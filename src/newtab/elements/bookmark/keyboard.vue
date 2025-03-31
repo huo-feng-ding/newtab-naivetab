@@ -39,6 +39,27 @@ const keyboardTask = (e: KeyboardEvent) => {
   }
   // shift + key 后台打开书签，alt + key 新标签页打开
   if (!localConfig.bookmark.isDblclickOpen) {
+    // 关闭当前标签页
+    if (url.startsWith('https://closeCurrentTab')) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length > 0) {
+          chrome.tabs.remove(tabs[0].id, () => {
+            console.log(`标签页 ID ${tabs[0].id} 已关闭`);
+          });
+        }
+      });
+      return
+    }
+    // 检索输入框获取焦点
+    if (url.startsWith('https://searchFocus')) {
+      e.preventDefault() // 禁止输入框中有英文快捷键输入
+      bookmarkState.currSelectKeyCode = ''
+      const searchInput = window.document.querySelector('.n-input__input-el')
+      if(searchInput){
+        searchInput.focus()
+      }
+      return
+    }
     bookmarkState.currSelectKeyCode = code
     openPage(url, shiftKey, altKey)
     return

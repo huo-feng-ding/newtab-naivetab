@@ -80,6 +80,15 @@ const handleSearchKeydown = (e: KeyboardEvent) => {
   if (isComposing) {
     return
   }
+  // 输入框有焦点的时候，这时要失去焦点
+  if (['Escape'].includes(code)) {
+    const searchInput = window.document.querySelector('.n-input__input-el')
+    if(searchInput){
+      searchInput.blur()
+    }
+    handleSearchBlur()
+    return
+  }
   if (['Enter', 'NumpadEnter'].includes(code)) {
     onSearch()
     return
