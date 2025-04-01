@@ -81,7 +81,7 @@ const handleSearchKeydown = (e: KeyboardEvent) => {
     return
   }
   // 输入框有焦点的时候，这时要失去焦点
-  if (['Escape'].includes(code)) {
+  if (['Escape'].includes(code) || (event.ctrlKey && 'BracketLeft' === code)) {
     const searchInput = window.document.querySelector('.n-input__input-el')
     if(searchInput){
       searchInput.blur()
