@@ -30,10 +30,6 @@ const onOpenPage = (url: string) => {
 }
 
 const onMouseDownKey = (event: MouseEvent, url: string) => {
-  // 阻止默认行为（例如浏览器中键的滚轮模式切换）
-  event.preventDefault()
-  // 阻止事件冒泡
-  event.stopPropagation()
   if (event.button !== 1) {
     return
   }
@@ -42,9 +38,9 @@ const onMouseDownKey = (event: MouseEvent, url: string) => {
     return
   }
   // 阻止事件冒泡
-  e.stopPropagation()
+  event.stopPropagation()
   // 阻止默认行为
-  e.preventDefault()
+  event.preventDefault()
   createTab(url, false)
 }
 
