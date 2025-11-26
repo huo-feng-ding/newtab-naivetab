@@ -1,7 +1,7 @@
 import 'driver.js/dist/driver.css'
 import { driver } from 'driver.js'
 import { createTab } from '@/logic/util'
-import { URL_NAIVETAB_DOC_STARTED } from '@/logic/const'
+import { URL_NAIVETAB_DOC_STARTED } from '@/logic/constants/index'
 import { toggleIsDragMode } from '@/logic/moveable'
 import { localConfig, globalState } from '@/logic/store'
 
@@ -19,12 +19,13 @@ const startGuide = () => {
     allowClose: true,
     allowKeyboardControl: false,
     disableActiveInteraction: true, // 高亮区域不可点击
+    overlayClickBehavior: () => {}, // 遮罩层不可点击
     prevBtnText: window.$t('guide.prevStep'),
     nextBtnText: window.$t('guide.nextStep'),
     doneBtnText: window.$t('guide.doneStep'),
     steps: [
       {
-        element: '#moveable-tool .drawer__content',
+        element: '#draft-tool .draft__content',
         popover: {
           title: window.$t('guide.stepTitle1'),
           description: window.$t('guide.stepDescription1'),
@@ -33,7 +34,7 @@ const startGuide = () => {
         },
       },
       {
-        element: '#digital-clock .clockDigital__container',
+        element: '#clockDigital .clockDigital__container',
         popover: {
           title: window.$t('guide.stepTitle2'),
           description: window.$t('guide.stepDescription2'),
@@ -42,7 +43,7 @@ const startGuide = () => {
         },
       },
       {
-        element: '#moveable-tool .drawer__header .header__done',
+        element: '#draft-tool .drawer__header .header__done',
         popover: {
           title: window.$t('guide.stepTitle3'),
           description: window.$t('guide.stepDescription3'),
@@ -51,7 +52,7 @@ const startGuide = () => {
         },
       },
       {
-        element: '#digital-clock .clockDigital__container',
+        element: '#clockDigital .clockDigital__container',
         popover: {
           title: window.$t('guide.stepTitle4'),
           description: window.$t('guide.stepDescription4'),
@@ -97,7 +98,7 @@ export const handleFirstOpen = () => {
     return
   }
   openUserGuide()
-  setTimeout(() => {
-    createTab(URL_NAIVETAB_DOC_STARTED)
-  }, 300)
+  // setTimeout(() => {
+  //   createTab(URL_NAIVETAB_DOC_STARTED)
+  // }, 300)
 }

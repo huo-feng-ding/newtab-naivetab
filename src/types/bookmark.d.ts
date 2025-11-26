@@ -58,15 +58,7 @@ interface KeyboardConfigItem {
   marginBottom?: number // default 0
 }
 
-interface ChromeBookmarkItem {
-  dateAdded: number // 1618456881151
-  id: string // "130"
-  index: number // 1
-  parentId: string // "106"
-  title: string // "StackBlitz"
-  url?: string // "https://stackblitz.com/"
-  children: ChromeBookmarkItem[]
-}
+type BookmarkNode = chrome.bookmarks.BookmarkTreeNode
 
 interface BookmarkItem {
   key: string
