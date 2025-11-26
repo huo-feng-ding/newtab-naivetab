@@ -9,6 +9,7 @@ import { currKeyboardConfig } from '@/logic/keyboard'
 import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapType, getKeycapName, getKeycapUrl, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
 import { localConfig, getStyleField, customPrimaryColor } from '@/logic/store'
 import { WIDGET_CODE } from '../config'
+import { handleSpecialScript } from '../scriptHandlers'
 
 const props = defineProps({
   keyCode: {
@@ -60,6 +61,10 @@ const onMouseDownKey = (event: MouseEvent, keyCode: string) => {
   }
   const url = keycapBookmarkUrl.value
   if (url.length === 0) {
+    return
+  }
+  // 处理特殊脚本
+  if (handleSpecialScript(url, event, keyboardState)) {
     return
   }
   if (button === 0) {

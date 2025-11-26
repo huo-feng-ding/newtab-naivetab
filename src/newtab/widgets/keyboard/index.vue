@@ -8,6 +8,7 @@ import { localConfig, getStyleField, getStyleConst, getIsWidgetRender } from '@/
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardKeycap from './components/KeyboardKeycap.vue'
 import { WIDGET_CODE } from './config'
+import { handleSpecialScript } from './scriptHandlers'
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -40,6 +41,11 @@ const keyboardTask = (e: KeyboardEvent) => {
   }
   // shift + key 后台打开书签，alt + key 新标签页打开
   if (!localConfig.keyboard.isDblclickOpen) {
+    // 处理特殊脚本
+    if (handleSpecialScript(url, e, keyboardState)) {
+      return
+    }
+
     keyboardState.currSelectKeyCode = code
     openPage(url, shiftKey, altKey)
     return
