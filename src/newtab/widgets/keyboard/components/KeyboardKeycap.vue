@@ -289,6 +289,8 @@ const keycapStageClassName = computed(() => {
   border-style: solid;
   box-sizing: border-box;
   cursor: pointer;
+  transition: transform 80ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 80ms ease;
   .keycap__stage {
     display: flex;
     flex-direction: column;
@@ -345,22 +347,43 @@ const keycapStageClassName = computed(() => {
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+    /* F / J 触摸凸起 —— 圆弧小块，模拟真实键帽手感凸起 */
     .item__tactile_bumps {
       position: absolute;
       left: 50%;
-      bottom: 0;
+      bottom: 6%;
       transform: translate(-50%, 0);
-      width: 25%;
-      border: 1px solid v-bind(customMainFontColor);
+      width: 22%;
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.55) 0%,
+        v-bind(customMainFontColor) 40%,
+        rgba(0, 0, 0, 0.25) 100%
+      );
+      opacity: 0.7;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
   }
+
+  /* ── Flat 磨砂玻璃质感 ── */
   .keycap__stage-flat {
     padding: v-bind(customKeycapStageFlatPadding);
     border-radius: v-bind(customKeycapBorderRadius);
     border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.1);
-    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(0, 0, 0, 0.06) 100%
+    );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   }
+
+  /* ── GMK 机械键帽立体感 ── */
   .keycap__stage-gmk {
     border-width: 0px;
     border-color: rgba(0, 0, 0, 0.1);
@@ -368,33 +391,67 @@ const keycapStageClassName = computed(() => {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 8px 4px;
     border-bottom-left-radius: 8px 4px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.12) 2%, rgba(255, 255, 255, 0.1) 90%, rgba(255, 255, 255, 0.1) 100%);
-    box-shadow: 0 0 10px rgb(0 0 0 / 20%);
+    /* 顶面高光：左上→右下渐变，模拟键帽顶面光泽 */
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.10) 18%,
+      rgba(0, 0, 0, 0.04) 55%,
+      rgba(0, 0, 0, 0.10) 100%
+    );
+    /* 顶面内高光线 + 底部阴影层次 */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+      0 2px 6px rgba(0, 0, 0, 0.18);
     background-color: inherit;
     color: inherit;
   }
+
+  /* ── DSA 球面键帽立体感 ── */
   .keycap__stage-dsa {
     border-width: 0px;
     border-color: rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0.2) 10%, rgba(255, 255, 255, 0.1) 80%, rgba(255, 255, 255, 0.1) 100%);
+    /* 球面光泽：左上高光，中心平坦，四边压暗 */
+    background: radial-gradient(
+      ellipse at 38% 30%,
+      rgba(255, 255, 255, 0.30) 0%,
+      rgba(255, 255, 255, 0.10) 35%,
+      rgba(0, 0, 0, 0.06) 65%,
+      rgba(0, 0, 0, 0.14) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+      inset 1px 0 0 rgba(255, 255, 255, 0.12),
+      inset -1px 0 0 rgba(0, 0, 0, 0.08),
+      0 2px 5px rgba(0, 0, 0, 0.18);
     background-color: inherit;
     color: inherit;
   }
 }
+
+/* ── GMK 键帽外壳侧壁阴影（厚重的机械键帽侧壁效果） ── */
 .row__keycap-flat {
-  /* border-width: 1px;
-          border-color: black; */
+  box-shadow: none;
 }
 .row__keycap-gmk {
   border-width: v-bind(customKeycapkeycapGmkTopBorderWidth) v-bind(customKeycapkeycapGmkHorizontalBorderWidth) v-bind(customKeycapkeycapGmkBottomBorderWidth);
-  border-color: rgba(0, 0, 0, 0.03) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.22) rgba(100, 100, 100, 0.1);
-  box-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  /* 顶部：极薄高光；左右：轻微阴影；底部：最深，模拟键帽厚度投影 */
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.30) rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .row__keycap-dsa {
   border-width: v-bind(customKeycapDsaBorderWidth);
-  border-color: rgba(0, 0, 0, 0.03) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.18) rgba(100, 100, 100, 0.1);
-  box-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.10) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 3px 7px rgba(0, 0, 0, 0.40),
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 .row__keycap--move {
   cursor: move !important;
@@ -402,10 +459,38 @@ const keycapStageClassName = computed(() => {
 .row__keycap--border {
   outline: v-bind(customBorderWidth) solid v-bind(customBorderColor);
 }
+/* 按下效果：下沉 + 阴影压缩，模拟物理按键行程 */
 .row__keycap--active {
-  transform: translate(1px, 2px);
+  transform: translate(0px, 3px);
+  filter: brightness(0.94);
+  &.row__keycap-gmk {
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.40),
+      0 0px 1px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  &.row__keycap-dsa {
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.36),
+      0 0px 1px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
 }
+/* Hover 效果：微微上浮 + 高光增亮，区别于按下 */
 .row__keycap--hover:hover {
-  transform: translate(1px, 2px);
+  transform: translate(0px, -1px);
+  filter: brightness(1.06);
+  &.row__keycap-gmk {
+    box-shadow:
+      0 5px 12px rgba(0, 0, 0, 0.50),
+      0 2px 4px rgba(0, 0, 0, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  &.row__keycap-dsa {
+    box-shadow:
+      0 5px 10px rgba(0, 0, 0, 0.44),
+      0 2px 3px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
 }
 </style>

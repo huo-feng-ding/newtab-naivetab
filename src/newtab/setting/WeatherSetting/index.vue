@@ -65,7 +65,10 @@ const onSelectCity = (cityId: string) => {
 </script>
 
 <template>
-  <SettingPaneTitle :title="$t('setting.weather')" />
+  <SettingPaneTitle
+    :title="$t('setting.weather')"
+    widget-code="weather"
+  />
 
   <SettingPaneWrap
     id="weather__setting"
@@ -91,9 +94,9 @@ const onSelectCity = (cityId: string) => {
 
         <NButton
           type="primary"
-          class="setting__item-ele"
+          class="setting__item-ele action-btn action-btn--primary"
           size="small"
-          ghost
+          secondary
           @click="state.isEditCityModel = !state.isEditCityModel"
         >
           <template v-if="state.isEditCityModel">
@@ -137,26 +140,28 @@ const onSelectCity = (cityId: string) => {
               size="small"
             />
           </div>
-          <div
-            v-if="localConfig.weather.iconEnabled"
-            class="item__box"
-          >
-            <NSlider
-              v-model:value="localConfig.weather.iconSize"
-              :step="1"
-              :min="30"
-              :max="200"
-              :tooltip="false"
-            />
-            <NInputNumber
-              v-model:value="localConfig.weather.iconSize"
-              class="setting__item-ele setting__input-number"
-              size="small"
-              :step="1"
-              :min="30"
-              :max="200"
-            />
-          </div>
+          <Transition name="setting-expand">
+            <div
+              v-if="localConfig.weather.iconEnabled"
+              class="item__box"
+            >
+              <NSlider
+                v-model:value="localConfig.weather.iconSize"
+                :step="1"
+                :min="30"
+                :max="200"
+                :tooltip="false"
+              />
+              <NInputNumber
+                v-model:value="localConfig.weather.iconSize"
+                class="setting__item-ele setting__input-number"
+                size="small"
+                :step="1"
+                :min="30"
+                :max="200"
+              />
+            </div>
+          </Transition>
         </div>
       </NFormItem>
 

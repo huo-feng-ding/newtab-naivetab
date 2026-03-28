@@ -127,16 +127,16 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       }"
     >
       <div class="progress__text">
-        <p class="text__day">
-          <span class="text__active">{{ state.passDay }}</span>
-          <span class="text__blur"> / {{ state.totalDay }}</span>
-        </p>
+        <div class="text__day-wrap">
+          <span class="text__active text__day-num">{{ state.passDay }}</span>
+          <span class="text__blur text__day-total"> / {{ state.totalDay }}</span>
+        </div>
         <p
           v-if="localConfig.yearProgress.isPercentageEnabled"
           class="text__percent"
         >
           <span class="text__active">{{ state.percent }}</span>
-          <span class="text__blur"> %</span>
+          <span class="text__blur text__unit"> %</span>
         </p>
         <p
           v-if="localConfig.yearProgress.isDateEnabled"
@@ -146,6 +146,8 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         </p>
       </div>
 
+      <div class="progress__divider" />
+
       <div class="progress__table">
         <div
           v-for="item in state.tableList"
@@ -154,6 +156,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
           class="table__block"
           :class="{
             'table__block--active': item.dayNum <= state.passDay,
+            'table__block--current': item.dayNum === state.passDay,
           }"
         />
       </div>
@@ -172,55 +175,96 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     position: absolute;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     width: v-bind(customWidth);
     height: v-bind(customHeight);
     border-radius: v-bind(customBorderRadius);
     background-color: v-bind(customBackgroundColor);
     backdrop-filter: blur(v-bind(customBackgroundBlur));
+    overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+
     .progress__text {
       flex: 0 0 auto;
-      width: 30%;
+      width: 28%;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end;
+      padding-right: 10px;
+      gap: 1px;
       line-height: v-bind(customTextLineHeight);
+
       .text__blur {
-        opacity: 0.7;
+        opacity: 0.5;
       }
       .text__active {
-        font-weight: 600;
+        font-weight: 700;
         color: v-bind(customTextActiveColor);
       }
-      .text__day {
+      .text__day-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+      }
+      .text__day-num {
+        font-size: 1.35em;
+        letter-spacing: -0.02em;
+      }
+      .text__day-total {
+        font-size: 0.78em;
       }
       .text__percent {
-        font-size: v-bind(customSubFontSize);
+        display: flex;
+        align-items: baseline;
+        gap: 1px;
+      }
+      .text__unit {
+        font-size: 0.78em;
       }
       .text__date {
         font-size: v-bind(customSubFontSize);
+        letter-spacing: 0.01em;
       }
+    }
+
+    .progress__divider {
+      flex: 0 0 1px;
+      align-self: stretch;
+      margin: 12% 0;
+      background-color: v-bind(customFontColor);
+      opacity: 0.12;
+      border-radius: 1px;
     }
 
     .progress__table {
       flex: 1;
       padding: v-bind(customPadding);
-      width: 70%;
       display: flex;
       flex-wrap: wrap;
+      align-content: center;
+
       .table__block {
         margin: v-bind(customBlockMargin);
         width: v-bind(customBlockSize);
         height: v-bind(customBlockSize);
         border-radius: v-bind(customBlockRadius);
         background-color: v-bind(customBlockDefaultColor);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+
         &:hover {
-          opacity: 0.6;
+          transform: scale(1.2);
+          box-shadow: 0 0 0 1.5px v-bind(customBlockActiveColor);
+          opacity: 0.9;
         }
       }
       .table__block--active {
         background-color: v-bind(customBlockActiveColor);
+      }
+      .table__block--current {
+        box-shadow: 0 0 0 1.5px v-bind(customBlockActiveColor);
+        opacity: 0.9;
       }
     }
   }

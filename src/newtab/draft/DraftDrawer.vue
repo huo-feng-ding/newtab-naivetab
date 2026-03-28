@@ -5,19 +5,29 @@ import { gaProxy } from '@/logic/gtag'
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode, toggleIsDragMode, isDraftDrawerVisible, handleToggleIsDraftDrawerVisible, moveState } from '@/logic/moveable'
 import { getStyleConst, customPrimaryColor, localConfig, globalState } from '@/logic/store'
-import { widgetsList } from '@/newtab/widgets/registry'
+import { widgetsRegistry } from '@/newtab/widgets/registry'
+import { WIDGET_GROUPS } from '@/newtab/widgets/codes'
 
 const state = reactive({
   isCursorInDraftDrawer: false,
 })
 
-const widgets = computed(() =>
-  widgetsList.map((item) => ({
-    code: item.code,
-    label: window.$t(item.widgetLabel || item.code),
-    iconName: item.iconName || 'material-symbols:widgets-outline',
-    iconSize: item.iconSize || 30,
-    disabled: localConfig[item.code]?.enabled,
+const widgetGroups = computed(() =>
+  WIDGET_GROUPS.map((group) => ({
+    label: window.$t(group.labelKey),
+    items: group.codes
+      .map((code) => {
+        const meta = widgetsRegistry[code]
+        if (!meta) return null
+        return {
+          code: meta.code,
+          label: window.$t(meta.widgetLabel || meta.code),
+          iconName: meta.iconName || 'material-symbols:widgets-outline',
+          iconSize: meta.iconSize || 30,
+          disabled: localConfig[meta.code]?.enabled,
+        }
+      })
+      .filter(Boolean),
   })),
 )
 
@@ -42,9 +52,11 @@ const handleDraftMouseDown = async (e: MouseEvent) => {
   localConfig[moveState.currDragTarget.code].enabled = true
   await nextTick()
   // 以光标位置为组件的中心开始拖拽
+  // ⚠️  必须 await startDrag 完成（它内部需要 nextTick 等 DOM 渲染），
+  //     再执行 onDragging，否则 startState 尚未初始化，组件会出现在错误位置
   const mouseDownTask = moveState.mouseDownTaskMap.get(moveState.currDragTarget.code)
   if (mouseDownTask) {
-    mouseDownTask(e, true) // startDrag(e: MouseEvent, resite: boolean)
+    await mouseDownTask(e, true) // startDrag(e: MouseEvent, resite: boolean)
   }
   // 执行一次 onDragging，为消除首次启用组件时会展示上次存储的布局
   const mouseMoveTask = moveState.mouseMoveTaskMap.get(moveState.currDragTarget.code)
@@ -179,22 +191,35 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
       </div>
 
       <div class="draft__content">
-        <div
-          v-for="item in widgets"
-          v-show="!item.disabled"
-          :key="item.label"
-          class="content__item"
-          data-target-type="draft"
-          :data-target-code="item.code"
+        <template
+          v-for="group in widgetGroups"
+          :key="group.label"
         >
           <div
-            class="item__icon"
-            :style="`font-size: ${item.iconSize}px`"
+            v-if="group.items.some((item) => !item!.disabled)"
+            class="content__group"
           >
-            <Icon :icon="item.iconName" />
+            <span class="group__label">{{ group.label }}</span>
+            <div class="group__items">
+              <div
+                v-for="item in group.items"
+                v-show="!item!.disabled"
+                :key="item!.label"
+                class="content__item"
+                data-target-type="draft"
+                :data-target-code="item!.code"
+              >
+                <div
+                  class="item__icon"
+                  :style="`font-size: ${item!.iconSize}px`"
+                >
+                  <Icon :icon="item!.iconName" />
+                </div>
+                <span class="item__text">{{ item!.label }}</span>
+              </div>
+            </div>
           </div>
-          <span class="item__text">{{ item.label }}</span>
-        </div>
+        </template>
       </div>
     </div>
     <!-- delete -->
@@ -225,7 +250,9 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
   bottom: 0 !important;
 }
 .draft-tool--shadow {
-  box-shadow: 0 0 10px 3px #272727;
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.55),
+    0 -1px 6px rgba(0, 0, 0, 0.3);
 }
 
 #draft-tool {
@@ -237,55 +264,92 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
   height: 265px;
   color: #fff;
   background-color: v-bind(bgMoveableToolDrawer);
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  transition: all 300ms ease;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  transition: all 300ms cubic-bezier(0.34, 1.06, 0.64, 1);
+  /* 顶部高光边框线 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18) 30%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.18) 70%, transparent);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+
   .tool__drawer {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     height: 100%;
-    backdrop-filter: saturate(50%) blur(4px);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    /* background-image: radial-gradient(transparent 1px, #000 1px);
-    background-size: 4px 4px; */
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+
     .drawer__switch {
       z-index: 30;
       position: absolute;
-      top: -25px;
+      top: -26px;
       left: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
       width: 5vw;
-      height: 25px;
+      height: 26px;
       background-color: v-bind(bgMoveableToolDrawer);
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
-      box-shadow: 0 0 5px 3px #272727;
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      box-shadow:
+        -3px -4px 10px rgba(0, 0, 0, 0.4),
+        3px -4px 10px rgba(0, 0, 0, 0.4);
       transform: translate(-50%, 0);
       cursor: pointer;
+      transition: color 200ms ease;
+      /* 顶部高光 */
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 10%;
+        right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3) 50%, transparent);
+        border-radius: 50%;
+      }
       .switch__icon {
         flex: 0 0 auto;
-        font-size: 26px;
-        transition: all 400ms ease-in-out;
+        font-size: 22px;
+        opacity: 0.7;
+        transition: all 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
       }
       .switch__icon--active {
         transform: rotate(180deg);
+        opacity: 1;
       }
     }
     .drawer__switch:hover {
       color: v-bind(customPrimaryColor);
+      .switch__icon {
+        opacity: 1;
+      }
     }
 
     .drawer__header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 50px;
+      height: 52px;
       width: 100%;
-      border-bottom: 1px solid v-bind(borderMoveableToolItem);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
       .header__done {
         display: flex;
         align-items: center;
@@ -294,61 +358,144 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: opacity 150ms ease;
+          &:hover {
+            opacity: 0.85;
+          }
         }
         .done__esc {
           margin: 0 8px 0 1.5vw;
-          width: 37px;
-          height: 37px;
+          width: 34px;
+          height: 34px;
           background-size: 100%;
           background-image: url('/assets/img/keyboard/esc.png');
+          opacity: 0.85;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
         }
       }
       .header__tips {
-        margin-top: 10px;
         margin-right: 2vw;
-        font-size: 12px;
-        opacity: 0.8;
+        font-size: 11px;
+        opacity: 0.45;
+        letter-spacing: 0.02em;
       }
     }
 
     .draft__content {
       flex: 1;
       display: flex;
-      flex-wrap: wrap;
-      align-content: flex-start;
-      padding: 0.5vw;
+      flex-direction: column;
+      width: 100%;
+      padding: 6px 0.6vw 0;
+      overflow-y: auto;
+      /* 自定义滚动条 */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+      }
+      .content__group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 6px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+        .group__label {
+          padding: 2px 4px 4px;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          opacity: 0.35;
+          user-select: none;
+        }
+        .group__items {
+          display: flex;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+      }
       .content__item {
         flex-shrink: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin: 10px 0.9vw;
+        margin: 6px 0.6vw;
         width: 8vw;
-        height: 80px;
-        font-size: 14px;
-        border: 2px solid v-bind(borderMoveableToolItem);
-        border-radius: 8px;
+        height: 78px;
+        font-size: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
         cursor: move;
         user-select: none;
+        background: rgba(255, 255, 255, 0.04);
+        transition:
+          background 180ms ease,
+          border-color 180ms ease,
+          transform 150ms ease,
+          box-shadow 180ms ease;
+        position: relative;
+        overflow: hidden;
+        /* 卡片内部顶部高光 */
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 40%;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 100%);
+          pointer-events: none;
+        }
         .item__icon {
           display: flex;
           justify-content: center;
           align-items: center;
           width: 100%;
-          height: 45px;
+          height: 44px;
+          opacity: 0.9;
+          transition: opacity 180ms ease, transform 180ms ease;
         }
         .item__text {
           flex: 1;
-          padding-top: 3px;
+          padding-top: 4px;
           height: 20px;
           line-height: 20px;
           text-align: center;
-          border-top: 1px solid v-bind(borderMoveableToolItem);
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          opacity: 0.8;
+          letter-spacing: 0.02em;
+          font-size: 11px;
+          width: 100%;
         }
       }
       .content__item:hover {
-        background-color: v-bind(bgMoveableWidgetMain);
+        background: rgba(100, 181, 246, 0.18);
+        border-color: rgba(100, 181, 246, 0.45);
+        box-shadow:
+          0 2px 12px rgba(100, 181, 246, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        transform: translateY(-1px);
+        .item__icon {
+          opacity: 1;
+          transform: scale(1.08);
+        }
+        .item__text {
+          opacity: 1;
+        }
+      }
+      .content__item:active {
+        transform: scale(0.96);
+        box-shadow: none;
       }
     }
   }
@@ -361,8 +508,9 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
     width: 200px;
     height: 200px;
     cursor: pointer;
-    background-color: v-bind(bgMoveableWidgetDelete);
-    transition: all 300ms ease;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 100, 100, 1), rgba(220, 38, 38, 1));
+    box-shadow: -4px 4px 20px rgba(220, 38, 38, 0.5);
+    transition: all 300ms cubic-bezier(0.34, 1.06, 0.64, 1);
     transform: rotate(45deg);
     .delete__icon {
       position: absolute;
@@ -371,11 +519,18 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
       font-size: 36px;
       color: #fff;
       transform: rotate(-45deg);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      transition: transform 200ms ease, filter 200ms ease;
     }
   }
   .tool__delete--active {
     top: -100px;
     right: -100px;
+  }
+  .tool__delete:hover {
+    .delete__icon {
+      filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.4));
+    }
   }
 }
 </style>

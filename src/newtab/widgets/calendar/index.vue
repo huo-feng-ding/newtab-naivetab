@@ -10,6 +10,8 @@ import { WIDGET_CODE } from './config'
 
 const todayDayjs = dayjs()
 
+const slideDirection = ref<'left' | 'right'>('left')
+
 const state = reactive({
   today: todayDayjs.format('YYYY-MM-DD'),
   currYear: todayDayjs.get('year'),
@@ -31,11 +33,35 @@ const state = reactive({
   currDetailDate: '',
 })
 
-const festivalList = computed(() =>
-  state.dateList.filter((item) => {
-    return item.isFestival && item.festivalCountdownDay >= 0
-  }),
-)
+const festivalList = (() => {
+  type FestivalItem = {
+    date: string
+    shortDate: string
+    desc: string
+    type: number
+    festivalCountdownDay: number
+  }
+  const list: FestivalItem[] = []
+  for (let i = 0; i <= 365; i++) {
+    const dateEle = todayDayjs.add(i, 'day')
+    const formatDate = dateEle.format('YYYY-MM-DD')
+    const shortDate = dateEle.format('MM.DD')
+    const targetDateEle = new Date(formatDate)
+    const solarEle = Solar.fromDate(targetDateEle)
+    const lunarEle = Lunar.fromDate(targetDateEle)
+    const holidayEle = HolidayUtil.getHoliday(dateEle.get('year'), dateEle.get('month') + 1, dateEle.get('date'))
+    const desc = lunarEle.getFestivals()[0] || solarEle.getFestivals()[0] || lunarEle.getJieQi() || ''
+    if (!desc) continue
+    let dayType = 0
+    if (holidayEle && holidayEle.isWork()) {
+      dayType = 2
+    } else if (holidayEle && holidayEle.getName()) {
+      dayType = 1
+    }
+    list.push({ date: formatDate, shortDate, desc, type: dayType, festivalCountdownDay: i })
+  }
+  return list
+})()
 
 const monthsList = computed(() => [
   { label: window.$t('calendar.january'), value: 1 },
@@ -184,6 +210,7 @@ watch(
 )
 
 const onPrevMonth = () => {
+  slideDirection.value = 'right'
   if (state.currMonth === 1) {
     state.currYear -= 1
     state.currMonth = 12
@@ -195,6 +222,7 @@ const onPrevMonth = () => {
 }
 
 const onNextMonth = () => {
+  slideDirection.value = 'left'
   if (state.currMonth === 12) {
     state.currYear += 1
     state.currMonth = 1
@@ -205,7 +233,10 @@ const onNextMonth = () => {
   gaProxy('click', ['calendar', 'nextMonth'])
 }
 
-const onDateChange = (type: 'year' | 'month') => {
+const onDateChange = (type: 'year' | 'month', newVal: number) => {
+  const oldYearMonth = state.currYear * 12 + state.currMonth
+  const newYearMonth = type === 'year' ? newVal * 12 + state.currMonth : state.currYear * 12 + newVal
+  slideDirection.value = newYearMonth >= oldYearMonth ? 'left' : 'right'
   gaProxy('click', ['calendar', 'dateChange', type])
   onRender()
 }
@@ -213,6 +244,9 @@ const onDateChange = (type: 'year' | 'month') => {
 const isResetBtnVisible = computed(() => state.currYear !== todayDayjs.get('year') || state.currMonth !== todayDayjs.get('month') + 1)
 
 const onReset = () => {
+  const currYearMonth = state.currYear * 12 + state.currMonth
+  const todayYearMonth = todayDayjs.get('year') * 12 + todayDayjs.get('month') + 1
+  slideDirection.value = currYearMonth > todayYearMonth ? 'right' : 'left'
   state.currYear = todayDayjs.get('year')
   state.currMonth = todayDayjs.get('month') + 1
   state.currDay = todayDayjs.get('date')
@@ -278,6 +312,7 @@ const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
 const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const customItemWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customBodyWrapHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 6)
 const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
 
 const customTodayDayFontColor = getStyleField(WIDGET_CODE, 'todayDayFontColor')
@@ -323,7 +358,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
             size="small"
             :options="state.yearList"
             :disabled="isDragMode"
-            @update:value="onDateChange('year')"
+            @update:value="(v) => onDateChange('year', v)"
           />
         </div>
         <div class="options__item">
@@ -345,7 +380,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
             size="small"
             :options="monthsList"
             :disabled="isDragMode"
-            @update:value="onDateChange('month')"
+            @update:value="(v) => onDateChange('month', v)"
           />
           <NButton
             class="item__btn"
@@ -390,132 +425,137 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       </ul>
 
       <!-- body -->
-      <ul
-        class="calendar__body"
-        :class="{
-          'calendar__body--hover': !isDragMode,
-        }"
-      >
-        <li
-          v-for="item in state.dateList"
-          :key="item.date"
-          @click="onToggleDetailPopover(item.date)"
-        >
-          <NPopover
-            style="max-width: 350px"
-            display-directive="if"
-            :show="state.currDetailDate === item.date"
-            :title="item.date"
-            trigger="manual"
-            @clickoutside="onToggleDetailPopover()"
+      <div class="calendar__body__wrap">
+        <Transition :name="`slide-${slideDirection}`">
+          <ul
+            :key="`${state.currYear}-${state.currMonth}`"
+            class="calendar__body"
+            :class="{
+              'calendar__body--hover': !isDragMode,
+            }"
           >
-            <template #trigger>
-              <div
-                class="body__item"
-                :class="{
-                  'body__item--hover': !isDragMode,
-                  'body__item--blur': item.isNotCurrMonth,
-                  'body__item--weekend': item.isWeekend,
-                  'body__item--today': item.isToday,
-                  'body__item--rest': item.type === 1,
-                  'body__item--work': item.type === 2,
-                }"
+            <li
+              v-for="item in state.dateList"
+              :key="item.date"
+              @click="onToggleDetailPopover(item.date)"
+            >
+              <NPopover
+                style="max-width: 350px"
+                display-directive="if"
+                :show="state.currDetailDate === item.date"
+                :title="item.date"
+                trigger="manual"
+                @clickoutside="onToggleDetailPopover()"
               >
-                <span
-                  v-if="item.type"
-                  class="item__label"
-                >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span>
-                <span
-                  v-if="item.isToday"
-                  class="item__label item__label--today"
-                >{{ $t('calendar.today') }}</span>
-                <!-- 日期 -->
-                <span class="item__day">{{ item.day }}</span>
-                <!-- 描述 -->
-                <span
-                  class="item__desc"
-                  :class="{
-                    'item__desc--highlight': item.isFestival,
-                  }"
-                >{{ item.desc }}</span>
-              </div>
-            </template>
+                <template #trigger>
+                  <div
+                    class="body__item"
+                    :class="{
+                      'body__item--hover': !isDragMode,
+                      'body__item--blur': item.isNotCurrMonth,
+                      'body__item--weekend': item.isWeekend,
+                      'body__item--today': item.isToday,
+                      'body__item--rest': item.type === 1,
+                      'body__item--work': item.type === 2,
+                    }"
+                  >
+                    <span
+                      v-if="item.type"
+                      class="item__label"
+                    >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span>
+                    <span
+                      v-if="item.isToday"
+                      class="item__label item__label--today"
+                    >{{ $t('calendar.today') }}</span>
+                    <!-- 日期 -->
+                    <span class="item__day">{{ item.day }}</span>
+                    <!-- 描述 -->
+                    <span
+                      class="item__desc"
+                      :class="{
+                        'item__desc--highlight': item.isFestival,
+                      }"
+                    >{{ item.desc }}</span>
+                  </div>
+                </template>
 
-            <!-- detail -->
-            <div class="calendar__detail">
-              <p class="detail__date">
-                {{ detailInfo.date }}
-                {{ detailInfo.xingzuo }}
-              </p>
-              <p class="detail__date">
-                {{ detailInfo.lunar }}
-              </p>
-              <p class="detail__festival">
-                {{ `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}` }}
-              </p>
-              <div class="detail__row">
-                <p class="row__tag row__tag--yi">易</p>
-                <div class="row__value">
-                  <n-tag
-                    v-for="yiItem in detailInfo.yi"
-                    :key="yiItem"
-                    class="tag__item"
-                    type="success"
-                    size="small"
-                    :bordered="false"
-                  >
-                    {{ yiItem }}
-                  </n-tag>
+                <!-- detail -->
+                <div class="calendar__detail">
+                  <p class="detail__date">
+                    {{ detailInfo.date }}
+                    {{ detailInfo.xingzuo }}
+                  </p>
+                  <p class="detail__date">
+                    {{ detailInfo.lunar }}
+                  </p>
+                  <p class="detail__festival">
+                    {{ `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}` }}
+                  </p>
+                  <div class="detail__row">
+                    <p class="row__tag row__tag--yi">易</p>
+                    <div class="row__value">
+                      <n-tag
+                        v-for="yiItem in detailInfo.yi"
+                        :key="yiItem"
+                        class="tag__item"
+                        type="success"
+                        size="small"
+                        :bordered="false"
+                      >
+                        {{ yiItem }}
+                      </n-tag>
+                    </div>
+                  </div>
+                  <div class="detail__row">
+                    <p class="row__tag row__tag--ji">忌</p>
+                    <div class="row__value">
+                      <n-tag
+                        v-for="yiItem in detailInfo.ji"
+                        :key="yiItem"
+                        class="tag__item"
+                        type="error"
+                        size="small"
+                        :bordered="false"
+                      >
+                        {{ yiItem }}
+                      </n-tag>
+                    </div>
+                  </div>
+                  <div class="detail__row">
+                    <p class="row__label">吉神</p>
+                    <div class="row__value">
+                      <n-tag
+                        v-for="yiItem in detailInfo.jishen"
+                        :key="yiItem"
+                        class="tag__item"
+                        type="info"
+                        size="small"
+                        :bordered="false"
+                      >
+                        {{ yiItem }}
+                      </n-tag>
+                    </div>
+                  </div>
+                  <div class="detail__row">
+                    <p class="row__label">凶煞</p>
+                    <div class="row__value">
+                      <n-tag
+                        v-for="yiItem in detailInfo.xiongsha"
+                        :key="yiItem"
+                        class="tag__item"
+                        size="small"
+                        :bordered="false"
+                      >
+                        {{ yiItem }}
+                      </n-tag>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="detail__row">
-                <p class="row__tag row__tag--ji">忌</p>
-                <div class="row__value">
-                  <n-tag
-                    v-for="yiItem in detailInfo.ji"
-                    :key="yiItem"
-                    class="tag__item"
-                    type="error"
-                    size="small"
-                    :bordered="false"
-                  >
-                    {{ yiItem }}
-                  </n-tag>
-                </div>
-              </div>
-              <div class="detail__row">
-                <p class="row__label">吉神</p>
-                <div class="row__value">
-                  <n-tag
-                    v-for="yiItem in detailInfo.jishen"
-                    :key="yiItem"
-                    class="tag__item"
-                    type="info"
-                    size="small"
-                    :bordered="false"
-                  >
-                    {{ yiItem }}
-                  </n-tag>
-                </div>
-              </div>
-              <div class="detail__row">
-                <p class="row__label">凶煞</p>
-                <div class="row__value">
-                  <n-tag
-                    v-for="yiItem in detailInfo.xiongsha"
-                    :key="yiItem"
-                    class="tag__item"
-                    size="small"
-                    :bordered="false"
-                  >
-                    {{ yiItem }}
-                  </n-tag>
-                </div>
-              </div>
-            </div>
-          </NPopover>
-        </li>
-      </ul>
+              </NPopover>
+            </li>
+          </ul>
+        </Transition>
+      </div>
 
       <div
         v-if="localConfig.calendar.festivalCountdown"
@@ -565,10 +605,13 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     backdrop-filter: blur(v-bind(customBackgroundBlur));
     user-select: none;
     overflow: hidden;
+    /* 提升为独立 GPU 合成层，防止其他 widget 的持续动画（neonFlicker 等）影响 box-shadow 渲染 */
+    will-change: transform;
+    transform: translateZ(0);
     .calendar__options {
-      padding: 1.5%;
+      padding: 1.8% 2%;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
       .n-base-selection-label {
         background-color: rgba(255, 255, 255, 0.1) !important;
@@ -581,8 +624,14 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
           display: flex;
           justify-content: center;
           align-items: center;
-          margin: 0 0.8vmin;
+          width: 2.2vmin;
+          height: 2.2vmin;
+          border-radius: 50%;
           cursor: pointer;
+          transition: background-color 150ms ease-in-out;
+          &:hover {
+            background-color: rgba(128, 128, 128, 0.15);
+          }
           .btn__icon {
             font-size: v-bind(customFontSize);
             color: v-bind(customFontColor);
@@ -593,16 +642,17 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
           font-size: v-bind(customFontSize) !important;
         }
         .item__select_year {
-          width: 80px;
+          width: 84px;
         }
         .item__select_month {
           flex: 0 0 auto;
-          width: 95px;
+          width: 105px;
         }
       }
       .options__reset {
         flex: 0 0 auto;
-        width: 0.8vmin;
+        width: 2.2vmin;
+        margin-left: 0.5vmin;
       }
     }
     .calendar__header {
@@ -610,22 +660,32 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      font-weight: 500;
+      font-weight: 600;
+      opacity: 0.65;
+      padding-bottom: 0.3vmin;
       .header__item {
-        flex: 1;
-        height: 30px;
-        line-height: 30px;
-        text-align: center;
-      }
+          flex: 1;
+          height: 2.4vmin;
+          line-height: 2.4vmin;
+          text-align: center;
+          font-size: v-bind(customFontSize);
+          letter-spacing: 0.02em;
+        }
       .header__item--weekend {
         color: v-bind(customHolidayFontColor);
       }
+    }
+    .calendar__body__wrap {
+      position: relative;
+      overflow: hidden;
+      height: v-bind(customBodyWrapHeight);
     }
     .calendar__body {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
+      padding: 0 0 0.5vmin;
       .body__item {
         position: relative;
         flex: 0 0 auto;
@@ -637,37 +697,46 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         width: v-bind(customItemWidth);
         height: v-bind(customItemWidth);
         text-align: center;
+        border-radius: 6px;
         overflow: hidden;
+        transition: background-color 150ms ease-in-out, opacity 150ms ease-in-out;
         .item__day {
           color: v-bind(customDayFontColor);
           font-size: v-bind(customDayFontSize);
           font-family: v-bind(customDayFontFamily);
           font-weight: 500;
+          line-height: 1.2;
         }
         .item__desc {
-          margin-top: 0.2vmin;
+          margin-top: 0.15vmin;
           color: v-bind(customDescFontColor);
           font-size: v-bind(customDescFontSize);
           font-family: v-bind(customDescFontFamily);
-          overflow: hidden;
           white-space: nowrap;
+          line-height: 1.2;
+          max-width: 92%;
+          overflow: hidden;
+          text-align: left;
         }
         .item__desc--highlight {
           color: v-bind(customHolidayFontColor) !important;
         }
         .item__label {
           position: absolute;
-          top: -7%;
-          left: -7%;
-          padding: 7%;
-          font-size: v-bind(customFontSize);
-          transform: scale(0.8);
-          border-radius: 4px;
+          top: 2px;
+          left: 2px;
+          padding: 0 2px;
+          height: 12px;
+          line-height: 12px;
+          font-size: 9px;
+          font-weight: 600;
+          border-radius: 3px;
+          letter-spacing: 0;
+          white-space: nowrap;
         }
       }
       .body__item--hover:hover {
-        opacity: 0.5;
-        transition: all 200ms ease-in-out;
+        background-color: rgba(128, 128, 128, 0.15);
       }
       .body__item--work {
         background-color: v-bind(customWorkItemBackgroundColor);
@@ -680,6 +749,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         }
         .item__desc {
           color: v-bind(customWorkDescFontColor);
+        }
+        &.body__item--hover:hover {
+          filter: brightness(0.92);
         }
       }
       .body__item--rest {
@@ -694,16 +766,20 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         .item__desc {
           color: v-bind(customRestDescFontColor);
         }
+        &.body__item--hover:hover {
+          filter: brightness(0.92);
+        }
       }
       .body__item--weekend {
-        color: v-bind(customHolidayFontColor);
+        .item__day {
+          color: v-bind(customHolidayFontColor);
+        }
       }
       .body__item--today {
-        border-radius: 4px;
         background-color: v-bind(customTodayItemBackgroundColor);
         .item__label--today {
           left: auto !important;
-          right: -7% !important;
+          right: 2px !important;
           color: v-bind(customTodayLabelFontColor);
           background-color: v-bind(customTodayLabelBackgroundColor);
         }
@@ -713,9 +789,13 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         .item__desc {
           color: v-bind(customTodayDescFontColor);
         }
+        &.body__item--hover:hover {
+          filter: brightness(0.9);
+          background-color: v-bind(customTodayItemBackgroundColor);
+        }
       }
       .body__item--blur {
-        opacity: 0.4;
+        opacity: 0.3;
       }
     }
     .calendar__body--hover {
@@ -727,8 +807,8 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
   }
   .calendar__container--shadow {
     box-shadow:
-      v-bind(customShadowColor) 0px 2px 4px 0px,
-      v-bind(customShadowColor) 0px 2px 16px 0px;
+      v-bind(customShadowColor) 0px 2px 8px 0px,
+      v-bind(customShadowColor) 0px 4px 20px 0px;
   }
   .calendar__container--drag {
     background-color: transparent !important;
@@ -750,16 +830,18 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
   }
   .detail__row {
     display: flex;
-    margin: 5px 0;
+    margin: 4px 0;
     .row__tag {
       flex: 0 0 auto;
-      margin: 3px 10px;
+      margin: 3px 10px 3px 2px;
       width: 20px;
       height: 20px;
       line-height: 20px;
       text-align: center;
       color: #fff;
       border-radius: 50%;
+      font-size: 12px;
+      font-weight: 600;
     }
     .row__tag--yi {
       background-color: rgb(0, 128, 0);
@@ -770,56 +852,65 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     .row__label {
       flex: 0 0 auto;
       padding-top: 2px;
-      width: 40px;
-      font-weight: bold;
+      width: 36px;
+      font-weight: 600;
+      font-size: 12px;
       text-align: center;
+      opacity: 0.7;
     }
     .row__value {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
       .tag__item {
         margin: 2px 3px;
       }
       .n-tag {
-        border-radius: 5px;
+        border-radius: 4px;
       }
     }
   }
 }
 
 .calendar__festival__list {
-  padding: 1.5% 0;
+  padding: 0.8% 0 1.5%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   max-height: v-bind(customDestivalCountdownItemHeight);
   overflow-y: auto;
+  border-top: 1px solid rgba(128, 128, 128, 0.12);
   -ms-overflow-style: none;
   scrollbar-width: none;
   .festival__item {
-    padding: 0.2% 3.5%;
+    padding: 0.4% 3%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 50%;
     font-size: v-bind(customDestivalCountdownFontSize);
+    box-sizing: border-box;
     .item__left {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       width: 70%;
+      gap: 3px;
       .left__date {
-        margin-right: 3px;
         flex: 0 0 auto;
-        opacity: 0.8;
+        opacity: 0.65;
+        letter-spacing: 0.01em;
       }
       .left__rest {
-        margin-right: 2px;
-        padding: 2%;
+        padding: 0 3px;
         flex: 0 0 auto;
         color: v-bind(customRestLabelFontColor);
         background-color: v-bind(customRestLabelBackgroundColor);
         font-size: v-bind(customDestivalCountdownRestFontSize);
-        border-radius: 4px;
+        border-radius: 3px;
         box-sizing: border-box;
+        line-height: 1.5;
       }
       .left__desc {
         flex: 1;
@@ -836,18 +927,61 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       justify-content: flex-end;
       align-items: baseline;
       width: 30%;
+      gap: 2px;
       .right__count {
         font-size: v-bind(customDayFontSize);
         font-family: v-bind(customDayFontFamily);
         font-weight: 500;
       }
       .right__unit {
-        margin-left: 2px;
         font-size: v-bind(customDescFontSize);
         font-family: v-bind(customDescFontFamily);
-        opacity: 0.8;
+        opacity: 0.65;
       }
     }
   }
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.slide-left-enter-from {
+  transform: translateX(30%);
+  opacity: 0;
+}
+.slide-left-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-left-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-left-leave-to {
+  transform: translateX(-30%);
+  opacity: 0;
+}
+.slide-right-enter-from {
+  transform: translateX(-30%);
+  opacity: 0;
+}
+.slide-right-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-right-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-right-leave-to {
+  transform: translateX(30%);
+  opacity: 0;
 }
 </style>

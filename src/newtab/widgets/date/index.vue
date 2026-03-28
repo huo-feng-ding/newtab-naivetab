@@ -51,17 +51,25 @@ const customLetterSpacing = getStyleField(WIDGET_CODE, 'letterSpacing', 'vmin')
   font-family: v-bind(customFontFamily);
   color: v-bind(customFontColor);
   user-select: none;
+
   .date__container {
     z-index: 10;
     position: absolute;
+
     .date__text {
       font-size: v-bind(customFontSize);
       letter-spacing: v-bind(customLetterSpacing);
       white-space: nowrap;
+      word-spacing: 0.15em;
     }
   }
+
+  /* 多层文字阴影：近距硬影 + 中距扩散 + 远距光晕 */
   .date__container--shadow {
-    text-shadow: 2px 8px 6px v-bind(customShadowColor);
+    text-shadow:
+      1px 2px 2px v-bind(customShadowColor),
+      2px 6px 10px v-bind(customShadowColor),
+      0 0 24px color-mix(in srgb, v-bind(customShadowColor) 35%, transparent);
   }
 }
 </style>

@@ -7,6 +7,7 @@ import SettingPaneTitle from '~/newtab/setting/SettingPaneTitle.vue'
 import SettingPaneWrap from '~/newtab/setting/SettingPaneWrap.vue'
 import Tips from '@/components/Tips.vue'
 import BackgroundDrawer from './BackgroundDrawer.vue'
+import SliderInput from '@/components/SliderInput.vue'
 import { ICONS } from '@/logic/icons'
 
 const instance = getCurrentInstance()
@@ -111,11 +112,15 @@ const onResetSetting = () => {
 <template>
   <BackgroundDrawer v-model:show="state.isBackgroundDrawerVisible" />
 
-  <SettingPaneTitle :title="$t('setting.general')" />
+  <SettingPaneTitle
+    :title="$t('setting.general')"
+    widget-code="general"
+  />
 
   <SettingPaneWrap
     widget-code="general"
     :divider-name="$t('general.globalStyle')"
+    hide-reset
   >
     <template #header>
       <NFormItem :label="$t('general.pageTitle')">
@@ -140,20 +145,22 @@ const onResetSetting = () => {
           v-model:value="localConfig.general.isLoadPageAnimationEnabled"
           size="small"
         />
-        <NRadioGroup
-          v-if="localConfig.general.isLoadPageAnimationEnabled"
-          v-model:value="localConfig.general.loadPageAnimationType"
-          size="small"
-          class="setting__item-ml"
-        >
-          <NRadioButton
-            v-for="item in loadPageAnimationTypeList"
-            :key="item.value"
-            :value="item.value"
+        <Transition name="setting-expand">
+          <NRadioGroup
+            v-if="localConfig.general.isLoadPageAnimationEnabled"
+            v-model:value="localConfig.general.loadPageAnimationType"
+            size="small"
+            class="setting__item-ml"
           >
-            {{ item.label }}
-          </NRadioButton>
-        </NRadioGroup>
+            <NRadioButton
+              v-for="item in loadPageAnimationTypeList"
+              :key="item.value"
+              :value="item.value"
+            >
+              {{ item.label }}
+            </NRadioButton>
+          </NRadioGroup>
+        </Transition>
       </NFormItem>
 
       <NFormItem
@@ -223,118 +230,114 @@ const onResetSetting = () => {
           v-model:value="localConfig.general.isBackgroundImageEnabled"
           size="small"
         />
-        <NButton
+        <Transition name="setting-expand">
+          <NButton
+            v-if="localConfig.general.isBackgroundImageEnabled"
+            class="setting__item-ele action-btn action-btn--primary"
+            type="primary"
+            size="small"
+            secondary
+            @click="openBackgroundDrawer()"
+          >
+            <Icon :icon="ICONS.selectFinger" />&nbsp;{{ $t('common.select') }}
+          </NButton>
+        </Transition>
+      </NFormItem>
+
+      <Transition name="setting-slide">
+        <NFormItem
           v-if="localConfig.general.isBackgroundImageEnabled"
-          class="setting__item-ele"
-          type="primary"
-          size="small"
-          ghost
-          @click="openBackgroundDrawer()"
+          :label="$t('common.blur')"
         >
-          <Icon :icon="ICONS.selectFinger" />&nbsp;{{ $t('common.select') }}
-        </NButton>
-      </NFormItem>
+          <SliderInput
+            v-model="localConfig.general.bgBlur"
+            :step="0.1"
+            :min="0"
+            :max="30"
+          />
+        </NFormItem>
+      </Transition>
 
-      <NFormItem
-        v-if="localConfig.general.isBackgroundImageEnabled"
-        :label="$t('common.blur')"
-      >
-        <NSlider
-          v-model:value="localConfig.general.bgBlur"
-          :step="0.1"
-          :min="0"
-          :max="30"
-          :tooltip="false"
-        />
-        <NInputNumber
-          v-model:value="localConfig.general.bgBlur"
-          class="setting__item-ele setting__input-number"
-          size="small"
-          :step="0.1"
-          :min="0"
-          :max="30"
-        />
-      </NFormItem>
-
-      <NFormItem
-        v-if="localConfig.general.isBackgroundImageEnabled"
-        :label="$t('common.opacity')"
-      >
-        <NSlider
-          v-model:value="localConfig.general.bgOpacity"
-          :step="0.01"
-          :min="0"
-          :max="1"
-          :tooltip="false"
-        />
-        <NInputNumber
-          v-model:value="localConfig.general.bgOpacity"
-          class="setting__item-ele setting__input-number"
-          size="small"
-          :step="0.01"
-          :min="0"
-          :max="1"
-        />
-      </NFormItem>
+      <Transition name="setting-slide">
+        <NFormItem
+          v-if="localConfig.general.isBackgroundImageEnabled"
+          :label="$t('common.opacity')"
+        >
+          <SliderInput
+            v-model="localConfig.general.bgOpacity"
+            :step="0.01"
+            :min="0"
+            :max="1"
+          />
+        </NFormItem>
+      </Transition>
 
       <!-- setting -->
       <NDivider title-placement="left">
         {{ $t('general.settingDividerSetting') }}
       </NDivider>
 
+      <!-- 同步时间 -->
       <NFormItem :label="$t('general.syncTime')">
         <NSpin
           :show="isUploadConfigLoading"
           size="small"
         >
-          <p>{{ syncTime }}</p>
+          <div class="sync-time__badge">
+            <Icon
+              :icon="ICONS.check"
+              class="sync-time__icon"
+            />
+            <span class="sync-time__text">{{ syncTime }}</span>
+          </div>
         </NSpin>
         <Tips :content="$t('general.syncTimeTips')" />
       </NFormItem>
 
       <NFormItem :label="$t('general.importExportSettingsLabel')">
-        <div>
-          <NButton
-            type="primary"
-            size="small"
-            ghost
-            :loading="globalState.isImportSettingLoading"
-            @click="onImportSetting"
-          >
-            <Icon :icon="ICONS.importFile" />&nbsp;{{ $t('general.importSettingsValue') }}
-          </NButton>
-          <input
-            ref="importSettingInputEl"
-            style="display: none"
-            type="file"
-            accept=".json"
-            @change="onImportFileChange"
-          />
-          <Tips :content="$t('general.importSettingsTips')" />
-        </div>
-
-        <div style="margin-left: 30px">
-          <NButton
-            type="primary"
-            size="small"
-            ghost
-            @click="onExportSetting()"
-          >
-            <Icon :icon="ICONS.exportFile" />&nbsp;{{ $t('general.exportSettingValue') }}
-          </NButton>
-          <Tips :content="$t('general.exportSettingTips')" />
-        </div>
+        <NButton
+          class="action-btn action-btn--primary"
+          type="primary"
+          size="small"
+          secondary
+          :loading="globalState.isImportSettingLoading"
+          @click="onImportSetting"
+        >
+          <template #icon><Icon :icon="ICONS.importFile" /></template>
+          {{ $t('general.importSettingsValue') }}
+        </NButton>
+        <input
+          ref="importSettingInputEl"
+          style="display: none"
+          type="file"
+          accept=".json"
+          @change="onImportFileChange"
+        />
+        <Tips :content="$t('general.importSettingsTips')" />
+        <NButton
+          class="setting__item-ml action-btn action-btn--primary"
+          type="primary"
+          size="small"
+          secondary
+          @click="onExportSetting()"
+        >
+          <template #icon><Icon :icon="ICONS.exportFile" /></template>
+          {{ $t('general.exportSettingValue') }}
+        </NButton>
+        <Tips :content="$t('general.exportSettingTips')" />
       </NFormItem>
 
       <NFormItem :label="$t('general.clearStorageLabel')">
         <NButton
-          type="primary"
+          class="action-btn action-btn--warning"
+          type="warning"
           size="small"
-          ghost
+          secondary
           :loading="globalState.isClearStorageLoading"
           @click="refreshSetting()"
         >
-          <Icon :icon="ICONS.clearOutlined" />&nbsp;{{ $t('general.clearStorageValue') }}
+          <template #icon><Icon :icon="ICONS.clearOutlined" /></template>
+          {{ $t('general.clearStorageValue') }}
         </NButton>
         <Tips :content="$t('general.clearStorageTips')" />
       </NFormItem>
@@ -343,14 +346,16 @@ const onResetSetting = () => {
         <NPopconfirm @positive-click="onResetSetting()">
           <template #trigger>
             <NButton
+              class="action-btn action-btn--error"
               type="error"
               size="small"
-              ghost
+              secondary
             >
-              <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{ $t('general.resetSettingValue') }}
+              <template #icon><Icon :icon="ICONS.restoreTwotone" /></template>
+              {{ $t('general.resetAllSettingValue') }}
             </NButton>
           </template>
-          {{ `${$t('common.confirm')} ${$t('general.resetSettingLabel')}` }}?
+          {{ `${$t('common.confirm')} ${$t('general.resetAllSettingValue')}` }}?
         </NPopconfirm>
         <Tips :content="$t('general.resetSettingTips')" />
       </NFormItem>
@@ -359,24 +364,34 @@ const onResetSetting = () => {
 </template>
 
 <style>
+/* ——— 抽屉方向选择器 ——— */
 .drawer__site_wrap {
-  margin-bottom: -9px;
   .n-form-item-label {
-    margin-top: 17px;
+    margin-top: 14px;
   }
   .drawer__site {
     display: grid;
-    grid-template-rows: repeat(3, 1fr);
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 28px);
+    grid-template-columns: repeat(3, 28px);
+    gap: 2px;
+    padding: 3px;
+    border-radius: var(--radius-lg);
+    background: rgba(128, 128, 128, 0.06);
+    border: 1px solid rgba(128, 128, 128, 0.1);
     .site__item {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 23px;
+      font-size: 17px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+      color: rgba(128, 128, 128, 0.55);
       &:hover {
-        opacity: 0.6;
+        background-color: rgba(128, 128, 128, 0.12);
+        color: rgba(128, 128, 128, 0.85);
+        transform: scale(1.08);
       }
       &:nth-child(1) {
         grid-column: 1;
@@ -396,8 +411,34 @@ const onResetSetting = () => {
       }
     }
     .site__item--active {
-      color: v-bind(customPrimaryColor);
+      color: v-bind(customPrimaryColor) !important;
+      background-color: color-mix(in srgb, v-bind(customPrimaryColor) 12%, transparent);
+      border-color: color-mix(in srgb, v-bind(customPrimaryColor) 30%, transparent);
+      transform: scale(1.06);
     }
   }
 }
+
+/* ——— 同步时间徽章 ——— */
+.sync-time__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(56, 168, 102, 0.1);
+  border: 1px solid rgba(56, 168, 102, 0.22);
+  .sync-time__icon {
+    font-size: 13px;
+    color: #38a866;
+    flex-shrink: 0;
+  }
+  .sync-time__text {
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    color: rgba(56, 168, 102, 0.85);
+    letter-spacing: 0.2px;
+  }
+}
+
 </style>
