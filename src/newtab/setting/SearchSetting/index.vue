@@ -80,7 +80,10 @@ const searchSelectRenderLabel = (option: typeof SEARCH_ENGINE_LIST[0]) => {
 </script>
 
 <template>
-  <SettingPaneTitle :title="$t('setting.search')" />
+  <SettingPaneTitle
+    :title="$t('setting.search')"
+    widget-code="search"
+  />
 
   <SettingPaneWrap
     widget-code="search"
@@ -97,17 +100,19 @@ const searchSelectRenderLabel = (option: typeof SEARCH_ENGINE_LIST[0]) => {
           @update:value="onChangeSearch"
         />
       </NFormItem>
-      <NFormItem
-        v-if="localConfig.search.urlName === 'custom'"
-        :label="$t('search.customEngine')"
-      >
-        <NInput
-          v-model:value="localConfig.search.urlValue"
-          type="text"
-          size="small"
-          placeholder="https://example/search?q={query}"
-        />
-      </NFormItem>
+      <Transition name="setting-slide">
+        <NFormItem
+          v-if="localConfig.search.urlName === 'custom'"
+          :label="$t('search.customEngine')"
+        >
+          <NInput
+            v-model:value="localConfig.search.urlValue"
+            type="text"
+            size="small"
+            placeholder="https://example/search?q={query}"
+          />
+        </NFormItem>
+      </Transition>
       <NFormItem :label="$t('search.placeholder')">
         <NInput
           v-model:value="localConfig.search.placeholder"

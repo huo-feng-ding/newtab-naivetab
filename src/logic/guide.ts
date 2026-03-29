@@ -1,7 +1,5 @@
 import 'driver.js/dist/driver.css'
 import { driver } from 'driver.js'
-import { createTab } from '@/logic/util'
-import { URL_NAIVETAB_DOC_STARTED } from '@/logic/constants/index'
 import { toggleIsDragMode } from '@/logic/moveable'
 import { localConfig, globalState } from '@/logic/store'
 
@@ -10,6 +8,11 @@ const onCloseGuide = () => {
   globalState.isGuideMode = false
   globalState.isSettingDrawerVisible = false
   toggleIsDragMode(false)
+}
+
+const destroyGuide = (driverInstance: ReturnType<typeof driver>) => {
+  onCloseGuide()
+  driverInstance.destroy()
 }
 
 // https://driverjs.com/docs/configuration
@@ -52,12 +55,9 @@ const startGuide = () => {
         },
       },
       {
-        element: '#clockDigital .clockDigital__container',
         popover: {
           title: window.$t('guide.stepTitle4'),
           description: window.$t('guide.stepDescription4'),
-          side: 'top',
-          align: 'center',
         },
       },
       {
@@ -65,17 +65,13 @@ const startGuide = () => {
           title: window.$t('guide.stepTitle5'),
           description: window.$t('guide.stepDescription5'),
           onNextClick: () => {
-            onCloseGuide()
-            driverConfig.moveNext()
-            driverConfig.destroy()
+            destroyGuide(driverConfig)
           },
         },
       },
     ],
     onCloseClick: () => {
-      onCloseGuide()
-      driverConfig.moveNext()
-      driverConfig.destroy()
+      destroyGuide(driverConfig)
     },
   })
 
@@ -98,7 +94,4 @@ export const handleFirstOpen = () => {
     return
   }
   openUserGuide()
-  // setTimeout(() => {
-  //   createTab(URL_NAIVETAB_DOC_STARTED)
-  // }, 300)
 }

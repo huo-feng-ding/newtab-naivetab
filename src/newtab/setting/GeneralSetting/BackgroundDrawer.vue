@@ -122,7 +122,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
     >
       <div class="drawer__content">
         <!-- current -->
-        <div>
+        <div class="content__config-section">
           <NForm
             class="content__config"
             label-placement="left"
@@ -151,19 +151,29 @@ const handleBackgroundImageCustomUrlBlur = () => {
               :label="$t('common.select')"
             >
               <div class="form__local">
-                <div>
+                <div class="local__actions">
                   <NButton
                     type="primary"
                     size="small"
-                    ghost
-                    style="margin-top: 3px"
+                    secondary
+                    class="action-btn action-btn--primary"
                     @click="onSelectBackgroundImage"
                   >
-                    <Icon :icon="ICONS.importFile" />&nbsp;{{ $t('common.import') }}
+                    <template #icon>
+                      <Icon :icon="ICONS.importFile" />
+                    </template>
+                    {{ $t('common.import') }}
                   </NButton>
                   <Tips :content="$t('general.localBackgroundTips')" />
                 </div>
-                <p class="local__filename">
+                <p
+                  v-if="imageState.currBackgroundImageFileName"
+                  class="local__filename"
+                >
+                  <Icon
+                    :icon="ICONS.imageSquare"
+                    class="filename__icon"
+                  />
                   {{ imageState.currBackgroundImageFileName }}
                 </p>
                 <input
@@ -229,6 +239,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
         <NSpin
           v-if="localConfig.general.backgroundImageSource === 1 && !localConfig.general.isBackgroundImageCustomUrlEnabled"
           :show="isImageListLoading"
+          class="image-list__spin"
         >
           <NTabs
             type="line"
@@ -269,38 +280,71 @@ const handleBackgroundImageCustomUrlBlur = () => {
     z-index: 1;
     background-color: var(--n-tab-color-segment);
   }
+
+  .content__config-section {
+    display: flex;
+  }
+
   .form__local {
     display: flex;
     flex-direction: column;
+    gap: 6px;
+
+    .local__actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .local__filename {
-      margin-top: 8px;
-      width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 340px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background-color: var(--n-color-target);
+      border: 1px solid var(--n-border-color);
+      font-size: 12px;
+      color: var(--n-text-color-3);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+
+      .filename__icon {
+        flex-shrink: 0;
+        font-size: 14px;
+        opacity: 0.6;
+      }
     }
   }
+
   .content__config {
     margin-right: 18px;
     flex: 1;
   }
-  .current__label {
-    margin-bottom: -10px;
-    color: var(--n-label-text-color);
-  }
+
   .current__image {
-    margin-top: 10px;
+    margin-top: 4px;
     width: 200px;
     min-height: 92px;
+    border-radius: 6px;
+    overflow: hidden;
   }
+
+  .image-list__spin {
+    margin-top: 4px;
+  }
+
   .picker__images {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 2px 1px 6px;
+
     .image__item {
-      flex: 0 0 auto;
-      margin: 1.6%;
-      width: 30%;
-      min-height: 89px;
+      aspect-ratio: 16 / 9;
+      min-height: 70px;
     }
   }
 }

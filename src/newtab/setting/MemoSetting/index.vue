@@ -5,7 +5,10 @@ import SettingPaneWrap from '~/newtab/setting/SettingPaneWrap.vue'
 </script>
 
 <template>
-  <SettingPaneTitle :title="$t('setting.memo')" />
+  <SettingPaneTitle
+    :title="$t('setting.memo')"
+    widget-code="memo"
+  />
 
   <SettingPaneWrap
     widget-code="memo"

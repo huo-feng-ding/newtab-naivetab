@@ -9,6 +9,8 @@ import type { TWidgetConfig as MemoConfig } from './memo/config'
 import type { TWidgetConfig as DateConfig } from './date/config'
 import type { TWidgetConfig as ClockDigitalConfig } from './clockDigital/config'
 import type { TWidgetConfig as ClockAnalogConfig } from './clockAnalog/config'
+import type { TWidgetConfig as ClockFlipConfig } from './clockFlip/config'
+import type { TWidgetConfig as ClockNeonConfig } from './clockNeon/config'
 import type { TWidgetConfig as WeatherConfig } from './weather/config'
 import type { TWidgetConfig as YearProgressConfig } from './yearProgress/config'
 
@@ -23,6 +25,8 @@ export type WidgetConfigByCode = {
   date: DateConfig
   clockDigital: ClockDigitalConfig
   clockAnalog: ClockAnalogConfig
+  clockFlip: ClockFlipConfig
+  clockNeon: ClockNeonConfig
   weather: WeatherConfig
   yearProgress: YearProgressConfig
 }

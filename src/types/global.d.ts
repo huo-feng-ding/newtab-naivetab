@@ -15,7 +15,7 @@ interface Window {
 }
 
 // @@@@ add widget type
-type WidgetCodes = 'keyboard' | 'bookmarkFolder' | 'clockDigital' | 'clockAnalog' | 'date' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news'
+type WidgetCodes = 'keyboard' | 'bookmarkFolder' | 'clockDigital' | 'clockAnalog' | 'clockFlip' | 'clockNeon' | 'date' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news'
 type ConfigField = WidgetCodes | 'general'
 type EleTargetCode = WidgetCodes | 'draft-common'
 type EleTargetType = 'widget' | 'draft'

@@ -81,10 +81,16 @@ const customNameInputWidth = computed(() => (localConfig.keyboard.isListenBackgr
     @select="onSelectBookmark"
   />
   <!-- bookmarkConfig -->
-  <NCollapseItem
-    :title="$t('setting.bookmarkConfig')"
-    name="bookmarkConfig"
-  >
+  <NCollapseItem name="bookmarkConfig">
+    <template #header>
+      <span class="setting__label setting__label--collapse">
+        <Icon
+          :icon="ICONS.bookmarkPlus"
+          class="label__icon"
+        />
+        {{ $t('setting.bookmarkConfig') }}
+      </span>
+    </template>
     <div class="modal__bookmark">
       <NInputGroup class="bookmark__label">
         <p class="label__text">

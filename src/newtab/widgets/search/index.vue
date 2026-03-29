@@ -240,6 +240,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 #search {
   font-family: v-bind(customFontFamily);
   user-select: none;
+
   .search__container {
     z-index: 10;
     position: absolute;
@@ -248,7 +249,44 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
     align-items: center;
     border-radius: v-bind(customBorderRadius);
     background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur));
+    backdrop-filter: blur(v-bind(customBackgroundBlur)) saturate(1.4);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+    will-change: transform;
+
+    /* 内高光：左上角玻璃反射光晕 */
+    &::before {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(255, 255, 255, 0.04) 40%,
+        transparent 70%
+      );
+      z-index: 0;
+    }
+    /* 顶部高光线 */
+    &::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      border-radius: 50%;
+      z-index: 1;
+    }
+
     .n-input__border,
     .n-input__state-border {
       border: 0 !important;
@@ -259,6 +297,8 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
       border-radius: v-bind(customBorderRadius) !important;
     }
     .input__main {
+      position: relative;
+      z-index: 1;
       flex: 1;
       width: v-bind(customWidth);
       height: v-bind(customHeight);
@@ -270,6 +310,23 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           height: v-bind(customHeight);
           color: v-bind(customFontColor) !important;
           caret-color: v-bind(customFontColor);
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+        .n-input__placeholder {
+          color: v-bind(customFontColor);
+          opacity: 0.4;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .n-input__suffix {
+          .n-base-clear {
+            color: v-bind(customFontColor);
+            opacity: 0.45;
+            transition: opacity 0.18s ease, transform 0.15s ease;
+            &:hover {
+              opacity: 0.9;
+              transform: scale(1.15);
+            }
+          }
         }
       }
     }
@@ -280,24 +337,65 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
       }
     }
     .input__search {
-      width: 50px;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      width: auto;
+      padding: 0 v-bind(customPadding);
       color: v-bind(customFontColor) !important;
+      opacity: 0.65;
       cursor: pointer;
+      transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
       .search__icon {
         font-size: v-bind(customFontSize);
+        display: block;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+        transition: filter 0.18s ease;
+      }
+      &:hover {
+        opacity: 1;
+        transform: scale(1.12);
+        .search__icon {
+          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+        }
+      }
+      &:active {
+        transform: scale(0.95);
+        transition-duration: 0.08s;
       }
     }
     .input__search--move {
       cursor: move !important;
+      &:hover {
+        transform: none;
+      }
+      &:active {
+        transform: none;
+      }
     }
   }
+
   .search__container--border {
     border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
   }
   .search__container--shadow {
     box-shadow:
-      v-bind(customShadowColor) 0px 2px 4px 0px,
-      v-bind(customShadowColor) 0px 2px 16px 0px;
+      0 4px 24px v-bind(customShadowColor),
+      0 1px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .search__container--focus {
+    &.search__container--shadow {
+      box-shadow:
+        0 6px 32px v-bind(customShadowColor),
+        0 2px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+    &.search__container--border {
+      border-color: v-bind(customFontColor);
+    }
+    /* 聚焦时背景微微提亮 */
+    background-color: color-mix(in srgb, v-bind(customBackgroundColor) 85%, rgba(255,255,255,0.08) 15%);
   }
 }
 </style>

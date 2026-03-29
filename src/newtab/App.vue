@@ -2,7 +2,7 @@
 import { NConfigProvider, NMessageProvider, NNotificationProvider, NLoadingBarProvider } from 'naive-ui'
 import { log } from '@/logic/util'
 import { gaProxy } from '@/logic/gtag'
-import { FOCUE_ELEMENT_SELECTOR_MAP } from '@/logic/constants/index'
+import { FOCUS_ELEMENT_SELECTOR_MAP } from '@/logic/constants/index'
 import { startKeydown, startTimer, stopTimer, onPageFocus, stopKeydown } from '@/logic/task'
 import { handleWatchLocalConfigChange, handleMissedUploadConfig, loadRemoteConfig } from '@/logic/storage'
 import { handleFirstOpen } from '@/logic/guide'
@@ -24,7 +24,7 @@ const handleFocusPage = () => {
   if (localConfig.general.openPageFocusElement === 'default') {
     return
   }
-  const selector = FOCUE_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
+  const selector = FOCUS_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
   const focusEle = document.querySelector(selector) as HTMLElement | null
   if (focusEle && focusEle.focus) {
     focusEle.focus()

@@ -28,10 +28,10 @@ const onCloseModal = () => {
 
       <div class="card__footer">
         <NButton
-          class="footer__btn"
+          class="footer__btn action-btn action-btn--primary"
           type="primary"
           size="small"
-          ghost
+          secondary
           @click="onCloseModal()"
         >
           <template #icon>

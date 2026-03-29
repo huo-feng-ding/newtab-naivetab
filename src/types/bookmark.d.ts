@@ -46,7 +46,9 @@ type KeyLabel
     | '>'
     | '?'
 
-type KeycapType = 'none' | 'mark' | 'folder' | 'back'
+type KeycapBookmarkType = 'none' | 'mark' | 'folder' | 'back'
+
+type KeycapVisualType = 'gmk' | 'dsa' | 'flat'
 
 interface KeyboardConfigItem {
   label?: string

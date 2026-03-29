@@ -3,7 +3,7 @@ import { gaProxy } from '@/logic/gtag'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
 import { state, newsLocalState, updateNews, onRetryNews, handleWatchNewsConfigChange } from '@/newtab/widgets/news/logic'
-import { localConfig, getIsWidgetRender, getStyleField, getStyleConst } from '@/logic/store'
+import { localConfig, getIsWidgetRender, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
@@ -30,17 +30,18 @@ const onOpenPage = (url: string) => {
 }
 
 const onMouseDownKey = (event: MouseEvent, url: string) => {
+  // 拖动模式下不干预事件冒泡，让 body 的 mousedown 监听器能收到事件以启动拖拽
+  if (isDragMode.value) {
+    return
+  }
   // 阻止默认行为（例如浏览器中键的滚轮模式切换）
   event.preventDefault()
-  // 阻止事件冒泡
+  // 阻止事件冒泡（仅非拖动模式，防止影响拖拽事件链）
   event.stopPropagation()
   if (event.button !== 1) {
     return
   }
   // 按下鼠标中键
-  if (isDragMode.value) {
-    return
-  }
   createTab(url, false)
 }
 
@@ -80,7 +81,6 @@ const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 
-const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 </script>
 
 <template>
@@ -88,7 +88,6 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     <div
       class="news__container"
       :class="{
-        'news__container--drag': isDragMode,
         'news__container--border': localConfig.news.isBorderEnabled,
         'news__container--shadow': localConfig.news.isShadowEnabled,
       }"
@@ -137,6 +136,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
                   <n-popover
                     :delay="500"
                     trigger="hover"
+                    :disabled="isDragMode"
                     :style="`width: ${customWidth}; line-height: 1.5;`"
                   >
                     <template #trigger>
@@ -186,16 +186,33 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     border-radius: v-bind(customBorderRadius);
     background-color: v-bind(customBackgroundColor);
     backdrop-filter: blur(v-bind(customBackgroundBlur));
+    overflow: hidden;
+    will-change: transform;
+    /* 显式触发合成层，配合 overflow:hidden + border-radius 消除边缘竖向闪烁 */
+    transform: translateZ(0);
     .news__wrap {
       width: v-bind(customWidth);
       .n-tabs .n-tab-pane {
         padding: 0 !important;
       }
       /* segment */
-      .n-tabs .n-tabs-rail {
-        background-color: transparent !important;
-        .n-tabs-capsule {
-          background-color: v-bind(customTabActiveBackgroundColor) !important;
+      .n-tabs .n-tabs-nav.n-tabs-nav--segment-type {
+        padding: 6px 8px 4px !important;
+        .n-tabs-rail {
+          background-color: transparent !important;
+          border-radius: 8px !important;
+          .n-tabs-capsule {
+            background-color: v-bind(customTabActiveBackgroundColor) !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            /* 提前升为独立合成层，消除 translateX 动画在父合成层边缘产生的竖向闪烁 */
+            will-change: transform;
+            backface-visibility: hidden;
+          }
+          .n-tabs-tab {
+            border-radius: 6px !important;
+            transition: color 0.2s ease !important;
+          }
         }
       }
       /* line bottom border */
@@ -204,25 +221,33 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       }
       .n-tabs-tab__label {
         font-size: v-bind(customFontSize);
+        font-weight: 500;
       }
       .news__content {
         height: v-bind(customHeight);
         color: v-bind(customFontColor);
         font-size: v-bind(customFontSize);
         overflow-y: scroll;
+        padding: 2px 8px 6px;
+        box-sizing: border-box;
         &::-webkit-scrollbar {
           display: none;
         }
         .content__item {
           display: flex;
           align-items: center;
-          padding: v-bind(customMargin) 0;
+          padding: v-bind(customMargin) 4px;
           width: 100%;
+          border-radius: 6px;
+          transition: background-color 0.15s ease, color 0.15s ease;
+          box-sizing: border-box;
           .row__index {
-            width: 8%;
-            flex: 0 0 auto;
-            font-weight: 500;
+            width: 28px;
+            flex: 0 0 28px;
+            font-weight: 700;
             text-align: center;
+            font-size: 0.85em;
+            line-height: 1;
           }
           .row__index__1 {
             color: #fe2d46;
@@ -234,25 +259,32 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
             color: #faa90e;
           }
           .row__content {
-            width: 92%;
+            flex: 1;
+            min-width: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 6px;
             .content__desc {
               flex: 1;
+              min-width: 0;
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
+              line-height: 1.4;
             }
             .content__hot {
               flex: 0 0 auto;
-              margin: 0 8px;
-              opacity: 0.7;
+              font-size: 0.8em;
+              opacity: 0.5;
+              white-space: nowrap;
             }
           }
         }
         .content__item--hover:hover {
           color: v-bind(customUrlActiveColor);
+          background-color: v-bind(customTabActiveBackgroundColor);
+          cursor: pointer;
         }
         .content__empty {
           display: flex;
@@ -262,14 +294,8 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         }
       }
       .news__content--hover:hover {
-        cursor: pointer;
+        cursor: default;
       }
-    }
-  }
-  .news__container--drag {
-    background-color: transparent !important;
-    &:hover {
-      background-color: v-bind(bgMoveableWidgetMain) !important;
     }
   }
   .news__container--border {
