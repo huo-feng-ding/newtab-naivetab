@@ -250,7 +250,7 @@
     "keyboardType": "Keyboard Type",
     "splitSpace": "Split Space",
     "keycap": "Keycap",
-    "keycapType": "Keycap Profile",
+    "keycapVisualType": "Keycap Profile",
     "tactileBumps": "Tactile Bumps",
     "customKeys": "Custom keys",
     "keyLabel": "Key",

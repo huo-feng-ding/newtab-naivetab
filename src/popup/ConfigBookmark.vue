@@ -3,11 +3,13 @@ import { useStorageLocal } from '@/composables/useStorageLocal'
 import { gaProxy } from '@/logic/gtag'
 import { requestPermission } from '@/logic/storage'
 import { getFaviconFromUrl } from '@/logic/bookmark'
+import { TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP } from '@/logic/constants/index'
 import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, KEYBOARD_COMMAND_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig } from '@/logic/keyboard'
 import { getDefaultBookmarkNameFromUrl, getBookmarkConfigUrl, getBookmarkConfigName } from '~/newtab/widgets/keyboard/logic'
 import { globalState, localConfig, customPrimaryColor, getStyleConst, getStyleField, getAllCommandsConfig, openConfigShortcutsPage } from '@/logic/store'
 import BookmarkPicker from '@/components/BookmarkPicker.vue'
+import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
 import Tips from '@/components/Tips.vue'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
@@ -136,7 +138,6 @@ const handleDragEnd = () => {
 
 const popupKeyboardBorder = getStyleConst('popupKeyboardBorder')
 const popupKeyboardHoverBg = getStyleConst('popupKeyboardHoverBg')
-const popupKeyboardActiveBg = getStyleConst('popupKeyboardActiveBg')
 
 // ── 从键盘 widget 配置读取样式（与 newtab 保持一致）──────────
 const keycapMainFontColor = getStyleField('keyboard', 'mainFontColor')
@@ -146,6 +147,7 @@ const keycapEmphasisOneBgColor = getStyleField('keyboard', 'emphasisOneBackgroun
 const keycapEmphasisTwoFontColor = getStyleField('keyboard', 'emphasisTwoFontColor')
 const keycapEmphasisTwoBgColor = getStyleField('keyboard', 'emphasisTwoBackgroundColor')
 const keycapBorderColor = getStyleField('keyboard', 'keycapBorderColor')
+const keycapBackgroundBlurPx = getStyleField('keyboard', 'keycapBackgroundBlur', 'px')
 
 // keycapSize 在 widget 中单位是 vmin（× 0.1），popup 固定 px 基准为 40
 const KEYCAP_BASE_SIZE = 40
@@ -173,9 +175,10 @@ const keycapDsaStageHeightPx = computed(() => `${(1 - DSA_EDGE * 1.7) * KEYCAP_B
 // favicon 缩放
 const keycapFaviconSize = getStyleField('keyboard', 'faviconSize')
 // 键帽类型（gmk / dsa / flat）
-const keycapType = computed(() => localConfig.keyboard.keycapType)
+const keycapVisualType = computed(() => localConfig.keyboard.keycapType)
 // 字体
 const keycapKeyFontFamily = getStyleField('keyboard', 'keycapKeyFontFamily')
+const keycapBookmarkFontFamily = getStyleField('keyboard', 'keycapBookmarkFontFamily')
 const keycapKeyFontSizePx = computed(() => {
   const s = localConfig.keyboard.keycapSize
   const fs = localConfig.keyboard.keycapKeyFontSize
@@ -186,9 +189,16 @@ const keycapBookmarkFontSizePx = computed(() => {
   const fs = localConfig.keyboard.keycapBookmarkFontSize
   return `${(fs / s) * KEYCAP_BASE_SIZE}px`
 })
+const keycapTextPaddingPx = computed(() => `${0.08 * KEYCAP_BASE_SIZE}px`)
+const keycapIconPaddingPx = computed(() => `${0.08 * KEYCAP_BASE_SIZE}px`)
+const keycapStageFlatPaddingPx = computed(() => `${0.08 * KEYCAP_BASE_SIZE}px`)
 // 自定义描边
 const isKeycapBorderEnabled = computed(() => localConfig.keyboard.isKeycapBorderEnabled)
 const keycapBorderWidthPx = computed(() => `${localConfig.keyboard.keycapBorderWidth}px`)
+const isCapKeyVisible = computed(() => localConfig.keyboard.isCapKeyVisible)
+const isNameVisible = computed(() => localConfig.keyboard.isNameVisible)
+const isFaviconVisible = computed(() => localConfig.keyboard.isFaviconVisible)
+const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumpsVisible)
 // keycap wrap padding（widget 中单位 vmin，同比换算）
 const keycapPaddingPx = computed(() => {
   const p = localConfig.keyboard.keycapPadding
@@ -229,6 +239,28 @@ const plateBackgroundBlurPx = getStyleField('keyboard', 'plateBackgroundBlur', '
 
 const keycapBaseSize = `${KEYCAP_BASE_SIZE}px`
 
+// popup 虽然使用固定像素尺寸，但仍然复用和 widget 完全相同的展示组件。
+// 这里把 popup 侧换算后的样式常量通过 CSS 变量注入，保证结构一致、尺寸独立。
+const keycapCssVars = computed(() => ({
+  '--keycap-main-font-color': keycapMainFontColor.value,
+  '--keycap-main-bg-color': keycapMainBgColor.value,
+  '--keycap-background-blur': keycapBackgroundBlurPx.value,
+  '--keycap-border-radius': keycapBorderRadiusPx.value,
+  '--custom-primary-color': customPrimaryColor.value,
+  '--keycap-key-font-family': keycapKeyFontFamily.value,
+  '--keycap-key-font-size': keycapKeyFontSizePx.value,
+  '--keycap-bookmark-font-size': keycapBookmarkFontSizePx.value,
+  '--keycap-favicon-size': keycapFaviconSize.value,
+  '--keycap-stage-flat-padding': keycapStageFlatPaddingPx.value,
+  '--keycap-gmk-top-border': keycapGmkTopBorderPx.value,
+  '--keycap-gmk-h-border': keycapGmkHBorderPx.value,
+  '--keycap-gmk-bot-border': keycapGmkBotBorderPx.value,
+  '--keycap-dsa-border': keycapDsaBorderPx.value,
+  '--keycap-border-width': keycapBorderWidthPx.value,
+  '--keycap-border-color': keycapBorderColor.value,
+}))
+
+// popup 里的宽度是固定 px，所以这里直接按当前缩略尺寸重新计算键宽
 const getCustomKeycapWidth = (code: string) => {
   let value = KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].size
   const customSize = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].size
@@ -247,6 +279,84 @@ const getCustomKeycapMargin = (code: string, type: 'marginLeft' | 'marginRight')
   return 0
 }
 
+const getCustomKeycapLabel = (code: string) => {
+  let value = KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].label
+  const customLabel = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].label
+  if (customLabel) {
+    value = customLabel
+  }
+  return value
+}
+
+const getCustomTextAlign = (code: string) => {
+  let value = KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].textAlign
+  const customTextAlign = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].textAlign
+  if (customTextAlign) {
+    value = customTextAlign
+  }
+  return value
+}
+
+// popup 里的 stage 计算和 widget 保持一致，只是单位从 vmin 预先换算成了 px
+const getKeycapStageStyle = (code: string) => {
+  let style = ''
+  const width = getCustomKeycapWidth(code)
+  if (keycapVisualType.value === 'gmk') {
+    style += `margin-top: -${keycapGmkStageMarginTopPx.value};`
+    style += `margin-left: -${keycapGmkStageMarginLeftPx.value};`
+    style += `width: ${width - KEYCAP_BASE_SIZE * (GMK_EDGE * 10)}px;`
+    style += `height: ${keycapGmkStageHeightPx.value};`
+  } else if (keycapVisualType.value === 'dsa') {
+    style += `margin: -${keycapDsaStageMargPx.value};`
+    style += `width: ${width - KEYCAP_BASE_SIZE * (DSA_EDGE * 1.7)}px;`
+    style += `height: ${keycapDsaStageHeightPx.value};`
+  }
+  return style
+}
+
+// label / name 共用一套文字对齐规则，避免 popup 和 widget 的视觉表现再次分叉
+const getKeycapTextStyle = (code: string) => {
+  const textAlign = getCustomTextAlign(code)
+  let style = `text-align: ${textAlign};`
+  if (textAlign !== 'center') {
+    style += `padding: 0 ${keycapTextPaddingPx.value};`
+  }
+  return style
+}
+
+// favicon 区域同样跟随 textAlign；当名称隐藏时，改用统一 padding 维持图标居中
+const getKeycapIconStyle = (code: string) => {
+  let textAlign = getCustomTextAlign(code)
+  textAlign = TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP[textAlign]
+  let style = `justify-content: ${textAlign};`
+  if (isNameVisible.value) {
+    if (textAlign !== 'center') {
+      style += `padding: 0 ${keycapTextPaddingPx.value};`
+    }
+  } else {
+    style += `padding: ${keycapIconPaddingPx.value};`
+  }
+  return style
+}
+
+const getPopupKeycapStyle = (code: string) => {
+  if (currKeyboardConfig.value.emphasisOneKeys.includes(code)) {
+    return `background-color:${keycapEmphasisOneBgColor.value};color:${keycapEmphasisOneFontColor.value};`
+  }
+  if (currKeyboardConfig.value.emphasisTwoKeys.includes(code)) {
+    return `background-color:${keycapEmphasisTwoBgColor.value};color:${keycapEmphasisTwoFontColor.value};`
+  }
+  return ''
+}
+
+// popup 中空书签不应触发浏览器 favicon 占位地址，否则共享组件会拿到一个看似有效的 src，
+// 最终渲染出空的 img 节点，导致“无图标键位看起来仍然有图”的问题。
+const getPopupKeycapIconSrc = (code: string) => {
+  const url = getBookmarkConfigUrl(code)
+  return url ? getFaviconFromUrl(url) : ''
+}
+
+// 键帽外层仍由 popup 自己控制宽度和边距，这样拖拽排序与整体排版逻辑不用改
 const getKeycapWrapStyle = (code: string) => {
   let style = ''
   const width = getCustomKeycapWidth(code)
@@ -315,6 +425,7 @@ const popupMainWidth = computed(() => `${getContainerWidth()}px`)
         </div>
       </div>
     </template>
+
     <NForm
       label-placement="left"
       require-mark-placement="left"
@@ -447,48 +558,27 @@ const popupMainWidth = computed(() => `${getContainerWidth()}px`)
                   v-if="isShellVisible && isPlateVisible"
                   class="row__keycap-plate"
                 />
-                <div
-                  class="row__keycap"
-                  :class="[
-                    `row__keycap-${keycapType}`,
-                    isKeycapBorderEnabled && 'row__keycap--border',
-                  ]"
-                  :style="
-                    currKeyboardConfig.emphasisOneKeys.includes(code)
-                      ? `background-color:${keycapEmphasisOneBgColor};color:${keycapEmphasisOneFontColor};`
-                      : currKeyboardConfig.emphasisTwoKeys.includes(code)
-                        ? `background-color:${keycapEmphasisTwoBgColor};color:${keycapEmphasisTwoFontColor};`
-                        : ''
-                  "
+                <KeyboardKeycapDisplay
+                  :key-code="code"
+                  :label="getCustomKeycapLabel(code)"
+                  :name="getBookmarkConfigName(code)"
+                  :visual-type="keycapVisualType"
+                  :bookmark-type="'mark'"
+                  :icon-src="getPopupKeycapIconSrc(code)"
+                  :stage-style="getKeycapStageStyle(code)"
+                  :text-style="getKeycapTextStyle(code)"
+                  :icon-style="getKeycapIconStyle(code)"
+                  :img-draggable="state.isBookmarkDragEnabled"
+                  :is-selected="code === state.keyCode"
+                  :is-border-enabled="isKeycapBorderEnabled"
+                  :show-cap-key="isCapKeyVisible"
+                  :show-name="isNameVisible"
+                  :show-favicon="isFaviconVisible"
+                  :show-tactile-bumps="isTactileBumpsVisible"
+                  class="row__keycap--hover"
+                  :style="[keycapCssVars, getPopupKeycapStyle(code)]"
                   @click="selectKey(code)"
-                >
-                  <div
-                    v-if="code === state.keyCode"
-                    class="keycap__select"
-                  >
-                    <Icon :icon="ICONS.checkCircle" />
-                  </div>
-
-                  <div
-                    class="keycap__stage"
-                    :class="`keycap__stage-${keycapType}`"
-                  >
-                    <p class="keycap__label">
-                      {{ KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].label }}
-                    </p>
-                    <div class="keycap__img">
-                      <img
-                        v-if="getBookmarkConfigUrl(code)"
-                        class="img__main"
-                        :src="getFaviconFromUrl(getBookmarkConfigUrl(code))"
-                        :draggable="state.isBookmarkDragEnabled"
-                      />
-                    </div>
-                    <p class="keycap__name">
-                      {{ getBookmarkConfigName(code) }}
-                    </p>
-                  </div>
-                </div>
+                />
               </div>
             </div>
           </div>
@@ -678,7 +768,7 @@ const popupMainWidth = computed(() => `${getContainerWidth()}px`)
   /* ── 键盘区域 ─────────────────────────────────────────── */
   .popup__keyboard {
     cursor: pointer;
-    font-family: v-bind(keycapKeyFontFamily);
+    font-family: v-bind(keycapBookmarkFontFamily);
     padding: 4px 2px 2px;
     border-radius: var(--radius-lg);
 
@@ -729,244 +819,6 @@ const popupMainWidth = computed(() => `${getContainerWidth()}px`)
           background: v-bind(plateColor);
           border-radius: v-bind(plateBorderRadiusPx);
           backdrop-filter: blur(v-bind(plateBackgroundBlurPx));
-        }
-
-        /* ── 基础键帽：颜色/圆角/字体读取 widget 配置 ── */
-        .row__keycap {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          color: v-bind(keycapMainFontColor);
-          background-color: v-bind(keycapMainBgColor);
-          border-style: solid;
-          border-radius: v-bind(keycapBorderRadiusPx);
-          box-sizing: border-box;
-          user-select: none;
-          cursor: pointer;
-          transition:
-            transform 80ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-            box-shadow 80ms ease,
-            filter 80ms ease;
-
-          /* 选中蒙层 */
-          .keycap__select {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            background: color-mix(in srgb, v-bind(customPrimaryColor) 20%, transparent);
-            color: v-bind(customPrimaryColor);
-            font-size: 14px;
-            border-radius: calc(v-bind(keycapBorderRadiusPx) - 1px);
-            box-shadow:
-              inset 0 0 0 1.5px v-bind(customPrimaryColor),
-              0 0 8px color-mix(in srgb, v-bind(customPrimaryColor) 28%, transparent);
-          }
-
-          /* 键帽顶面 stage（公共基础） */
-          .keycap__stage {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            border-style: solid;
-            border-width: 0;
-            color: inherit;
-            background-color: inherit;
-
-            .keycap__label {
-              flex: 0 0 auto;
-              width: 100%;
-              font-size: v-bind(keycapKeyFontSizePx);
-              line-height: 1;
-              font-weight: 500;
-              text-align: center;
-              opacity: 0.82;
-              letter-spacing: 0.3px;
-              padding: 2px 2px 0;
-            }
-
-            .keycap__img {
-              flex: 1 1 0;
-              min-height: 0;
-              width: 100%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              overflow: hidden;
-              padding: 1px 0;
-              filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
-              transition: filter var(--transition-fast), transform var(--transition-fast);
-
-              .img__main {
-                display: block;
-                max-width: 80%;
-                max-height: 100%;
-                width: auto;
-                height: auto;
-                object-fit: contain;
-              }
-            }
-
-            .keycap__name {
-              flex: 0 0 auto;
-              width: 100%;
-              line-height: 1;
-              font-size: v-bind(keycapBookmarkFontSizePx);
-              text-align: center;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              opacity: 0.72;
-              font-weight: 500;
-              letter-spacing: 0.15px;
-              padding: 0 2px 2px;
-            }
-          }
-
-          /* hover 时 favicon 高光 */
-          &:hover .keycap__img {
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
-          }
-        }
-
-        /* ── Flat 磨砂质感 ── */
-        .row__keycap-flat {
-          box-shadow: none;
-          .keycap__stage-flat {
-            padding: 3px 2px 2px;
-            border-radius: v-bind(keycapBorderRadiusPx);
-            border-width: 1px;
-            border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
-            background: linear-gradient(
-              160deg,
-              rgba(255, 255, 255, 0.18) 0%,
-              rgba(255, 255, 255, 0.04) 50%,
-              rgba(0, 0, 0, 0.06) 100%
-            );
-            box-shadow:
-              inset 0 1px 0 rgba(255, 255, 255, 0.25),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-          }
-        }
-
-        /* ── GMK 机械键帽立体感 ── */
-        .row__keycap-gmk {
-          border-width: v-bind(keycapGmkTopBorderPx) v-bind(keycapGmkHBorderPx) v-bind(keycapGmkBotBorderPx);
-          border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.30) rgba(0, 0, 0, 0.08);
-          box-shadow:
-            0 3px 8px rgba(0, 0, 0, 0.45),
-            0 1px 2px rgba(0, 0, 0, 0.30),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12);
-
-          &:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.06);
-            box-shadow:
-              0 5px 12px rgba(0, 0, 0, 0.50),
-              0 2px 4px rgba(0, 0, 0, 0.32),
-              inset 0 1px 0 rgba(255, 255, 255, 0.18);
-          }
-          &:active {
-            transform: translateY(2px);
-            filter: brightness(0.94);
-            box-shadow:
-              0 1px 3px rgba(0, 0, 0, 0.40),
-              0 0px 1px rgba(0, 0, 0, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.08);
-          }
-
-          .keycap__stage-gmk {
-            /* GMK stage 覆盖外壳侧壁，形成顶面凹入效果 */
-            overflow: hidden;
-            margin-top: calc(-1 * v-bind(keycapGmkStageMarginTopPx));
-            margin-left: calc(-1 * v-bind(keycapGmkStageMarginLeftPx));
-            width: calc(100% + v-bind(keycapGmkHBorderPx) * 2);
-            height: v-bind(keycapGmkStageHeightPx);
-            border-width: 0px;
-            border-color: rgba(0, 0, 0, 0.1);
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 8px 4px;
-            border-bottom-left-radius: 8px 4px;
-            background: linear-gradient(
-              145deg,
-              rgba(255, 255, 255, 0.28) 0%,
-              rgba(255, 255, 255, 0.10) 18%,
-              rgba(0, 0, 0, 0.04) 55%,
-              rgba(0, 0, 0, 0.10) 100%
-            );
-            box-shadow:
-              inset 0 1px 0 rgba(255, 255, 255, 0.35),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.12),
-              0 2px 6px rgba(0, 0, 0, 0.18);
-            background-color: inherit;
-            color: inherit;
-          }
-        }
-
-        /* ── DSA 球面键帽立体感 ── */
-        .row__keycap-dsa {
-          border-width: v-bind(keycapDsaBorderPx);
-          border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.10) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.06);
-          box-shadow:
-            0 3px 7px rgba(0, 0, 0, 0.40),
-            0 1px 2px rgba(0, 0, 0, 0.28),
-            inset 0 1px 0 rgba(255, 255, 255, 0.10);
-
-          &:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.06);
-            box-shadow:
-              0 5px 10px rgba(0, 0, 0, 0.44),
-              0 2px 3px rgba(0, 0, 0, 0.28),
-              inset 0 1px 0 rgba(255, 255, 255, 0.16);
-          }
-          &:active {
-            transform: translateY(2px);
-            filter: brightness(0.94);
-            box-shadow:
-              0 1px 3px rgba(0, 0, 0, 0.36),
-              0 0px 1px rgba(0, 0, 0, 0.22),
-              inset 0 1px 0 rgba(255, 255, 255, 0.06);
-          }
-
-          .keycap__stage-dsa {
-            overflow: hidden;
-            margin: calc(-1 * v-bind(keycapDsaStageMargPx));
-            width: calc(100% + v-bind(keycapDsaBorderPx) * 2);
-            height: v-bind(keycapDsaStageHeightPx);
-            border-width: 0px;
-            border-radius: 8px;
-            background: radial-gradient(
-              ellipse at 38% 30%,
-              rgba(255, 255, 255, 0.30) 0%,
-              rgba(255, 255, 255, 0.10) 35%,
-              rgba(0, 0, 0, 0.06) 65%,
-              rgba(0, 0, 0, 0.14) 100%
-            );
-            box-shadow:
-              inset 0 1px 0 rgba(255, 255, 255, 0.30),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.14),
-              inset 1px 0 0 rgba(255, 255, 255, 0.12),
-              inset -1px 0 0 rgba(0, 0, 0, 0.08),
-              0 2px 5px rgba(0, 0, 0, 0.18);
-            background-color: inherit;
-            color: inherit;
-          }
-        }
-
-        /* ── 自定义描边 ── */
-        .row__keycap--border {
-          outline: v-bind(keycapBorderWidthPx) solid v-bind(keycapBorderColor);
         }
       }
     }

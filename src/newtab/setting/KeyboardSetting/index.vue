@@ -168,18 +168,6 @@ const onOpenPopup = () => {
         />
       </NFormItem>
 
-      <NFormItem :label="$t('keyboard.presetTheme')">
-        <NButton
-          type="primary"
-          size="small"
-          secondary
-          class="action-btn action-btn--primary"
-          @click="state.isPresetThemeDrawerVisible = true"
-        >
-          <Icon :icon="ICONS.selectFinger" />&nbsp;{{ $t('common.select') }}
-        </NButton>
-      </NFormItem>
-
       <NFormItem
         v-if="isOpenPopupVisible"
         :label="$t('keyboard.configBookmark')"
@@ -192,6 +180,18 @@ const onOpenPopup = () => {
           @click="onOpenPopup()"
         >
           <Icon :icon="ICONS.openInNew" />&nbsp;{{ `${$t('common.open')}${$t('common.config')}` }}
+        </NButton>
+      </NFormItem>
+
+      <NFormItem :label="$t('keyboard.presetTheme')">
+        <NButton
+          type="primary"
+          size="small"
+          secondary
+          class="action-btn action-btn--primary"
+          @click="state.isPresetThemeDrawerVisible = true"
+        >
+          <Icon :icon="ICONS.selectFinger" />&nbsp;{{ $t('common.select') }}
         </NButton>
       </NFormItem>
     </template>

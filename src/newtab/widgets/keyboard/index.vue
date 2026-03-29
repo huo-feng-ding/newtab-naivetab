@@ -3,7 +3,7 @@ import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode } from '@/logic/moveable'
 import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapType, getKeycapUrl, handlePressKeycap, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
 import { localConfig, getStyleField, getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardKeycap from './components/KeyboardKeycap.vue'
@@ -32,7 +32,7 @@ const keyboardTask = (e: KeyboardEvent) => {
   if (!keyboardCurrentModelAllKeyList.value.includes(code)) {
     return
   }
-  const isHandled = handleSpecialKeycapExec(code, getKeycapType(code))
+  const isHandled = handleSpecialKeycapExec(code, getKeycapBookmarkType(code))
   const url = getKeycapUrl(code)
   if (isHandled || url.length === 0) {
     handlePressKeycap(code)

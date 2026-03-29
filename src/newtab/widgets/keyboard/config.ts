@@ -37,7 +37,7 @@ export const WIDGET_CONFIG = {
   keyboardType: 'key61',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
   // keycap
-  keycapType: 'gmk',
+  keycapType: 'gmk' as KeycapVisualType,
   keycapPadding: 1.5,
   keycapSize: 58,
   keycapBorderRadius: 5,

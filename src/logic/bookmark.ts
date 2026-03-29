@@ -19,6 +19,7 @@ export const getBrowserBookmark = async () => {
 }
 
 export const getFaviconFromUrl = (url: string, size = 128) => {
+  if (!url) return ''
   try {
     if (isChrome) return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`
     const urlEle = new URL(url)

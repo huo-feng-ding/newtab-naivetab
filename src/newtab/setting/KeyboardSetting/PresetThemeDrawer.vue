@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SECOND_MODAL_WIDTH } from '@/logic/constants/index'
-import { KEYCAP_PREINSTALL_MAP } from '@/logic/constants/keycapThemes'
+import { KEYCAP_PREINSTALL_GROUPS, KEYCAP_PREINSTALL_MAP, type KeycapThemeKey } from '@/logic/constants/keycapThemes'
 import { localConfig, localState } from '@/logic/store'
 
 const props = defineProps({
@@ -16,7 +16,7 @@ const onCloseModal = () => {
   emit('update:show', false)
 }
 
-const onSelectPresetTheme = (themeKey: string) => {
+const onSelectPresetTheme = (themeKey: KeycapThemeKey) => {
   localConfig.keyboard.shellColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].shellColor
   localConfig.keyboard.mainFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainFontColor
   localConfig.keyboard.mainBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainBackgroundColor
@@ -26,21 +26,20 @@ const onSelectPresetTheme = (themeKey: string) => {
   localConfig.keyboard.emphasisTwoBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoBackgroundColor
 }
 
-const presetThemeList = Object.keys(KEYCAP_PREINSTALL_MAP)
+const presetThemeGroups = KEYCAP_PREINSTALL_GROUPS
 
 // 每行共 8 个单位格，span 表示占几格
 // t: 'main'=主色  'e1'=强调色一  'e2'=强调色二
 const KB_ROWS = [
   // 数字行：esc(1) + 1~6(6) + del(1) = 8
   [
-    { k: 'esc', t: 'e1' as const, span: 1 },
+    { k: 'esc', t: 'e2' as const, span: 1 },
     { k: '1', t: 'main' as const, span: 1 },
     { k: '2', t: 'main' as const, span: 1 },
     { k: '3', t: 'main' as const, span: 1 },
     { k: '4', t: 'main' as const, span: 1 },
     { k: '5', t: 'main' as const, span: 1 },
-    { k: '6', t: 'main' as const, span: 1 },
-    { k: 'del', t: 'e2' as const, span: 1 },
+    { k: 'del', t: 'e1' as const, span: 2 },
   ],
   // QWERTY 行：tab(1) + Q~Y(6) + \(1) = 8
   [
@@ -51,7 +50,7 @@ const KB_ROWS = [
     { k: 'R', t: 'main' as const, span: 1 },
     { k: 'T', t: 'main' as const, span: 1 },
     { k: 'Y', t: 'main' as const, span: 1 },
-    { k: '\\', t: 'e2' as const, span: 1 },
+    { k: '\\', t: 'main' as const, span: 1 },
   ],
   // ASDF 行：caps(2) + A~F(4) + ↵(2) = 8
   [
@@ -66,7 +65,7 @@ const KB_ROWS = [
   [
     { k: 'ctrl', t: 'e1' as const, span: 2 },
     { k: '', t: 'main' as const, span: 4 },
-    { k: 'ctrl', t: 'e2' as const, span: 2 },
+    { k: 'alt', t: 'e1' as const, span: 2 },
   ],
 ]
 
@@ -92,45 +91,98 @@ const getKeycapStyle = (themeKey: string, t: 'main' | 'e1' | 'e2') => {
       :title="`${$t('common.select')}${$t('keyboard.presetTheme')}`"
       closable
     >
-      <div class="theme__container">
-        <div
-          v-for="themeKey in presetThemeList"
-          :key="themeKey"
-          class="theme__item"
-          :style="`background-color: ${KEYCAP_PREINSTALL_MAP[themeKey].shellColor}`"
-          @click="onSelectPresetTheme(themeKey)"
+      <div class="theme__sections">
+        <section
+          v-for="group in presetThemeGroups"
+          :key="group.key"
+          class="theme__section"
         >
-          <!-- 主题名称标签 -->
-          <span
-            class="theme__title"
-            :style="getKeycapStyle(themeKey, 'main')"
-          >{{ KEYCAP_PREINSTALL_MAP[themeKey].label }}</span>
-
-          <!-- 键盘预览（每行 8 等分 grid） -->
-          <div
-            v-for="(row, ri) in KB_ROWS"
-            :key="ri"
-            class="keyboard__row"
-          >
-            <span
-              v-for="(key, ki) in row"
-              :key="ki"
-              class="keycap"
-              :style="`${getKeycapStyle(themeKey, key.t)};grid-column:span ${key.span}`"
-            >{{ key.k }}</span>
+          <div class="section__header">
+            <span class="section__label">{{ group.label }}</span>
+            <span class="section__count">{{ group.themeKeys.length }}</span>
           </div>
-        </div>
+
+          <div
+            class="theme__container"
+          >
+            <div
+              v-for="themeKey in group.themeKeys"
+              :key="themeKey"
+              class="theme__item"
+              :style="`background-color: ${KEYCAP_PREINSTALL_MAP[themeKey].shellColor}`"
+              @click="onSelectPresetTheme(themeKey)"
+            >
+              <span
+                class="theme__title"
+                :style="getKeycapStyle(themeKey, 'main')"
+              >{{ KEYCAP_PREINSTALL_MAP[themeKey].label }}</span>
+
+              <div
+                v-for="(row, ri) in KB_ROWS"
+                :key="ri"
+                class="keyboard__row"
+              >
+                <span
+                  v-for="(key, ki) in row"
+                  :key="ki"
+                  class="keycap"
+                  :style="`${getKeycapStyle(themeKey, key.t)};grid-column:span ${key.span}`"
+                >{{ key.k }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </NDrawerContent>
   </NDrawer>
 </template>
 
 <style scoped>
+.theme__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 2px;
+}
+
+.theme__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--n-text-color-base);
+}
+
+.section__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--n-text-color-2);
+  background-color: var(--n-color-target);
+}
+
 .theme__container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  padding: 2px;
 }
 
 .theme__item {

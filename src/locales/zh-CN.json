@@ -250,7 +250,7 @@
     "keyboardType": "键盘配列",
     "splitSpace": "分裂空格",
     "keycap": "按键",
-    "keycapType": "键帽类型",
+    "keycapVisualType": "键帽类型",
     "tactileBumps": "触摸点",
     "customKeys": "自定义快捷键",
     "keyLabel": "按键",

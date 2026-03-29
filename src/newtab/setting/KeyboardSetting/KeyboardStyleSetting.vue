@@ -9,7 +9,7 @@ import { localConfig } from '@/logic/store'
     :label-width="120"
     :show-feedback="false"
   >
-    <NFormItem :label="$t('keyboard.keycapType')">
+    <NFormItem :label="$t('keyboard.keycapVisualType')">
       <NRadioGroup
         v-model:value="localConfig.keyboard.keycapType"
         size="small"
