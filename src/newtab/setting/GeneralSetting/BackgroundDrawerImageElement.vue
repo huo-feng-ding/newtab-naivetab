@@ -123,6 +123,7 @@ const onUnFavoriteImage = () => {
         class="image__empty"
       >
         <Icon :icon="ICONS.imageSquare" />
+        <span class="image__empty-text">暂无图片</span>
       </div>
 
       <!-- 懒加载的img不支持reactive变量 -->
@@ -144,7 +145,9 @@ const onUnFavoriteImage = () => {
       v-if="isCurrSelectedImage"
       class="image__current-mask"
     >
-      <Icon :icon="ICONS.checkCircle" />
+      <div class="check__icon">
+        <Icon :icon="ICONS.checkCircle" />
+      </div>
     </div>
 
     <!-- toolbar -->
@@ -155,13 +158,14 @@ const onUnFavoriteImage = () => {
       <NPopover
         v-if="props.data.desc && props.data.desc.length !== 0"
         trigger="hover"
+        placement="top"
       >
         <template #trigger>
           <div class="toolbar__icon">
             <Icon :icon="ICONS.info" />
           </div>
         </template>
-        <p>{{ props.data.desc }}</p>
+        <p class="toolbar__desc">{{ props.data.desc }}</p>
       </NPopover>
 
       <div
@@ -192,7 +196,7 @@ const onUnFavoriteImage = () => {
         @positive-click="onUnFavoriteImage()"
       >
         <template #trigger>
-          <div class="toolbar__icon">
+          <div class="toolbar__icon toolbar__icon--danger">
             <Icon :icon="ICONS.deleteBin" />
           </div>
         </template>
@@ -207,43 +211,103 @@ const onUnFavoriteImage = () => {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 2px;
+  border-radius: 6px;
   cursor: pointer;
   overflow: hidden;
-  outline: 1px solid var(--n-tab-border-color);
+  outline: 1.5px solid transparent;
+  background-color: var(--n-color-target);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition:
+    outline 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.18s ease;
+
   &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    outline: 1.5px solid rgba(128, 128, 128, 0.35);
+
     .image__toolbar {
-      bottom: 0 !important;
+      opacity: 1;
+      transform: translateY(0);
     }
   }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.04);
+  }
+
   .image__empty {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 50px;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    min-height: 89px;
+    color: var(--n-placeholder-color);
+    font-size: 32px;
   }
+
+  .image__empty-text {
+    font-size: 11px;
+    opacity: 0.6;
+    letter-spacing: 0.02em;
+  }
+
   .image__toolbar {
     z-index: 2;
     position: absolute;
-    bottom: -20px;
+    bottom: 0;
     left: 0;
     display: flex;
     justify-content: space-around;
     align-items: center;
     width: 100%;
-    height: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
+    height: 28px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.0) 100%);
+    padding: 0 4px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+
     .toolbar__icon {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 13px;
+      transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+
       &:hover {
-        opacity: 0.7;
+        background-color: rgba(255, 255, 255, 0.18);
+        transform: scale(1.12);
+      }
+
+      &.toolbar__icon--danger:hover {
+        background-color: rgba(255, 80, 80, 0.28);
+        color: #ff8080;
       }
     }
   }
+
   .image__current-mask {
     z-index: 1;
     position: absolute;
@@ -254,12 +318,32 @@ const onUnFavoriteImage = () => {
     align-items: center;
     width: 100%;
     height: 100%;
-    font-size: 26px;
-    background-color: rgba(0, 0, 0, 0.3);
-    color: v-bind(customPrimaryColor);
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.38) 100%);
+
+    .check__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 28px;
+      background-color: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(4px);
+      color: v-bind(customPrimaryColor);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
   }
 }
+
 .image__wrap--active {
-  outline: 2px solid v-bind(customPrimaryColor);
+  outline: 2px solid v-bind(customPrimaryColor) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, v-bind(customPrimaryColor) 22%, transparent);
+}
+
+.toolbar__desc {
+  max-width: 240px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 </style>

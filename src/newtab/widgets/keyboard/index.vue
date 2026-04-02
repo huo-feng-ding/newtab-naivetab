@@ -3,7 +3,7 @@ import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode } from '@/logic/moveable'
 import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapType, getKeycapUrl, handlePressKeycap, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
 import { localConfig, getStyleField, getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardKeycap from './components/KeyboardKeycap.vue'
@@ -33,7 +33,7 @@ const keyboardTask = (e: KeyboardEvent) => {
   if (!keyboardCurrentModelAllKeyList.value.includes(code)) {
     return
   }
-  const isHandled = handleSpecialKeycapExec(code, getKeycapType(code))
+  const isHandled = handleSpecialKeycapExec(code, getKeycapBookmarkType(code))
   const url = getKeycapUrl(code)
   if (isHandled || url.length === 0) {
     handlePressKeycap(code)
@@ -187,13 +187,32 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     border-radius: v-bind(customShellBorderRadius);
     background-color: v-bind(customShellColor) !important;
     backdrop-filter: blur(v-bind(customShellBackgroundBlur));
+    /* 外壳顶部高光边缘线，增强材质厚度感 */
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 1px solid rgba(255, 255, 255, 0.10);
+    border-right: 1px solid rgba(0, 0, 0, 0.10);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+    will-change: transform;
   }
   .keyboard__container-shell--shadow {
-    background: linear-gradient(110deg, rgba(0, 0, 0, 0.15) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.15) 100%),
-      linear-gradient(10deg, rgba(0, 0, 0, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(0, 0, 0, 0.15) 100%);
+    /* 斜向光泽渐变叠加，模拟外壳材质反光 */
+    background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, 0.03) 35%,
+        rgba(0, 0, 0, 0.06) 65%,
+        rgba(0, 0, 0, 0.12) 100%
+      ),
+      v-bind(customShellColor) !important;
     box-shadow:
-      v-bind(customShellShadowColor) 0px 2px 4px 0px,
-      v-bind(customShellShadowColor) 0px 2px 16px 0px;
+      /* 主环境阴影 */
+      0px 8px 24px v-bind(customShellShadowColor),
+      /* 近距离阴影增加立体感 */
+      0px 3px 8px v-bind(customShellShadowColor),
+      /* 顶部内高光线，模拟外壳上边缘受光 */
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      /* 底部内阴影，增加深度 */
+      inset 0 -2px 4px rgba(0, 0, 0, 0.15);
   }
   .keyboard__container--hover {
     cursor: pointer;

@@ -1,7 +1,7 @@
 export const WIDGET_CODE = 'bookmarkFolder'
 
 export const WIDGET_CONFIG = {
-  enabled: true,
+  enabled: false,
   isNewTabOpen: true,
   gridColumns: 5,
   itemGap: 5,
@@ -21,7 +21,7 @@ export const WIDGET_CONFIG = {
   },
   padding: 7,
   width: 300,
-  height: 200,
+  height: 175,
   borderRadius: 10,
   fontFamily: 'Arial',
   fontSize: 10,
@@ -32,7 +32,7 @@ export const WIDGET_CONFIG = {
   backgroundColor: ['rgba(152, 152, 152, 0.15)', 'rgba(74, 74, 74, 0.15)'],
   backgroundBlur: 10,
   isShadowEnabled: true,
-  shadowColor: ['rgba(31, 31, 31, 0.4)', 'rgba(31, 31, 31, 0.4)'],
+  shadowColor: ['rgba(20, 20, 30, 0.45)', 'rgba(20, 20, 30, 0.45)'],
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

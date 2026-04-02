@@ -76,43 +76,49 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
 const customLabelSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.4)
 const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.2)
 const customLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.5)
-const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2)
+const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
 </script>
 
 <template>
   <div id="now">
-    <div class="now__icon">
-      <div
-        v-if="localConfig.weather.iconEnabled"
-        class="icon__wrap"
-        @click="onOpenWeather()"
+    <!-- 天气图标区域 -->
+    <div
+      v-if="localConfig.weather.iconEnabled"
+      class="now__icon-section"
+      @click="onOpenWeather()"
+    >
+      <NPopover
+        :show="weatherIndicesInfo.length > 0 && state.isIndicesVisible"
+        trigger="manual"
       >
-        <NPopover
-          :show="weatherIndicesInfo.length > 0 && state.isIndicesVisible"
-          trigger="manual"
-        >
-          <template #trigger>
-            <div
-              class="label__info"
-              :class="{ 'label__info--move': isDragMode }"
-              @mouseenter="handleIndicesMouseEnter()"
-              @mouseleave="handleIndicesMouseLeave()"
-            >
-              <i :class="`qi-${weatherState.now.icon}`" />
-            </div>
-          </template>
-          <p class="weather__indices">
-            {{ weatherIndicesInfo }}
-          </p>
-        </NPopover>
-      </div>
+        <template #trigger>
+          <div
+            class="weather-icon__wrap"
+            :class="{ 'weather-icon__wrap--move': isDragMode }"
+            @mouseenter="handleIndicesMouseEnter()"
+            @mouseleave="handleIndicesMouseLeave()"
+          >
+            <i :class="`qi-${weatherState.now.icon}`" />
+          </div>
+        </template>
+        <p class="weather__indices">
+          {{ weatherIndicesInfo }}
+        </p>
+      </NPopover>
     </div>
+
+    <!-- 右侧信息区域 -->
     <div class="now__info">
-      <!-- row 1 -->
-      <div class="info__row">
-        <div class="info__item">
-          <div class="item__label">
-            <div v-if="isWeatherWarning">
+      <!-- 主要信息区（单行：状态 | 温度 | 体感 | 范围） -->
+      <div class="info__main">
+        <div class="info__temp-row">
+          <!-- 天气状态 + 警告 -->
+          <div class="temp__condition">
+            <span class="text__condition">{{ weatherState.now.text }}</span>
+            <div
+              v-if="isWeatherWarning"
+              class="warning__trigger"
+            >
               <NPopover
                 :style="{ width: '500px' }"
                 :show="isMounted && warningVisible"
@@ -120,11 +126,11 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2)
               >
                 <template #trigger>
                   <div
-                    class="label__info"
+                    class="warning__icon"
                     :class="{ 'label__info--move': isDragMode }"
                     @mouseenter="handleWarningMouseEnter()"
                     @mouseleave="handleWarningMouseLeave()"
-                    @click="onPinWarning()"
+                    @click.stop="onPinWarning()"
                   >
                     <Icon :icon="ICONS.warning" />
                   </div>
@@ -135,7 +141,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2)
                   </p>
                   <div
                     v-if="weatherState.state.isWarningVisible"
-                    class="icon__wrap"
+                    class="icon__wrap warning__close"
                     @click="onUnpinWarning()"
                   >
                     <Icon :icon="ICONS.closeCircleLine" />
@@ -144,67 +150,109 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2)
               </NPopover>
             </div>
           </div>
-        </div>
-        <div class="info__item">
-          <div class="item__value">
-            <span class="value__text value__text--l">{{ weatherState.now.text }}</span>
+
+          <div class="temp__divider" />
+
+          <!-- 当前温度 -->
+          <div class="temp__primary">
+            <Icon
+              class="temp__icon"
+              :icon="ICONS.temp"
+            />
+            <span class="temp__value">{{ weatherState.now.temp }}</span>
+            <span class="temp__unit">{{ temperatureUnit }}</span>
           </div>
-        </div>
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.temp" />
+
+          <div class="temp__divider" />
+
+          <!-- 体感温度 -->
+          <div class="temp__secondary">
+            <span class="temp__secondary-label">{{ $t('weather.feelsLike') }}</span>
+            <span class="temp__secondary-value">{{ weatherState.now.feelsLike }}</span>
+            <span class="temp__secondary-unit">{{ temperatureUnit }}</span>
           </div>
-          <div class="item__value">
-            <span class="value__text value__text--xl">{{ weatherState.now.temp }}</span>
-            <span class="value__unit">{{ temperatureUnit }}</span>
+
+          <div class="temp__divider" />
+
+          <!-- 今日温度范围 -->
+          <div class="temp__range">
+            <span class="temp__range-value">
+              {{ weatherState.forecast.list[0] && `${weatherState.forecast.list[0].tempMax}° / ${weatherState.forecast.list[0].tempMin}°` }}
+            </span>
           </div>
-        </div>
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.temperatureFeelsLike" />
-          </div>
-          <div class="item__value">
-            <span class="value__text value__text--xl">{{ weatherState.now.feelsLike }} </span>
-            <span class="value__unit">{{ temperatureUnit }}</span>
-          </div>
-        </div>
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.plusMinusBold" />
-          </div>
-          <div class="item__value">
-            <span class="value__text">{{ weatherState.forecast.list[0] && `${weatherState.forecast.list[0].tempMax} ~ ${weatherState.forecast.list[0].tempMin}` }} </span>
-            <span class="value__unit">{{ temperatureUnit }}</span>
+
+          <div class="temp__divider" />
+
+          <!-- 湿度 -->
+          <div class="temp__humidity">
+            <Icon
+              class="detail__icon"
+              :icon="ICONS.humidity"
+            />
+            <span class="temp__secondary-value">{{ weatherState.now.humidity }}</span>
+            <span class="temp__secondary-unit">%</span>
           </div>
         </div>
       </div>
-      <!-- row 2 -->
-      <div class="info__row">
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.air" />
-          </div>
-          <div class="item__value">
-            <span class="value__text">{{ `${weatherState.air.category} / AQI ${weatherState.air.aqi}` }}</span>
-          </div>
+
+      <!-- 次要信息行：空气 / 湿度 / 风 -->
+      <div class="info__secondary">
+        <div class="detail__item">
+          <Icon
+            class="detail__icon"
+            :icon="ICONS.air"
+          />
+          <span class="detail__label">{{ weatherState.air.category }}</span>
+          <span class="detail__badge">AQI {{ weatherState.air.aqi }}</span>
         </div>
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.humidity" />
-          </div>
-          <div class="item__value">
-            <span class="value__text">{{ weatherState.now.humidity }}</span>
-            <span class="value__unit">%</span>
-          </div>
+        <div class="detail__dot" />
+        <div class="detail__item">
+          <Icon
+            class="detail__icon"
+            :icon="ICONS.pm25"
+          />
+          <span class="detail__label">{{ weatherState.air.pm2p5 }}</span>
+          <span class="detail__unit"> μg/m³</span>
         </div>
-        <div class="info__item">
-          <div class="item__label">
-            <Icon :icon="ICONS.windyFill" />
-          </div>
-          <div class="item__value">
-            <span class="value__text">{{ `${weatherState.now.windDir} / ${weatherState.now.windScale} / ${weatherState.now.windSpeed}` }} </span>
-            <span class="value__unit">{{ speedUnit }}</span>
-          </div>
+        <div class="detail__dot" />
+        <div class="detail__item">
+          <Icon
+            class="detail__icon"
+            :icon="ICONS.windyFill"
+          />
+          <span class="detail__label">{{ weatherState.now.windDir }}</span>
+          <span class="detail__sub">{{ weatherState.now.windScale }}{{ $t('weather.windScaleUnit') }}</span>
+          <span class="detail__sub detail__sub--speed">{{ weatherState.now.windSpeed }}<span class="detail__unit"> {{ speedUnit }}</span></span>
+        </div>
+      </div>
+
+      <!-- 第三行：紫外线 / 日出 / 日落 -->
+      <div
+        v-if="weatherState.forecast.list[0]"
+        class="info__extra"
+      >
+        <div class="detail__item">
+          <Icon
+            class="detail__icon"
+            :icon="ICONS.uvIndex"
+          />
+          <span class="detail__label">UV {{ weatherState.forecast.list[0].uvIndex }}</span>
+        </div>
+        <div class="detail__dot" />
+        <div class="detail__item">
+          <Icon
+            class="detail__icon detail__icon--sunrise"
+            :icon="ICONS.sunrise"
+          />
+          <span class="detail__label">{{ weatherState.forecast.list[0].sunrise }}</span>
+        </div>
+        <div class="detail__dot" />
+        <div class="detail__item">
+          <Icon
+            class="detail__icon detail__icon--sunset"
+            :icon="ICONS.sunset"
+          />
+          <span class="detail__label">{{ weatherState.forecast.list[0].sunset }}</span>
         </div>
       </div>
     </div>
@@ -214,67 +262,238 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2)
 <style>
 .weather__indices_wrap {
   display: flex;
-  .icon__wrap {
+  align-items: flex-start;
+  gap: 8px;
+  .warning__close {
     cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--transition-base);
+    &:hover { opacity: 1; }
   }
 }
 .weather__indices {
   white-space: pre-line;
-  line-height: 1.5;
+  line-height: 1.6;
 }
+
 #now {
   display: flex;
-  justify-content: center;
   align-items: center;
-  .now__icon {
-    .icon__wrap {
-      font-size: v-bind(customIconSize);
-      cursor: pointer;
+  gap: 14px;
+
+  /* ── 天气图标区 ── */
+  .now__icon-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.06, 0.64, 1), filter 0.25s ease;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+
+    &:hover {
+      transform: scale(1.1) rotate(-5deg);
+      filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.35));
     }
-  }
-  .now__info {
-    .info__row {
+
+    .weather-icon__wrap {
+      font-size: v-bind(customIconSize);
       display: flex;
-      justify-content: center;
       align-items: center;
-      .info__item {
-        padding: 0 6px;
+      justify-content: center;
+    }
+    .weather-icon__wrap--move { cursor: move !important; }
+  }
+
+  /* ── 右侧信息列 ── */
+  .now__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    /* 温度行（含天气状态） */
+    .info__temp-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 天气状态 + 警告 */
+    .temp__condition {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      .text__condition {
+        font-size: v-bind(customLargeFontSize);
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+      }
+      .warning__trigger { display: flex; align-items: center; }
+      .warning__icon {
         display: flex;
-        justify-content: center;
         align-items: center;
-        .item__label {
-          display: flex;
-          align-items: center;
-          font-size: v-bind(customLabelSize);
-          .label__info {
-            cursor: pointer;
-          }
-          .label__info--move {
-            cursor: move !important;
-          }
-        }
-        .item__value {
-          margin-left: 6px;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          .value__text {
-            font-size: v-bind(customFontSize);
-          }
-          .value__text--l {
-            font-size: v-bind(customLargeFontSize);
-          }
-          .value__text--xl {
-            font-size: v-bind(customXLargeFontSize);
-          }
-          .value__text--bold {
-            font-weight: bold;
-          }
-          .value__unit {
-            font-size: v-bind(customFontSize);
-          }
+        font-size: v-bind(customLabelSize);
+        cursor: pointer;
+        color: #f5a623;
+        filter: drop-shadow(0 0 4px rgba(245, 166, 35, 0.6));
+        transition: transform var(--transition-base), filter var(--transition-base);
+        &:hover {
+          transform: scale(1.2);
+          filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.9));
         }
       }
+      .label__info--move { cursor: move !important; }
+    }
+
+    /* 当前温度（主） */
+    .temp__primary {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+
+      .temp__icon {
+        font-size: v-bind(customLabelSize);
+        opacity: 0.75;
+        /* svg icon 无法直接参与 baseline，用 translate 微调垂直居中 */
+        transform: translateY(15%);
+      }
+      .temp__value {
+        font-size: v-bind(customXLargeFontSize);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -1px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .temp__unit {
+        font-size: v-bind(customFontSize);
+        font-weight: 600;
+        opacity: 0.8;
+      }
+    }
+
+    /* 分隔线 */
+    .temp__divider {
+      width: 1px;
+      height: 16px;
+      background: currentColor;
+      opacity: 0.2;
+      flex-shrink: 0;
+      border-radius: 1px;
+    }
+
+    /* 体感温度（次） */
+    .temp__secondary {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+
+      .temp__secondary-label {
+        font-size: calc(v-bind(customFontSize) * 0.9);
+        opacity: 0.55;
+        margin-bottom: 1px;
+        letter-spacing: 0.02em;
+      }
+      .temp__secondary-value {
+        font-size: v-bind(customLargeFontSize);
+        font-weight: 600;
+        line-height: 1;
+      }
+      .temp__secondary-unit {
+        font-size: v-bind(customFontSize);
+        opacity: 0.7;
+        margin-bottom: 1px;
+      }
+    }
+
+    /* 湿度（第一行） */
+    .temp__humidity {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      .detail__icon {
+        font-size: v-bind(customFontSize);
+        opacity: 0.7;
+      }
+    }
+
+    /* 今日温度范围 */
+    .temp__range {
+      display: flex;
+      align-items: center;
+
+      .temp__range-value {
+        font-size: v-bind(customFontSize);
+        font-weight: 500;
+        opacity: 0.75;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+    }
+
+    /* ── 次要信息行 ── */
+    .info__secondary,
+    .info__extra {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .detail__item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+
+      .detail__icon {
+        font-size: v-bind(customFontSize);
+        flex-shrink: 0;
+        opacity: 0.7;
+        &.detail__icon--sunrise { color: #f5c842; opacity: 0.9; }
+        &.detail__icon--sunset  { color: #a78bfa; opacity: 0.9; }
+      }
+      .detail__label {
+        font-size: v-bind(customFontSize);
+        font-weight: 500;
+      }
+      .detail__sub {
+        font-size: calc(v-bind(customFontSize) * 0.9);
+        opacity: 0.65;
+        &::before {
+          content: '·';
+          margin: 0 2px;
+          opacity: 0.6;
+        }
+        &.detail__sub--speed {
+          opacity: 0.55;
+        }
+      }
+      .detail__badge {
+        font-size: calc(v-bind(customFontSize) * 0.85);
+        padding: 1px 5px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        line-height: 1.5;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        backdrop-filter: blur(4px);
+      }
+      .detail__unit {
+        font-size: v-bind(customFontSize);
+        opacity: 0.7;
+      }
+    }
+
+    /* 圆点分隔 */
+    .detail__dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.3;
+      flex-shrink: 0;
     }
   }
 }

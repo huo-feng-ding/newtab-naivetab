@@ -5,6 +5,7 @@ import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY, KEYBOARD_OLD_TO_NEW_CODE_MA
 import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
 import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
 import { localConfig, localState, globalState, switchSettingDrawerVisible, updateSetting } from '@/logic/store'
+import { clearDatabase } from '@/logic/database'
 
 export const isUploadConfigLoading = computed(() => {
   if (!Object.prototype.hasOwnProperty.call(localState.value, 'isUploadConfigStatusMap')) {
@@ -295,9 +296,10 @@ export const exportSetting = () => {
   window.$message.success(`${window.$t('common.export')}${window.$t('common.success')}`)
 }
 
-export const resetSetting = () => {
+export const resetSetting = async () => {
   chrome.storage.sync.clear()
   localStorage.clear()
+  await clearDatabase()
   location.reload()
 }
 

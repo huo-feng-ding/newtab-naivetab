@@ -42,6 +42,26 @@ const databaseInit = (): Promise<boolean> => {
   })
 }
 
+export const clearDatabase = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const request = window.indexedDB.deleteDatabase(DB_NAME)
+    request.onsuccess = () => {
+      log('IndexDB delete success')
+      isInitialized = false
+      DB = null
+      resolve(true)
+    }
+    request.onerror = (event) => {
+      log('IndexDB delete error', event)
+      resolve(false)
+    }
+    request.onblocked = (event) => {
+      log('IndexDB delete blocked', event)
+      resolve(false)
+    }
+  })
+}
+
 export const databaseStore = async (storeName: DatabaseStore, type: DatabaseHandleType, payload: DatabaseLocalBackgroundImages | string | number): Promise<DatabaseLocalBackgroundImages | null> => {
   if (!isInitialized) {
     await databaseInit()

@@ -46,6 +46,7 @@ export const globalState = reactive({
   isSearchFocused: false,
   isMemoFocused: false,
   currSettingTabCode: 'general',
+  currSettingAnchor: '',
 })
 
 document.addEventListener('fullscreenchange', () => {
@@ -452,6 +453,9 @@ export const handleAppUpdate = async () => {
       }
     }
     localConfig.bookmarkFolder.enabled = false
+  }
+  if (compareLeftVersionLessThanRightVersions(version, '2.0.0')) {
+    localConfig.clockFlip.enabled = false
   }
   // 更新local版本号
   localConfig.general.version = window.appVersion

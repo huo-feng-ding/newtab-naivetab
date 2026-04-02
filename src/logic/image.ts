@@ -181,7 +181,7 @@ const getCurrNetworkBackgroundImageUrl = (applyToAppearanceCode = localState.val
   } else if (localConfig.general.backgroundImageSource === 2) {
     // bing每日一图
     const todayImage = imageLocalState.value.bing.list[0]
-    const name = todayImage.name
+    const name = todayImage?.name
     imageUrl = name ? getBingImageUrlFromName(name, quality) : ''
   }
   console.log(imageUrl)
@@ -193,51 +193,53 @@ export const isImageLoading = ref(false)
 const renderRawBackgroundImage = async () => {
   console.time('RenderRawImage')
   isImageLoading.value = true
-  let dbData: TImage.BackgroundImageItem | null = null
-  const storeName = localConfig.general.backgroundImageSource === 0 ? 'localBackgroundImages' : 'currBackgroundImages'
-  dbData = await databaseStore(storeName, 'get', localState.value.currAppearanceCode)
-  if (!dbData) {
-    if (localConfig.general.backgroundImageSource === 0) {
-      // 首次选择 backgroundImageSource=0本地 时无数据，直接退出
-      imageState.currBackgroundImageFileObjectURL = ''
-      isImageLoading.value = false
-      return
+  try {
+    let dbData: TImage.BackgroundImageItem | null = null
+    const storeName = localConfig.general.backgroundImageSource === 0 ? 'localBackgroundImages' : 'currBackgroundImages'
+    dbData = await databaseStore(storeName, 'get', localState.value.currAppearanceCode)
+    if (!dbData) {
+      if (localConfig.general.backgroundImageSource === 0) {
+        // 首次选择 backgroundImageSource=0本地 时无数据，直接退出
+        imageState.currBackgroundImageFileObjectURL = ''
+        isImageLoading.value = false
+        return
+      }
+      // 来源为网络、每日一图时，自动在DB内新增当前背景图数据
+      const imageUrl = getCurrNetworkBackgroundImageUrl()
+      // 存储背景图数据
+      const targetFile = await urlToFile(imageUrl, imageUrl)
+      const smallBase64 = await compressedImageUrlToBase64(imageUrl)
+      dbData = {
+        appearanceCode: localState.value.currAppearanceCode,
+        file: targetFile,
+        smallBase64,
+      }
+      // 使用 put（upsert）而非 add，避免同一 appearanceCode 已存在时抛出 ConstraintError
+      databaseStore('currBackgroundImages', 'put', dbData)
+      localStorage.setItem('l-firstScreen', smallBase64)
+      // 每日一图，需要同时设置深色&浅色外观为同一张壁纸
+      if (localConfig.general.backgroundImageSource === 2) {
+        databaseStore('currBackgroundImages', 'put', {
+          ...dbData,
+          appearanceCode: +!localState.value.currAppearanceCode,
+        })
+      }
     }
-    // 来源为网络、每日一图时，自动在DB内新增当前背景图数据
-    const imageUrl = getCurrNetworkBackgroundImageUrl()
-    // 存储背景图数据
-    const targetFile = await urlToFile(imageUrl, imageUrl)
-    const smallBase64 = await compressedImageUrlToBase64(imageUrl)
-    dbData = {
-      appearanceCode: localState.value.currAppearanceCode,
-      file: targetFile,
-      smallBase64,
-    }
-    databaseStore('currBackgroundImages', 'add', dbData)
-    localStorage.setItem('l-firstScreen', smallBase64)
-    // 每日一图，需要同时设置深色&浅色外观为同一张壁纸
-    if (localConfig.general.backgroundImageSource === 2) {
-      databaseStore('currBackgroundImages', 'add', {
-        ...dbData,
-        appearanceCode: +!localState.value.currAppearanceCode,
-      })
-    }
+    imageState.currBackgroundImageFileName = localConfig.general.backgroundImageSource === 0 ? dbData.file.name : ''
+    requestIdleCallback(() => {
+      const rawBlobUrl = URL.createObjectURL((dbData as TImage.BackgroundImageItem).file)
+      const rawImageEle = new Image()
+      rawImageEle.src = rawBlobUrl
+      rawImageEle.onload = () => {
+        imageState.currBackgroundImageFileObjectURL = rawBlobUrl
+        isImageLoading.value = false
+        console.timeEnd('RenderRawImage')
+      }
+    })
+  } catch (e) {
+    console.error('renderRawBackgroundImage error:', e)
+    isImageLoading.value = false
   }
-  if (!dbData) {
-    console.error('dbData empty')
-    return
-  }
-  imageState.currBackgroundImageFileName = localConfig.general.backgroundImageSource === 0 ? dbData.file.name : ''
-  requestIdleCallback(() => {
-    const rawBlobUrl = URL.createObjectURL((dbData as TImage.BackgroundImageItem).file)
-    const rawImageEle = new Image()
-    rawImageEle.src = rawBlobUrl
-    rawImageEle.onload = () => {
-      imageState.currBackgroundImageFileObjectURL = rawBlobUrl
-      isImageLoading.value = false
-      console.timeEnd('RenderRawImage')
-    }
-  })
 }
 
 const setCurrSmallBackgroundImage = async () => {
@@ -260,9 +262,9 @@ const deleteCurrRawBackgroundImageInDB = async () => {
 }
 
 const refreshTodayImage = async () => {
-  const oldTodayImage = imageLocalState.value.bing.list[0].name
+  const oldTodayImage = imageLocalState.value.bing.list[0]?.name
   await updateBingImages()
-  const newTodayImage = imageLocalState.value.bing.list[0].name
+  const newTodayImage = imageLocalState.value.bing.list[0]?.name
   if (newTodayImage !== oldTodayImage) {
     await deleteCurrRawBackgroundImageInDB()
   }

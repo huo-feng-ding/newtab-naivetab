@@ -1,9 +1,10 @@
 export const WIDGET_CODE = 'clockDigital'
 
 export const WIDGET_CONFIG = {
-  enabled: true,
+  enabled: false,
   format: 'HH:mm:ss',
   unitEnabled: false,
+  colonBlinkEnabled: true,
   layout: {
     xOffsetKey: 'left',
     xOffsetValue: 50,

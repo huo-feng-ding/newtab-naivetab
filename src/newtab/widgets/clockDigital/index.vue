@@ -10,6 +10,7 @@ const isRender = getIsWidgetRender(WIDGET_CODE)
 const state = reactive({
   time: '',
   unit: '',
+  colonVisible: true,
 })
 
 // 只在时间格式真正变化时才更新状态，避免不必要的重新渲染
@@ -24,6 +25,8 @@ const updateTime = () => {
   if (state.unit !== newUnit) {
     state.unit = newUnit
   }
+  // 每秒切换冒号可见性，与系统时钟同步
+  state.colonVisible = !state.colonVisible
 }
 
 const debouncedUpdateTime = useDebounceFn(updateTime, 50)
@@ -68,7 +71,17 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
             v-for="(item, index) in state.time.split('')"
             :key="index"
           >
-            <span :class="Number.isNaN(+item) ? 'text__divide' : 'text__digit'">{{ item }}</span>
+            <span
+              v-if="Number.isNaN(+item)"
+              class="text__divide"
+              :class="{
+                'text__divide--dim': localConfig.clockDigital.colonBlinkEnabled && !state.colonVisible,
+              }"
+            >{{ item }}</span>
+            <span
+              v-else
+              class="text__digit"
+            >{{ item }}</span>
           </template>
         </p>
         <span
@@ -85,16 +98,21 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
   font-family: v-bind(customFontFamily);
   color: v-bind(customFontColor);
   user-select: none;
+
   .clockDigital__container {
     z-index: 10;
     position: absolute;
     text-align: center;
+
     .clock__time {
       display: flex;
       justify-content: center;
       align-items: baseline;
+
       .time__text {
         font-size: v-bind(customFontSize);
+        letter-spacing: 0.01em;
+
         .text__digit {
           display: inline-block;
           width: v-bind(customDigitTextWidth);
@@ -104,16 +122,30 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
           display: inline-block;
           width: v-bind(customDigitDivideWidth);
           text-align: center;
+          opacity: 1;
+          transition: opacity 0.15s ease;
+
+          &.text__divide--dim {
+            opacity: 0.15;
+          }
         }
       }
+
       .time__unit {
         margin-left: v-bind(customUnitMargin);
         font-size: v-bind(customUnitFontSize);
+        opacity: 0.7;
+        letter-spacing: 0.05em;
       }
     }
   }
+
+  /* 多层文字阴影：近距硬影 + 中距扩散 + 远距光晕 */
   .clockDigital__container--shadow {
-    text-shadow: 2px 8px 6px v-bind(customShadowColor);
+    text-shadow:
+      1px 2px 2px v-bind(customShadowColor),
+      2px 6px 10px v-bind(customShadowColor),
+      0 0 30px color-mix(in srgb, v-bind(customShadowColor) 40%, transparent);
   }
 }
 </style>

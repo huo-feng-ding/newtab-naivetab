@@ -47,59 +47,117 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
   /* 画布中心辅助线 */
   .axis {
     z-index: 20;
-    outline: 1.5px solid v-bind(auxiliaryLineMain);
     opacity: 0;
-    transition: opacity 0.3s;
+    /* 吸附到中心时的淡入过渡，配合 cubic-bezier 带轻微弹性感 */
+    transition: opacity 180ms cubic-bezier(0.34, 1.06, 0.64, 1);
+    pointer-events: none;
   }
+
   .xaxis__center {
     position: fixed;
     top: 0;
     left: 50%;
-    width: 0;
+    width: 1px;
     height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      v-bind(auxiliaryLineMain) 15%,
+      v-bind(auxiliaryLineMain) 85%,
+      transparent 100%
+    );
+    box-shadow: 0 0 6px 1px v-bind(auxiliaryLineMain);
+    transform: translateX(-50%);
   }
+
   .yaxis__center {
     position: fixed;
     top: 50%;
     left: 0;
     width: 100vw;
-    height: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      v-bind(auxiliaryLineMain) 15%,
+      v-bind(auxiliaryLineMain) 85%,
+      transparent 100%
+    );
+    box-shadow: 0 0 6px 1px v-bind(auxiliaryLineMain);
+    transform: translateY(-50%);
   }
 
   /* 画布边界辅助线 */
   .bound {
     z-index: 20;
-    outline: 5px solid v-bind(auxiliaryLineBound);
     opacity: 0;
-    transition: opacity 0.3s;
+    /* 碰边时快速闪现，消失时稍慢，形成边界感 */
+    transition: opacity 150ms ease-out;
+    pointer-events: none;
   }
+
   .bound__top {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
-    height: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      v-bind(auxiliaryLineBound) 20%,
+      v-bind(auxiliaryLineBound) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
   }
+
   .bound__bottom {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100vw;
-    height: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      v-bind(auxiliaryLineBound) 20%,
+      v-bind(auxiliaryLineBound) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
   }
+
   .bound__left {
     position: fixed;
     top: 0;
     left: 0;
-    width: 0;
+    width: 2px;
     height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      v-bind(auxiliaryLineBound) 20%,
+      v-bind(auxiliaryLineBound) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
   }
+
   .bound__right {
     position: fixed;
     top: 0;
     right: 0;
-    width: 0;
+    width: 2px;
     height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      v-bind(auxiliaryLineBound) 20%,
+      v-bind(auxiliaryLineBound) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
   }
 }
 </style>

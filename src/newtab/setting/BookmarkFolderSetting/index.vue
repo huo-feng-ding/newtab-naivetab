@@ -71,7 +71,10 @@ const onResetFolder = () => {
 </script>
 
 <template>
-  <SettingPaneTitle :title="$t('setting.bookmarkFolder')" />
+  <SettingPaneTitle
+    :title="$t('setting.bookmarkFolder')"
+    widget-code="bookmarkFolder"
+  />
 
   <SettingPaneWrap
     id="bookmarkFolder__setting"
@@ -93,16 +96,16 @@ const onResetFolder = () => {
             <NButton
               type="primary"
               size="small"
-              ghost
-              class="setting__item-ele"
+              secondary
+              class="setting__item-ele action-btn action-btn--primary"
               @click="onOpenPicker"
             >
               <Icon :icon="ICONS.bookmarkPlus" />&nbsp;{{ $t('common.select') }}
             </NButton>
             <NButton
               size="small"
-              ghost
-              class="setting__item-ele"
+              secondary
+              class="setting__item-ele action-btn action-btn--default"
               @click="onResetFolder"
             >
               <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{ $t('general.resetSettingValue') }}

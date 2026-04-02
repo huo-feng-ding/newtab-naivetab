@@ -8,9 +8,10 @@ export const moveState = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
   // 鼠标事件回调函数map
-  mouseDownTaskMap: new Map() as Map<string, (e: MouseEvent, resite?: boolean) => unknown>,
-  mouseMoveTaskMap: new Map() as Map<string, (e: MouseEvent) => unknown>,
-  mouseUpTaskMap: new Map() as Map<string, (e: MouseEvent) => unknown>,
+  // mouseDownTask 可能是 async 函数（如 startDrag），使用 Promise<void> | void 确保 await 可正确等待
+  mouseDownTaskMap: new Map() as Map<string, (e: MouseEvent, resite?: boolean) => Promise<void> | void>,
+  mouseMoveTaskMap: new Map() as Map<string, (e: MouseEvent) => void>,
+  mouseUpTaskMap: new Map() as Map<string, (e: MouseEvent) => void>,
   isWidgetStartDrag: false, // 是否开始拖动组件，拖动组件时动态悬浮删除icon
   isDeleteHover: false,
   // 辅助线
@@ -52,23 +53,20 @@ export const getTargetDataFromEvent = (e: MouseEvent): {
   type: EleTargetType | ''
   code: EleTargetCode | ''
 } => {
-  let target = e.target as HTMLInputElement
-  try {
-    while (target && !target.getAttribute('data-target-type')) {
-      target = target.parentNode as HTMLInputElement
+  const empty = { type: '' as const, code: '' as const }
+  let target = e.target
+  while (target) {
+    // 只在 Element 节点上调用 getAttribute，跳过 TextNode / Document 等非元素节点
+    if (!(target instanceof Element)) {
+      return empty
     }
-  } catch (err) {
-    // 忽略点击组件外其他区域的报错
-    return {
-      type: '',
-      code: '',
+    if (target.getAttribute('data-target-type')) {
+      break
     }
+    target = target.parentNode
   }
-  if (!target || !target.getAttribute) {
-    return {
-      type: '',
-      code: '',
-    }
+  if (!target || !(target instanceof Element)) {
+    return empty
   }
   const type = target.getAttribute('data-target-type') as EleTargetType | ''
   const code = (target.getAttribute('data-target-code') as EleTargetCode) || ''
@@ -85,7 +83,7 @@ const currMouseTaskKey = computed(() => {
   return taskKey as EleTargetCode
 })
 
-const handleMousedown = (e: MouseEvent) => {
+const handleMousedown = async (e: MouseEvent) => {
   if (globalState.isGuideMode || !isDragMode.value || e.button !== 0) {
     return
   }
@@ -97,23 +95,34 @@ const handleMousedown = (e: MouseEvent) => {
   }
   const task = moveState.mouseDownTaskMap.get(currMouseTaskKey.value)
   if (task) {
-    task(e)
+    await task(e)
   }
 }
 
 const handleMousemove = (e: MouseEvent) => {
+  if (globalState.isGuideMode || !isDragMode.value || e.buttons === 0 || !moveState.currDragTarget.type) {
+    return
+  }
+
   // 取消之前的动画帧请求，避免堆积
   if (lastFrameId !== null) {
     cancelAnimationFrame(lastFrameId)
   }
 
+  // 捕获当前事件坐标，避免 rAF 回调时 event 对象已更新
+  const clientX = e.clientX
+  const clientY = e.clientY
+  const buttons = e.buttons
+
   lastFrameId = requestAnimationFrame(() => {
-    if (globalState.isGuideMode || !isDragMode.value || e.buttons === 0 || !moveState.currDragTarget.type) {
+    lastFrameId = null
+    if (!isDragMode.value || buttons === 0 || !moveState.currDragTarget.type) {
       return
     }
     const task = moveState.mouseMoveTaskMap.get(currMouseTaskKey.value)
     if (task) {
-      task(e)
+      // 构造一个轻量代理对象，避免重新创建完整 MouseEvent
+      task({ clientX, clientY, buttons } as MouseEvent)
     }
     // 鼠标移动时隐藏draft抽屉
     if (lastIsDraftDrawerVisible === null) {
@@ -122,8 +131,6 @@ const handleMousemove = (e: MouseEvent) => {
         toggleIsDraftDrawerVisible(false)
       }
     }
-
-    lastFrameId = null
   })
 }
 
@@ -150,7 +157,7 @@ const handleMouseup = (e: MouseEvent) => {
 
 const mouseTaskMap = {
   mousedown: handleMousedown,
-  mousemove: useThrottleFn(handleMousemove, 5),
+  mousemove: handleMousemove,
   mouseup: handleMouseup,
   mouseleave: handleMouseup,
 }
@@ -160,9 +167,12 @@ const handleMouseTaskListener = (isInit: boolean) => {
   if (!bodyEle) {
     return
   }
-  const eventListenerFunc = isInit ? bodyEle.addEventListener : bodyEle.removeEventListener
   for (const eventName of Object.keys(mouseTaskMap)) {
-    eventListenerFunc(eventName, mouseTaskMap[eventName])
+    if (isInit) {
+      bodyEle.addEventListener(eventName, mouseTaskMap[eventName])
+    } else {
+      bodyEle.removeEventListener(eventName, mouseTaskMap[eventName])
+    }
   }
 }
 

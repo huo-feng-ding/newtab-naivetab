@@ -10,7 +10,10 @@ import CustomColorPicker from '~/components/CustomColorPicker.vue'
 </script>
 
 <template>
-  <SettingPaneTitle :title="$t('setting.yearProgress')" />
+  <SettingPaneTitle
+    :title="$t('setting.yearProgress')"
+    widget-code="yearProgress"
+  />
 
   <SettingPaneWrap
     widget-code="yearProgress"
@@ -66,17 +69,22 @@ import CustomColorPicker from '~/components/CustomColorPicker.vue'
           v-model:value="localConfig.yearProgress.isDateEnabled"
           size="small"
         />
-        <template v-if="localConfig.yearProgress.isDateEnabled">
-          <NInput
-            v-model:value="localConfig.yearProgress.format"
-            class="setting__item-ml"
-            size="small"
-          />
-          <Tips
-            link
-            :content="URL_DAYJS_FORMAT"
-          />
-        </template>
+        <Transition name="setting-expand">
+          <div
+            v-if="localConfig.yearProgress.isDateEnabled"
+            class="setting__item_wrap"
+          >
+            <NInput
+              v-model:value="localConfig.yearProgress.format"
+              class="setting__item-ml"
+              size="small"
+            />
+            <Tips
+              link
+              :content="URL_DAYJS_FORMAT"
+            />
+          </div>
+        </Transition>
       </NFormItem>
 
       <NFormItem :label="`${$t('common.lineHeight')}`">

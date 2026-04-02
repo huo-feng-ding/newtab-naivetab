@@ -19,7 +19,7 @@ export const WIDGET_CONFIG = {
   padding: 25,
   width: 400,
   height: 45,
-  borderRadius: 5.5,
+  borderRadius: 50,
   fontFamily: 'Arial',
   fontSize: 18,
   fontColor: ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)'],

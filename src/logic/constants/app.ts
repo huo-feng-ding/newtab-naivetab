@@ -27,7 +27,7 @@ export const DAYJS_LANG_MAP = {
 }
 
 // 焦点元素选择器映射
-export const FOCUE_ELEMENT_SELECTOR_MAP = {
+export const FOCUS_ELEMENT_SELECTOR_MAP = {
   root: '#app',
   search: '#search .n-input__input-el',
   memo: '#memo .n-input__textarea-el',

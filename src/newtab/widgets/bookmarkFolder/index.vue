@@ -202,6 +202,7 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
 <style>
 #bookmarkFolder {
   user-select: none;
+
   .bookmarkFolder__container {
     z-index: 10;
     position: absolute;
@@ -216,8 +217,25 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     height: v-bind(customHeight);
     background: v-bind(customBackgroundColor);
     border-radius: v-bind(customBorderRadius);
-    backdrop-filter: blur(v-bind(customBackgroundBlur));
+    backdrop-filter: blur(v-bind(customBackgroundBlur)) saturate(1.4);
     overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+    /* 内高光，增加玻璃质感 */
+    &::before {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.04) 40%,
+        transparent 70%
+      );
+      z-index: 0;
+    }
   }
   .bookmarkFolder__container--border {
     border-style: solid;
@@ -225,10 +243,15 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     border-color: v-bind(customBorderColor);
   }
   .bookmarkFolder__container--shadow {
-    box-shadow: 0 1px 6px v-bind(customShadowColor);
+    box-shadow:
+      0 4px 24px v-bind(customShadowColor),
+      0 1px 4px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .folder__grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: v-bind(customItemGap);
     grid-auto-rows: v-bind(customItemHeight);
@@ -246,6 +269,7 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
   }
 
   .folder__item {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -253,16 +277,49 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     height: 100%;
     box-sizing: border-box;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.07);
     border-radius: v-bind(customItemBorderRadius);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     user-select: none;
-    transition: transform 0.15s ease;
+    transition:
+      transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+    /* 内高光线 */
+    &::after {
+      content: '';
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.25),
+        transparent
+      );
+      border-radius: 50%;
+    }
   }
   .folder__item--pointer {
     cursor: pointer;
   }
   .folder__item--hover:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.03);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.18),
+      0 1px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  .folder__item--hover:active {
+    transform: translateY(0px) scale(0.97);
+    transition-duration: 0.08s;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .folder__icon {
@@ -275,25 +332,41 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     img {
       width: 100%;
       height: 100%;
-      border-radius: 4px;
+      border-radius: 20%;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
     }
     svg,
     .iconify {
       width: 100%;
       height: 100%;
       display: block;
+      filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
     }
   }
   .folder__label {
     margin-top: 4px;
+    padding: 0 4px;
     text-align: center;
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    letter-spacing: 0.2px;
+  }
+
+  /* 返回按钮特殊样式 */
+  .folder__item:first-child:has(.folder__icon .iconify) {
+    background: rgba(255, 255, 255, 0.04);
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   .folder__loading {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,24 +375,51 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
   }
   .folder__loading-icon {
     font-size: 22px;
+    opacity: 0.7;
+    animation: folder-spin 1s linear infinite;
+  }
+  @keyframes folder-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
 
   .folder__permission {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     height: 100%;
   }
+  .folder__permission-text {
+    font-size: 0.9em;
+    opacity: 0.75;
+    text-align: center;
+    padding: 0 12px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
   .folder__permission-btn {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.15);
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
     color: inherit;
     cursor: pointer;
+    font-size: 0.85em;
+    letter-spacing: 0.3px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    &:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 </style>

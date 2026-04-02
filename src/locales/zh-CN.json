@@ -2,7 +2,6 @@
   "common": {
     "version": "版本",
     "default": "默认",
-    "confirmation": "确认",
     "confirm": "确定",
     "cancel": "取消",
     "allow": "允许",
@@ -63,6 +62,8 @@
     "favorite": "收藏",
     "margin": "边距",
     "padding": "内边距",
+    "paddingVertical": "垂直内边距",
+    "paddingHorizontal": "水平内边距",
     "size": "大小",
     "width": "宽度",
     "height": "高度",
@@ -131,17 +132,23 @@
   "guide": {
     "prevStep": "上一步",
     "nextStep": "下一步",
-    "doneStep": "开始",
+    "doneStep": "完成",
+    "tipsTitle": "提示",
     "stepTitle1": "添加组件",
-    "stepDescription1": "安装后自动进入编辑模式，从左侧组件库拖拽元素到工作区即可布局",
+    "stepDescription1": "从底部工具栏拖拽组件到页面任意位置，松手即可放置",
     "stepTitle2": "移除组件",
-    "stepDescription2": "拖拽组件到垃圾桶图标或按Delete/Backspace键删除",
+    "stepDescription2": "将组件拖拽到右上角的垃圾桶区域，或直接按 Delete / Backspace 删除",
     "stepTitle3": "完成编辑",
-    "stepDescription3": "点击完成或按Esc退出编辑，右键组件可再次调整",
-    "stepTitle4": "右键菜单",
-    "stepDescription4": "右键点击组件，随时修改功能与样式",
-    "stepTitle5": "完成教程",
-    "stepDescription5": "开始自定义你的 NaiveTab 吧。"
+    "stepDescription3": "点击完成按钮或按 Esc 键退出编辑模式",
+    "stepTitle4": "随时调整",
+    "stepDescription4": "退出编辑后，右键点击任意组件可随时修改其功能与样式",
+    "stepTitle5": "一切就绪 🎉",
+    "stepDescription5": "NaiveTab 已准备好，去打造你的专属标签页吧"
+  },
+  "widgetGroup": {
+    "clock": "时钟 / 日期",
+    "bookmark": "书签",
+    "tool": "工具"
   },
   "setting": {
     "general": "通用",
@@ -154,6 +161,8 @@
     "clock": "时钟",
     "clockDigital": "数字时钟",
     "clockAnalog": "模拟时钟",
+    "clockFlip": "翻牌时钟",
+    "clockNeon": "霓虹时钟",
     "date": "日期",
     "calendar": "万年历",
     "yearProgress": "今年进度",
@@ -191,6 +200,7 @@
     "clearStorageTips": "清除本地缓存不影响已同步设置",
     "resetSettingLabel": "重置设置",
     "resetSettingValue": "重置",
+    "resetAllSettingValue": "重置全部设置",
     "resetSettingTips": "遇到无法解决的问题可尝试重置设置，注意备份当前配置",
     "language": "主语言",
     "timeLanguage": "日期语言",
@@ -199,7 +209,26 @@
     "focusModeTips": "在专注模式下，仅显示你选择的组件"
   },
   "clock": {
-    "apMark": "a.m./p.m."
+    "showColon": "显示冒号",
+    "colonBlink": "冒号呼吸动画",
+    "apMark": "a.m./p.m.",
+    "showSeconds": "显示秒",
+    "24hour": "24小时制",
+    "cardGap": "卡片间距",
+    "cardColor": "卡片颜色",
+    "cardDividerColor": "分隔线颜色",
+    "glowIntensity": "发光强度",
+    "showFrame": "显示边框",
+    "neonTimeColorsLabel": "时间颜色",
+    "neonFrameColorsLabel": "边框颜色",
+    "neonColor": "主色（小时）",
+    "neonSecondaryColor": "副色（分钟）",
+    "neonAccentColor": "强调色（秒）",
+    "frameColor": "内框颜色",
+    "showLabel": "显示底部标签",
+    "labelText": "标签文字",
+    "labelLeftPlaceholder": "左侧",
+    "labelRightPlaceholder": "右侧"
   },
   "keyboard": {
     "bookmarkSource": "书签来源",
@@ -221,7 +250,7 @@
     "keyboardType": "键盘配列",
     "splitSpace": "分裂空格",
     "keycap": "按键",
-    "keycapType": "键帽类型",
+    "keycapVisualType": "键帽类型",
     "tactileBumps": "触摸点",
     "customKeys": "自定义快捷键",
     "keyLabel": "按键",
@@ -294,7 +323,9 @@
     "temperatureUnit": "温度单位",
     "speedUnit": "速度单位",
     "forecast": "未来预报",
-    "icon": "天气图标"
+    "icon": "天气图标",
+    "feelsLike": "体感",
+    "windScaleUnit": "级"
   },
   "memo": {
     "wordCount": "字数统计"

@@ -34,10 +34,10 @@ export const WIDGET_CONFIG = {
     yOffsetValue: 1,
     yTranslateValue: 0,
   },
-  keyboardType: 'key67',
+  keyboardType: 'key61',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
   // keycap
-  keycapType: 'gmk',
+  keycapType: 'gmk' as KeycapVisualType,
   keycapPadding: 1.5,
   keycapSize: 58,
   keycapBorderRadius: 5,
@@ -50,7 +50,7 @@ export const WIDGET_CONFIG = {
   shellVerticalPadding: 15,
   shellHorizontalPadding: 15,
   shellBorderRadius: 10,
-  shellColor: ['rgba(255, 255, 255, 0.5)', 'rgba(66, 66, 70, 0.5)'],
+  shellColor: ['rgba(73, 73, 73, 0.8)', 'rgba(34, 34, 34, 1.0)'],
   isShellShadowEnabled: true,
   shellShadowColor: ['rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.4)'],
   shellBackgroundBlur: 5,
@@ -73,12 +73,12 @@ export const WIDGET_CONFIG = {
   faviconSize: 0.85,
   isTactileBumpsVisible: true,
   // color
-  mainFontColor: ['rgba(34,34,34,1.0)', 'rgba(228,222,221,1.0)'],
-  mainBackgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(95,92,82,1.0)'],
-  emphasisOneFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(228,222,221,1.0)'],
-  emphasisOneBackgroundColor: ['rgba(55,54,52,1.0)', 'rgba(51,52,48,1.0)'],
-  emphasisTwoFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(228,222,221,1.0)'],
-  emphasisTwoBackgroundColor: ['rgba(34, 34, 34, 1)', 'rgba(51,52,48,1.0)'],
+  mainFontColor: ['rgba(34, 34, 34, 1.0)', 'rgba(239,239,234,1.0)'],
+  mainBackgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(34, 34, 34, 1.0)'],
+  emphasisOneFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(239,239,234,1.0)'],
+  emphasisOneBackgroundColor: ['rgba(55,54,52,1.0)', 'rgba(34, 34, 34, 1.0)'],
+  emphasisTwoFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(239,239,234,1.0)'],
+  emphasisTwoBackgroundColor: ['rgba(34, 34, 34, 1)', 'rgba(34, 34, 34, 1.0)'],
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

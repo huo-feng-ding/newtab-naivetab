@@ -76,14 +76,14 @@ export const currFolderBookmarks = computed(() => {
   return findTargetFolderBookmark(state.systemBookmarks, state.selectedFolderTitleStack) || []
 })
 
-export const handleSpecialKeycapExec = (keyCode: string, keycapType: KeycapType) => {
-  if (keycapType === 'folder') {
+export const handleSpecialKeycapExec = (keyCode: string, keycapBookmarkType: KeycapBookmarkType) => {
+  if (keycapBookmarkType === 'folder') {
     const targetKeyIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
     const bookmarkItem = currFolderBookmarks.value[targetKeyIndex - 1] || {}
     state.selectedFolderTitleStack.push((bookmarkItem as any).title)
     return true
   }
-  if (keycapType === 'back') {
+  if (keycapBookmarkType === 'back') {
     state.selectedFolderTitleStack.pop()
     return true
   }
@@ -108,7 +108,7 @@ export const getBookmarkConfigUrl = (keyCode: string) => {
   return padUrlHttps(url)
 }
 
-export const getKeycapType = (keyCode: string): KeycapType => {
+export const getKeycapBookmarkType = (keyCode: string): KeycapBookmarkType => {
   if (localConfig.keyboard.source !== 1) {
     if (!localConfig.keyboard.keymap[keyCode]) return 'none'
     const url = localConfig.keyboard.keymap[keyCode].url

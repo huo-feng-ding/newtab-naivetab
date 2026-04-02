@@ -9,21 +9,33 @@ type SettingMeta = {
   labelKeys?: string[]
 }
 
-const SETTING_ORDER: settingPanes[] = [
-  'general',
-  'focusMode',
-  'keyboard',
-  'bookmarkFolder',
-  'clockDate',
-  'calendar',
-  'yearProgress',
-  'search',
-  'memo',
-  'weather',
-  'news',
-  'aboutSponsor',
-  'aboutIndex',
+/**
+ * 导航分组顺序：
+ * group: 'global' → 全局配置（通用、专注模式）
+ * group: 'widget' → 组件配置
+ * group: 'other'  → 关于与赞助（放最后）
+ */
+type SettingGroup = {
+  group: 'global' | 'widget' | 'other'
+  items: settingPanes[]
+}
+
+export const SETTING_GROUPS: SettingGroup[] = [
+  {
+    group: 'global',
+    items: ['general', 'focusMode'],
+  },
+  {
+    group: 'widget',
+    items: ['keyboard', 'bookmarkFolder', 'clockDate', 'calendar', 'yearProgress', 'search', 'memo', 'weather', 'news'],
+  },
+  {
+    group: 'other',
+    items: ['aboutSponsor', 'aboutIndex'],
+  },
 ]
+
+const SETTING_ORDER: settingPanes[] = SETTING_GROUPS.flatMap((g) => g.items)
 
 const modules = import.meta.glob('./**/index.ts', { eager: true }) as Record<string, { default: SettingMeta }>
 
@@ -34,5 +46,4 @@ for (const path in modules) {
   registry[meta.code] = meta
 }
 
-const settingsRegistry = registry
 export const settingsList = SETTING_ORDER.map((code) => registry[code]).filter(Boolean)

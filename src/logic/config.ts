@@ -28,10 +28,11 @@ const generalConfig = {
   backgroundImageSource: 1 as 0 | 1 | 2, // 0 localFile, 1 network, 2 bing Photo of the Day
   backgroundNetworkSourceType: 1 as 1 | 2, // 1 Bing, 2 Pexels
   backgroundImageHighQuality: false,
-  backgroundImageNames: ['ChukchiSea_ZH-CN7218471261', 'DolomitesMW_ZH-CN3307894335'],
+  backgroundImageNames: ['DarwinsArch_ZH-CN9740478501', 'DolomitesMW_ZH-CN3307894335'],
   isBackgroundImageCustomUrlEnabled: false,
-  backgroundImageCustomUrls: ['https://cn.bing.com/th?id=OHR.ChukchiSea_ZH-CN7218471261_1920x1080.jpg', 'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg'],
+  backgroundImageCustomUrls: ['https://cn.bing.com/th?id=OHR.DarwinsArch_ZH-CN9740478501_1920x1080.jpg', 'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg'],
   favoriteImageList: [
+    { networkSourceType: 1, name: 'DarwinsArch_ZH-CN9740478501' },
     { networkSourceType: 1, name: 'ChukchiSea_ZH-CN7218471261' },
     { networkSourceType: 1, name: 'DolomitesMW_ZH-CN3307894335' },
     { networkSourceType: 1, name: 'YosemiteNightSky_ZH-CN5864740024' },
@@ -40,7 +41,6 @@ const generalConfig = {
     { networkSourceType: 1, name: 'PrathameshJaju_ZH-CN2207606082' },
     { networkSourceType: 1, name: 'AthensAcropolis_ZH-CN9942357439' },
     { networkSourceType: 1, name: 'Balsamroot_ZH-CN9456182640' },
-    { networkSourceType: 1, name: 'DarwinsArch_ZH-CN9740478501' },
     { networkSourceType: 1, name: 'ChurchillBears_ZH-CN1430090934' },
     { networkSourceType: 1, name: 'WinterHalo_ZH-CN0666553211' },
     { networkSourceType: 2, name: '19161535' },

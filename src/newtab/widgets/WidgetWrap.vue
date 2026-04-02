@@ -20,25 +20,45 @@ const state = reactive({
     clientX: 0,
     clientY: 0,
   },
-  // 使用CSS变量存储drag时的位置信息，减少样式计算和DOM操作
+  /**
+   * 拖动位置的 CSS 变量值（高频更新层）
+   *
+   * 设计说明 - 拖动样式分两层更新，职责分离：
+   *
+   * 【第一层：高频，每帧执行】更新 CSS 变量的「值」
+   *   - 作用元素：widget__wrap（Vue 管理的父 div）
+   *   - 操作方式：修改此处的 cssVars → 由 v-bind 写入 CSS 变量（--x-offset 等）
+   *   - 每帧拖动时只更新 4 个 JS 字符串，Vue 在下一次 flush 时批量写入 CSS 变量
+   *
+   * 【第二层：低频，仅 key 切换时执行】更新 container 的「属性名」
+   *   - 作用元素：xxx__container（手动管理的子 div）
+   *   - 操作方式：el.style.left/right/top/bottom = 'var(--x-offset)' 直接 DOM 操作
+   *   - 仅当 left ↔ right 或 top ↔ bottom 发生切换时才执行，正常拖动中此分支不触发
+   *
+   * 关键点：container 的 left/right 值引用 var(--x-offset)，
+   * 而 --x-offset 定义在父级 widget__wrap 上，CSS 变量天然继承，
+   * 两层操作目标元素不同、属性不同，不存在竞争关系。
+   * 这样做将「频繁变化的数值」与「低频变化的方向结构」分离，
+   * 大幅减少 el.style 直接写入次数，降低浏览器样式重算开销。
+   */
   cssVars: {
     xOffset: '0',
     yOffset: '0',
     xTranslate: '0',
     yTranslate: '0',
   },
-  // 缓存上一次的OffsetKey，用于优化style更新
+  // 缓存上一次的 xOffsetKey/yOffsetKey，避免每帧都执行第二层 el.style 操作
   lastXOffsetKey: '',
   lastYOffsetKey: '',
 })
 
 const offsetData = reactive({
   xOffsetKey: '',
-  xOffsetValue: -1,
-  xTranslateValue: -1,
+  xOffsetValue: null as number | null,
+  xTranslateValue: null as number | null,
   yOffsetKey: '',
-  yOffsetValue: -1,
-  yTranslateValue: -1,
+  yOffsetValue: null as number | null,
+  yTranslateValue: null as number | null,
 })
 
 const getPercentageInWidth = (currWidth: number) => +((currWidth / moveState.width) * 100).toFixed(5)
@@ -46,6 +66,16 @@ const getPercentageInHeight = (currHeight: number) => +((currHeight / moveState.
 
 const ensureTargetContainer = async (): Promise<HTMLElement | null> => {
   await nextTick()
+  if (!state.targetContainerEle) {
+    state.targetContainerEle = document.querySelector(`.${props.widgetCode}__container`)
+  }
+  return state.targetContainerEle as HTMLElement | null
+}
+
+/**
+ * 同步版本的 getTargetContainer，用于高频拖动回调，避免 async/await 的微任务开销
+ */
+const getTargetContainerSync = (): HTMLElement | null => {
   if (!state.targetContainerEle) {
     state.targetContainerEle = document.querySelector(`.${props.widgetCode}__container`)
   }
@@ -137,16 +167,16 @@ const stopDrag = () => {
   if (offsetData.yOffsetKey.length !== 0) {
     localConfig[props.widgetCode].layout.yOffsetKey = offsetData.yOffsetKey
   }
-  if (offsetData.xOffsetValue !== -1) {
+  if (offsetData.xOffsetValue !== null) {
     localConfig[props.widgetCode].layout.xOffsetValue = offsetData.xOffsetValue
   }
-  if (offsetData.yOffsetValue !== -1) {
+  if (offsetData.yOffsetValue !== null) {
     localConfig[props.widgetCode].layout.yOffsetValue = offsetData.yOffsetValue
   }
-  if (offsetData.xTranslateValue !== -1) {
+  if (offsetData.xTranslateValue !== null) {
     localConfig[props.widgetCode].layout.xTranslateValue = offsetData.xTranslateValue
   }
-  if (offsetData.yTranslateValue !== -1) {
+  if (offsetData.yTranslateValue !== null) {
     localConfig[props.widgetCode].layout.yTranslateValue = offsetData.yTranslateValue
   }
   state.lastXOffsetKey = ''
@@ -154,8 +184,9 @@ const stopDrag = () => {
   scheduleApplyContainerLayout()
 }
 
-const onDragging = async (e: MouseEvent) => {
-  const el = await ensureTargetContainer()
+const onDragging = (e: MouseEvent) => {
+  // 同步获取容器元素，避免高频拖动中的 async/await 微任务开销
+  const el = getTargetContainerSync()
   if (!el) {
     return
   }
@@ -165,8 +196,8 @@ const onDragging = async (e: MouseEvent) => {
   offsetData.yOffsetKey = ''
   offsetData.xOffsetValue = state.startState.left + mouseDiffX
   offsetData.yOffsetValue = state.startState.top + mouseDiffY
-  offsetData.xTranslateValue = 0
-  offsetData.yTranslateValue = 0
+  offsetData.xTranslateValue = null
+  offsetData.yTranslateValue = null
 
   const xCenterLine = moveState.width / 2
   const yCenterLine = moveState.height / 2
@@ -209,36 +240,45 @@ const onDragging = async (e: MouseEvent) => {
   }
 
   // 画布边界限制 & 对应辅助线
-  if (offsetData.xOffsetValue < 0) {
+  // 注意：边界检查在居中吸附之后，若边界触碰需同步重置 translate，防止组件被偏移到屏幕外
+  if ((offsetData.xOffsetValue as number) < 0) {
     offsetData.xOffsetValue = 0
+    offsetData.xTranslateValue = 0
     if (offsetData.xOffsetKey === 'left') {
       moveState.isLeftBoundVisible = true
+      moveState.isRightBoundVisible = false
     } else {
       moveState.isRightBoundVisible = true
+      moveState.isLeftBoundVisible = false
     }
   } else {
     moveState.isLeftBoundVisible = false
     moveState.isRightBoundVisible = false
   }
-  if (offsetData.yOffsetValue < 0) {
+  if ((offsetData.yOffsetValue as number) < 0) {
     offsetData.yOffsetValue = 0
+    offsetData.yTranslateValue = 0
     if (offsetData.yOffsetKey === 'top') {
       moveState.isTopBoundVisible = true
+      moveState.isBottomBoundVisible = false
     } else {
       moveState.isBottomBoundVisible = true
+      moveState.isTopBoundVisible = false
     }
   } else {
     moveState.isTopBoundVisible = false
     moveState.isBottomBoundVisible = false
   }
 
-  // 使用CSS变量更新样式，减少DOM操作
-  state.cssVars.xOffset = `${offsetData.xOffsetValue}vw`
-  state.cssVars.yOffset = `${offsetData.yOffsetValue}vh`
-  state.cssVars.xTranslate = `${offsetData.xTranslateValue}%`
-  state.cssVars.yTranslate = `${offsetData.yTranslateValue}%`
+  // 第一层（高频）：更新 CSS 变量的值，由 v-bind 批量写入 widget__wrap
+  state.cssVars.xOffset = `${offsetData.xOffsetValue ?? 0}vw`
+  state.cssVars.yOffset = `${offsetData.yOffsetValue ?? 0}vh`
+  state.cssVars.xTranslate = `${offsetData.xTranslateValue ?? 0}%`
+  state.cssVars.yTranslate = `${offsetData.yTranslateValue ?? 0}%`
 
-  // 拖动组件时使用css变量，停止拖动时才触发真实config的更新
+  // 第二层（低频）：仅当方向 key 发生切换（left ↔ right / top ↔ bottom）时，
+  // 才直接操作 container 的 el.style，将 left/right 指向对应的 CSS 变量。
+  // 停止拖动后由 scheduleApplyContainerLayout 将最终位置写入 localConfig。
   if (!state.lastXOffsetKey || !state.lastYOffsetKey || state.lastXOffsetKey !== offsetData.xOffsetKey || state.lastYOffsetKey !== offsetData.yOffsetKey) {
     // 只在 xOffsetKey 或 yOffsetKey 值变化时才触发更新dragStyle
     if (offsetData.xOffsetKey === 'left') {
@@ -261,6 +301,7 @@ const onDragging = async (e: MouseEvent) => {
     state.lastYOffsetKey = offsetData.yOffsetKey
   }
 }
+
 onMounted(() => {
   applyContainerLayout()
   moveState.mouseDownTaskMap.set(props.widgetCode, startDrag)
@@ -285,11 +326,11 @@ const isFocusVisible = computed(() => {
   return !!localConfig.general.focusVisibleWidgetMap[props.widgetCode]
 })
 
-const modifyMoveableWrapClass = async (isAdd: boolean, ...clsList: string[]) => {
+const modifyMoveableWrapClass = (isAdd: boolean, ...clsList: string[]) => {
   if (clsList.length === 0) {
     return
   }
-  const el = await ensureTargetContainer()
+  const el = document.querySelector(`.${props.widgetCode}__container`)
   if (!el || !el.isConnected) {
     return
   }
@@ -310,7 +351,7 @@ watch(isDragMode, (value) => {
   if (value) {
     modifyMoveableWrapClass(true, 'widget-auxiliary-line', 'widget-bg-hover')
   } else {
-    modifyMoveableWrapClass(false, 'widget-auxiliary-line', 'widget-bg-hover', 'widget-active', 'widget-delete')
+    modifyMoveableWrapClass(false, 'widget-auxiliary-line', 'widget-bg-hover', 'widget-active', 'widget-delete', 'widget-dragging')
   }
 })
 
@@ -338,12 +379,13 @@ watch(isCurrentActive, (value) => {
   modifyMoveableWrapClass(value, 'widget-active')
 })
 
-// 拖拽/放下组件时，移除/添加组件的hover样式
+// 拖拽/放下组件时，移除/添加组件的hover样式，并切换拖动提升效果
 watch(
   () => moveState.isWidgetStartDrag,
   (value) => {
     if (isCurrentActive.value && isEnabled.value) {
       modifyMoveableWrapClass(!value, 'widget-bg-hover')
+      modifyMoveableWrapClass(value, 'widget-dragging')
     }
   },
 )
@@ -364,7 +406,6 @@ const bgMoveableWidgetActive = getStyleConst('bgMoveableWidgetActive')
 const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
 /**
  * widget__wrap div 的style会被用来存放v-bind的css var，不能再进行:style操作
- * id=widgetCode div 用来统一包裹真实的widget，用于drag逻辑的事件委派
  */
 </script>
 
@@ -382,6 +423,7 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
       :id="props.widgetCode"
       :data-target-code="props.widgetCode"
       data-target-type="widget"
+      class="widget__root"
     >
       <slot />
     </div>
@@ -405,19 +447,42 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
   cursor: move !important;
 }
 
+/* 拖动编辑模式 — 辅助线轮廓 */
 .widget-auxiliary-line {
   outline: 2px dashed v-bind(auxiliaryLineWidget) !important;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
+/* 非激活状态的 hover 高亮 */
 .widget-bg-hover:hover {
-  background-color: v-bind(bgMoveableWidgetMain) !important;
+  background-color: v-bind(bgMoveableWidgetMain);
+  box-shadow: 0 2px 12px rgba(100, 181, 246, 0.25);
 }
 
+/* 当前选中（mousedown）激活态 */
 .widget-active {
   background-color: v-bind(bgMoveableWidgetActive) !important;
+  box-shadow: 0 4px 16px rgba(100, 181, 246, 0.35) !important;
 }
 
+/* 拖动进行中 */
+.widget-dragging {
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(100, 181, 246, 0.3) !important;
+  opacity: 0.92 !important;
+  transition:
+    box-shadow 150ms ease,
+    opacity 150ms ease !important;
+}
+
+/* 拖入删除区域 — 红色警示 */
 .widget-delete {
   background-color: v-bind(moveableToolDeleteBtnColor) !important;
+  box-shadow: 0 4px 16px rgba(255, 100, 100, 0.4) !important;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease !important;
 }
 </style>
