@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import i18n from '@/lib/i18n'
-import { exportSetting, isUploadConfigLoading, importSetting, refreshSetting, resetSetting } from '@/logic/storage'
+import { exportSetting, isUploadConfigLoading, importSetting, refreshSetting, resetSetting, configSizeMap, SYNC_QUOTA_BYTES_PER_ITEM } from '@/logic/storage'
 import { localConfig, localState, globalState, customPrimaryColor } from '@/logic/store'
 import SettingPaneTitle from '~/newtab/setting/SettingPaneTitle.vue'
 import SettingPaneWrap from '~/newtab/setting/SettingPaneWrap.vue'
@@ -107,6 +107,9 @@ const onExportSetting = () => {
 const onResetSetting = () => {
   resetSetting()
 }
+
+// configSizeMap 的 field 映射到 i18n label，兜底展示原始 field 名
+const getFieldLabel = (field: string) => window.$t(`setting.${field}`) || field
 </script>
 
 <template>
@@ -294,6 +297,39 @@ const onResetSetting = () => {
         <Tips :content="$t('general.syncTimeTips')" />
       </NFormItem>
 
+      <!-- 配置占用大小 -->
+      <NFormItem :label="$t('general.syncStorageSize')">
+        <div class="storage-size__list">
+          <NTooltip
+            v-for="(bytes, field) in configSizeMap"
+            :key="field"
+            trigger="hover"
+            placement="top"
+          >
+            <template #trigger>
+              <div
+                class="storage-size__item"
+                :class="{
+                  'storage-size__item--warn': bytes > 7000,
+                  'storage-size__item--danger': bytes > 8000,
+                }"
+              >
+                <span class="item__field">{{ getFieldLabel(field) }}</span>
+                <div class="item__bar-wrap">
+                  <div
+                    class="item__bar"
+                    :style="{ width: `${Math.min((bytes / SYNC_QUOTA_BYTES_PER_ITEM) * 100, 100)}%` }"
+                  />
+                </div>
+                <span class="item__bytes">{{ (bytes / 1024).toFixed(1) }}KB</span>
+              </div>
+            </template>
+            {{ `${getFieldLabel(field)}: ${bytes} / ${SYNC_QUOTA_BYTES_PER_ITEM} bytes` }}
+          </NTooltip>
+        </div>
+        <Tips :content="$t('general.syncStorageSizeTips')" />
+      </NFormItem>
+
       <NFormItem :label="$t('general.importExportSettingsLabel')">
         <NButton
           class="action-btn action-btn--primary"
@@ -438,6 +474,82 @@ const onResetSetting = () => {
     font-variant-numeric: tabular-nums;
     color: rgba(56, 168, 102, 0.85);
     letter-spacing: 0.2px;
+  }
+}
+
+/* ——— 配置占用大小列表 ——— */
+.storage-size__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.storage-size__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: rgba(128, 128, 128, 0.05);
+  cursor: default;
+  transition: background-color var(--transition-fast);
+
+  &:hover {
+    background: rgba(128, 128, 128, 0.1);
+  }
+
+  /* 黄色警告：7KB ~ 8KB */
+  &.storage-size__item--warn {
+    background: rgba(240, 160, 32, 0.08);
+    border-color: rgba(240, 160, 32, 0.2);
+    .item__bar { background: rgba(240, 160, 32, 0.85); }
+    .item__bytes { color: rgba(200, 130, 0, 0.9); }
+  }
+
+  /* 红色危险：>8KB */
+  &.storage-size__item--danger {
+    background: rgba(220, 50, 50, 0.08);
+    border-color: rgba(220, 50, 50, 0.22);
+    .item__bar { background: rgba(220, 50, 50, 0.85); }
+    .item__bytes { color: rgba(200, 40, 40, 0.9); }
+  }
+
+  .item__field {
+    font-size: 11px;
+    font-family: monospace;
+    color: rgba(128, 128, 128, 0.75);
+    width: 90px;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .item__bar-wrap {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(128, 128, 128, 0.15);
+    overflow: hidden;
+  }
+
+  .item__bar {
+    height: 100%;
+    border-radius: 2px;
+    background: rgba(16, 152, 173, 0.7);
+    transition: width var(--transition-base);
+  }
+
+  .item__bytes {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(128, 128, 128, 0.65);
+    width: 42px;
+    text-align: right;
+    flex-shrink: 0;
   }
 }
 

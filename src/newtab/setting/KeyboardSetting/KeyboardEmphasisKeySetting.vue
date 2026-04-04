@@ -1,0 +1,176 @@
+<script setup lang="ts">
+/**
+ * EmphasisKeySetting
+ *
+ * 强调键分组自定义：展示当前键盘的缩略键盘，用户点击某个键循环切换
+ * 0（普通）→ 1（强调一）→ 2（强调二）→ 0（普通）
+ *
+ * 渲染复用 KeyboardLayout + KeyboardKeycapDisplay，固定 24px 基准。
+ */
+import { currKeyboardConfig } from '@/logic/keyboard'
+import { localConfig, getStyleField } from '@/logic/store'
+import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
+import KeyboardLayout from '@/components/KeyboardLayout.vue'
+import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
+
+// 固定 24px 基准，纯展示用
+const BASE = 24
+
+const {
+  getCustomLabel,
+  getEmphasisGroup,
+  getEmphasisStyle,
+  keycapCssVars,
+} = useKeyboardStyle('px', BASE)
+
+// 颜色（跟随外观模式，图例用）
+const mainBgColor = getStyleField('keyboard', 'mainBackgroundColor')
+const mainFontColor = getStyleField('keyboard', 'mainFontColor')
+const emphasisOneBgColor = getStyleField('keyboard', 'emphasisOneBackgroundColor')
+const emphasisOneFontColor = getStyleField('keyboard', 'emphasisOneFontColor')
+const emphasisTwoBgColor = getStyleField('keyboard', 'emphasisTwoBackgroundColor')
+const emphasisTwoFontColor = getStyleField('keyboard', 'emphasisTwoFontColor')
+
+// ── 点击循环切换 ──────────────────────────────────────────────────────────────
+const toggleGroup = (code: string) => {
+  const cur = getEmphasisGroup(code)
+  const next = ((cur + 1) % 3) as 0 | 1 | 2
+  if (!localConfig.keyboard.emphasisKeyOverrides) {
+    localConfig.keyboard.emphasisKeyOverrides = {}
+  }
+  localConfig.keyboard.emphasisKeyOverrides[code] = next
+}
+
+// ── 重置 ──────────────────────────────────────────────────────────────────────
+const handleReset = () => {
+  localConfig.keyboard.emphasisKeyOverrides = {}
+}
+
+// ── 是否有自定义覆盖 ──────────────────────────────────────────────────────────
+const hasOverrides = computed(() =>
+  Object.keys(localConfig.keyboard.emphasisKeyOverrides ?? {}).length > 0,
+)
+</script>
+
+<template>
+  <div class="emphasis-key-setting">
+    <!-- 标题 + 重置按钮 -->
+    <div class="emphasis-key-setting__header">
+      <span class="emphasis-key-setting__tips">{{ $t('keyboard.emphasisKeyGroupTips') }}</span>
+      <NButton
+        v-if="hasOverrides"
+        size="tiny"
+        secondary
+        @click="handleReset"
+      >
+        {{ $t('keyboard.emphasisKeyGroupReset') }}
+      </NButton>
+    </div>
+
+    <!-- 图例 -->
+    <div class="emphasis-key-setting__legend">
+      <span
+        class="legend__item"
+        :style="`background-color:${mainBgColor};color:${mainFontColor};`"
+      >{{ $t('keyboard.emphasisGroupNone') }}</span>
+      <span
+        class="legend__item"
+        :style="`background-color:${emphasisOneBgColor};color:${emphasisOneFontColor};`"
+      >{{ $t('keyboard.emphasisGroupOne') }}</span>
+      <span
+        class="legend__item"
+        :style="`background-color:${emphasisTwoBgColor};color:${emphasisTwoFontColor};`"
+      >{{ $t('keyboard.emphasisGroupTwo') }}</span>
+    </div>
+
+    <!-- 键盘缩略图（复用通用组件） -->
+    <div
+      class="emphasis-key-setting__keyboard"
+      :style="keycapCssVars"
+    >
+      <KeyboardLayout
+        unit="px"
+        :base-size="BASE"
+        :rows="currKeyboardConfig.list"
+      >
+        <template #keycap="{ code }">
+          <KeyboardKeycapDisplay
+            :key-code="code"
+            :label="getCustomLabel(code)"
+            name=""
+            visual-type="flat"
+            :show-name="false"
+            :show-favicon="false"
+            :show-tactile-bumps="false"
+            :style="getEmphasisStyle(code)"
+            class="emphasis-keycap"
+            @click="toggleGroup(code)"
+          />
+        </template>
+      </KeyboardLayout>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.emphasis-key-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ── 标题行 ── */
+.emphasis-key-setting__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 24px;
+}
+
+.emphasis-key-setting__tips {
+  font-size: 12px;
+  color: var(--n-text-color-3);
+}
+
+/* ── 图例 ── */
+.emphasis-key-setting__legend {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.legend__item {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ── 键盘容器：宽度由内容决定，不撑满父级 ── */
+.emphasis-key-setting__keyboard {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+}
+
+/* ── 键帽点击交互（不改变颜色，仅透明度反馈） ── */
+.emphasis-keycap {
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+
+  &:hover {
+    opacity: 0.75;
+  }
+
+  &:active {
+    opacity: 0.5;
+  }
+}
+</style>

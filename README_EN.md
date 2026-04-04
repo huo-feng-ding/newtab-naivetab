@@ -20,7 +20,7 @@
 | **🔍 Search Bar** | Customizable search engine for quick searches right from your new tab. |
 | **📝 Memo** | Editable notes and to-do lists — jot down ideas and tasks on the fly. |
 | **🌤 Weather** | Real-time temperature, wind speed, humidity, daily indices, and severe weather alerts. Powered by QWeather. |
-| **📰 News** | Aggregated trending content from Toutiao, Baidu, Zhihu, Sina Weibo, V2EX, and more — all in one place. |
+| **📰 News** | Aggregated trending content — all in one view. |
 
 ### Core Capabilities
 

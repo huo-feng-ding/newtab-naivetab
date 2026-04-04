@@ -188,6 +188,10 @@
     "primaryColorTips": "Takes effect after refresh page",
     "newTabOpen": "Open in newtab",
     "settingDividerSetting": "Setting",
+    "syncStorageSize": "Storage usage",
+    "syncStorageSizeTips": "Sync storage usage per config item. Each item is limited to 8KB",
+    "syncSizeWarning": "{field} config is approaching sync limit ({size}KB / 8KB), consider reducing bookmarks",
+    "syncSizeExceeded": "{field} config exceeds sync limit ({size}KB / 8KB). Saved locally but cross-device sync is unavailable. Please reduce bookmarks or shorten URLs",
     "syncTime": "Sync time",
     "syncTimeTips": "Requires browser account login for cross-device sync",
     "importExportSettingsLabel": "Import/Export",
@@ -258,7 +262,19 @@
     "urlPlaceholder": "",
     "nameLabel": "Name",
     "namePlaceholder": "Optional",
-    "shortcutLabel": "Shortcut"
+    "shortcutLabel": "Shortcut",
+    "themeGroup": {
+      "classic": "Classic",
+      "atmosphere": "Atmosphere",
+      "studio": "Studio",
+      "premium": "Premium"
+    },
+    "emphasisKeyGroup": "Key Color Groups",
+    "emphasisGroupNone": "Default",
+    "emphasisGroupOne": "Color 1",
+    "emphasisGroupTwo": "Color 2",
+    "emphasisKeyGroupTips": "Click a key to cycle its color group: Default → Color 1 → Color 2",
+    "emphasisKeyGroupReset": "Reset to Default"
   },
   "bookmarkFolder": {
     "defaultDisplayFolderTitle": "Expand Folder",

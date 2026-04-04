@@ -188,6 +188,10 @@
     "primaryColorTips": "修改后需刷新页面生效",
     "newTabOpen": "在新标签页打开",
     "settingDividerSetting": "设置",
+    "syncStorageSize": "存储用量",
+    "syncStorageSizeTips": "各项配置在 Chrome 同步存储中的占用大小，单项上限 8KB",
+    "syncSizeWarning": "{field} 配置接近同步上限（{size}KB / 8KB），建议减少书签数量",
+    "syncSizeExceeded": "{field} 配置超出同步限制（{size}KB / 8KB），配置已保存到本地但无法跨设备同步，请减少书签数量或缩短 URL",
     "syncTime": "同步时间",
     "syncTimeTips": "需登录浏览器账号开启数据同步",
     "importExportSettingsLabel": "导入/导出",
@@ -258,7 +262,19 @@
     "urlPlaceholder": "",
     "nameLabel": "书签",
     "namePlaceholder": "可选",
-    "shortcutLabel": "快捷键"
+    "shortcutLabel": "快捷键",
+    "themeGroup": {
+      "classic": "经典灵感",
+      "atmosphere": "自然氛围",
+      "studio": "编辑器配色",
+      "premium": "高级质感"
+    },
+    "emphasisKeyGroup": "按键配色分组",
+    "emphasisGroupNone": "默认色",
+    "emphasisGroupOne": "配色一",
+    "emphasisGroupTwo": "配色二",
+    "emphasisKeyGroupTips": "点击按键切换其配色分组，循环切换：默认色 → 配色一 → 配色二",
+    "emphasisKeyGroupReset": "恢复默认"
   },
   "bookmarkFolder": {
     "defaultDisplayFolderTitle": "默认展开文件夹",

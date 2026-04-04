@@ -2,7 +2,7 @@
 import { localConfig, localState, availableFontOptions, fontSelectRenderLabel } from '@/logic/store'
 import SettingPaneTitle from '~/newtab/setting/SettingPaneTitle.vue'
 import SettingPaneWrap from '~/newtab/setting/SettingPaneWrap.vue'
-import SettingColorGroup from '~/newtab/setting/SettingColorGroup.vue'
+import SettingIconGroup from '~/newtab/setting/SettingIconGroup.vue'
 import CustomColorPicker from '~/components/CustomColorPicker.vue'
 import { ICONS } from '@/logic/icons'
 
@@ -86,7 +86,7 @@ const beginsList = computed(() => [
         />
       </NFormItem>
 
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.calendarHoliday"
         :label="$t('calendar.holiday')"
       >
@@ -96,9 +96,9 @@ const beginsList = computed(() => [
         >
           <CustomColorPicker v-model:value="localConfig.calendar.holidayFontColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
 
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.calendarToday"
         :label="$t('calendar.todayDesc')"
       >
@@ -114,7 +114,7 @@ const beginsList = computed(() => [
         >
           <CustomColorPicker v-model:value="localConfig.calendar.todayLabelBackgroundColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
       <div class="setting__form_wrap">
         <NFormItem
           :label="`${$t('calendar.day')}${$t('common.fontColor')}`"
@@ -136,7 +136,7 @@ const beginsList = computed(() => [
         </NFormItem>
       </div>
 
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.calendarRest"
         :label="$t('calendar.restDesc')"
       >
@@ -152,7 +152,7 @@ const beginsList = computed(() => [
         >
           <CustomColorPicker v-model:value="localConfig.calendar.restLabelBackgroundColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
       <div class="setting__form_wrap">
         <NFormItem
           :label="`${$t('calendar.day')}${$t('common.fontColor')}`"
@@ -174,7 +174,7 @@ const beginsList = computed(() => [
         </NFormItem>
       </div>
 
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.calendarWork"
         :label="$t('calendar.workDesc')"
       >
@@ -190,7 +190,7 @@ const beginsList = computed(() => [
         >
           <CustomColorPicker v-model:value="localConfig.calendar.workLabelBackgroundColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
       <div class="setting__form_wrap">
         <NFormItem
           :label="`${$t('calendar.day')}${$t('common.fontColor')}`"

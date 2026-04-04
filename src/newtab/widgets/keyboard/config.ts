@@ -79,6 +79,8 @@ export const WIDGET_CONFIG = {
   emphasisOneBackgroundColor: ['rgba(55,54,52,1.0)', 'rgba(34, 34, 34, 1.0)'],
   emphasisTwoFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(239,239,234,1.0)'],
   emphasisTwoBackgroundColor: ['rgba(34, 34, 34, 1)', 'rgba(34, 34, 34, 1.0)'],
+  // 强调色分组用户自定义覆盖: keyCode → 0(普通) | 1(强调一) | 2(强调二)
+  emphasisKeyOverrides: {} as Record<string, 0 | 1 | 2>,
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

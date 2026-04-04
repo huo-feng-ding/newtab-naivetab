@@ -69,10 +69,10 @@ const KB_ROWS = [
   ],
 ]
 
-const getKeycapStyle = (themeKey: string, t: 'main' | 'e1' | 'e2') => {
+const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
   const theme = KEYCAP_PREINSTALL_MAP[themeKey]
-  if (t === 'e1') return `color:${theme.emphasisOneFontColor};background-color:${theme.emphasisOneBackgroundColor}`
-  if (t === 'e2') return `color:${theme.emphasisTwoFontColor};background-color:${theme.emphasisTwoBackgroundColor}`
+  if (type === 'e1') return `color:${theme.emphasisOneFontColor};background-color:${theme.emphasisOneBackgroundColor}`
+  if (type === 'e2') return `color:${theme.emphasisTwoFontColor};background-color:${theme.emphasisTwoBackgroundColor}`
   return `color:${theme.mainFontColor};background-color:${theme.mainBackgroundColor}`
 }
 </script>
@@ -98,24 +98,24 @@ const getKeycapStyle = (themeKey: string, t: 'main' | 'e1' | 'e2') => {
           class="theme__section"
         >
           <div class="section__header">
-            <span class="section__label">{{ group.label }}</span>
-            <span class="section__count">{{ group.themeKeys.length }}</span>
+            <span class="section__label">{{ $t(group.labelKey) }}</span>
+            <span class="section__count">{{ Object.keys(group.themes).length }}</span>
           </div>
 
           <div
             class="theme__container"
           >
             <div
-              v-for="themeKey in group.themeKeys"
+              v-for="[themeKey, theme] in Object.entries(group.themes)"
               :key="themeKey"
               class="theme__item"
-              :style="`background-color: ${KEYCAP_PREINSTALL_MAP[themeKey].shellColor}`"
-              @click="onSelectPresetTheme(themeKey)"
+              :style="`background-color: ${theme.shellColor}`"
+              @click="onSelectPresetTheme(themeKey as KeycapThemeKey)"
             >
               <span
                 class="theme__title"
                 :style="getKeycapStyle(themeKey, 'main')"
-              >{{ KEYCAP_PREINSTALL_MAP[themeKey].label }}</span>
+              >{{ theme.label }}</span>
 
               <div
                 v-for="(row, ri) in KB_ROWS"

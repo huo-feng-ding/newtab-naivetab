@@ -2,7 +2,7 @@
 import { ICONS } from '@/logic/icons'
 import { localConfig, localState } from '@/logic/store'
 import SettingPaneWrap from '~/newtab/setting/SettingPaneWrap.vue'
-import SettingColorGroup from '~/newtab/setting/SettingColorGroup.vue'
+import SettingIconGroup from '~/newtab/setting/SettingIconGroup.vue'
 import CustomColorPicker from '~/components/CustomColorPicker.vue'
 import SliderInput from '~/components/SliderInput.vue'
 </script>
@@ -90,7 +90,7 @@ import SliderInput from '~/components/SliderInput.vue'
     </template>
 
     <template #color>
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.neonTimeColors"
         :label="$t('clock.neonTimeColorsLabel')"
       >
@@ -112,9 +112,9 @@ import SliderInput from '~/components/SliderInput.vue'
         >
           <CustomColorPicker v-model:value="localConfig.clockNeon.accentColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
 
-      <SettingColorGroup
+      <SettingIconGroup
         :icon="ICONS.neonFrameColors"
         :label="$t('clock.neonFrameColorsLabel')"
       >
@@ -124,7 +124,7 @@ import SliderInput from '~/components/SliderInput.vue'
         >
           <CustomColorPicker v-model:value="localConfig.clockNeon.frameColor[localState.currAppearanceCode]" />
         </NFormItem>
-      </SettingColorGroup>
+      </SettingIconGroup>
     </template>
   </SettingPaneWrap>
 </template>

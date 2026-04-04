@@ -1,5 +1,9 @@
 import { isMacOS } from '@/env'
 
+// keyboard 书签 URL / name 的最大字符数限制
+export const KEYBOARD_URL_MAX_LENGTH = 200
+export const KEYBOARD_NAME_MAX_LENGTH = 10
+
 export const KEYBOARD_OLD_TO_NEW_CODE_MAP = {
   '1': 'Digit1',
   '2': 'Digit2',
@@ -177,6 +181,28 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   ArrowDown: { label: '↓', textAlign: 'center', size: 1 },
   ArrowLeft: { label: '←', textAlign: 'center', size: 1 },
   ArrowRight: { label: '→', textAlign: 'center', size: 1 },
+  // System
+  PrintScreen: { label: isMacOS ? 'prtsc' : 'PrtSc', textAlign: 'center', size: 1 },
+  ScrollLock: { label: isMacOS ? 'scrlk' : 'ScrLk', textAlign: 'center', size: 1 },
+  Pause: { label: isMacOS ? 'pause' : 'Pause', textAlign: 'center', size: 1 },
+  // Numpad
+  NumLock: { label: 'Num\nLock', textAlign: 'center', size: 1 },
+  NumpadDivide: { label: '/', textAlign: 'center', size: 1 },
+  NumpadMultiply: { label: '*', textAlign: 'center', size: 1 },
+  NumpadSubtract: { label: '-', textAlign: 'center', size: 1 },
+  Numpad7: { label: '7', textAlign: 'center', size: 1 },
+  Numpad8: { label: '8', textAlign: 'center', size: 1 },
+  Numpad9: { label: '9', textAlign: 'center', size: 1 },
+  NumpadAdd: { label: '+', textAlign: 'center', size: 2 },
+  Numpad4: { label: '4', textAlign: 'center', size: 1 },
+  Numpad5: { label: '5', textAlign: 'center', size: 1 },
+  Numpad6: { label: '6', textAlign: 'center', size: 1 },
+  Numpad1: { label: '1', textAlign: 'center', size: 1 },
+  Numpad2: { label: '2', textAlign: 'center', size: 1 },
+  Numpad3: { label: '3', textAlign: 'center', size: 1 },
+  NumpadEnter: { label: isMacOS ? 'return' : 'Enter', textAlign: 'center', size: 2 },
+  Numpad0: { label: '0', textAlign: 'center', size: 2 },
+  NumpadDecimal: { label: '.', textAlign: 'center', size: 1 },
 }
 
 export const KEYBOARD_COMMAND_ALLOW_KEYCODE_LIST = [

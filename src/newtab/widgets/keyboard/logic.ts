@@ -5,10 +5,8 @@ import { createTab, padUrlHttps, log } from '@/logic/util'
 import { defaultConfig } from '@/logic/config'
 import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
-import { KEYBOARD_CODE_TO_DEFAULT_CONFIG } from '@/logic/constants/keyboard'
-import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { globalState, localConfig, getAllCommandsConfig, getStyleField } from '@/logic/store'
-import { WIDGET_CODE } from './config'
+import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
+import { globalState, localConfig, getAllCommandsConfig } from '@/logic/store'
 
 export const state = reactive({
   systemBookmarks: [] as BookmarkNode[],
@@ -205,12 +203,3 @@ addVisibilityTask('keyboard', (hidden) => {
   refreshKeyboardConfig()
   getSystemBookmarkForKeyboard()
 })
-
-export const getCustomKeycapWidth = (code: string, addRatio = 0) => {
-  let value = KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].size
-  const customSize = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].size
-  if (customSize) value = customSize
-  value += addRatio
-  const width = getStyleField(WIDGET_CODE, 'keycapSize', 'vmin', value)
-  return width
-}
