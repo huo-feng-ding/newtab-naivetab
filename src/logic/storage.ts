@@ -1,7 +1,7 @@
 /* eslint-disable no-irregular-whitespace */
 import md5 from 'crypto-js/md5'
 import { useDebounceFn } from '@vueuse/core'
-import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY, KEYBOARD_OLD_TO_NEW_CODE_MAP } from '@/logic/constants/index'
+import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY, KEYBOARD_OLD_TO_NEW_CODE_MAP, KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/index'
 import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
 import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
 import { localConfig, localState, globalState, switchSettingDrawerVisible, updateSetting } from '@/logic/store'
@@ -21,17 +21,37 @@ export const isUploadConfigLoading = computed(() => {
   return isLoading
 })
 
+/**
+ * 各 field 在 chrome.storage.sync 中的实际占用字节数（通过 getBytesInUse 获取）
+ * key: ConfigField, value: bytes
+ */
+export const configSizeMap = reactive<Record<string, number>>({})
+
+// chrome.storage.sync 单 key 限制（留 92 字节余量）
+export const SYNC_QUOTA_BYTES_PER_ITEM = 8192
+const SYNC_SIZE_WARN = 7000 // 7KB 黄色警告
+const SYNC_SIZE_LIMIT = 8000 // 8KB 拦截（留有余量）
+
 const getUploadConfigData = (field: ConfigField) => {
-  // 处理 keyboard的bookmark配置，删除空url，空name，最小化配置
+  // 处理 keyboard 的bookmark配置：
+  //   1. 删除空 url 条目
+  //   2. 兜底截断超长 url / name（防止极端情况写爆 8KB 限制）
   if (field === 'keyboard') {
     const src = localConfig.keyboard
     const newKeymap: Record<string, { url: string, name?: string }> = {}
     for (const code of Object.keys(src.keymap)) {
       const item = src.keymap[code] as { url?: string, name?: string }
       if (!item) continue
-      const url = (item.url || '').replaceAll(' ', '')
+      let url = (item.url || '').replaceAll(' ', '')
       if (url.length === 0) continue
-      const name = (item.name || '').trim()
+      // 兜底截断：UI 层已限制，这里是最后防线
+      if (url.length > KEYBOARD_URL_MAX_LENGTH) {
+        url = url.slice(0, KEYBOARD_URL_MAX_LENGTH)
+      }
+      let name = (item.name || '').trim()
+      if (name.length > KEYBOARD_NAME_MAX_LENGTH) {
+        name = name.slice(0, KEYBOARD_NAME_MAX_LENGTH)
+      }
       const next: { url: string, name?: string } = { url }
       if (name.length > 0) next.name = name
       newKeymap[code] = next
@@ -70,13 +90,25 @@ const uploadConfigFn = (field: ConfigField) => {
     const currTime = Date.now()
     localState.value.isUploadConfigStatusMap[field].syncTime = currTime
     localState.value.isUploadConfigStatusMap[field].syncId = currConfigMd5
-    const payload = {
-      [`naive-tab-${field}`]: JSON.stringify({
-        syncTime: currTime,
-        syncId: currConfigMd5,
-        data: uploadData,
-      }),
+    const payloadStr = JSON.stringify({
+      syncTime: currTime,
+      syncId: currConfigMd5,
+      data: uploadData,
+    })
+    // 上传前校验大小，超限时告警并中止同步（保留本地数据，避免静默丢失）
+    const payloadBytes = new TextEncoder().encode(payloadStr).length
+    if (payloadBytes > SYNC_SIZE_LIMIT) {
+      log(`Upload config-${field} size exceeded`, `${payloadBytes} bytes`)
+      window.$message.error(window.$t('general.syncSizeExceeded').replace('{field}', field).replace('{size}', `${(payloadBytes / 1024).toFixed(1)}`))
+      localState.value.isUploadConfigStatusMap[field].loading = false
+      resolve(false)
+      return
     }
+    if (payloadBytes > SYNC_SIZE_WARN) {
+      log(`Upload config-${field} size warning`, `${payloadBytes} bytes`)
+      window.$message.warning(window.$t('general.syncSizeWarning').replace('{field}', field).replace('{size}', `${(payloadBytes / 1024).toFixed(1)}`))
+    }
+    const payload = { [`naive-tab-${field}`]: payloadStr }
     chrome.storage.sync.set(payload, async () => {
       const error = chrome.runtime.lastError
       if (error) {
@@ -84,6 +116,8 @@ const uploadConfigFn = (field: ConfigField) => {
         window.$message.error(`${window.$t('common.upload')}${window.$t('common.setting')}${window.$t('common.fail')}`)
       } else {
         log(`Upload config-${field} complete`)
+        // 上传成功后更新本地缓存的大小（估算值，与 getBytesInUse 基本一致）
+        configSizeMap[field] = payloadBytes
       }
       setTimeout(() => {
         // 确保isUploadConfigLoading的值不会抖动，消除多个配置排队同步时中间出现的短暂值均为false的间隙
@@ -184,6 +218,7 @@ export const loadRemoteConfig = () => {
             const localSyncId = localState.value.isUploadConfigStatusMap[field].syncId
             chrome.storage.sync.getBytesInUse(`naive-tab-${field}`).then((bytesInUse) => {
               log(`naive-tab-config-size-${field}`, `${bytesInUse} byte`)
+              configSizeMap[field] = bytesInUse
             })
             // syncId(md5)一致时无需更新
             if (targetSyncId === localSyncId) {

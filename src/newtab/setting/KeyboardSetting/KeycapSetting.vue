@@ -2,6 +2,7 @@
 import { localConfig, localState, availableFontOptions, fontSelectRenderLabel } from '@/logic/store'
 import CustomColorPicker from '~/components/CustomColorPicker.vue'
 import SliderInput from '@/components/SliderInput.vue'
+import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 </script>
 
 <template>
@@ -148,10 +149,10 @@ import SliderInput from '@/components/SliderInput.vue'
 
     <!-- 颜色 -->
     <NDivider title-placement="left">
-      {{ $t('common.color') }}
+      {{ `${$t('keyboard.keycap')}${$t('common.color')}` }}
     </NDivider>
 
-    <NFormItem :label="`${$t('keyboard.keycap')}Qwerty`">
+    <NFormItem :label="$t('keyboard.emphasisGroupNone')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
@@ -166,7 +167,7 @@ import SliderInput from '@/components/SliderInput.vue'
       </NFormItem>
     </NFormItem>
 
-    <NFormItem :label="`${$t('keyboard.keycap')}Control`">
+    <NFormItem :label="$t('keyboard.emphasisGroupOne')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
@@ -181,7 +182,7 @@ import SliderInput from '@/components/SliderInput.vue'
       </NFormItem>
     </NFormItem>
 
-    <NFormItem :label="`${$t('keyboard.keycap')}Enter`">
+    <NFormItem :label="$t('keyboard.emphasisGroupTwo')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
@@ -194,6 +195,15 @@ import SliderInput from '@/components/SliderInput.vue'
       >
         <CustomColorPicker v-model:value="localConfig.keyboard.emphasisTwoBackgroundColor[localState.currAppearanceCode]" />
       </NFormItem>
+    </NFormItem>
+
+    <!-- 强调键分组 -->
+    <NDivider title-placement="left">
+      {{ $t('keyboard.emphasisKeyGroup') }}
+    </NDivider>
+
+    <NFormItem :show-label="false">
+      <KeyboardEmphasisKeySetting />
     </NFormItem>
   </NForm>
 </template>

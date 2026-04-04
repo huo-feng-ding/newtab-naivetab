@@ -261,6 +261,8 @@ export const getStyleField = (configCode: ConfigField, field: string, unit?: str
     }
     if (unit) {
       if (unit === 'vmin') {
+        // 配置值以 px 量级存储（如 fontSize: 14 ≈ 14px），×0.1 转为 vmin
+        // 依赖约定：1vmin ≈ 10px（基准视口宽度 1000px 下）
         targetValue *= 0.1
       }
       targetValue = `${targetValue}${unit}`

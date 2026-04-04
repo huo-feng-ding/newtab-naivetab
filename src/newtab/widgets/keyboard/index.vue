@@ -3,10 +3,11 @@ import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode } from '@/logic/moveable'
 import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap, getCustomKeycapWidth } from '~/newtab/widgets/keyboard/logic'
-import { localConfig, getStyleField, getStyleConst, getIsWidgetRender } from '@/logic/store'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap } from '~/newtab/widgets/keyboard/logic'
+import { localConfig, getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
-import KeyboardKeycap from './components/KeyboardKeycap.vue'
+import KeyboardLayout from '@/components/KeyboardLayout.vue'
+import KeyboardKeycapWidget from './components/KeyboardKeycapWidget.vue'
 import { WIDGET_CODE } from './config'
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
@@ -68,149 +69,43 @@ watch(
   { immediate: true },
 )
 
-const customShellVerticalPadding = getStyleField(WIDGET_CODE, 'shellVerticalPadding', 'vmin')
-const customShellHorizontalPadding = getStyleField(WIDGET_CODE, 'shellHorizontalPadding', 'vmin')
-const customShellBorderRadius = getStyleField(WIDGET_CODE, 'shellBorderRadius', 'px')
-const customShellColor = getStyleField(WIDGET_CODE, 'shellColor')
-const customShellShadowColor = getStyleField(WIDGET_CODE, 'shellShadowColor')
-const customShellBackgroundBlur = getStyleField(WIDGET_CODE, 'shellBackgroundBlur', 'px')
-
-const customPlateSinglePadding = getStyleField(WIDGET_CODE, 'platePadding', 'vmin')
-const customPlateDoublePadding = getStyleField(WIDGET_CODE, 'platePadding', 'vmin', 2)
-const customPlateEdge = computed(() => `-${customPlateSinglePadding.value}`)
-const customPlateSize = computed(() => `${customPlateDoublePadding.value}`)
-const customPlateBorderRadius = getStyleField(WIDGET_CODE, 'plateBorderRadius', 'px')
-const customPlateColor = getStyleField(WIDGET_CODE, 'plateColor')
-const customPlateBackgroundBlur = getStyleField(WIDGET_CODE, 'plateBackgroundBlur', 'px')
-
-const customKeyboardKeyFontFamily = getStyleField(WIDGET_CODE, 'keycapBookmarkFontFamily')
-const customKeyboardKeyFontSize = getStyleField(WIDGET_CODE, 'keycapBookmarkFontSize', 'vmin')
-
-// keycap-base
-const customKeycapPadding = getStyleField(WIDGET_CODE, 'keycapPadding', 'vmin')
-const customKeycapBaseSize = getStyleField(WIDGET_CODE, 'keycapSize', 'vmin')
-
-const getKeycapWrapStyle = (code: string) => {
-  let style = ''
-  const width = getCustomKeycapWidth(code)
-  style += `width: ${width.value}; `
-  const marginLeft = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].marginLeft
-  if (marginLeft) {
-    style += `margin-left: ${getStyleField(WIDGET_CODE, 'keycapSize', 'vmin', marginLeft).value}; `
-  }
-  const marginRight = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].marginRight
-  if (marginRight) {
-    style += `margin-right: ${getStyleField(WIDGET_CODE, 'keycapSize', 'vmin', marginRight).value}; `
-  }
-  const marginBottom = currKeyboardConfig.value.custom[code] && currKeyboardConfig.value.custom[code].marginBottom
-  if (marginBottom) {
-    style += `margin-bottom: ${getStyleField(WIDGET_CODE, 'keycapSize', 'vmin', marginBottom).value}; `
-  }
-  return style
-}
+const containerClass = computed(() => ({
+  'keyboard__container--drag': isDragMode.value,
+  'keyboard__container--hover': !isDragMode.value,
+}))
 
 const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
-    <div
+    <KeyboardLayout
+      unit="vmin"
+      :rows="currKeyboardConfig.list"
+      :extra-class="containerClass"
       class="keyboard__container"
-      :class="{
-        'keyboard__container--drag': isDragMode,
-        'keyboard__container--hover': !isDragMode,
-        'keyboard__container-shell': localConfig.keyboard.isShellVisible,
-        'keyboard__container-shell--shadow': localConfig.keyboard.isShellVisible && localConfig.keyboard.isShellShadowEnabled,
-      }"
     >
-      <div
-        v-for="(rowItem, rowIndex) in currKeyboardConfig.list"
-        :key="rowIndex"
-        class="keyboard__row"
-      >
-        <div
-          v-for="keyCode in rowItem"
-          :key="keyCode"
-          class="row__keycap-wrap"
-          :style="getKeycapWrapStyle(keyCode)"
-        >
-          <div
-            v-if="localConfig.keyboard.isShellVisible && localConfig.keyboard.isPlateVisible"
-            class="row__keycap-plate"
-          />
-          <KeyboardKeycap :key-code="keyCode" />
-        </div>
-      </div>
-    </div>
+      <template #keycap="{ code }">
+        <KeyboardKeycapWidget :key-code="code" />
+      </template>
+    </KeyboardLayout>
   </WidgetWrap>
 </template>
 
 <style>
 #keyboard {
-  font-family: v-bind(customKeyboardKeyFontFamily);
-  font-size: v-bind(customKeyboardKeyFontSize);
   user-select: none;
+
   .keyboard__container {
     z-index: 10;
     position: absolute;
     overflow: hidden;
-    .keyboard__row {
-      display: flex;
-      justify-content: space-between;
-      .row__keycap-wrap {
-        flex: 0 0 auto;
-        position: relative;
-        padding: v-bind(customKeycapPadding);
-        height: v-bind(customKeycapBaseSize);
-        .row__keycap-plate {
-          z-index: -1;
-          position: absolute;
-          top: v-bind(customPlateEdge);
-          left: v-bind(customPlateEdge);
-          width: calc(100% + v-bind(customPlateSize));
-          height: calc(100% + v-bind(customPlateSize));
-          background: v-bind(customPlateColor);
-          border-radius: v-bind(customPlateBorderRadius);
-          backdrop-filter: blur(v-bind(customPlateBackgroundBlur));
-        }
-      }
-    }
   }
-  .keyboard__container-shell {
-    padding: v-bind(customShellVerticalPadding) v-bind(customShellHorizontalPadding);
-    border-radius: v-bind(customShellBorderRadius);
-    background-color: v-bind(customShellColor) !important;
-    backdrop-filter: blur(v-bind(customShellBackgroundBlur));
-    /* 外壳顶部高光边缘线，增强材质厚度感 */
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    border-left: 1px solid rgba(255, 255, 255, 0.10);
-    border-right: 1px solid rgba(0, 0, 0, 0.10);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.18);
-    will-change: transform;
-  }
-  .keyboard__container-shell--shadow {
-    /* 斜向光泽渐变叠加，模拟外壳材质反光 */
-    background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.10) 0%,
-        rgba(255, 255, 255, 0.03) 35%,
-        rgba(0, 0, 0, 0.06) 65%,
-        rgba(0, 0, 0, 0.12) 100%
-      ),
-      v-bind(customShellColor) !important;
-    box-shadow:
-      /* 主环境阴影 */
-      0px 8px 24px v-bind(customShellShadowColor),
-      /* 近距离阴影增加立体感 */
-      0px 3px 8px v-bind(customShellShadowColor),
-      /* 顶部内高光线，模拟外壳上边缘受光 */
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      /* 底部内阴影，增加深度 */
-      inset 0 -2px 4px rgba(0, 0, 0, 0.15);
-  }
+
   .keyboard__container--hover {
     cursor: pointer;
   }
+
   .keyboard__container--drag {
     background-color: transparent !important;
     &:hover {

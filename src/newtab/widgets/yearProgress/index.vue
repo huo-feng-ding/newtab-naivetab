@@ -94,8 +94,8 @@ const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
 
 const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
 const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
-const customSubFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px', 0.9)
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customSubFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.9)
 
 const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
 const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
@@ -194,6 +194,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       align-items: flex-end;
       padding-right: 10px;
       gap: 1px;
+      font-size: v-bind(customFontSize);
       line-height: v-bind(customTextLineHeight);
 
       .text__blur {
@@ -209,11 +210,10 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         gap: 2px;
       }
       .text__day-num {
-        font-size: 1.35em;
-        letter-spacing: -0.02em;
+        font-size: v-bind(customFontSize);
       }
       .text__day-total {
-        font-size: 0.78em;
+        font-size: v-bind(customSubFontSize);
       }
       .text__percent {
         display: flex;
@@ -221,11 +221,10 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         gap: 1px;
       }
       .text__unit {
-        font-size: 0.78em;
+        font-size: v-bind(customSubFontSize);
       }
       .text__date {
         font-size: v-bind(customSubFontSize);
-        letter-spacing: 0.01em;
       }
     }
 

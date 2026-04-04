@@ -22,8 +22,8 @@ export interface KeycapTheme {
   emphasisTwoBackgroundColor: string
 }
 
-export const KEYCAP_PREINSTALL_MAP = {
-  // ── 经典系列 ────────────────────────────────────────────────────────
+// ── 经典灵感系列 ─────────────────────────────────────────────────────────────
+export const KEYCAP_CLASSIC_MAP = {
   light: {
     label: 'Light',
     shellColor: 'rgba(73, 73, 73, 0.85)',
@@ -344,7 +344,10 @@ export const KEYCAP_PREINSTALL_MAP = {
     emphasisTwoFontColor: 'rgba(51,51,51,1.0)',
     emphasisTwoBackgroundColor: 'rgba(60,220,198,1.0)',
   },
-  // ── 自然与氛围系列 ───────────────────────────────────────────────────
+} satisfies Record<string, KeycapTheme>
+
+// ── 自然氛围系列 ─────────────────────────────────────────────────────────────
+export const KEYCAP_ATMOSPHERE_MAP = {
   midnight: {
     label: 'Midnight',
     shellColor: 'rgba(15,17,26,1.0)',
@@ -495,7 +498,70 @@ export const KEYCAP_PREINSTALL_MAP = {
     emphasisTwoFontColor: 'rgba(220,200,200,1.0)',
     emphasisTwoBackgroundColor: 'rgba(180,120,110,1.0)',
   },
-  // ── 编辑器 / 设计配色系列 ────────────────────────────────────────────
+  dune: {
+    label: 'Dune',
+    shellColor: 'rgba(171,144,114,1.0)',
+    mainFontColor: 'rgba(84,60,36,1.0)',
+    mainBackgroundColor: 'rgba(225,206,176,1.0)',
+    emphasisOneFontColor: 'rgba(225,206,176,1.0)',
+    emphasisOneBackgroundColor: 'rgba(123,91,58,1.0)',
+    emphasisTwoFontColor: 'rgba(225,206,176,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(180,126,68,1.0)',
+  },
+  alpine: {
+    label: 'Alpine',
+    shellColor: 'rgba(194,210,206,1.0)',
+    mainFontColor: 'rgba(48,82,78,1.0)',
+    mainBackgroundColor: 'rgba(235,243,240,1.0)',
+    emphasisOneFontColor: 'rgba(235,243,240,1.0)',
+    emphasisOneBackgroundColor: 'rgba(74,129,119,1.0)',
+    emphasisTwoFontColor: 'rgba(235,243,240,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(116,160,149,1.0)',
+  },
+  aurora: {
+    label: 'Aurora',
+    shellColor: 'rgba(31,36,63,1.0)',
+    mainFontColor: 'rgba(225,232,255,1.0)',
+    mainBackgroundColor: 'rgba(54,63,104,1.0)',
+    emphasisOneFontColor: 'rgba(21,24,44,1.0)',
+    emphasisOneBackgroundColor: 'rgba(123,233,214,1.0)',
+    emphasisTwoFontColor: 'rgba(21,24,44,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(194,138,255,1.0)',
+  },
+  emberMist: {
+    label: 'Ember Mist',
+    shellColor: 'rgba(58,45,43,1.0)',
+    mainFontColor: 'rgba(244,232,218,1.0)',
+    mainBackgroundColor: 'rgba(88,70,66,1.0)',
+    emphasisOneFontColor: 'rgba(58,45,43,1.0)',
+    emphasisOneBackgroundColor: 'rgba(239,154,90,1.0)',
+    emphasisTwoFontColor: 'rgba(58,45,43,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(205,119,102,1.0)',
+  },
+  lagoon: {
+    label: 'Lagoon',
+    shellColor: 'rgba(21,77,88,1.0)',
+    mainFontColor: 'rgba(225,248,245,1.0)',
+    mainBackgroundColor: 'rgba(31,109,119,1.0)',
+    emphasisOneFontColor: 'rgba(18,58,66,1.0)',
+    emphasisOneBackgroundColor: 'rgba(126,236,217,1.0)',
+    emphasisTwoFontColor: 'rgba(18,58,66,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(255,216,120,1.0)',
+  },
+  plum: {
+    label: 'Plum',
+    shellColor: 'rgba(74,48,82,1.0)',
+    mainFontColor: 'rgba(240,228,244,1.0)',
+    mainBackgroundColor: 'rgba(104,67,112,1.0)',
+    emphasisOneFontColor: 'rgba(55,34,63,1.0)',
+    emphasisOneBackgroundColor: 'rgba(241,185,214,1.0)',
+    emphasisTwoFontColor: 'rgba(55,34,63,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(193,154,255,1.0)',
+  },
+} satisfies Record<string, KeycapTheme>
+
+// ── 编辑器配色系列 ────────────────────────────────────────────────────────────
+export const KEYCAP_STUDIO_MAP = {
   dracula: {
     label: 'Dracula',
     shellColor: 'rgba(40,42,54,1.0)',
@@ -696,6 +762,20 @@ export const KEYCAP_PREINSTALL_MAP = {
     emphasisTwoFontColor: 'rgba(60,45,80,1.0)',
     emphasisTwoBackgroundColor: 'rgba(200,130,220,1.0)',
   },
+  arcade: {
+    label: 'Arcade',
+    shellColor: 'rgba(25,28,44,1.0)',
+    mainFontColor: 'rgba(236,242,255,1.0)',
+    mainBackgroundColor: 'rgba(44,49,78,1.0)',
+    emphasisOneFontColor: 'rgba(19,21,35,1.0)',
+    emphasisOneBackgroundColor: 'rgba(255,92,151,1.0)',
+    emphasisTwoFontColor: 'rgba(19,21,35,1.0)',
+    emphasisTwoBackgroundColor: 'rgba(108,234,255,1.0)',
+  },
+} satisfies Record<string, KeycapTheme>
+
+// ── 高级质感系列 ─────────────────────────────────────────────────────────────
+export const KEYCAP_PREMIUM_MAP = {
   cashmere: {
     label: 'Cashmere',
     shellColor: 'rgba(215,205,195,1.0)',
@@ -756,66 +836,6 @@ export const KEYCAP_PREINSTALL_MAP = {
     emphasisTwoFontColor: 'rgba(17,18,22,1.0)',
     emphasisTwoBackgroundColor: 'rgba(149,161,181,1.0)',
   },
-  dune: {
-    label: 'Dune',
-    shellColor: 'rgba(171,144,114,1.0)',
-    mainFontColor: 'rgba(84,60,36,1.0)',
-    mainBackgroundColor: 'rgba(225,206,176,1.0)',
-    emphasisOneFontColor: 'rgba(225,206,176,1.0)',
-    emphasisOneBackgroundColor: 'rgba(123,91,58,1.0)',
-    emphasisTwoFontColor: 'rgba(225,206,176,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(180,126,68,1.0)',
-  },
-  alpine: {
-    label: 'Alpine',
-    shellColor: 'rgba(194,210,206,1.0)',
-    mainFontColor: 'rgba(48,82,78,1.0)',
-    mainBackgroundColor: 'rgba(235,243,240,1.0)',
-    emphasisOneFontColor: 'rgba(235,243,240,1.0)',
-    emphasisOneBackgroundColor: 'rgba(74,129,119,1.0)',
-    emphasisTwoFontColor: 'rgba(235,243,240,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(116,160,149,1.0)',
-  },
-  aurora: {
-    label: 'Aurora',
-    shellColor: 'rgba(31,36,63,1.0)',
-    mainFontColor: 'rgba(225,232,255,1.0)',
-    mainBackgroundColor: 'rgba(54,63,104,1.0)',
-    emphasisOneFontColor: 'rgba(21,24,44,1.0)',
-    emphasisOneBackgroundColor: 'rgba(123,233,214,1.0)',
-    emphasisTwoFontColor: 'rgba(21,24,44,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(194,138,255,1.0)',
-  },
-  emberMist: {
-    label: 'Ember Mist',
-    shellColor: 'rgba(58,45,43,1.0)',
-    mainFontColor: 'rgba(244,232,218,1.0)',
-    mainBackgroundColor: 'rgba(88,70,66,1.0)',
-    emphasisOneFontColor: 'rgba(58,45,43,1.0)',
-    emphasisOneBackgroundColor: 'rgba(239,154,90,1.0)',
-    emphasisTwoFontColor: 'rgba(58,45,43,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(205,119,102,1.0)',
-  },
-  arcade: {
-    label: 'Arcade',
-    shellColor: 'rgba(25,28,44,1.0)',
-    mainFontColor: 'rgba(236,242,255,1.0)',
-    mainBackgroundColor: 'rgba(44,49,78,1.0)',
-    emphasisOneFontColor: 'rgba(19,21,35,1.0)',
-    emphasisOneBackgroundColor: 'rgba(255,92,151,1.0)',
-    emphasisTwoFontColor: 'rgba(19,21,35,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(108,234,255,1.0)',
-  },
-  lagoon: {
-    label: 'Lagoon',
-    shellColor: 'rgba(21,77,88,1.0)',
-    mainFontColor: 'rgba(225,248,245,1.0)',
-    mainBackgroundColor: 'rgba(31,109,119,1.0)',
-    emphasisOneFontColor: 'rgba(18,58,66,1.0)',
-    emphasisOneBackgroundColor: 'rgba(126,236,217,1.0)',
-    emphasisTwoFontColor: 'rgba(18,58,66,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(255,216,120,1.0)',
-  },
   paperwhite: {
     label: 'Paperwhite',
     shellColor: 'rgba(214,208,196,1.0)',
@@ -826,130 +846,44 @@ export const KEYCAP_PREINSTALL_MAP = {
     emphasisTwoFontColor: 'rgba(248,244,236,1.0)',
     emphasisTwoBackgroundColor: 'rgba(171,136,92,1.0)',
   },
-  plum: {
-    label: 'Plum',
-    shellColor: 'rgba(74,48,82,1.0)',
-    mainFontColor: 'rgba(240,228,244,1.0)',
-    mainBackgroundColor: 'rgba(104,67,112,1.0)',
-    emphasisOneFontColor: 'rgba(55,34,63,1.0)',
-    emphasisOneBackgroundColor: 'rgba(241,185,214,1.0)',
-    emphasisTwoFontColor: 'rgba(55,34,63,1.0)',
-    emphasisTwoBackgroundColor: 'rgba(193,154,255,1.0)',
-  },
+} satisfies Record<string, KeycapTheme>
+
+// ── 聚合全量 Map（由各分组推导，勿手动维护）────────────────────────────────────
+export const KEYCAP_PREINSTALL_MAP = {
+  ...KEYCAP_CLASSIC_MAP,
+  ...KEYCAP_ATMOSPHERE_MAP,
+  ...KEYCAP_STUDIO_MAP,
+  ...KEYCAP_PREMIUM_MAP,
 } satisfies Record<string, KeycapTheme>
 
 export type KeycapThemeKey = keyof typeof KEYCAP_PREINSTALL_MAP
 
 export interface KeycapThemeGroup {
   key: string
-  label: string
-  themeKeys: KeycapThemeKey[]
+  /** i18n 路径，如 'keyboard.themeGroup.classic' */
+  labelKey: string
+  themes: typeof KEYCAP_CLASSIC_MAP | typeof KEYCAP_ATMOSPHERE_MAP | typeof KEYCAP_STUDIO_MAP | typeof KEYCAP_PREMIUM_MAP
 }
 
 export const KEYCAP_PREINSTALL_GROUPS: KeycapThemeGroup[] = [
   {
     key: 'classic',
-    label: '经典灵感',
-    themeKeys: [
-      'light',
-      'whiteOnBlack',
-      'granite',
-      'bento',
-      'olivia',
-      'oblivion',
-      'oblivionW',
-      'classicOlivetti',
-      'shiko',
-      'hhkb',
-      'hana',
-      'rf10th',
-      'raindrop',
-      'carbon',
-      'honeywell',
-      'hyperfuse',
-      'jukebox',
-      'valentine',
-      'eva01',
-      'pulse',
-      'royalNavy',
-      'dolch',
-      'lime',
-      'eve',
-      'godspeed',
-      'jamon',
-      'beta',
-      'dmg',
-      'symbiosis',
-      'poshBlue',
-      'poshPink',
-      'pitta',
-    ],
+    labelKey: 'keyboard.themeGroup.classic',
+    themes: KEYCAP_CLASSIC_MAP,
   },
   {
     key: 'atmosphere',
-    label: '自然氛围',
-    themeKeys: [
-      'midnight',
-      'nord',
-      'matcha',
-      'sakura',
-      'slate',
-      'sunset',
-      'lavender',
-      'amber',
-      'creme',
-      'miami',
-      'forest',
-      'mocha',
-      'glacier',
-      'volt',
-      'dustyRose',
-      'dune',
-      'alpine',
-      'aurora',
-      'emberMist',
-      'lagoon',
-      'plum',
-    ],
+    labelKey: 'keyboard.themeGroup.atmosphere',
+    themes: KEYCAP_ATMOSPHERE_MAP,
   },
   {
     key: 'studio',
-    label: '编辑器配色',
-    themeKeys: [
-      'dracula',
-      'solarized',
-      'gruvbox',
-      'monokai',
-      'tokyoNight',
-      'catppuccin',
-      'oneLight',
-      'rose',
-      'kanagawa',
-      'everforest',
-      'ayu',
-      'pinkLemonade',
-      'arctic',
-      'espresso',
-      'mint',
-      'cobalt',
-      'charcoal',
-      'neon',
-      'wheat',
-      'dusk',
-      'arcade',
-    ],
+    labelKey: 'keyboard.themeGroup.studio',
+    themes: KEYCAP_STUDIO_MAP,
   },
   {
     key: 'premium',
-    label: '高级质感',
-    themeKeys: [
-      'cashmere',
-      'porcelain',
-      'titanium',
-      'oxblood',
-      'deepSea',
-      'obsidian',
-      'paperwhite',
-    ],
+    labelKey: 'keyboard.themeGroup.premium',
+    themes: KEYCAP_PREMIUM_MAP,
   },
 ]
