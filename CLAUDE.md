@@ -122,8 +122,6 @@ Chrome API 回调统一包装为 Promise，不使用裸回调。
 
 **禁止自行实现可用 Naive UI 组件完成的 UI 功能**（如自定义 toggle、手写 slider 等）。
 
----
-
 ## 图标使用规范
 
 **禁止在模板或代码中硬编码图标字符串，必须通过 `ICONS` 常量引用。**
@@ -153,8 +151,6 @@ import { ICONS } from '@/logic/icons'
 /* ✅ 正确：用 font-size 控制 Icon 尺寸 */
 .action__icon { font-size: 20px; }
 ```
-
----
 
 ## i18n 规范
 
@@ -193,8 +189,6 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 新增 Widget 的完整步骤见 `.claude/skills/add-widget/SKILL.md`。
 
----
-
 ## Widget 与 Setting Pane 映射
 
 部分 Widget 共用同一个 setting pane（如所有时钟类和 date 均指向 `clockDate`）。
@@ -212,8 +206,6 @@ export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>>
 ```
 
 遗漏此步会导致右键菜单点击「设置」无法跳转到正确的 setting 面板。
-
----
 
 ## Widget 分组
 
@@ -233,8 +225,6 @@ export const WIDGET_GROUPS: Array<{
 
 分组：`time`（时间类）、`bookmark`（书签类）、`tool`（工具类）三选一。
 
----
-
 ## 自动处理机制（无需手动修改）
 
 以下文件通过 glob / 遍历自动扫描，**不要**手动向其中添加 Widget 条目：
@@ -245,8 +235,6 @@ export const WIDGET_GROUPS: Array<{
 | `src/logic/store.ts` | 遍历 `WIDGET_CODE_LIST` 动态创建 storage key |
 | `src/newtab/Content.vue` | 遍历 `widgetsList` 动态渲染所有 Widget |
 | `src/newtab/draft/DraftDrawer.vue` | 遍历 `widgetsList` 展示组件库列表 |
-
----
 
 ## 快速重置保留字段
 
@@ -261,8 +249,6 @@ export const WIDGET_CONFIG = { /* ... */ }
 - 系统会自动扫描所有 `config.ts` 收集保留字段，无需修改别处
 - `enabled` 和 `layout` 总是被保留，无需重复声明
 - 只有用户通过交互生成的自定义数据才需要保留，普通配置选项不需要
-
----
 
 ## 定时任务生命周期管理
 
@@ -286,8 +272,6 @@ watch(isRender, (value) => {
 - 全局 timer 每 **1000ms** 触发一次，所有 Widget 共享此定时器
 - `addTimerTask` 会立即执行一次 task，再加入轮询列表
 - 组件卸载时不需要手动移除，`WidgetWrap` 的 `isEnabled` watch 会自动处理
-
----
 
 ## WidgetWrap 机制说明
 
@@ -320,8 +304,6 @@ Widget 根组件写法：
 - Chrome 云同步使用 `chrome.storage.sync`，key 为 `naive-tab-{field}`
 - **云同步限制**：单个配置不超过 8KB，总量约 100KB，每分钟最多写 120 次
 
----
-
 ## 全局状态说明
 
 ```ts
@@ -337,8 +319,6 @@ globalState      // 运行时全局状态（不持久化）
 ```
 
 键盘事件在 `isSettingDrawerVisible || isSearchFocused || isInputFocused` 时会被屏蔽（仅 Escape 可用）。
-
----
 
 ## 配置字段设计规范（兼容性）
 
@@ -389,8 +369,6 @@ if (compareLeftVersionLessThanRightVersions(version, 'x.y.z')) {
 | 依赖浅合并补全嵌套字段 | 在 handleAppUpdate 中手动补全 |
 | 不升级版本号就改配置结构 | 必须同步升版本号并写迁移逻辑 |
 
----
-
 ## 云同步架构与规范
 
 项目使用 Chrome 浏览器原生 `chrome.storage.sync` 实现跨设备配置云同步，核心架构为**版本感知的 Last-Write-Wins**策略。
@@ -439,6 +417,53 @@ Chrome `storage.sync` 有严格的配额限制，代码中已做完整防护：
 - 上传失败保留 `dirty` 状态，页面重新加载后 `handleMissedUploadConfig` 会自动重试
 - 压缩解析失败自动降级尝试原始 JSON 解析，兼容旧格式数据
 
+### popup 书签同步机制
+
+**通过 `setupKeyboardSyncListener` 实现 popup 修改书签后 newtab 实时感知。**
+
+#### 数据流
+```
+popup 修改 localConfig.keyboard.keymap[code]
+    ↓
+flushConfigSync('keyboard') → chrome.storage.sync.set（立即写入，跳过防抖）
+    ↓
+chrome.storage.onChanged 事件触发
+    ├─ newtab: setupKeyboardSyncListener → 更新 localConfig.keyboard → Vue 渲染
+    └─ Service Worker: onChanged 监听 → 更新缓存 → 快捷键生效
+```
+
+#### 关键函数
+| 函数 | 文件 | 用途 |
+|------|------|------|
+| `setupKeyboardSyncListener` | `storage.ts` | newtab 启动时注册，监听 keyboard 配置变化 |
+| `flushConfigSync` | `storage.ts` | popup 修改后强制立即同步，跳过 2 秒防抖 |
+| `parseStoredData` | `compress.ts` | 自动解压 gzip 格式，兼容新旧数据格式 |
+
+#### 为什么 popup 需要 `flushConfigSync`
+- popup 关闭后 JavaScript 环境销毁，防抖回调不会执行
+- 必须在 `handleCommit` 中强制同步，确保 Service Worker 能收到更新
+
+### 后台脚本与 keyboard 配置
+
+**后台脚本 `src/background/main.ts` 直接依赖 keyboard（书签快捷键）配置，修改该配置结构时必须同步考虑后台脚本的兼容性。**
+
+#### 架构说明
+- 后台脚本以 Service Worker 形式运行，无法使用 Vue 响应式状态
+- 采用**缓存 + 监听模式**：启动时一次性读取配置到内存，按键时直接读缓存（~0ms 响应）
+- 通过 `chrome.storage.onChanged` 监听配置变化，自动更新缓存
+- 配置超过 4000 字节时会 gzip 压缩，后台脚本通过 `parseStoredData` 自动解压
+- **onChanged 监听器必须返回 Promise**，否则 Service Worker 可能在异步 resolve 前休眠，导致缓存更新失败
+
+#### 修改 keyboard 配置时的注意事项
+| 修改类型 | 后台脚本影响 |
+|----------|--------------|
+| 新增字段 | 无影响（缓存自动合并新字段） |
+| 重命名/删除字段 | **必须同步修改** `main.ts` 中的字段引用 |
+| 修改 keymap 结构 | **必须同步修改** `main.ts` 中的 keymap 访问逻辑 |
+| 修改默认值 | 无影响（后台脚本只读用户配置） |
+
+**Why:** 后台脚本独立运行，不会随 Vue 代码同步更新，遗漏修改会导致快捷键功能异常。
+
 ---
 
 # 样式 & 主题
@@ -456,8 +481,6 @@ fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)']
 
 - `getStyleField(WIDGET_CODE, 'fontColor')` 自动读取当前主题对应值
 - Setting 面板中手动读取颜色时，需用 `localConfig.xxx.fontColor[localState.currAppearanceCode]`
-
----
 
 ## 主题色派生色用法
 
@@ -486,8 +509,6 @@ const primaryIconBg  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)
 - Naive UI **不提供** `--n-primary-color-rgb` 这类 CSS 变量，直接用会 fallback 到 Naive UI 默认绿色（`#18a058`）
 - **不能**直接拼接十六进制 alpha 后缀，格式不兼容
 
----
-
 ## CSS 变量 / Naive UI 主题变量
 
 优先使用 Naive UI 注入的 CSS 变量，这些变量会随主题自动切换：
@@ -515,8 +536,6 @@ const primaryIconBg  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)
 | `--n-card-color` | Card 背景色 |
 | `--n-modal-color` | Modal 背景色 |
 
----
-
 ## 硬编码颜色必须覆盖双模式
 
 若确实需要硬编码颜色（不依赖配置且 Naive UI 变量无法覆盖），**必须同时写浅色和深色规则**：
@@ -535,19 +554,15 @@ const primaryIconBg  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)
 }
 ```
 
----
-
 ## CSS 样式规范
 
 - Widget 的样式块外层 selector 为 `#widgetCode`（由 `WidgetWrap` 自动设置 id）
 - Widget 容器（`.xxx__container`）必须设置 `position: absolute`，配合拖拽定位系统
 - 使用 `v-bind(cssVar)` 将响应式配置注入 CSS，`cssVar` 由 `getStyleField()` 生成
 - 尺寸单位优先使用 `vmin`（`getStyleField` 传 `'vmin'` 时会自动乘以 `0.1`）
-- **`widget__wrap` div 的 style 被 `v-bind` 用于存放 CSS 变量，不可再对其进行 `:style` 绑定操作**
 - 优先使用全局 token 变量，不要写魔法数字（token 定义在 `src/styles/tokens.css` 顶部 `:root` 中）
 - `rgba()` 的 alpha 通道不支持 `var()`，需写字面量（如 `rgba(0,0,0,0.85)`）
 - 不要给 Naive UI 组件覆盖字号，让它继承上下文即可
-- 使用 `backdrop-filter` 时必须同时加 `-webkit-backdrop-filter` 前缀
 
 全局公共 CSS 类（定义在 `src/styles/global.css`，可直接使用）：
 | 类名 | 用途 |
@@ -558,8 +573,6 @@ const primaryIconBg  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)
 | `.setting__input-number` | 数字输入框固定宽度（103px） |
 | `.setting__input-number--unit` | 带单位的数字输入框（150px） |
 | `.n-form-item--color` | 颜色类表单项（压缩 margin） |
-
----
 
 ## getStyleField 用法速查
 
@@ -579,8 +592,6 @@ const unitSize = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin')
 ```
 
 返回值是 `ComputedRef<string>`，在 `<style>` 中通过 `v-bind(customXxx)` 使用。
-
----
 
 ## 光感设计语言（Glassmorphism）
 
@@ -637,8 +648,6 @@ src/newtab/setting/
 - `widget`: 各 Widget 组件配置
 - `other`: 关于、赞助等（放最后）
 
----
-
 ## Setting 原子组件
 
 **所有 Setting 面板开发必须统一使用 `src/newtab/setting/fields` 中的原子组件，禁止自行封装或直接使用 Naive UI 组件。**
@@ -682,8 +691,6 @@ import { ColorField, FontField, SliderField, SwitchField, ToggleColorField } fro
 - 所有颜色相关组件已内置 `currAppearanceCode` 处理逻辑，**无需在模板中手动取值**
 - 传递完整数组即可，组件内部会自动读取当前主题对应的颜色值
 - `ToggleColorField` 的 `width` prop 用于边框宽度，仅当 `show-width="true"` 时才显示
-
----
 
 ## 设置面板图标
 
@@ -737,8 +744,6 @@ if (hasPermission) {
 2. **`CHANGELOG.md`** → 在文件顶部（已有条目之前）新增对应版本的条目
 
 版本号遵循 `Major.Minor.Patch` 格式。
-
----
 
 ## CHANGELOG.md 格式规范
 

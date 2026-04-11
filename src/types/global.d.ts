@@ -43,3 +43,14 @@ interface SelectStringItem {
   label: string
   value: string
 }
+
+/**
+ * 同步数据结构
+ * ⚠️ 重要：appVersion 字段用于版本感知合并策略，确保多设备多版本场景下配置兼容性
+ */
+interface SyncPayload {
+  syncTime: number
+  syncId: string // md5
+  appVersion: string // 生成该数据的客户端版本
+  data: any
+}

@@ -1,8 +1,6 @@
 import { gaProxy } from '@/logic/gtag'
 import { requestPermission } from '@/logic/storage'
-import { useStorageLocal } from '@/composables/useStorageLocal'
-import { createTab, padUrlHttps, log } from '@/logic/util'
-import { defaultConfig } from '@/logic/config'
+import { createTab, padUrlHttps } from '@/logic/util'
 import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
 import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
@@ -16,7 +14,9 @@ export const state = reactive({
 })
 
 export const getSystemBookmarkForKeyboard = async () => {
-  if (localConfig.keyboard.source !== 1) return
+  if (localConfig.keyboard.source !== 1) {
+    return
+  }
   try {
     const base = await getBrowserBookmark()
     state.systemBookmarks = base
@@ -176,30 +176,22 @@ export const handlePressKeycap = (keyCode: string) => {
   }, 200)
 }
 
-export const resetKeyboardPending = () => {
-  localStorage.setItem('data-keyboard-pending', JSON.stringify({ isPending: false }))
-}
-
-const refreshKeyboardConfig = () => {
+/**
+ * 页面获得焦点/可见时刷新键盘相关数据
+ * - 快捷键配置：用户可能在 chrome://extensions/shortcuts 修改了快捷键
+ * - 系统书签：用户可能在其他页面修改了书签树
+ * - keyboard 配置：由 setupKeyboardSyncListener 实时同步，无需在此处理
+ */
+const refreshKeyboardData = () => {
   if (globalState.isSettingDrawerVisible) {
     getAllCommandsConfig()
   }
-  const bookmarkPendingData = useStorageLocal('data-keyboard-pending', { isPending: false })
-  if (!bookmarkPendingData.value.isPending) return
-  log('Update keyboard from popup')
-  localConfig.keyboard = useStorageLocal('c-keyboard', defaultConfig.keyboard) as any
-  resetKeyboardPending()
+  getSystemBookmarkForKeyboard()
 }
 
-addPageFocusTask('keyboard', () => {
-  refreshKeyboardConfig()
-  getSystemBookmarkForKeyboard()
-})
+addPageFocusTask('keyboard', refreshKeyboardData)
 
 addVisibilityTask('keyboard', (hidden) => {
-  if (hidden) {
-    return
-  }
-  refreshKeyboardConfig()
-  getSystemBookmarkForKeyboard()
+  if (hidden) return
+  refreshKeyboardData()
 })

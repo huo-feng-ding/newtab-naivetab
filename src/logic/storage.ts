@@ -70,77 +70,10 @@ import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
 import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
 import { localConfig, localState, globalState, switchSettingDrawerVisible, updateSetting, mergeState } from '@/logic/store'
 import { clearDatabase } from '@/logic/database'
+import { COMPRESS_PREFIX, compressString, decompressString, shouldCompress, parseStoredData } from '@/logic/compress'
 
 // ── 压缩配置 ─────────────────────────
-
-// 启用压缩的字段列表
-const COMPRESSED_FIELDS: ConfigField[] = ['keyboard']
-// 自动压缩阈值（超过此大小才压缩）
-const AUTO_COMPRESS_THRESHOLD = 4000
-// 压缩数据前缀标记
-const COMPRESS_PREFIX = 'gzip:'
-
-/**
- * 使用 gzip 压缩字符串，返回 base64 编码
- */
-const compressString = async (str: string): Promise<string> => {
-  try {
-    const stream = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))
-    const compressed = await new Response(stream).arrayBuffer()
-    // base64 编码
-    const bytes = new Uint8Array(compressed)
-    let binary = ''
-    for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i])
-    }
-    return btoa(binary)
-  } catch (e) {
-    log('Compress failed', e)
-    throw e
-  }
-}
-
-/**
- * 解压 gzip 压缩的 base64 字符串
- */
-const decompressString = async (base64Str: string): Promise<string> => {
-  try {
-    // base64 解码
-    const binary = atob(base64Str)
-    const bytes = new Uint8Array(binary.length)
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i)
-    }
-    // gzip 解压
-    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
-    const decompressed = await new Response(stream).arrayBuffer()
-    return new TextDecoder().decode(decompressed)
-  } catch (e) {
-    log('Decompress failed', e)
-    throw e
-  }
-}
-
-/**
- * 判断是否使用压缩
- */
-const shouldCompress = (field: ConfigField, payloadBytes: number): boolean => {
-  if (!COMPRESSED_FIELDS.includes(field)) return false
-  return payloadBytes > AUTO_COMPRESS_THRESHOLD
-}
-
-/**
- * 解析存储的数据（自动处理压缩和非压缩格式）
- */
-const parseStoredData = async (rawData: string): Promise<SyncPayload> => {
-  let jsonStr = rawData
-  // 检查是否压缩格式
-  if (rawData.startsWith(COMPRESS_PREFIX)) {
-    const compressedData = rawData.slice(COMPRESS_PREFIX.length)
-    jsonStr = await decompressString(compressedData)
-  }
-  return JSON.parse(jsonStr)
-}
+// 压缩相关函数已移至 @/logic/compress.ts，此处仅引用
 
 export const isUploadConfigLoading = computed(() => {
   if (!Object.prototype.hasOwnProperty.call(localState.value, 'isUploadConfigStatusMap')) {
@@ -401,6 +334,76 @@ export const handleWatchLocalConfigChange = () => {
 }
 
 /**
+ * 强制立即同步配置到 chrome.storage.sync（跳过防抖）
+ *
+ * 用于 popup 等可能立即关闭的场景，确保配置能同步到 Service Worker
+ * 调用后会立即写入，不依赖防抖延迟
+ *
+ * @param field 配置字段名，如 'keyboard'
+ * @returns Promise<boolean> 同步是否成功
+ */
+export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
+  // 标记本地有修改（如果尚未标记）
+  if (!localState.value.isUploadConfigStatusMap[field]?.dirty) {
+    localState.value.isUploadConfigStatusMap[field].dirty = true
+    localState.value.isUploadConfigStatusMap[field].localModifiedTime = Date.now()
+  }
+  localState.value.isUploadConfigStatusMap[field].loading = true
+  log(`Flush config-${field} sync`)
+  const result = await uploadConfigFn(field)
+  return result as boolean
+}
+
+/**
+ * 设置 chrome.storage.onChanged 监听器，同步 popup 修改的 keyboard 配置
+ *
+ * 【使用场景】
+ * popup 修改书签后通过 flushConfigSync('keyboard') 立即写入 chrome.storage.sync
+ * newtab 通过此监听器实时感知变化并更新 localConfig.keyboard
+ *
+ * 【防循环更新】
+ * 通过比较 syncId 判断是否需要更新，避免本地修改后又触发 onChanged 形成循环
+ *
+ * 【注意】
+ * 此监听器只在 newtab 页面注册，Service Worker 有自己的独立监听逻辑
+ */
+export const setupKeyboardSyncListener = () => {
+  chrome.storage.onChanged.addListener((changes) => {
+    const key = 'naive-tab-keyboard'
+    if (!changes[key]) return
+
+    const raw = changes[key].newValue as string
+    if (!raw || raw.length === 0) return
+
+    // 返回 Promise，Chrome 会等待异步完成
+    return parseStoredData(raw)
+      .then((parsed: SyncPayload) => {
+        const newSyncId = parsed.syncId
+        const currSyncId = localState.value.isUploadConfigStatusMap.keyboard?.syncId
+
+        // syncId 相同说明内容未变化，跳过更新（防循环）
+        if (newSyncId === currSyncId) {
+          log('Sync keyboard skipped (same syncId)')
+          return
+        }
+
+        // 直接更新 localConfig.keyboard
+        // popup 和 newtab 运行在同一设备同一版本，无需版本感知合并
+        localConfig.keyboard = parsed.data
+        log('Sync keyboard updated from storage.onChanged')
+
+        // 更新同步状态
+        localState.value.isUploadConfigStatusMap.keyboard.syncId = newSyncId
+        localState.value.isUploadConfigStatusMap.keyboard.syncTime = parsed.syncTime
+        localState.value.isUploadConfigStatusMap.keyboard.dirty = false
+      })
+      .catch((e) => {
+        log('Sync keyboard parse error', e)
+      })
+  })
+}
+
+/**
  * 页面启动时处理上次未完成上传的配置
  *
  * 【故障恢复机制】
@@ -417,18 +420,6 @@ export const handleMissedUploadConfig = async () => {
       uploadConfigFn(field)
     }
   }
-}
-
-/**
- * 同步数据结构
- *
- * ⚠️ 重要：appVersion 字段用于版本感知合并策略，确保多设备多版本场景下配置兼容性
- */
-interface SyncPayload {
-  syncTime: number
-  syncId: string // md5
-  appVersion: string // 生成该数据的客户端版本
-  data: any
 }
 
 // ── 版本感知合并策略 ─────────────────────────
