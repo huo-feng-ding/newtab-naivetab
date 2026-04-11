@@ -13,6 +13,7 @@ import type { TWidgetConfig as ClockFlipConfig } from './clockFlip/config'
 import type { TWidgetConfig as ClockNeonConfig } from './clockNeon/config'
 import type { TWidgetConfig as WeatherConfig } from './weather/config'
 import type { TWidgetConfig as YearProgressConfig } from './yearProgress/config'
+import type { TWidgetConfig as CountdownConfig } from './countdown/config'
 
 // @@@@ add widget registry
 export type WidgetConfigByCode = {
@@ -29,6 +30,7 @@ export type WidgetConfigByCode = {
   clockNeon: ClockNeonConfig
   weather: WeatherConfig
   yearProgress: YearProgressConfig
+  countdown: CountdownConfig
 }
 
 export type WidgetMeta = {

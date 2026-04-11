@@ -48,6 +48,7 @@ export default defineConfig(
       'no-undef': 'off',
       'no-unused-vars': 'off',
       'no-empty-function': 'off',
+      'no-useless-assignment': 'off',
       'max-len': 'off',
       'no-plusplus': 'off',
       'no-continue': 'off',

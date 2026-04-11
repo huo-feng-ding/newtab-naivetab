@@ -200,6 +200,11 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
 </template>
 
 <style>
+@keyframes folder-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 #bookmarkFolder {
   user-select: none;
 
@@ -377,10 +382,6 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     font-size: 22px;
     opacity: 0.7;
     animation: folder-spin 1s linear infinite;
-  }
-  @keyframes folder-spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
   }
 
   .folder__permission {

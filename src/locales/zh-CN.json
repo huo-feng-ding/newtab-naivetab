@@ -31,6 +31,7 @@
     "vertical": "垂直",
     "horizontal": "水平",
     "style": "样式",
+    "typography": "文字",
     "appearance": "外观",
     "preinstall": "预设",
     "theme": "主题",
@@ -64,7 +65,8 @@
     "padding": "内边距",
     "paddingVertical": "垂直内边距",
     "paddingHorizontal": "水平内边距",
-    "size": "大小",
+    "process": "处理",
+    "size": "尺寸",
     "width": "宽度",
     "height": "高度",
     "lineHeight": "行高度",
@@ -86,9 +88,11 @@
     "day": "天",
     "setting": "设置",
     "general": "通用",
+    "advanced": "高级",
     "other": "其他",
     "retry": "重试",
-    "login": "登录"
+    "login": "登录",
+    "behavior": "配置项"
   },
   "form": {
     "applyToAppearance": "应用于外观",
@@ -146,7 +150,7 @@
     "stepDescription5": "NaiveTab 已准备好，去打造你的专属标签页吧"
   },
   "widgetGroup": {
-    "clock": "时钟 / 日期",
+    "time": "时间",
     "bookmark": "书签",
     "tool": "工具"
   },
@@ -158,6 +162,7 @@
     "keyboard": "键盘书签",
     "bookmarkFolder": "文件夹书签",
     "bookmarkConfig": "书签配置",
+    "clockDate": "时钟/日期",
     "clock": "时钟",
     "clockDigital": "数字时钟",
     "clockAnalog": "模拟时钟",
@@ -170,10 +175,12 @@
     "weather": "天气",
     "memo": "备忘录",
     "news": "资讯",
+    "countdown": "倒计时",
     "aboutIndex": "关于",
     "aboutSponsor": "买杯咖啡"
   },
   "general": {
+    "total": "总计",
     "globalStyle": "全局样式",
     "generalLabel": "通用",
     "pageTitle": "页面标题",
@@ -192,6 +199,7 @@
     "syncStorageSizeTips": "各项配置在 Chrome 同步存储中的占用大小，单项上限 8KB",
     "syncSizeWarning": "{field} 配置接近同步上限（{size}KB / 8KB），建议减少书签数量",
     "syncSizeExceeded": "{field} 配置超出同步限制（{size}KB / 8KB），配置已保存到本地但无法跨设备同步，请减少书签数量或缩短 URL",
+    "syncRateWarning": "同步写入频率较高（{count} - {max}/分钟），请稍后再修改设置，避免触发浏览器限制",
     "syncTime": "同步时间",
     "syncTimeTips": "需登录浏览器账号开启数据同步",
     "importExportSettingsLabel": "导入/导出",
@@ -204,19 +212,31 @@
     "clearStorageTips": "清除本地缓存不影响已同步设置",
     "resetSettingLabel": "重置设置",
     "resetSettingValue": "重置",
+    "reset": "重置",
     "resetAllSettingValue": "重置全部设置",
     "resetSettingTips": "遇到无法解决的问题可尝试重置设置，注意备份当前配置",
+    "quickReset": "快速重置",
+    "quickResetDesc": "保留用户数据，只重置外观",
+    "fullReset": "完全重置",
+    "fullResetDesc": "重置所有设置到默认值",
+    "confirmReset": "确认重置该组件设置到默认值？",
     "language": "主语言",
     "timeLanguage": "日期语言",
     "saveCurrendImage": "保存当前背景",
     "localBackgroundTips": "本地背景图不会进行云同步，仅在当前设备生效",
-    "focusModeTips": "在专注模式下，仅显示你选择的组件"
+    "focusModeTips": "在专注模式下，仅显示你选择的组件",
+    "parallax": "背景视差效果",
+    "parallaxTips": "鼠标移动时背景会轻微跟随移动，增加动态层次感",
+    "parallaxIntensity": "视差强度"
   },
   "clock": {
     "showColon": "显示冒号",
     "colonBlink": "冒号呼吸动画",
     "apMark": "a.m./p.m.",
     "showSeconds": "显示秒",
+    "showNumberScale": "显示数字刻度",
+    "numberScaleFont": "数字刻度字体",
+    "numberScaleRadius": "数字刻度半径",
     "24hour": "24小时制",
     "cardGap": "卡片间距",
     "cardColor": "卡片颜色",
@@ -285,8 +305,8 @@
     "hideName": "隐藏名称",
     "iconSize": "图标大小",
     "itemHeight": "书签项高度",
-    "itemGap": "项目间距",
-    "itemBorderRadius": "项目圆角"
+    "itemGap": "书签项间距",
+    "itemBorderRadius": "书签项圆角"
   },
   "search": {
     "searchEngine": "搜索引擎",
@@ -356,6 +376,19 @@
     "kr36": "36氪",
     "bilibili": "B站",
     "v2ex": "V2EX"
+  },
+  "countdown": {
+    "clock": "时钟",
+    "defaultDuration": "默认时长",
+    "showHours": "显示小时位",
+    "strokeWidth": "进度环宽度",
+    "progressColor": "进度颜色",
+    "trackColor": "轨道颜色",
+    "notifyTitle": "倒计时结束",
+    "notifyBody": "计时已完成",
+    "label": "标签文字",
+    "labelFontSize": "标签字体大小",
+    "labelFontColor": "标签颜色"
   },
   "about": {
     "userHelp": "使用帮助",

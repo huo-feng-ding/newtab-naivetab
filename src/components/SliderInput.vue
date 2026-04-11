@@ -27,7 +27,7 @@ const modelValue = defineModel<number>({ required: true })
   />
   <NInputNumber
     v-model:value="modelValue"
-    class="setting__item-ele setting__input-number"
+    class="setting__item-ele setting__item-ml setting__input-number"
     size="small"
     :step="props.step"
     :min="props.min"

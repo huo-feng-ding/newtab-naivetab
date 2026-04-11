@@ -1,5 +1,7 @@
 export const WIDGET_CODE = 'memo'
 
+export const PRESERVE_FIELDS = ['content']
+
 export const WIDGET_CONFIG = {
   enabled: false,
   countEnabled: true,

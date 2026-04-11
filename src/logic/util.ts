@@ -120,7 +120,7 @@ export const compressedImageToBlob = async (
     try {
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     } catch (error) {
-      throw new Error(`Canvas drawing failed （可能被污染或资源无效）: ${error}`)
+      throw new Error(`Canvas drawing failed （可能被污染或资源无效）: ${error}`, { cause: error })
     }
     return await new Promise((resolve, reject) => {
       canvas.toBlob(
@@ -136,7 +136,7 @@ export const compressedImageToBlob = async (
       )
     })
   } catch (error) {
-    throw new Error(`图片压缩失败: ${error}`)
+    throw new Error(`图片压缩失败: ${error}`, { cause: error })
   }
 }
 

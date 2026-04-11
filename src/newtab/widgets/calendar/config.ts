@@ -23,7 +23,7 @@ export const WIDGET_CONFIG = {
   descFontFamily: 'Arial',
   descFontSize: 10,
   descFontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
-  backgroundColor: ['rgba(255, 255, 255, 0.85)', 'rgba(52, 52, 57, 0.65)'],
+  backgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(52, 52, 57, 0.65)'],
   backgroundBlur: 5,
   isBorderEnabled: false,
   borderWidth: 1,

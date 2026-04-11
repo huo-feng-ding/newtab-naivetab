@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useStorageLocal } from '@/composables/useStorageLocal'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import { gaProxy } from '@/logic/gtag'
-import { requestPermission } from '@/logic/storage'
+import { requestPermission, flushConfigSync } from '@/logic/storage'
 import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/keyboard'
 import { getFaviconFromUrl } from '@/logic/bookmark'
 import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, KEYBOARD_COMMAND_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
@@ -42,11 +41,6 @@ const state = reactive({
   keyCode: '', // 当前选中的键位
 })
 
-// 为实现 page 切换前台时刷新通过 popup 修改的书签
-const keyboardPendingData = useStorageLocal('data-keyboard-pending', {
-  isPending: false,
-})
-
 onMounted(() => {
   setCurrentTabUrl()
   getAllCommandsConfig()
@@ -60,8 +54,10 @@ onMounted(() => {
 const setCurrentTabUrl = () => {
   chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
     const currTab = tabs[0]
-    state.url = currTab.url || ''
-    state.name = currTab.title || ''
+    const { url, title } = currTab
+    state.url = url?.slice(0, KEYBOARD_URL_MAX_LENGTH) || ''
+    // title 可能过长且包含换行，默认不直接使用，交由用户选择是否填入；如果用户没有输入名称，则使用默认名称（从 url 解析或默认文案）
+    state.name = ''
   })
 }
 
@@ -83,15 +79,17 @@ const selectKey = (key: string) => {
 
 const isCommitBtnDisabled = computed(() => state.keyCode.length === 0)
 
-/** 通用提交包装：设置 loading、标记 pending（供 newtab 感知变更）、执行回调 */
-const handleCommit = (callback: () => void) => {
+/** 通用提交包装：设置 loading、执行回调、强制同步到 chrome.storage */
+const handleCommit = async (callback: () => void) => {
   state.isCommitLoading = true
-  keyboardPendingData.value.isPending = true
   callback()
+  // 强制立即同步到 chrome.storage.sync，确保 Service Worker 和 newtab 能收到更新
+  // popup 关闭后防抖回调不会执行，必须在此处强制同步
+  await flushConfigSync('keyboard')
   setTimeout(() => {
     state.isCommitLoading = false
     window.$message.success(`${window.$t('common.success')}`)
-  }, 1000)
+  }, 300)
 }
 
 const onDeleteKey = () => {

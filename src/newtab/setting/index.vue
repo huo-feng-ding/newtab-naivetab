@@ -42,18 +42,40 @@ watch(
 const settingContentHeightStyle = computed(() => `${settingContentHeight.value}px`)
 
 /**
- * 每个分组（第一个分组除外）的首个 tab code 集合。
- * 用于在该 tab 的 tab slot 中添加 group-start 标记，通过 CSS 显示分隔线。
+ * 获取每个分组（第一个分组除外）首个 tab 的信息。
+ * 用于在分隔线位置显示分组标题。
+ */
+const groupsWithFirstItem = computed(() => {
+  const result: Array<{ firstCode: settingPanes, labelKey: string }> = []
+  SETTING_GROUPS.forEach((group, index) => {
+    if (index > 0 && group.items.length > 0) {
+      result.push({
+        firstCode: group.items[0].code,
+        labelKey: group.labelKey,
+      })
+    }
+  })
+  return result
+})
+
+/**
+ * 首个 tab code 集合，用于标记分组起点
  */
 const groupStartSet = computed(() => {
   const set = new Set<settingPanes>()
-  SETTING_GROUPS.forEach((group, index) => {
-    if (index > 0 && group.items.length > 0) {
-      set.add(group.items[0])
-    }
+  groupsWithFirstItem.value.forEach((item) => {
+    set.add(item.firstCode)
   })
   return set
 })
+
+/**
+ * 根据首个 item code 获取分组 labelKey
+ */
+const getGroupLabel = (code: settingPanes): string => {
+  const found = groupsWithFirstItem.value.find((item) => item.firstCode === code)
+  return found?.labelKey || ''
+}
 </script>
 
 <template>
@@ -85,20 +107,25 @@ const groupStartSet = computed(() => {
             v-for="item of tabPaneList"
             :key="item.code"
             :name="item.code"
-            :tab="item.labelKeys ? `${$t(item.labelKeys[0])} / ${$t(item.labelKeys[1])}` : $t(item.labelKey || '')"
+            :tab="$t(item.labelKey || '')"
           >
             <template #tab>
               <div
                 class="tab__title"
                 :class="{ 'tab__title--group-start': groupStartSet.has(item.code) }"
               >
+                <template v-if="groupStartSet.has(item.code)">
+                  <div class="group-divider">
+                    <span class="group-divider__text">{{ $t(getGroupLabel(item.code)) }}</span>
+                  </div>
+                </template>
                 <div
                   class="title__icon"
                   :style="`font-size: ${item.iconSize}px`"
                 >
                   <Icon :icon="item.iconName" />
                 </div>
-                <span class="title__text">{{ item.labelKeys ? `${$t(item.labelKeys[0])} / ${$t(item.labelKeys[1])}` : $t(item.labelKey || '') }}</span>
+                <span class="title__text">{{ $t(item.labelKey || '') }}</span>
               </div>
             </template>
 
@@ -151,19 +178,43 @@ const groupStartSet = computed(() => {
       .n-tabs-nav-scroll-wrapper {
         height: v-bind(settingContentHeightStyle);
 
-        /* 分组分隔线：在分组首个 tab 的外层 wrapper 前插入 */
+        /* 分组分隔线：在分组首个 tab 上方显示分组标题 */
         .n-tabs-tab:has(.tab__title--group-start) {
-          margin-top: var(--space-2);
+          margin-top: 20px;
           position: relative;
+        }
+
+        .tab__title--group-start .group-divider {
+          position: absolute;
+          top: -18px;
+          left: 0;
+          right: 0;
+          text-align: center;
+          background: var(--n-color);
+          padding: 0 4px;
+
+          .group-divider__text {
+            display: inline-block;
+            padding: 0 10px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--n-text-color-3);
+            background: var(--n-color);
+            opacity: 0.45;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          }
+
           &::before {
             content: '';
             position: absolute;
-            top: -5px;
-            left: 12%;
-            width: 76%;
+            top: 50%;
+            left: 8px;
+            right: 8px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--n-tab-border-color) 30%, var(--n-tab-border-color) 70%, transparent);
-            opacity: 0.8;
+            background: linear-gradient(90deg, transparent, var(--n-tab-border-color) 20%, var(--n-tab-border-color) 80%, transparent);
+            opacity: 1;
+            z-index: 0;
           }
         }
 

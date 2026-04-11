@@ -5,11 +5,11 @@ import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
 const onFocus = () => {
-  globalState.isMemoFocused = true
+  globalState.isInputFocused = true
 }
 
 const onBlur = () => {
-  globalState.isMemoFocused = false
+  globalState.isInputFocused = false
 }
 
 // isDragMode下不允许输入

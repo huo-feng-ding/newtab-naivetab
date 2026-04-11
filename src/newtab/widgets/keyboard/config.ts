@@ -1,11 +1,13 @@
 export const WIDGET_CODE = 'keyboard'
 
+export const PRESERVE_FIELDS = ['keymap']
+
 export const WIDGET_CONFIG = {
   enabled: true,
-  source: 2,
-  isListenBackgroundKeystrokes: true,
-  isDblclickOpen: false,
-  dblclickIntervalTime: 200,
+  source: 2, // 书签来源：1浏览器，2扩展本身
+  isListenBackgroundKeystrokes: true, // 是否监听后台按键
+  isDblclickOpen: false, // 是否双击打开
+  dblclickIntervalTime: 200, // 双击间隔时间
   isNewTabOpen: false,
   defaultExpandFolder: null as null | string,
   keymap: {
@@ -34,7 +36,7 @@ export const WIDGET_CONFIG = {
     yOffsetValue: 1,
     yTranslateValue: 0,
   },
-  keyboardType: 'key61',
+  keyboardType: 'key67',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
   // keycap
   keycapType: 'gmk' as KeycapVisualType,
@@ -50,7 +52,7 @@ export const WIDGET_CONFIG = {
   shellVerticalPadding: 15,
   shellHorizontalPadding: 15,
   shellBorderRadius: 10,
-  shellColor: ['rgba(73, 73, 73, 0.8)', 'rgba(34, 34, 34, 1.0)'],
+  shellColor: ['rgba(73, 73, 73, 0.7)', 'rgba(34, 34, 34, 0.7)'],
   isShellShadowEnabled: true,
   shellShadowColor: ['rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.4)'],
   shellBackgroundBlur: 5,
@@ -58,7 +60,7 @@ export const WIDGET_CONFIG = {
   isPlateVisible: true,
   platePadding: 3,
   plateBorderRadius: 5,
-  plateColor: ['rgba(80, 80, 80, 0.8)', 'rgba(119, 119, 119, 0.5)'],
+  plateColor: ['rgba(80, 80, 80, 0.6)', 'rgba(119, 119, 119, 0.5)'],
   plateBackgroundBlur: 3,
   // keycap key
   isCapKeyVisible: true,

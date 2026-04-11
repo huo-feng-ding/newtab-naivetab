@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "module": "esnext",
     "target": "esnext",
     "lib": ["dom", "esnext"],
@@ -31,6 +32,8 @@
   "exclude": ["dist", "node_modules"],
   "include": [
     "src/**/*.ts",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "shim.d.ts"
   ]
 }

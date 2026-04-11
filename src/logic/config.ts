@@ -63,6 +63,8 @@ const generalConfig = {
   backgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(53, 54, 58, 1)'],
   bgOpacity: 1,
   bgBlur: 0,
+  isParallaxEnabled: true,
+  parallaxIntensity: 5,
   swatcheColors: [
     'rgba(255, 255, 255, 1)',
     'rgba(16, 152, 173, 1)',
@@ -99,7 +101,9 @@ export const defaultConfig = {
 export const defaultUploadStatusItem = {
   loading: false,
   syncTime: 0,
-  syncId: '',
+  syncId: '', // MD5
+  localModifiedTime: 0, // 本地最后修改时间
+  dirty: false, // 本地是否有未同步的修改
 }
 
 const genUploadConfigStatusMap = () => {
@@ -108,6 +112,8 @@ const genUploadConfigStatusMap = () => {
       loading: boolean
       syncTime: number
       syncId: string
+      localModifiedTime: number
+      dirty: boolean
     }
   }
   for (const widget in defaultConfig) {

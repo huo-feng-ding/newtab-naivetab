@@ -22,7 +22,7 @@ const useWidgetStorageLocal = <K extends keyof WidgetConfigByCode>(key: K) => {
 const createLocalConfig = (): LocalConfigRefs => {
   const res: any = {}
   res.general = useStorageLocal('c-general', defaultConfig.general)
-  const widgetNames = WIDGET_CODE_LIST as (keyof WidgetConfigByCode)[]
+  const widgetNames = WIDGET_CODE_LIST
   for (const key of widgetNames) {
     res[key] = useWidgetStorageLocal(key)
   }
@@ -44,7 +44,7 @@ export const globalState = reactive({
   isClearStorageLoading: false,
   isChangelogModalVisible: false,
   isSearchFocused: false,
-  isMemoFocused: false,
+  isInputFocused: false,
   currSettingTabCode: 'general',
   currSettingAnchor: '',
 })
@@ -165,7 +165,7 @@ export const fontSelectRenderLabel = (option: SelectStringItem) => {
       [
         h('span', {
           style: {
-            maxWidth: '110px',
+            maxWidth: '90px',
             'overflow': 'hidden',
             'whiteSpace': 'nowrap',
             'textOverflow': 'ellipsis',
@@ -201,10 +201,24 @@ export const openChangelogModal = () => {
   globalState.isChangelogModalVisible = true
 }
 
+/**
+ * 同步状态映射表增量更新
+ *
+ * 当新增 Widget 后，为 isUploadConfigStatusMap 增量添加新增字段的默认状态
+ * 避免全量重置导致丢失已有字段的同步状态（dirty, syncTime, syncId 等）
+ */
 export const handleStateResetAndUpdate = () => {
-  if (Object.keys(defaultLocalState.isUploadConfigStatusMap).length !== Object.keys(localState.value.isUploadConfigStatusMap).length) {
-    localState.value.isUploadConfigStatusMap = defaultLocalState.isUploadConfigStatusMap
-    log('isUploadConfigStatusMap update')
+  let needUpdate = false
+  // 遍历默认状态，增量添加缺失的字段
+  for (const [field, defaultStatus] of Object.entries(defaultLocalState.isUploadConfigStatusMap)) {
+    if (!Object.prototype.hasOwnProperty.call(localState.value.isUploadConfigStatusMap, field)) {
+      localState.value.isUploadConfigStatusMap[field] = { ...defaultStatus }
+      needUpdate = true
+      log(`isUploadConfigStatusMap add field: ${field}`)
+    }
+  }
+  if (needUpdate) {
+    log('isUploadConfigStatusMap update completed')
   }
 }
 
@@ -324,43 +338,77 @@ export const getLocalVersion = () => {
   return version || '0'
 }
 
-const mergeState = (state: unknown, acceptState: unknown) => {
+/**
+ * 配置合并函数（递归）
+ *
+ * 合并策略说明：
+ * ┌─────────────────────────────────────────────────────────────────────────────┐
+ * │  参数说明                                                                   │
+ * │  - state: 默认配置（来自 defaultConfig）                                   │
+ * │  - acceptState: 待合并的配置（来自云端/导入/本地）                          │
+ * │                                                                             │
+ * │  合并规则（按优先级）：                                                     │
+ * │  1. acceptState 为空 → 使用默认值 state                                     │
+ * │  2. 类型不同 → 使用默认值 state（处理新增字段）                             │
+ * │  3. 基础类型 → 直接使用 acceptState 的值                                    │
+ * │  4. 数组等非纯Object → 直接使用 acceptState 的值                            │
+ * │  5. keymap 特殊对象 → 直接使用 acceptState 的值（避免深合并破坏结构）        │
+ * │  6. 普通对象 → 递归合并，只合并 state 中已定义的字段                        │
+ * │                                                                             │
+ * │  设计目标：                                                                 │
+ * │  - 保留用户新版本新增字段的默认值                                           │
+ * │  - 删除旧版本废弃的字段                                                     │
+ * │  - 避免合并破坏特殊数据结构（如 keymap）                                    │
+ * └─────────────────────────────────────────────────────────────────────────────┘
+ */
+export const mergeState = (state: unknown, acceptState: unknown): unknown => {
+  // 规则1: acceptState 为空，使用默认值
   if (acceptState === undefined || acceptState === null) {
     return state
   }
-  // 二者类型不同时，直接返回state，为处理新增state的情况
+
+  // 规则2: 类型不同时，使用默认值（处理新增字段的情况）
+  // 例如：旧版本某字段是 string，新版本改为 object
   if (Object.prototype.toString.call(state) !== Object.prototype.toString.call(acceptState)) {
     return state
   }
+
+  // 规则3: 基础类型，直接使用 acceptState 的值
   if (typeof acceptState === 'string' || typeof acceptState === 'number' || typeof acceptState === 'boolean') {
     return acceptState
   }
-  // 只处理纯Object类型，其余如Array等对象类型均直接返回acceptState
+
+  // 规则4: 数组等非纯 Object 类型，直接使用 acceptState 的值
+  // 原因：数组的合并逻辑复杂，直接替换更安全
   if (Object.prototype.toString.call(acceptState) !== '[object Object]') {
     return acceptState
   }
-  // 二者均为Object，且state为空Object时，返回acceptState
-  if (Object.keys(state as object).length === 0) {
+
+  // 规则5: keymap 特殊对象检测
+  // keymap 是 Record<string, { url, name }> 结构，不应深合并
+  // 检测逻辑：如果存在键盘码格式的 key，认为是 keymap
+  const acceptObj = acceptState as Record<string, unknown>
+  const stateObj = state as Record<string, unknown>
+  const hasKeymapPattern = Object.keys(acceptObj).some((key) =>
+    key.startsWith('Key') || key.startsWith('Digit') || key.startsWith('Numpad'),
+  )
+  if (hasKeymapPattern) {
     return acceptState
   }
-  // 特殊处理 keyboard.keymap 数据，直接返回acceptState
-  if (
-    Object.prototype.hasOwnProperty.call(state, 'KeyQ')
-    || Object.prototype.hasOwnProperty.call(state, 'KeyA')
-    || Object.prototype.hasOwnProperty.call(state, 'KeyZ')
-    || Object.prototype.hasOwnProperty.call(state, 'Digit1')
-  ) {
-    return acceptState
-  }
-  const filterState = {} as { [propName: string]: unknown }
-  const fieldList = Object.keys(acceptState)
-  for (const field of fieldList) {
-    // 递归合并，只合并state内存在的字段
-    if (Object.prototype.hasOwnProperty.call(state, field)) {
-      filterState[field] = mergeState((state as object)[field], acceptState[field])
+
+  // 规则6: 普通对象，递归合并
+  // 注意：只合并 state（默认配置）中已定义的字段，忽略 acceptState 中的未知字段
+  const filterState: Record<string, unknown> = {}
+  for (const field of Object.keys(stateObj)) {
+    if (Object.prototype.hasOwnProperty.call(acceptObj, field)) {
+      filterState[field] = mergeState(stateObj[field], acceptObj[field])
+    } else {
+      // acceptState 中不存在该字段，使用默认值
+      filterState[field] = stateObj[field]
     }
   }
-  return { ...(state as object), ...filterState }
+
+  return filterState
 }
 
 /**
@@ -401,7 +449,7 @@ export const updateSetting = (acceptRawState = localConfig): Promise<boolean> =>
   })
 }
 
-export const handleAppUpdate = async () => {
+export const handleAppUpdate = () => {
   const version = getLocalVersion()
   log('Version', version)
   if (!compareLeftVersionLessThanRightVersions(version, window.appVersion)) {
@@ -462,6 +510,9 @@ export const handleAppUpdate = async () => {
   // 更新local版本号
   localConfig.general.version = window.appVersion
   updateSuccess()
-  // 刷新配置设置
-  await updateSetting()
+
+  // 异步刷新配置数据结构，不阻塞首屏渲染
+  // updateSetting 会整理配置结构、补充缺失字段、删除废弃字段
+  // 这些修改会触发 watch，但属于后台操作，不应阻塞初始化流程
+  updateSetting()
 }

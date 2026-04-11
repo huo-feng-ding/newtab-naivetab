@@ -4,12 +4,12 @@ import { log } from '@/logic/util'
 import { gaProxy } from '@/logic/gtag'
 import { FOCUS_ELEMENT_SELECTOR_MAP } from '@/logic/constants/index'
 import { startKeydown, startTimer, stopTimer, onPageFocus, stopKeydown } from '@/logic/task'
-import { handleWatchLocalConfigChange, handleMissedUploadConfig, loadRemoteConfig } from '@/logic/storage'
+import { handleWatchLocalConfigChange, handleMissedUploadConfig, loadRemoteConfig, setupKeyboardSyncListener } from '@/logic/storage'
 import { handleFirstOpen } from '@/logic/guide'
 import { getStyleField, localConfig, nativeUILang, currTheme, themeOverrides, handleStateResetAndUpdate, handleAppUpdate, setEdgeFavicon } from '@/logic/store'
 import { initBackgroundImage } from '@/logic/image'
 import { cleanupEvents, cleanupResizeObserver } from '@/logic/moveable'
-import { initKeyboardData, resetKeyboardPending } from '~/newtab/widgets/keyboard/logic'
+import { initKeyboardData } from '~/newtab/widgets/keyboard/logic'
 import { updatePoetry } from '@/logic/poetry'
 import Content from '@/newtab/Content.vue'
 
@@ -64,20 +64,28 @@ const onDot = () => {
 }
 
 onMounted(async () => {
+  // 阶段 1：基础初始化（同步操作，无依赖）
   initBackgroundImage()
   setEdgeFavicon()
-  resetKeyboardPending()
   handleStateResetAndUpdate()
   startTimer()
   startKeydown()
-  // 先加载远程配置，再处理缺失的上传配置
+
+  // 阶段 2：配置同步（按顺序，有依赖关系）
   await loadRemoteConfig()
   await handleMissedUploadConfig()
   handleWatchLocalConfigChange()
+  setupKeyboardSyncListener() // 监听 popup 修改的书签配置
+
+  // 阶段 3：版本升级（配置修改同步生效，updateSetting 异步执行）
+  // handleAppUpdate 内的配置修改会立即生效（Vue 响应式）
+  // updateSetting 在后台异步执行，不阻塞首屏渲染
+  handleAppUpdate()
+
+  // 阶段 4：应用初始化（使用最新配置）
   initKeyboardData()
   await nextTick()
   handleFirstOpen()
-  handleAppUpdate()
   handleFocusPage()
   updatePoetry()
   onDot()

@@ -5,7 +5,7 @@ description: NaiveTab 浏览器扩展的 Widget 开发指南。当用户要在 n
 
 # NaiveTab Add Widget
 
-新增 Widget 需按顺序完成以下步骤。详细字段说明见 [reference.md](reference.md)。
+新增 Widget 需按顺序完成以下步骤。完整模板参考见 [reference.md](reference.md)。
 
 ## 必须修改的 8 个文件
 
@@ -68,7 +68,7 @@ export const ICONS = {
 }
 ```
 
-**5-B：在 `WIDGET_ICON_META` 中引用（使用 `ICONS.myWidget`，禁止硬编码字符串）**：
+**5-B：在 `WIDGET_ICON_META` 中引用（使用 `ICONS.myWidget`，禁止硬编码字符串）：**
 
 ```ts
 export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
@@ -77,9 +77,9 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
 }
 ```
 
-> ❌ 错误示范：`iconName: 'mdi:some-icon'`（硬编码字符串绕过了 ICONS 常量，难以统一维护）
+> ❌ 错误示范：`iconName: 'mdi:some-icon'`（硬编码字符串绕过了 `ICONS` 常量，难以统一维护）
 
-**设置面板中引用图标也必须使用 `ICONS.xxx`**（见可选步骤）。
+**设置面板中引用图标也必须使用 `ICONS.xxx`。**
 
 ### Step 6 — `src/newtab/widgets/registry.ts`
 
@@ -93,6 +93,9 @@ myWidget: MyWidgetConfig
 
 ### Step 7 — `src/newtab/widgets/codes.ts`
 
+三件事都在同一个文件：
+
+**7-A：添加到 `WIDGET_CODE_LIST`**
 ```ts
 export const WIDGET_CODE_LIST = [
   // ...
@@ -100,16 +103,28 @@ export const WIDGET_CODE_LIST = [
 ] as WidgetCodes[]
 ```
 
-**⚠️ 若新 Widget 与其他 Widget 共用同一个 setting pane**（如时钟类都指向 `clockDate`），需同步维护 `WIDGET_SETTING_PANE_MAP`：
-
+**7-B：（可选）若新 Widget 与其他 Widget 共用同一个 setting pane，需维护 `WIDGET_SETTING_PANE_MAP`**
 ```ts
 export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
   // ...
   myWidget: 'clockDate',   // ← 指向对应的 pane code
 }
 ```
-
 > 未在此 Map 中的 Widget，右键菜单会默认用自身 code 查找 pane（`myWidget` → pane `myWidget`）。
+
+**7-C：添加到 `WIDGET_GROUPS` 对应分组**（用于组件库抽屉和专注设置按分类展示）
+```ts
+export const WIDGET_GROUPS: Array<{
+  labelKey: string
+  codes: WidgetCodes[]
+}> = [
+  {
+    labelKey: 'widgetGroup.time',
+    codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组（time/bookmark/tool 三选一）
+  },
+]
+```
+**必须添加**否则不会显示在组件库列表中。
 
 ### Step 8 — i18n：`src/locales/zh-CN.json` 和 `en-US.json`
 
@@ -123,29 +138,76 @@ export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>>
 
 ## 可选：添加专属设置面板
 
-1. 新建 `src/newtab/setting/XxxSetting/MyWidgetSetting.vue`，用 `SettingPaneWrap` 作为容器
-2. 在 `SettingPaneWrap` 的 `#header`/`#color`/`#footer` 插槽中添加自定义表单项
-3. 在对应的 `setting/XxxSetting/index.vue` 中引入并渲染，**图标必须用 `:icon="ICONS.myWidget"` 动态绑定，禁止硬编码字符串**：
+自 v2.0.0 起，所有设置面板统一管理在 `src/newtab/setting/` 目录下。新增专属设置面板步骤：
+
+### 步骤 1 — 新建面板文件
+
+新建目录 `src/newtab/setting/panes/MyWidgetSetting/`，并创建 `index.vue`：
 
 ```vue
-<script setup lang="ts">
-import { ICONS } from '@/logic/icons'
-// ...其他 import
-</script>
-
 <template>
-  <!-- ✅ 正确：动态绑定 ICONS 常量 -->
-  <p class="setting__label">
-    <Icon :icon="ICONS.myWidget" class="label__icon" />
-    {{ $t('setting.myWidget') }}
-  </p>
-
-  <!-- ❌ 错误：硬编码 icon 字符串（图标名可能无效且难以维护） -->
-  <!-- <Icon icon="mdi:some-icon" class="label__icon" /> -->
+  <SettingPaneContent>
+    <!-- 在这里使用原子组件（ColorField, FontField, SliderField, etc.）构建表单 -->
+    <SwitchField
+      v-model="localConfig.myWidget.enabled"
+      :label="$t('common.enabled')"
+    />
+    <ColorField
+      v-model="localConfig.myWidget.fontColor"
+      :label="$t('common.color')"
+    />
+    <!-- ... 更多表单项 -->
+  </SettingPaneContent>
 </template>
+
+<script setup lang="ts">
+import { SettingPaneContent } from '@/newtab/setting/components/SettingPaneContent'
+import { SwitchField, ColorField } from '@/newtab/setting/fields'
+import { localConfig } from '@/logic/store'
+</script>
 ```
 
-`SettingPaneWrap` 会**自动**根据 `localConfig[widgetCode]` 中存在的字段渲染通用控件（宽高、字体、颜色、阴影、边框等），见 [reference.md](reference.md)。
+**所有表单项必须使用 `src/newtab/setting/fields` 中提供的原子组件。**
+
+### 步骤 2 — 注册设置面板
+
+在 `src/newtab/setting/registry.ts` 中注册：
+
+在 `SETTING_GROUPS` 对应的分组（通常是 `widget`）的 `items` 数组添加配置项：
+```ts
+{ code: 'myWidget', labelKey: 'setting.myWidget' },
+```
+
+### 步骤 3 — 添加设置图标元数据
+
+在 `src/logic/icons.ts` 中添加：
+
+**1-A：已有图标可复用则跳过此步 — 在 `ICONS` 中新增图标常量：**
+```ts
+export const ICONS = {
+  // ...
+  myWidget: 'mdi:some-icon',
+}
+```
+
+**1-B：在 `SETTING_ICON_META` 中注册：**
+```ts
+export const SETTING_ICON_META: Record<settingPanes, { iconName: string; settingSize: number }> = {
+  // ...
+  myWidget: { iconName: ICONS.myWidget, settingSize: 20 },
+}
+```
+
+### 步骤 4 — 建立 Widget 与 Setting Pane 的映射
+
+在 `src/newtab/widgets/codes.ts` 的 `WIDGET_SETTING_PANE_MAP` 中添加：
+
+```ts
+export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
+  // ...
+  myWidget: 'myWidget',   // Widget code 对应到 setting pane code
+}
+```
 
 ---
 

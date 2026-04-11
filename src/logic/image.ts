@@ -184,7 +184,6 @@ const getCurrNetworkBackgroundImageUrl = (applyToAppearanceCode = localState.val
     const name = todayImage?.name
     imageUrl = name ? getBingImageUrlFromName(name, quality) : ''
   }
-  console.log(imageUrl)
   return imageUrl
 }
 
