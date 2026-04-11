@@ -14,13 +14,12 @@ interface Window {
   $loadingBar: LoadingBarApiInjection
 }
 
-// @@@@ add widget type
-type WidgetCodes = 'keyboard' | 'bookmarkFolder' | 'clockDigital' | 'clockAnalog' | 'clockFlip' | 'clockNeon' | 'date' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news'
+type WidgetCodes = import('@/newtab/widgets/codes').WidgetCodes
 type ConfigField = WidgetCodes | 'general'
 type EleTargetCode = WidgetCodes | 'draft-common'
 type EleTargetType = 'widget' | 'draft'
 
-type settingPanes = 'general' | 'focusMode' | 'keyboard' | 'bookmarkFolder' | 'clockDate' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news' | 'aboutIndex' | 'aboutSponsor'
+type settingPanes = 'general' | 'focusMode' | 'keyboard' | 'bookmarkFolder' | 'clockDate' | 'calendar' | 'yearProgress' | 'countdown' | 'search' | 'weather' | 'memo' | 'news' | 'aboutIndex' | 'aboutSponsor'
 
 type KeydownTaskKey = 'draft-tool' | 'keyboard' | 'bookmarkFolder'
 

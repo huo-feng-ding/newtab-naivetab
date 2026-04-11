@@ -9,8 +9,8 @@ let keyboardConfig = WIDGET_CONFIG
 
 const getKeyboardConfigData = async () =>
   new Promise((resolve) => {
-    chrome.storage.sync.get(null, (data) => {
-      const config = data['naive-tab-keyboard']
+    chrome.storage.sync.get(null, (data: Record<string, string>) => {
+      const config = data['naive-tab-keyboard'] as string
       if (!config || config.length === 0) {
         resolve(true)
         return

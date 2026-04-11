@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { addVisibilityTask, addTimerTask, removeTimerTask } from '@/logic/task'
-import { localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 const currTheme = computed(() => localState.value.currAppearanceLabel)
+const showNumberScale = computed(() => localConfig.clockAnalog.showNumberScale)
 
 const state = reactive({
   isAnimationEnable: true,
@@ -112,6 +113,19 @@ const handleFullRotation = (m: number) => {
   }
 }
 
+const getNumberPosition = (num: number) => {
+  const angle = (num * 30) * (Math.PI / 180) // 转弧度
+  const radiusPercent = localConfig.clockAnalog.numberScaleRadius
+  const center = 50 // 圆心在 50%, 50%
+  const r = (radiusPercent / 100) * 50
+  const x = center + r * Math.sin(angle)
+  const y = center - r * Math.cos(angle)
+  return {
+    left: `${x}%`,
+    top: `${y}%`,
+  }
+}
+
 watch(
   isRender,
   (value) => {
@@ -136,6 +150,12 @@ addVisibilityTask(WIDGET_CODE, (hidden) => {
 })
 
 const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const numberScaleFontFamily = computed(() => localConfig.clockAnalog.numberScaleFontFamily)
+const numberScaleFontSize = computed(() => `${localConfig.clockAnalog.numberScaleFontSize}px`)
+const numberScaleFontColor = computed(() => {
+  const colors = localConfig.clockAnalog.numberScaleFontColor
+  return Array.isArray(colors) ? colors[localState.value.currAppearanceCode] : colors
+})
 const hourDeg = computed(() => `${state.hourDeg}deg`)
 const minuteDeg = computed(() => `${state.minuteDeg}deg`)
 const secondDeg = computed(() => `${state.secondDeg}deg`)
@@ -170,6 +190,21 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
           :class="{ 'clock__base--animation': state.isAnimationEnable && state.isSecondAnimationEnable }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/second.png);`"
         />
+
+        <!-- 数字刻度 -->
+        <div
+          v-if="showNumberScale"
+          class="clock__number-scale"
+        >
+          <div
+            v-for="num in 12"
+            :key="num"
+            class="number-scale__item"
+            :style="getNumberPosition(num)"
+          >
+            <span>{{ num }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </WidgetWrap>
@@ -208,6 +243,31 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
       }
       .clock__second {
         transform: rotateZ(v-bind(secondDeg));
+      }
+
+      .clock__number-scale {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        font-weight: 500;
+
+        .number-scale__item {
+          position: absolute;
+
+          span {
+            display: block;
+            text-align: center;
+            font-family: v-bind(numberScaleFontFamily);
+            font-size: v-bind(numberScaleFontSize);
+            color: v-bind(numberScaleFontColor);
+            font-weight: 600;
+            line-height: 1;
+            min-width: 1.5em;
+            transform: translate(-50%, -50%);
+          }
+        }
       }
     }
   }

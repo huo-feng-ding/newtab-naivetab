@@ -1,5 +1,7 @@
 export const WIDGET_CODE = 'search'
 
+export const PRESERVE_FIELDS = ['placeholder', 'urlName', 'urlValue']
+
 export const WIDGET_CONFIG = {
   enabled: true,
   isNewTabOpen: false,

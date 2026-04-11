@@ -31,6 +31,8 @@
   "exclude": ["dist", "node_modules"],
   "include": [
     "src/**/*.ts",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "shim.d.ts"
   ]
 }

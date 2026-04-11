@@ -11,6 +11,11 @@ export const WIDGET_CONFIG = {
     yTranslateValue: 0,
   },
   width: 150,
+  showNumberScale: false,
+  numberScaleRadius: 77,
+  numberScaleFontFamily: 'Arial',
+  numberScaleFontSize: 12,
+  numberScaleFontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

@@ -1,0 +1,213 @@
+/* ============================================================
+   Global Base & Utility Styles
+   ============================================================ */
+
+/* Base body styles */
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+  color: var(--text-color-main) !important;
+  background-color: var(--bg-main) !important;
+  /* GPU acceleration for smoother animations */
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility: Icon wrapper centering */
+.icon__wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================================================
+   Setting Panel — Global Form Styles
+   ============================================================ */
+.n-form-item {
+  margin: 10px 0;
+}
+.n-form-item--color {
+  margin: 1px 0 !important;
+}
+.n-form-item--half {
+  margin: 0 !important;
+  width: 50%;
+}
+.n-base-select-option__content {
+  width: 100% !important;
+}
+
+/* NFormItem label consistent weight */
+.n-form-item-label {
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+
+.setting__form_wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+.setting__label {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 500;
+  opacity: var(--opacity-secondary);
+  letter-spacing: 0.2px;
+  /* Do not set font-size, inherit from context */
+  .label__icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--text-lg);
+  }
+}
+.setting__item_wrap {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  .item__box {
+    display: flex;
+    align-items: center;
+    &:nth-of-type(2) {
+      flex: 1;
+      margin-left: 10px;
+    }
+  }
+}
+
+.setting__slider-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.setting__item-ele {
+  flex: 0 0 auto;
+}
+.setting__item-ml {
+  margin-left: var(--space-2);
+}
+.setting__input-number {
+  width: 103px;
+}
+.setting__input-number--unit {
+  width: 150px;
+}
+
+/* Switch expand child options - scale transition */
+.setting-expand-enter-active,
+.setting-expand-leave-active {
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  transform-origin: left center;
+}
+.setting-expand-enter-from,
+.setting-expand-leave-to {
+  opacity: 0;
+  transform: scaleX(0.85);
+}
+.setting-expand-enter-to,
+.setting-expand-leave-from {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Switch expand block content - height slide transition */
+.setting-slide-enter-active,
+.setting-slide-leave-active {
+  transition: opacity var(--transition-base), max-height var(--transition-base);
+  overflow: hidden;
+  max-height: 200px;
+}
+.setting-slide-enter-from,
+.setting-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.setting-slide-enter-to,
+.setting-slide-leave-from {
+  opacity: 1;
+  max-height: 200px;
+}
+
+/* ============================================================
+   Setting Panel — Action Buttons
+   统一质感样式：在 NButton 上加 secondary 属性 + class="action-btn action-btn--{type}"
+   ============================================================ */
+.action-btn {
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  transition: box-shadow var(--transition-base), transform var(--transition-fast) !important;
+
+  &:not(.n-button--loading):hover {
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: none !important;
+  }
+}
+
+.action-btn--primary {
+  box-shadow: 0 1px 3px rgba(24, 160, 88, 0.18),
+              0 1px 1px rgba(24, 160, 88, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  &:hover {
+    box-shadow: 0 3px 8px rgba(24, 160, 88, 0.24),
+                0 1px 2px rgba(24, 160, 88, 0.14),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+.action-btn--warning {
+  box-shadow: 0 1px 3px rgba(240, 160, 32, 0.2),
+              0 1px 1px rgba(240, 160, 32, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  &:hover {
+    box-shadow: 0 3px 8px rgba(240, 160, 32, 0.28),
+                0 1px 2px rgba(240, 160, 32, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+.action-btn--error {
+  box-shadow: 0 1px 3px rgba(208, 48, 80, 0.2),
+              0 1px 1px rgba(208, 48, 80, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  &:hover {
+    box-shadow: 0 3px 8px rgba(208, 48, 80, 0.28),
+                0 1px 2px rgba(208, 48, 80, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+.action-btn--default {
+  box-shadow: 0 1px 3px rgba(128, 128, 128, 0.15),
+              0 1px 1px rgba(128, 128, 128, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  &:hover {
+    box-shadow: 0 3px 8px rgba(128, 128, 128, 0.2),
+                0 1px 2px rgba(128, 128, 128, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* Drag mode disabled input */
+.n-input.n-input--disabled .n-input__input-el,
+.n-input.n-input--disabled .n-input__textarea-el {
+  cursor: move;
+}
+
+/* Modal scroll */
+.modal__content {
+  height: 40vh;
+  white-space: pre-line;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

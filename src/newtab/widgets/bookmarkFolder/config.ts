@@ -1,5 +1,7 @@
 export const WIDGET_CODE = 'bookmarkFolder'
 
+export const PRESERVE_FIELDS = ['selectedFolderTitles']
+
 export const WIDGET_CONFIG = {
   enabled: false,
   isNewTabOpen: true,

@@ -12,7 +12,10 @@ export const WIDGET_CODE_LIST = [
   'memo',
   'bookmarkFolder',
   'search',
-] as WidgetCodes[]
+  'countdown',
+] as const
+
+export type WidgetCodes = typeof WIDGET_CODE_LIST[number]
 
 /**
  * 将 widget code 映射到对应的 setting pane code。
@@ -40,8 +43,8 @@ export const WIDGET_GROUPS: Array<{
   codes: WidgetCodes[]
 }> = [
   {
-    labelKey: 'widgetGroup.clock',
-    codes: ['clockDigital', 'clockAnalog', 'clockFlip', 'clockNeon', 'date', 'calendar', 'yearProgress'],
+    labelKey: 'widgetGroup.time',
+    codes: ['clockDigital', 'clockAnalog', 'clockFlip', 'clockNeon', 'date', 'calendar', 'yearProgress', 'countdown'],
   },
   {
     labelKey: 'widgetGroup.bookmark',

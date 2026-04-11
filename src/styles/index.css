@@ -1,6 +1,7 @@
 @import url('./reset.css');
-@import url('./main.css');
-@import url('./animation.css');
+@import url('./tokens.css');
+@import url('./global.css');
+@import url('./animations.css');
 @import url('./font.css');
 @import url('./qweather-icons.css');
 @import url('./driver.css');

@@ -1,5 +1,6 @@
 .DS_Store
 .idea/
+.qoder/
 .vite-ssg-dist
 .vite-ssg-temp
 .eslintcache

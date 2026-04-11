@@ -31,6 +31,7 @@
     "vertical": "Vertical",
     "horizontal": "Horizontal",
     "style": "Style",
+    "typography": "Typography",
     "appearance": "Appearance",
     "preinstall": "Preinstall",
     "theme": "Theme",
@@ -86,9 +87,11 @@
     "day": "day",
     "setting": "Setting",
     "general": "General",
+    "advanced": "Advanced",
     "other": "Other",
     "retry": "Retry",
-    "login": "Login"
+    "login": "Login",
+    "behavior": "Behavior"
   },
   "form": {
     "applyToAppearance": "Apply to appearance",
@@ -146,7 +149,7 @@
     "stepDescription5": "NaiveTab is ready — go build your perfect new tab page"
   },
   "widgetGroup": {
-    "clock": "Clock & Date",
+    "time": "Time",
     "bookmark": "Bookmark",
     "tool": "Tool"
   },
@@ -158,6 +161,7 @@
     "keyboard": "Keyboard",
     "bookmarkFolder": "Folder Bookmark",
     "bookmarkConfig": "Bookmark Config",
+    "clockDate": "Clock/Date",
     "clock": "Clock",
     "clockDigital": "Digital Clock",
     "clockAnalog": "Analog Clock",
@@ -170,10 +174,12 @@
     "weather": "Weather",
     "memo": "Memo",
     "news": "News",
+    "countdown": "Countdown",
     "aboutIndex": "About",
     "aboutSponsor": "Sponsor"
   },
   "general": {
+    "total": "Total",
     "globalStyle": "Global style",
     "generalLabel": "General",
     "pageTitle": "Page title",
@@ -192,6 +198,7 @@
     "syncStorageSizeTips": "Sync storage usage per config item. Each item is limited to 8KB",
     "syncSizeWarning": "{field} config is approaching sync limit ({size}KB / 8KB), consider reducing bookmarks",
     "syncSizeExceeded": "{field} config exceeds sync limit ({size}KB / 8KB). Saved locally but cross-device sync is unavailable. Please reduce bookmarks or shorten URLs",
+    "syncRateWarning": "Sync write rate is high ({count} - {max}/min). Please wait before modifying settings to avoid browser limit",
     "syncTime": "Sync time",
     "syncTimeTips": "Requires browser account login for cross-device sync",
     "importExportSettingsLabel": "Import/Export",
@@ -204,19 +211,31 @@
     "clearStorageTips": "Clear local cache without affecting synced settings",
     "resetSettingLabel": "Reset setting",
     "resetSettingValue": "Reset",
+    "reset": "Reset",
     "resetAllSettingValue": "Reset All Settings",
     "resetSettingTips": "If you encounter an unsolvable problem, try resetting the settings and back up the current configuration",
+    "quickReset": "Quick Reset",
+    "quickResetDesc": "Keep user data, reset appearance only",
+    "fullReset": "Full Reset",
+    "fullResetDesc": "Reset all settings to defaults",
+    "confirmReset": "Confirm reset this widget settings to defaults?",
     "language": "Main Language",
     "timeLanguage": "Time Language",
     "saveCurrendImage": "Save Wallpaper",
     "localBackgroundTips": "Local file will not be synchronized",
-    "focusModeTips": "In Focus Mode, only selected widgets are visible"
+    "focusModeTips": "In Focus Mode, only selected widgets are visible",
+    "parallax": "Parallax effect",
+    "parallaxTips": "Background moves slightly with mouse cursor, adds depth and dynamic feel",
+    "parallaxIntensity": "Parallax intensity"
   },
   "clock": {
     "showColon": "Show Colon",
     "colonBlink": "Colon Blink",
     "apMark": "a.m./p.m.",
     "showSeconds": "Show Seconds",
+    "showNumberScale": "Show Number Scale",
+    "numberScaleFont": "Number Scale Font",
+    "numberScaleRadius": "Number Scale Radius",
     "24hour": "24-Hour Format",
     "cardGap": "Card Gap",
     "cardColor": "Card Color",
@@ -356,6 +375,19 @@
     "kr36": "36kr",
     "bilibili": "Bilibili",
     "v2ex": "V2EX"
+  },
+  "countdown": {
+    "clock": "Clock",
+    "defaultDuration": "Default duration",
+    "showHours": "Show hours",
+    "strokeWidth": "Ring width",
+    "progressColor": "Progress color",
+    "trackColor": "Track color",
+    "notifyTitle": "Countdown finished",
+    "notifyBody": "Your timer has ended",
+    "label": "Label text",
+    "labelFontSize": "Label font size",
+    "labelFontColor": "Label color"
   },
   "about": {
     "userHelp": "Help Center",

@@ -13,6 +13,12 @@ export const ICONS = {
   weather: 'mdi:weather-cloudy',
   memo: 'material-symbols:note-alt-outline',
   news: 'majesticons:newspaper-line',
+  countdown: 'mdi:timer-outline',
+  countdownPlay: 'mdi:play',
+  countdownPause: 'mdi:pause',
+  countdownRestore: 'mdi:restore',
+  countdownSpinUp: 'mdi:chevron-up',
+  countdownSpinDown: 'mdi:chevron-down',
   // setting__label
   calendarHoliday: 'mdi:calendar-star',
   calendarToday: 'mdi:calendar-today',
@@ -123,6 +129,7 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
   weather: { iconName: ICONS.weather, widgetSize: 35 },
   memo: { iconName: ICONS.memo, widgetSize: 35 },
   news: { iconName: ICONS.news, widgetSize: 30 },
+  countdown: { iconName: ICONS.countdown, widgetSize: 32 },
 }
 
 export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
@@ -137,6 +144,7 @@ export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   weather: { iconName: ICONS.weather, settingSize: 19 },
   memo: { iconName: ICONS.memo, settingSize: 18 },
   news: { iconName: ICONS.news, settingSize: 18 },
+  countdown: { iconName: ICONS.countdown, settingSize: 18 },
   aboutSponsor: { iconName: ICONS.sponsor, settingSize: 19 },
   aboutIndex: { iconName: ICONS.info, settingSize: 19 },
 }
