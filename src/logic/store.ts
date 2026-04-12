@@ -3,7 +3,7 @@ import { enUS, zhCN, darkTheme, useOsTheme, NButton } from 'naive-ui'
 import { useStorageLocal } from '@/composables/useStorageLocal'
 import { isEdge, isFirefox } from '@/env'
 import { styleConst } from '@/styles/const'
-import { URL_CHROME_STORE, URL_EDGE_STORE, URL_FIREFOX_STORE, URL_CHROME_EXTENSIONS_SHORTCUTS, URL_EDGE_EXTENSIONS_SHORTCUTS, URL_FIREFOX_EXTENSIONS_SHORTCUTS, APPEARANCE_TO_CODE_MAP, DAYJS_LANG_MAP, FONT_LIST } from '@/logic/constants/index'
+import { URL_CHROME_STORE, URL_EDGE_STORE, URL_FIREFOX_STORE, APPEARANCE_TO_CODE_MAP, DAYJS_LANG_MAP, FONT_LIST } from '@/logic/constants/index'
 import { defaultConfig, defaultLocalState, defaultFocusVisibleWidgetMap } from '@/logic/config'
 import type { WidgetConfigByCode } from '@/newtab/widgets/registry'
 import { log, createTab, compareLeftVersionLessThanRightVersions } from '@/logic/util'
@@ -38,7 +38,6 @@ export const globalState = reactive({
   isGuideMode: false,
   isFullScreen: !!document.fullscreenElement,
   availableFontList: [] as string[],
-  allCommandsMap: {} as Record<string, string | undefined>,
   isUploadSettingLoading: false,
   isImportSettingLoading: false,
   isClearStorageLoading: false,
@@ -98,24 +97,6 @@ watch(
     immediate: true,
   },
 )
-
-export const getAllCommandsConfig = () => {
-  chrome.commands.getAll((commands) => {
-    for (const { name, shortcut } of commands) {
-      globalState.allCommandsMap[name as string] = shortcut
-    }
-  })
-}
-
-export const openConfigShortcutsPage = () => {
-  let shortcutUrl = URL_CHROME_EXTENSIONS_SHORTCUTS
-  if (isEdge) {
-    shortcutUrl = URL_EDGE_EXTENSIONS_SHORTCUTS
-  } else if (isFirefox) {
-    shortcutUrl = URL_FIREFOX_EXTENSIONS_SHORTCUTS
-  }
-  createTab(shortcutUrl)
-}
 
 export const openExtensionsStorePage = () => {
   let storeUrl = URL_CHROME_STORE
@@ -189,9 +170,6 @@ export const switchSettingDrawerVisible = (status: boolean) => {
   globalState.isSettingDrawerVisible = status
   if (status && globalState.availableFontList.length === 0) {
     initAvailableFontList()
-  }
-  if (Object.keys(globalState.allCommandsMap).length === 0) {
-    getAllCommandsConfig()
   }
 }
 

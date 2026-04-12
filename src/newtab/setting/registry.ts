@@ -44,19 +44,19 @@ export const SETTING_GROUPS: SettingGroup[] = [
     ],
   },
   {
+    labelKey: 'widgetGroup.bookmark',
+    items: [
+      { code: 'keyboard', labelKey: 'setting.keyboard' },
+      { code: 'bookmarkFolder', labelKey: 'setting.bookmarkFolder' },
+    ],
+  },
+  {
     labelKey: 'widgetGroup.time',
     items: [
       { code: 'clockDate', labelKey: 'setting.clockDate' },
       { code: 'calendar', labelKey: 'setting.calendar' },
       { code: 'yearProgress', labelKey: 'setting.yearProgress' },
       { code: 'countdown', labelKey: 'setting.countdown' },
-    ],
-  },
-  {
-    labelKey: 'widgetGroup.bookmark',
-    items: [
-      { code: 'keyboard', labelKey: 'setting.keyboard' },
-      { code: 'bookmarkFolder', labelKey: 'setting.bookmarkFolder' },
     ],
   },
   {

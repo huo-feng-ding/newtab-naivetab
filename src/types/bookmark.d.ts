@@ -1,51 +1,3 @@
-type KeyLabel
-  = | '1'
-    | '2'
-    | '3'
-    | '4'
-    | '5'
-    | '6'
-    | '7'
-    | '8'
-    | '9'
-    | '0'
-    | '-'
-    | '+'
-    | 'BS'
-    | 'q'
-    | 'w'
-    | 'e'
-    | 'r'
-    | 't'
-    | 'y'
-    | 'u'
-    | 'i'
-    | 'o'
-    | 'p'
-    | '{'
-    | '}'
-    | 'a'
-    | 's'
-    | 'd'
-    | 'f'
-    | 'g'
-    | 'h'
-    | 'j'
-    | 'k'
-    | 'l'
-    | ':'
-    | '"'
-    | 'z'
-    | 'x'
-    | 'c'
-    | 'v'
-    | 'b'
-    | 'n'
-    | 'm'
-    | '<'
-    | '>'
-    | '?'
-
 type KeycapBookmarkType = 'none' | 'mark' | 'folder' | 'back'
 
 type KeycapVisualType = 'gmk' | 'dsa' | 'flat'
@@ -61,6 +13,11 @@ interface KeyboardConfigItem {
 }
 
 type BookmarkNode = chrome.bookmarks.BookmarkTreeNode
+
+interface TBookmarkEntry {
+  url: string
+  name: string
+}
 
 interface BookmarkItem {
   key: string

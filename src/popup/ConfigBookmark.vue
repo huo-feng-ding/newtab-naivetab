@@ -4,10 +4,10 @@ import { gaProxy } from '@/logic/gtag'
 import { requestPermission, flushConfigSync } from '@/logic/storage'
 import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/keyboard'
 import { getFaviconFromUrl } from '@/logic/bookmark'
-import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, KEYBOARD_COMMAND_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
+import { KEYBOARD_CODE_TO_DEFAULT_CONFIG } from '@/logic/constants/keyboard'
 import { currKeyboardConfig } from '@/logic/keyboard'
 import { getDefaultBookmarkNameFromUrl, getBookmarkConfigUrl, getBookmarkConfigName } from '~/newtab/widgets/keyboard/logic'
-import { globalState, localConfig, customPrimaryColor, getStyleConst, getAllCommandsConfig, openConfigShortcutsPage } from '@/logic/store'
+import { localConfig, customPrimaryColor, getStyleConst } from '@/logic/store'
 import BookmarkPicker from '@/components/BookmarkPicker.vue'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
@@ -19,15 +19,7 @@ import { ICONS } from '@/logic/icons'
 // popup 键帽固定基准：40px
 const KEYCAP_BASE_SIZE = 40
 
-const {
-  getCustomLabel,
-  getKeycapStageStyle,
-  getKeycapTextStyle,
-  getKeycapIconStyle,
-  getEmphasisStyle,
-  keycapCssVars,
-  getFirstRowWidth,
-} = useKeyboardStyle('px', KEYCAP_BASE_SIZE)
+const { getCustomLabel, getKeycapStageStyle, getKeycapTextStyle, getKeycapIconStyle, getEmphasisStyle, keycapCssVars, getFirstRowWidth } = useKeyboardStyle('px', KEYCAP_BASE_SIZE)
 
 // ── 表单状态 ───────────────────────────────────────────────────────────────
 const state = reactive({
@@ -43,7 +35,6 @@ const state = reactive({
 
 onMounted(() => {
   setCurrentTabUrl()
-  getAllCommandsConfig()
   gaProxy('view', ['popup'], {
     userAgent: navigator.userAgent,
   })
@@ -66,10 +57,8 @@ const loadCurrKeyConfig = () => {
   if (state.keyCode.length === 0) {
     return
   }
-  if (localConfig.keyboard.keymap[state.keyCode] && localConfig.keyboard.keymap[state.keyCode].url) {
-    state.url = localConfig.keyboard.keymap[state.keyCode].url
-    state.name = localConfig.keyboard.keymap[state.keyCode].name
-  }
+  state.url = localConfig.keyboard.keymap[state.keyCode]?.url || ''
+  state.name = localConfig.keyboard.keymap[state.keyCode]?.name || ''
 }
 
 const selectKey = (key: string) => {
@@ -167,7 +156,7 @@ const getPopupKeycapIconSrc = (code: string) => {
 }
 
 // popup 总宽 = 表单左右留白 + 键盘区宽度（含 shell padding，由 composable 统一计算）
-const popupMainWidth = computed(() => `${80 + 24 + getFirstRowWidth()}px`)
+const popupMainWidth = computed(() => `${70 + getFirstRowWidth()}px`)
 
 const keycapVisualType = computed(() => localConfig.keyboard.keycapType)
 const isKeycapBorderEnabled = computed(() => localConfig.keyboard.isKeycapBorderEnabled)
@@ -184,9 +173,7 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
     @select="onSelectBookmark"
   />
 
-  <NCard
-    id="popup"
-  >
+  <NCard id="popup">
     <template #header>
       <div class="popup__header">
         <span class="header__title">{{ `${$t('common.config')}${$t('setting.bookmark')}` }}</span>
@@ -206,28 +193,31 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
       </div>
     </template>
 
-    <NForm
-      label-placement="left"
-      require-mark-placement="left"
-      :label-width="55"
-      :show-feedback="false"
-      :model="state"
-    >
-      <NFormItem
-        class="form__url"
-        :label="$t('keyboard.urlLabel')"
-        path="url"
-        :rule="{ required: true }"
-      >
-        <NInput
-          v-model:value="state.url"
-          size="small"
-          :placeholder="$t('keyboard.urlPlaceholder')"
-          :maxlength="KEYBOARD_URL_MAX_LENGTH"
-          show-count
-          clearable
-          @input="state.url = state.url.replaceAll(' ', '')"
-        />
+    <div class="popup__form">
+      <div class="form__config">
+        <div class="form__field form__field--url">
+          <NInput
+            v-model:value="state.url"
+            size="small"
+            :placeholder="$t('keyboard.urlLabel')"
+            :maxlength="KEYBOARD_URL_MAX_LENGTH"
+            show-count
+            clearable
+            @input="state.url = state.url.replaceAll(' ', '')"
+          />
+        </div>
+
+        <div class="form__field form__field--name">
+          <NInput
+            v-model:value="state.name"
+            size="small"
+            :placeholder="getDefaultBookmarkNameFromUrl(state.url) || $t('keyboard.nameLabel')"
+            :maxlength="KEYBOARD_NAME_MAX_LENGTH"
+            show-count
+            clearable
+            @input="state.name = state.name.trim()"
+          />
+        </div>
 
         <div class="url__operation">
           <NButton
@@ -267,60 +257,10 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
             {{ `${$t('common.delete')} ${KEYBOARD_CODE_TO_DEFAULT_CONFIG[state.keyCode].label}` }} ？
           </NPopconfirm>
         </div>
-      </NFormItem>
-
-      <div class="popup__form_wrap">
-        <NFormItem
-          class="form__name"
-          :label="$t('keyboard.nameLabel')"
-        >
-          <NInput
-            v-model:value="state.name"
-            size="small"
-            :placeholder="getDefaultBookmarkNameFromUrl(state.url)"
-            :maxlength="KEYBOARD_NAME_MAX_LENGTH"
-            show-count
-            clearable
-            @input="state.name = state.name.trim()"
-          />
-        </NFormItem>
-
-        <NFormItem
-          :label="$t('keyboard.shortcutLabel')"
-          class="form__shortcut"
-        >
-          <NInputGroupLabel
-            v-if="localConfig.keyboard.isListenBackgroundKeystrokes"
-            class="shortcut__main"
-            :title="globalState.allCommandsMap[state.keyCode]"
-            @click="openConfigShortcutsPage()"
-          >
-            <template v-if="globalState.allCommandsMap[state.keyCode]">
-              {{ globalState.allCommandsMap[state.keyCode] }}
-            </template>
-            <Icon
-              v-else-if="KEYBOARD_COMMAND_ALLOW_KEYCODE_LIST.includes(state.keyCode)"
-              :icon="ICONS.add"
-            />
-            <Icon
-              v-else
-              :icon="ICONS.ban"
-            />
-          </NInputGroupLabel>
-        </NFormItem>
       </div>
 
-      <NFormItem
-        :label="$t('keyboard.keyLabel')"
-        path="key"
-        :rule="{ required: true }"
-      >
+      <div class="popup__keyboard-wrap">
         <NSpin :show="state.isCommitLoading">
-          <!--
-            KeyboardLayout 负责行列结构、shell、plate 渲染。
-            popup 侧通过 #keycap slot 注入拖拽绑定和 KeyboardKeycapDisplay，
-            这样和 widget 共用同一套布局逻辑，以后只需维护一个地方。
-          -->
           <KeyboardLayout
             unit="px"
             :base-size="KEYCAP_BASE_SIZE"
@@ -360,8 +300,8 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
             </template>
           </KeyboardLayout>
         </NSpin>
-      </NFormItem>
-    </NForm>
+      </div>
+    </div>
   </NCard>
 </template>
 
@@ -376,11 +316,7 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
     padding: 0 !important;
     border-bottom: 1px solid v-bind(popupKeyboardBorder);
     /* 头部微渐变背景，增加层次感 */
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      transparent 100%
-    );
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
   }
 
   .popup__header {
@@ -454,106 +390,86 @@ const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumps
     padding: 10px 14px 12px 14px !important;
   }
 
-  .n-form-item {
-    margin: 3px 0;
-  }
-
-  /* ── URL 行：输入框 + 操作按钮 ────────────────────────── */
-  .url__operation {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    padding-left: 5px;
-    gap: 2px;
-
-    .operation__btn {
+  /* ── Form ── */
+  .popup__form {
+    .form__config {
+      margin: 10px;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 26px;
-      height: 26px;
-      border-radius: var(--radius-md);
-      transition:
-        background-color var(--transition-fast),
-        opacity var(--transition-fast),
-        transform var(--transition-spring),
-        box-shadow var(--transition-fast);
-      opacity: 0.4;
+      gap: 12px;
 
-      &:not([disabled]):hover {
-        background-color: v-bind(popupKeyboardHoverBg);
-        opacity: 1;
-        transform: scale(1.1);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      &:not([disabled]):active {
-        transform: scale(0.92);
-        opacity: 0.75;
-        box-shadow: none;
-      }
-
-      .btn__icon {
-        font-size: 14px;
-      }
-    }
-  }
-
-  /* ── 名称 + 快捷键行 ──────────────────────────────────── */
-  .popup__form_wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .form__name {
-      flex: 1;
-    }
-
-    .form__shortcut {
-      flex: 0 0 auto;
-      width: 22%;
-
-      .shortcut__main {
+      .form__field {
         display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form__field--url {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .form__field--name {
+        flex: 0 0 auto;
+        width: 140px;
+      }
+
+      .url__operation {
+        display: flex;
+        flex-wrap: nowrap;
         justify-content: center;
         align-items: center;
-        padding: 0 6px;
-        width: 100%;
-        height: 28px;
-        line-height: 1;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 600;
-        cursor: alias;
-        border-radius: var(--radius-md);
-        opacity: 0.72;
-        letter-spacing: 0.2px;
-        /* kbd 风格微立体 */
-        box-shadow:
-          0 1px 0 rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        transition: opacity var(--transition-fast);
+        gap: 2px;
 
-        &:hover {
-          opacity: 0.92;
+        .operation__btn {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 26px;
+          height: 26px;
+          border-radius: var(--radius-md);
+          transition:
+            background-color var(--transition-fast),
+            opacity var(--transition-fast),
+            transform var(--transition-spring),
+            box-shadow var(--transition-fast);
+          opacity: 0.4;
+
+          &:not([disabled]):hover {
+            background-color: v-bind(popupKeyboardHoverBg);
+            opacity: 1;
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          }
+
+          &:not([disabled]):active {
+            transform: scale(0.92);
+            opacity: 0.75;
+            box-shadow: none;
+          }
+
+          .btn__icon {
+            font-size: 14px;
+          }
         }
       }
     }
   }
 
   /* ── 键盘区域 ─────────────────────────────────────────── */
-  .popup__keyboard {
-    cursor: pointer;
-    /* 无 shell 时加一点内边距；有 shell 时由 KeyboardLayout 内部的 shell padding 接管，不能覆盖 */
-    &:not(.keyboard-layout--shell) {
-      padding: 4px 2px 2px;
-    }
+  .popup__keyboard-wrap {
+    display: flex;
+    .popup__keyboard {
+      cursor: pointer;
+      /* 无 shell 时加一点内边距；有 shell 时由 KeyboardLayout 内部的 shell padding 接管，不能覆盖 */
+      &:not(.keyboard-layout--shell) {
+        padding: 4px 2px 2px;
+      }
 
-    /* 拖拽包裹层：铺满整个 keycap-wrap 槽位，用于接收拖拽事件 */
-    .popup__keycap-drag-wrap {
-      width: 100%;
-      height: 100%;
+      /* 拖拽包裹层：铺满整个 keycap-wrap 槽位，用于接收拖拽事件 */
+      .popup__keycap-drag-wrap {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 }

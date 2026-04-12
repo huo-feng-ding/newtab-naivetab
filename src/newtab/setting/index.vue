@@ -88,7 +88,7 @@ const getGroupLabel = (code: settingPanes): string => {
     <NDrawer
       v-model:show="globalState.isSettingDrawerVisible"
       class="drawer-wrap"
-      :width="650"
+      :width="750"
       :height="500"
       :placement="localConfig.general.drawerPlacement"
       show-mask="transparent"

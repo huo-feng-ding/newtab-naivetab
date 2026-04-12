@@ -101,8 +101,12 @@ export const ICONS = {
   keyboardCmdKey: 'ic:twotone-keyboard-command-key',
   openInNew: 'material-symbols:open-in-new',
   bookmarkPlus: 'lucide:bookmark-plus',
+  link: 'mdi:link-variant',
+  text: 'mdi:format-text',
   folderOutline: 'ic:outline-folder',
   arrowBackRounded: 'material-symbols:arrow-back-rounded',
+  record: 'fluent:record-12-regular',
+  stop: 'fluent:record-stop-12-regular',
 }
 
 export type WidgetIconMeta = {

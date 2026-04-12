@@ -1,6 +1,6 @@
 # NaiveTab 开发规范
 
-这是NaiveTab，一个优雅的新标签页浏览器扩展项目。本文档定义了项目的开发规范，所有 AI 辅助开发必须遵守。AI阅读此文档后在回复前输出 "(-.-)已阅读CLAUDE.md"。
+这是NaiveTab，一个浏览器新标签页扩展项目。本文档定义了项目的开发规范，所有 AI 辅助开发必须遵守。AI阅读此文档后在回复前输出 "(-.-)已阅读CLAUDE.md"。
 
 **强制必须遵循**：
 - 所有 AI 与用户的沟通、代码注释、文档编写等，都必须使用中文。
@@ -22,7 +22,7 @@
 
 ### BEM 命名
 
-**采用简化版 BEM：`block__element--modifier`，使用双下划线分隔元素、双连字符分隔修饰符。**
+**必须采用BEM命名规范：`block__element--modifier`，使用双下划线分隔元素、双连字符分隔修饰符。**
 
 - `block`：组件级名称，使用 camelCase（如 `clockDigital`、`bookmarkFolder`）
 - `block__element`：子元素使用双下划线连接（如 `time__text`、`text__digit`）
@@ -32,7 +32,7 @@
 
 ### PostCSS 嵌套
 
-**使用 PostCSS 嵌套语法，选择器直接写在父级花括号内，不使用 `&` 拼接类名。**
+**必须使用 PostCSS 嵌套语法，选择器直接写在父级花括号内，不使用 `&` 拼接类名。**
 
 - Widget 样式外层使用 `#widgetCode` 作为最外层选择器（由 `WidgetWrap` 自动设置 id）
 - 嵌套层级不超过 4 层，过深时拆分为独立类
@@ -169,8 +169,8 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 ### 添加新文案步骤
 1. 在 `src/locales/zh-CN.json` 和 `en-US.json` 的 `general` 命名空间下添加 key
-2. 使用 `{placeholder}` 作为变量占位符
-3. 代码中使用 `.replace('{placeholder}', value)` 替换变量
+2. 使用 `__xxx__` 作为变量占位符（如 `__field__`、`__count__`），不可用 `{xxx}` 会被 vue-i18n 解析为空
+3. 代码中使用 `.replace('__xxx__', value)` 替换变量
 4. 确保两个语言文件同步更新
 
 

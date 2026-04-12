@@ -193,8 +193,8 @@ const uploadConfigFn = async (field: ConfigField) => {
       log(`Upload config-${field} write rate warning`, `${count}/${MAX_WRITE_PER_MINUTE} per minute`)
       window.$message.warning(
         window.$t('general.syncRateWarning')
-          .replace('{count}', String(count))
-          .replace('{max}', String(MAX_WRITE_PER_MINUTE)),
+          .replace('__count__', String(count))
+          .replace('__max__', String(MAX_WRITE_PER_MINUTE)),
       )
     }
 
@@ -249,14 +249,14 @@ const uploadConfigFn = async (field: ConfigField) => {
       const finalBytes = new TextEncoder().encode(finalPayload).length
       if (finalBytes > SYNC_SIZE_LIMIT) {
         log(`Upload config-${field} size exceeded`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.error(window.$t('general.syncSizeExceeded').replace('{field}', field).replace('{size}', `${(finalBytes / 1024).toFixed(1)}`))
+        window.$message.error(window.$t('general.syncSizeExceeded').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
         localState.value.isUploadConfigStatusMap[field].loading = false
         resolve(false)
         return
       }
       if (finalBytes > SYNC_SIZE_WARN) {
         log(`Upload config-${field} size warning`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.warning(window.$t('general.syncSizeWarning').replace('{field}', field).replace('{size}', `${(finalBytes / 1024).toFixed(1)}`))
+        window.$message.warning(window.$t('general.syncSizeWarning').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
       }
 
       const payload = { [`naive-tab-${field}`]: finalPayload }
@@ -364,8 +364,13 @@ export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
  * 【防循环更新】
  * 通过比较 syncId 判断是否需要更新，避免本地修改后又触发 onChanged 形成循环
  *
+ * 【注意：直接赋值的副作用】
+ * localConfig.keyboard = parsed.data 会触发 watchLocalConfigChange 中的 watcher，
+ * 导致排队上传（debounce）。但由于 MD5 去重机制，上传时会发现 syncId 相同而跳过实际上传，
+ * 因此不会造成真正的循环上传。
+ *
  * 【注意】
- * 此监听器只在 newtab 页面注册，Service Worker 有自己的独立监听逻辑
+ * 此监听器只在 newtab 页面注册，Service Worker 有自己的独立监听逻辑（background/main.ts）
  */
 export const setupKeyboardSyncListener = () => {
   chrome.storage.onChanged.addListener((changes) => {

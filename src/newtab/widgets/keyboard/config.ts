@@ -5,9 +5,8 @@ export const PRESERVE_FIELDS = ['keymap']
 export const WIDGET_CONFIG = {
   enabled: true,
   source: 2, // 书签来源：1浏览器，2扩展本身
-  isListenBackgroundKeystrokes: true, // 是否监听后台按键
-  isDblclickOpen: false, // 是否双击打开
-  dblclickIntervalTime: 200, // 双击间隔时间
+  isListenBackgroundKeystrokes: true, // 是否监听后台按键（含全局快捷键）
+  globalShortcutModifier: 'alt' as string, // 全局快捷键修饰键，如 "alt"、"ctrl+shift"
   isNewTabOpen: false,
   defaultExpandFolder: null as null | string,
   keymap: {
@@ -27,7 +26,7 @@ export const WIDGET_CONFIG = {
       url: 'https://gxfg.github.io/naivetab-doc/',
       name: 'welcome',
     },
-  },
+  } as Record<string, TBookmarkEntry>,
   layout: {
     xOffsetKey: 'left',
     xOffsetValue: 50,

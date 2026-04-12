@@ -146,6 +146,7 @@ onUnmounted(() => {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    transition: background-image 0.4s ease;
     filter: blur(v-bind(`${localConfig.general.bgBlur}px`));
     opacity: v-bind(customOpacity);
     will-change: transform;

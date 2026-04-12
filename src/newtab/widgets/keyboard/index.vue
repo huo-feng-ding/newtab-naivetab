@@ -4,7 +4,7 @@ import { isDragMode } from '@/logic/moveable'
 import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
 import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap } from '~/newtab/widgets/keyboard/logic'
-import { localConfig, getStyleConst, getIsWidgetRender } from '@/logic/store'
+import { getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
 import KeyboardKeycapWidget from './components/KeyboardKeycapWidget.vue'
@@ -13,8 +13,6 @@ import { WIDGET_CODE } from './config'
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 // keyboard listener
-let keyboardTimer: ReturnType<typeof setTimeout>
-
 const keyboardTask = (e: KeyboardEvent) => {
   if (isDragMode.value) {
     return
@@ -40,21 +38,8 @@ const keyboardTask = (e: KeyboardEvent) => {
     return
   }
   // shift + key 后台打开书签，alt + key 新标签页打开
-  if (!localConfig.keyboard.isDblclickOpen) {
-    keyboardState.currSelectKeyCode = code
-    openPage(url, shiftKey, altKey)
-    return
-  }
-  // 双击打开书签
-  clearTimeout(keyboardTimer)
-  if (code === keyboardState.currSelectKeyCode) {
-    openPage(url, shiftKey, altKey)
-  } else {
-    keyboardState.currSelectKeyCode = code
-    keyboardTimer = setTimeout(() => {
-      keyboardState.currSelectKeyCode = ''
-    }, localConfig.keyboard.dblclickIntervalTime)
-  }
+  keyboardState.currSelectKeyCode = code
+  openPage(url, shiftKey, altKey)
 }
 
 watch(

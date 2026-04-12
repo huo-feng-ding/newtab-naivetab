@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { isFirefox } from '@/env'
-import { URL_FIREFOX_EXTENSIONS_SHORTCUTS } from '@/logic/constants/index'
 import { requestPermission } from '@/logic/storage'
 import { state as keyboardState, getSystemBookmarkForKeyboard } from '~/newtab/widgets/keyboard/logic'
-import { localConfig, openConfigShortcutsPage } from '@/logic/store'
+import { localConfig } from '@/logic/store'
 import SettingPaneTitle from '~/newtab/setting/components/SettingPaneTitle.vue'
 import SettingPaneContent from '~/newtab/setting/components/SettingPaneContent.vue'
 import Tips from '@/components/Tips.vue'
@@ -13,6 +11,8 @@ import PresetThemeDrawer from './PresetThemeDrawer.vue'
 import KeyboardStyleSetting from './KeyboardStyleSetting.vue'
 import ShellSetting from './KeyboardShellSetting.vue'
 import KeycapSetting from './KeyboardKeycapSetting.vue'
+import BookmarkManager from './BookmarkManager.vue'
+import GlobalShortcutRecorder from './GlobalShortcutRecorder.vue'
 
 const state = reactive({
   isPresetThemeDrawerVisible: false,
@@ -48,13 +48,6 @@ const handleDefaultFolderTitleChange = (value: string) => {
   keyboardState.selectedFolderTitleStack = value ? [value] : []
 }
 
-const isOpenPopupVisible = ref(!!chrome.action.openPopup)
-
-const onOpenPopup = () => {
-  if (chrome.action.openPopup) {
-    chrome.action.openPopup()
-  }
-}
 </script>
 
 <template>
@@ -98,86 +91,6 @@ const onOpenPopup = () => {
         />
       </NFormItem>
 
-      <NFormItem :label="$t('keyboard.listenBackgroundKeystrokes')">
-        <div class="setting__item_wrap">
-          <div class="item__box">
-            <NSwitch
-              v-model:value="localConfig.keyboard.isListenBackgroundKeystrokes"
-              size="small"
-            />
-            <Tips :content="`${$t('keyboard.listenBackgroundKeystrokesTips')} ${isFirefox ? URL_FIREFOX_EXTENSIONS_SHORTCUTS : ''}`" />
-          </div>
-          <Transition name="setting-expand">
-            <div
-              v-if="localConfig.keyboard.isListenBackgroundKeystrokes && !isFirefox"
-              class="item__box"
-            >
-              <NButton
-                type="primary"
-                size="small"
-                secondary
-                class="action-btn action-btn--primary"
-                @click="openConfigShortcutsPage()"
-              >
-                <Icon :icon="ICONS.keyboardCmdKey" />&nbsp;{{ $t('keyboard.customKeys') }}
-              </NButton>
-            </div>
-          </Transition>
-        </div>
-      </NFormItem>
-
-      <NFormItem :label="$t('keyboard.dblclickKeyToOpen')">
-        <div class="setting__item_wrap">
-          <div class="item__box">
-            <NSwitch
-              v-model:value="localConfig.keyboard.isDblclickOpen"
-              size="small"
-            />
-            <Tips :content="$t('keyboard.dblclickKeyToOpenTips')" />
-          </div>
-          <Transition name="setting-expand">
-            <div
-              v-if="localConfig.keyboard.isDblclickOpen"
-              class="item__box"
-            >
-              <span class="setting__item-ele setting__item-ml">{{ $t('keyboard.intervalTime') }}</span>
-              <NInputNumber
-                v-model:value="localConfig.keyboard.dblclickIntervalTime"
-                class="setting__item-ele setting__item-ml setting__input-number--unit"
-                size="small"
-                :min="0"
-                :step="1"
-              >
-                <template #suffix> ms </template>
-              </NInputNumber>
-              <Tips :content="$t('keyboard.intervalTimeTips')" />
-            </div>
-          </Transition>
-        </div>
-      </NFormItem>
-
-      <NFormItem :label="$t('general.newTabOpen')">
-        <NSwitch
-          v-model:value="localConfig.keyboard.isNewTabOpen"
-          size="small"
-        />
-      </NFormItem>
-
-      <NFormItem
-        v-if="isOpenPopupVisible"
-        :label="$t('keyboard.configBookmark')"
-      >
-        <NButton
-          type="primary"
-          size="small"
-          secondary
-          class="action-btn action-btn--primary"
-          @click="onOpenPopup()"
-        >
-          <Icon :icon="ICONS.openInNew" />&nbsp;{{ `${$t('common.open')}${$t('common.config')}` }}
-        </NButton>
-      </NFormItem>
-
       <NFormItem :label="$t('keyboard.presetTheme')">
         <NButton
           type="primary"
@@ -189,6 +102,31 @@ const onOpenPopup = () => {
           <Icon :icon="ICONS.selectFinger" />&nbsp;{{ $t('common.select') }}
         </NButton>
       </NFormItem>
+
+      <NFormItem :label="$t('general.newTabOpen')">
+        <NSwitch
+          v-model:value="localConfig.keyboard.isNewTabOpen"
+          size="small"
+        />
+      </NFormItem>
+
+      <NFormItem :label="$t('keyboard.listenBackgroundKeystrokes')">
+        <div class="setting__item_wrap">
+          <div class="item__box">
+            <NSwitch
+              v-model:value="localConfig.keyboard.isListenBackgroundKeystrokes"
+              size="small"
+            />
+            <Tips :content="`${$t('keyboard.shortcutNote')}`" />
+          </div>
+        </div>
+      </NFormItem>
+
+      <!-- 全局快捷键修饰键 -->
+      <GlobalShortcutRecorder />
+
+      <!-- 全局快捷键/书签管理 -->
+      <BookmarkManager mode="setting" />
     </template>
 
     <!-- 底部扩展 -->
