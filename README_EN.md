@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/img/icon/icon-128x128.png" width="128" height="128" alt="NaiveTab Logo" />
+  <img src="./assets/img/icon/icon.png" width="128" height="128" alt="NaiveTab Logo" />
   <h1>NaiveTab</h1>
   <p>Visual keyboard for bookmarks & browser commands — one-press access. Drag & drop layout, full customization, focus mode, and cloud sync.</p>
   <p>

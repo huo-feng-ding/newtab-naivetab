@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/img/icon/icon-128x128.png" width="128" height="128" alt="NaiveTab Logo" />
+  <img src="./assets/img/icon/icon.png" width="128" height="128" alt="NaiveTab Logo" />
   <h1>NaiveTab</h1>
   <p>可视化键盘展示书签和浏览器指令，肌肉记忆一键直达。支持自由拖拽、深度自定义外观、专注模式、云同步。</p>
   <p>
