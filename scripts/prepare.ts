@@ -2,7 +2,7 @@
 import { execSync } from 'node:child_process'
 import fs from 'fs-extra'
 import chokidar from 'chokidar'
-import { isDev, log, port, r } from './utils'
+import { isDev, log, port, r, BROWSER_DIR } from './utils'
 
 /**
  * Stub index.html to use Vite in development
@@ -16,7 +16,7 @@ async function stubIndexHtml() {
   ]
 
   for (const view of views) {
-    await fs.ensureDir(r(`extension/dist/${view}`))
+    await fs.ensureDir(r(`${BROWSER_DIR}/dist/${view}`))
     let data = await fs.readFile(r(`src/${view}/index.html`), 'utf-8')
 
     data = data
@@ -37,7 +37,7 @@ async function stubIndexHtml() {
           }
         }
       </style>`
-    await fs.writeFile(r(`extension/dist/${view}/index.html`), data, 'utf-8')
+    await fs.writeFile(r(`${BROWSER_DIR}/dist/${view}/index.html`), data, 'utf-8')
     log('PRE', `stub ${view}`)
   }
 }
@@ -50,8 +50,8 @@ function writeLocales() {
   execSync('esno ./scripts/locale.ts', { stdio: 'inherit' })
 }
 
-fs.ensureDirSync(r('extension'))
-fs.copySync(r('assets'), r('extension/assets'), {
+fs.ensureDirSync(r(BROWSER_DIR))
+fs.copySync(r('assets'), r(`${BROWSER_DIR}/assets`), {
   filter: (src) => !src.endsWith('.DS_Store'),
 })
 

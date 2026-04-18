@@ -37,33 +37,22 @@ const startGuide = () => {
         },
       },
       {
-        element: '#clockDigital .clockDigital__container',
+        element: '#draft-tool .drawer__header .header__done',
         popover: {
           title: window.$t('guide.stepTitle2'),
           description: window.$t('guide.stepDescription2'),
-          side: 'top',
-          align: 'center',
         },
       },
       {
-        element: '#draft-tool .drawer__header .header__done',
         popover: {
           title: window.$t('guide.stepTitle3'),
           description: window.$t('guide.stepDescription3'),
-          side: 'left',
-          align: 'start',
         },
       },
       {
         popover: {
           title: window.$t('guide.stepTitle4'),
           description: window.$t('guide.stepDescription4'),
-        },
-      },
-      {
-        popover: {
-          title: window.$t('guide.stepTitle5'),
-          description: window.$t('guide.stepDescription5'),
           onNextClick: () => {
             destroyGuide(driverConfig)
           },

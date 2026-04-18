@@ -12,7 +12,7 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Markdown from 'unplugin-vue-markdown/vite'
 import postcssPresetEnv from 'postcss-preset-env'
 import { visualizer } from 'rollup-plugin-visualizer'
-import { isDev, port, r } from './scripts/utils'
+import { isDev, port, r, BROWSER_DIR } from './scripts/utils'
 import packageJson from './package.json'
 
 export const sharedConfig: UserConfig = {
@@ -61,7 +61,7 @@ export const sharedConfig: UserConfig = {
 
     // visualizer(), // 打包分析工具，需要时启用
 
-    // html内引用的资源直接存储在/extension/assets, 无需转换
+    // html内引用的资源直接存储在/{BROWSER_DIR}/assets, 无需转换
     // rewrite assets to use relative path
     // {
     //   name: 'assets-rewrite',
@@ -91,7 +91,7 @@ export default defineConfig(({ command }) => ({
   build: {
     target: 'esnext',
     watch: isDev ? {} : undefined,
-    outDir: r('extension/dist'),
+    outDir: r(`${BROWSER_DIR}/dist`),
     emptyOutDir: false, // 保留未由 Vite 处理的静态资源
     sourcemap: isDev ? 'inline' : false,
     minify: process.env.NO_MINIFY ? false : 'esbuild',

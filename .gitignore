@@ -13,6 +13,8 @@ dist
 dist-ssr
 node_modules
 extension
+extension-chrome
+extension-firefox
 src/auto-imports.d.ts
 src/components.d.ts
 stats.html
