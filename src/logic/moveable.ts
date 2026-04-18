@@ -1,4 +1,5 @@
 import { useToggle, useThrottleFn } from '@vueuse/core'
+import { gaProxy } from '@/logic/gtag'
 import { globalState, localConfig } from '@/logic/store'
 
 export const [isDragMode, toggleIsDragMode] = useToggle(false)
@@ -144,6 +145,25 @@ const handleMouseup = (e: MouseEvent) => {
   if (globalState.isGuideMode || !isDragMode.value || !moveState.currDragTarget.type) {
     return
   }
+
+  // 检查鼠标是否在删除区域内（防止鼠标移出后 delete icon 缩回导致 isDeleteHover 丢失）
+  const isInDeleteZone = moveState.isWidgetStartDrag
+    && e.clientX > moveState.width - 100
+    && e.clientY < 100
+  if (isInDeleteZone && moveState.currDragTarget.type === 'widget') {
+    animateDeleteWidget(moveState.currDragTarget.code as WidgetCodes)
+    gaProxy('delete', ['widget', moveState.currDragTarget.code], { enabled: false })
+    moveState.isWidgetStartDrag = false
+    moveState.currDragTarget.type = ''
+    moveState.currDragTarget.code = ''
+    // 重置状态，确保鼠标抬起时能恢复抽屉
+    if (lastIsDraftDrawerVisible) {
+      toggleIsDraftDrawerVisible(true)
+      lastIsDraftDrawerVisible = null
+    }
+    return
+  }
+
   const task = moveState.mouseUpTaskMap.get(currMouseTaskKey.value)
   if (task) {
     task(e)

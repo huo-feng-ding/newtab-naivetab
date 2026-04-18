@@ -22,7 +22,7 @@ export const styleConst = ref({
   bgMoveableWidgetMain: ['rgba(100,181,246, 0.5)', ''],
   bgMoveableWidgetActive: ['rgba(100,181,246, 0.7)', ''],
   moveableToolDeleteBtnColor: ['#ffa39e', ''],
-  bgMoveableToolDrawer: ['rgba(32, 32, 32, 0.7)', ''],
+  bgMoveableToolDrawer: ['rgba(32, 32, 32, 0.85)', ''],
 
   // ── Popup Keyboard ──────────────────────────────────────────────────
   popupKeyboardBorder: ['rgb(224, 224, 230)', 'rgba(73, 73, 77, 1)'],

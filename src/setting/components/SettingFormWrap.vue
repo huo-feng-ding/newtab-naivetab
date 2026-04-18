@@ -22,7 +22,7 @@ const hasWidgetCode = computed(() => !!props.widgetCode && props.widgetCode in d
 
 // 从各 widget config.ts 中获取需要保留的字段（自动扫描）
 const preserveFieldsMap = (() => {
-  const modules = import.meta.glob('../../../newtab/widgets/**/config.ts', { eager: true }) as Record<string, any>
+  const modules = import.meta.glob('../../newtab/widgets/**/config.ts', { eager: true }) as Record<string, any>
   const map: Record<string, string[]> = {}
   for (const key in modules) {
     const m = modules[key]
