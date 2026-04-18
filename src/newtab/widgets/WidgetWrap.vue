@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { DRAG_TRIGGER_DISTANCE } from '@/logic/constants/index'
+import { DRAG_TRIGGER_DISTANCE } from '@/logic/constants/app'
 import { moveState, isDragMode } from '@/logic/moveable'
-import { localConfig, getStyleConst } from '@/logic/store'
+import { localConfig, localState } from '@/logic/store'
+import { styleConst } from '@/styles/const'
 
 const props = defineProps({
   widgetCode: {
@@ -9,6 +10,18 @@ const props = defineProps({
     required: true,
   },
 })
+
+// 拖动位置 CSS 变量 + 样式常量统一通过 :style 注入，避免 v-bind() TDZ 错误
+const widgetStyle = computed(() => ({
+  '--nt-x-offset': state.cssVars.xOffset,
+  '--nt-y-offset': state.cssVars.yOffset,
+  '--nt-x-translate': state.cssVars.xTranslate,
+  '--nt-y-translate': state.cssVars.yTranslate,
+  '--nt-auxiliary-line-widget': styleConst.value.auxiliaryLineWidget[localState.value.currAppearanceCode] || styleConst.value.auxiliaryLineWidget[0],
+  '--nt-bg-moveable-widget-main': styleConst.value.bgMoveableWidgetMain[localState.value.currAppearanceCode] || styleConst.value.bgMoveableWidgetMain[0],
+  '--nt-bg-moveable-widget-active': styleConst.value.bgMoveableWidgetActive[localState.value.currAppearanceCode] || styleConst.value.bgMoveableWidgetActive[0],
+  '--nt-moveable-tool-delete-btn-color': styleConst.value.moveableToolDeleteBtnColor[localState.value.currAppearanceCode] || styleConst.value.moveableToolDeleteBtnColor[0],
+}))
 
 const state = reactive({
   targetContainerEle: null as null | Element,
@@ -32,10 +45,10 @@ const state = reactive({
    *
    * 【第二层：低频，仅 key 切换时执行】更新 container 的「属性名」
    *   - 作用元素：xxx__container（手动管理的子 div）
-   *   - 操作方式：el.style.left/right/top/bottom = 'var(--x-offset)' 直接 DOM 操作
+   *   - 操作方式：el.style.left/right/top/bottom = 'var(--nt-x-offset)' 直接 DOM 操作
    *   - 仅当 left ↔ right 或 top ↔ bottom 发生切换时才执行，正常拖动中此分支不触发
    *
-   * 关键点：container 的 left/right 值引用 var(--x-offset)，
+   * 关键点：container 的 left/right 值引用 var(--nt-x-offset)，
    * 而 --x-offset 定义在父级 widget__wrap 上，CSS 变量天然继承，
    * 两层操作目标元素不同、属性不同，不存在竞争关系。
    * 这样做将「频繁变化的数值」与「低频变化的方向结构」分离，
@@ -282,20 +295,20 @@ const onDragging = (e: MouseEvent) => {
   if (!state.lastXOffsetKey || !state.lastYOffsetKey || state.lastXOffsetKey !== offsetData.xOffsetKey || state.lastYOffsetKey !== offsetData.yOffsetKey) {
     // 只在 xOffsetKey 或 yOffsetKey 值变化时才触发更新dragStyle
     if (offsetData.xOffsetKey === 'left') {
-      el.style.left = 'var(--x-offset)'
+      el.style.left = 'var(--nt-x-offset)'
       el.style.right = ''
     } else {
-      el.style.right = 'var(--x-offset)'
+      el.style.right = 'var(--nt-x-offset)'
       el.style.left = ''
     }
     if (offsetData.yOffsetKey === 'top') {
-      el.style.top = 'var(--y-offset)'
+      el.style.top = 'var(--nt-y-offset)'
       el.style.bottom = ''
     } else {
-      el.style.bottom = 'var(--y-offset)'
+      el.style.bottom = 'var(--nt-y-offset)'
       el.style.top = ''
     }
-    el.style.transform = 'translate(var(--x-translate), var(--y-translate))'
+    el.style.transform = 'translate(var(--nt-x-translate), var(--nt-y-translate))'
     // 更新缓存的值
     state.lastXOffsetKey = offsetData.xOffsetKey
     state.lastYOffsetKey = offsetData.yOffsetKey
@@ -400,10 +413,6 @@ watch(
   },
 )
 
-const auxiliaryLineWidget = getStyleConst('auxiliaryLineWidget')
-const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
-const bgMoveableWidgetActive = getStyleConst('bgMoveableWidgetActive')
-const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
 /**
  * widget__wrap div 的style会被用来存放v-bind的css var，不能再进行:style操作
  */
@@ -417,6 +426,7 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
       'widget__wrap--hidden': !isFocusVisible,
       'widget__wrap--cursor-move': isDragMode
     }"
+    :style="widgetStyle"
   >
     <div
       v-if="isEnabled"
@@ -432,10 +442,14 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
 
 <style>
 .widget__wrap {
-  --x-offset: v-bind(state.cssVars.xOffset);
-  --y-offset: v-bind(state.cssVars.yOffset);
-  --x-translate: v-bind(state.cssVars.xTranslate);
-  --y-translate: v-bind(state.cssVars.yTranslate);
+  --x-offset: 0;
+  --y-offset: 0;
+  --x-translate: 0;
+  --y-translate: 0;
+  --nt-auxiliary-line-widget: rgba(0, 0, 0, 0);
+  --nt-bg-moveable-widget-main: rgba(0, 0, 0, 0);
+  --nt-bg-moveable-widget-active: rgba(0, 0, 0, 0);
+  --nt-moveable-tool-delete-btn-color: rgba(0, 0, 0, 0);
 }
 
 .widget__wrap--hidden {
@@ -449,20 +463,20 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
 
 /* 拖动编辑模式 — 辅助线轮廓 */
 .widget-auxiliary-line {
-  outline: 2px dashed v-bind(auxiliaryLineWidget) !important;
+  outline: 2px dashed var(--nt-auxiliary-line-widget) !important;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 /* 非激活状态的 hover 高亮 */
 .widget-bg-hover:hover {
-  background-color: v-bind(bgMoveableWidgetMain);
+  background-color: var(--nt-bg-moveable-widget-main);
   box-shadow: 0 2px 12px rgba(100, 181, 246, 0.25);
 }
 
 /* 当前选中（mousedown）激活态 */
 .widget-active {
-  background-color: v-bind(bgMoveableWidgetActive) !important;
+  background-color: var(--nt-bg-moveable-widget-active) !important;
   box-shadow: 0 4px 16px rgba(100, 181, 246, 0.35) !important;
 }
 
@@ -477,12 +491,26 @@ const moveableToolDeleteBtnColor = getStyleConst('moveableToolDeleteBtnColor')
     opacity 150ms ease !important;
 }
 
-/* 拖入删除区域 — 红色警示 */
+/* 拖入删除区域 — 红色警示 + 脉冲动画 */
 .widget-delete {
-  background-color: v-bind(moveableToolDeleteBtnColor) !important;
-  box-shadow: 0 4px 16px rgba(255, 100, 100, 0.4) !important;
+  background-color: var(--nt-moveable-tool-delete-btn-color) !important;
+  box-shadow: 0 4px 24px rgba(255, 80, 80, 0.55) !important;
+  animation: widget-delete-pulse 1.2s ease-in-out infinite !important;
   transition:
-    background-color 150ms ease,
-    box-shadow 150ms ease !important;
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+
+@keyframes widget-delete-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 24px rgba(255, 80, 80, 0.55) !important;
+    opacity: 1 !important;
+  }
+  50% {
+    transform: scale(0.96);
+    box-shadow: 0 6px 32px rgba(255, 60, 60, 0.7) !important;
+    opacity: 0.88 !important;
+  }
 }
 </style>

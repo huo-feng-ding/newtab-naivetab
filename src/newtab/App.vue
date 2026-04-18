@@ -2,33 +2,52 @@
 import { NConfigProvider, NMessageProvider, NNotificationProvider, NLoadingBarProvider } from 'naive-ui'
 import { log } from '@/logic/util'
 import { gaProxy } from '@/logic/gtag'
-import { FOCUS_ELEMENT_SELECTOR_MAP } from '@/logic/constants/index'
+import { FOCUS_ELEMENT_SELECTOR_MAP } from '@/logic/constants/app'
+import { SYSTEM_FONT_STACK } from '@/logic/constants/fonts'
 import { startKeydown, startTimer, stopTimer, onPageFocus, stopKeydown } from '@/logic/task'
-import { handleWatchLocalConfigChange, handleMissedUploadConfig, loadRemoteConfig, setupKeyboardSyncListener } from '@/logic/storage'
+import { setupNewtabGlobalShortcutForBookmark, cleanupNewtabGlobalShortcutForBookmark } from '@/logic/globalShortcut/shortcut-bookmark'
+import { setupNewtabGlobalShortcutForCommand, cleanupNewtabGlobalShortcutForCommand } from '@/logic/globalShortcut/shortcut-executor'
+import { setupPageConfigSync, setupLocalStorageSyncListener } from '@/logic/storage'
 import { handleFirstOpen } from '@/logic/guide'
-import { getStyleField, localConfig, nativeUILang, currTheme, themeOverrides, handleStateResetAndUpdate, handleAppUpdate, setEdgeFavicon } from '@/logic/store'
+import { getStyleField, localConfig, nativeUILang, currTheme, themeOverrides } from '@/logic/store'
+import { handleAppUpdate } from '@/logic/config-update'
 import { initBackgroundImage } from '@/logic/image'
 import { cleanupEvents, cleanupResizeObserver } from '@/logic/moveable'
-import { initKeyboardData } from '~/newtab/widgets/keyboard/logic'
+import { initKeyboardData } from '@/newtab/widgets/keyboard/logic'
 import { updatePoetry } from '@/logic/poetry'
 import Content from '@/newtab/Content.vue'
+
+// 样式通过 :style 注入，避免 v-bind() TDZ 错误
+const WIDGET_CODE = 'general'
+const appStyle = computed(() => {
+  const fontFamilyValue = getStyleField(WIDGET_CODE, 'fontFamily').value
+  return {
+    '--nt-app-font-family': fontFamilyValue === 'system' ? SYSTEM_FONT_STACK : fontFamilyValue,
+    '--nt-app-font-size': getStyleField(WIDGET_CODE, 'fontSize', 'px').value,
+  }
+})
 
 if (localConfig.general.openPageFocusElement !== 'default') {
   if (location.search !== '?focus') {
     location.search = '?focus'
-    throw new Error()
+    // 设置 query 参数后中断组件初始化，页面将以 ?focus 参数重新加载
+    // 此 throw 是预期行为，非 bug
+    throw new Error('[NAIVETAB] Reloading page with ?focus query for focus element initialization')
   }
 }
 
 const handleFocusPage = () => {
-  if (localConfig.general.openPageFocusElement === 'default') {
-    return
-  }
-  const selector = FOCUS_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
-  const focusEle = document.querySelector(selector) as HTMLElement | null
-  if (focusEle && focusEle.focus) {
-    focusEle.focus()
-  }
+  // 推迟到宏任务队列，让浏览器完成新标签页的初始聚焦（地址栏）后，再将焦点转移到页面元素。
+  setTimeout(() => {
+    if (localConfig.general.openPageFocusElement === 'default') {
+      return
+    }
+    const selector = FOCUS_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
+    const focusEle = document.querySelector(selector) as HTMLElement | null
+    if (focusEle && focusEle.focus) {
+      focusEle.focus()
+    }
+  }, 0)
 }
 
 const onDot = () => {
@@ -66,16 +85,14 @@ const onDot = () => {
 onMounted(async () => {
   // 阶段 1：基础初始化（同步操作，无依赖）
   initBackgroundImage()
-  setEdgeFavicon()
-  handleStateResetAndUpdate()
   startTimer()
   startKeydown()
+  setupNewtabGlobalShortcutForBookmark()
+  setupNewtabGlobalShortcutForCommand()
 
   // 阶段 2：配置同步（按顺序，有依赖关系）
-  await loadRemoteConfig()
-  await handleMissedUploadConfig()
-  handleWatchLocalConfigChange()
-  setupKeyboardSyncListener() // 监听 popup 修改的书签配置
+  await setupPageConfigSync()
+  setupLocalStorageSyncListener()
 
   // 阶段 3：版本升级（配置修改同步生效，updateSetting 异步执行）
   // handleAppUpdate 内的配置修改会立即生效（Vue 响应式）
@@ -92,8 +109,12 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  // 注意：浏览器新标签页关闭时不会触发 onUnmounted，整个 JS 环境直接销毁。
+  // 以下清理代码仅在开发 HMR / 扩展热重载时生效，属于防御性清理。
   stopTimer()
   stopKeydown()
+  cleanupNewtabGlobalShortcutForBookmark()
+  cleanupNewtabGlobalShortcutForCommand()
   cleanupEvents()
   cleanupResizeObserver()
 })
@@ -104,10 +125,6 @@ const pageAnimationClass = computed(() => {
   }
   return `animation--${localConfig.general.loadPageAnimationType}`
 })
-
-const WIDGET_CODE = 'general'
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
 </script>
 
 <template>
@@ -117,6 +134,7 @@ const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
     :locale="nativeUILang"
     :theme="currTheme"
     :theme-overrides="themeOverrides"
+    :style="appStyle"
   >
     <NDialogProvider>
       <NNotificationProvider>
@@ -140,8 +158,8 @@ const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
 #container {
   width: 100vw;
   height: 100vh;
-  font-size: v-bind(customFontSize);
-  font-family: v-bind(customFontFamily);
+  font-size: var(--nt-app-font-size);
+  font-family: var(--nt-app-font-family);
   #container__main {
     width: 100vw;
     height: 100vh;

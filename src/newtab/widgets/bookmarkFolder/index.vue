@@ -11,6 +11,42 @@ import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 import { initData, state } from './logic'
 
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+const customItemGap = getStyleField(WIDGET_CODE, 'itemGap', 'px')
+const customItemBorderRadius = getStyleField(WIDGET_CODE, 'itemBorderRadius', 'vmin')
+const customItemHeight = getStyleField(WIDGET_CODE, 'itemHeight', 'px')
+const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
+
+const bookmarkFolderStyle = computed(() => ({
+  '--nt-bf-font-family': customFontFamily.value,
+  '--nt-bf-font-color': customFontColor.value,
+  '--nt-bf-font-size': customFontSize.value,
+  '--nt-bf-padding': customPadding.value,
+  '--nt-bf-width': customWidth.value,
+  '--nt-bf-height': customHeight.value,
+  '--nt-bf-border-radius': customBorderRadius.value,
+  '--nt-bf-border-width': customBorderWidth.value,
+  '--nt-bf-border-color': customBorderColor.value,
+  '--nt-bf-background-color': customBackgroundColor.value,
+  '--nt-bf-shadow-color': customShadowColor.value,
+  '--nt-bf-background-blur': customBackgroundBlur.value,
+  '--nt-bf-item-gap': customItemGap.value,
+  '--nt-bf-item-border-radius': customItemBorderRadius.value,
+  '--nt-bf-item-height': customItemHeight.value,
+  '--nt-bf-icon-size': customIconSize.value,
+}))
+
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 const requestBookmarkAccess = async () => {
@@ -91,28 +127,13 @@ watch(
   { immediate: true },
 )
 
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-const customItemGap = getStyleField(WIDGET_CODE, 'itemGap', 'px')
-const customItemBorderRadius = getStyleField(WIDGET_CODE, 'itemBorderRadius', 'vmin')
-const customItemHeight = getStyleField(WIDGET_CODE, 'itemHeight', 'px')
-const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="bookmarkFolder__container"
+      :style="bookmarkFolderStyle"
       :class="{
         'bookmarkFolder__container--border': localConfig.bookmarkFolder.isBorderEnabled,
         'bookmarkFolder__container--shadow': localConfig.bookmarkFolder.isShadowEnabled,
@@ -214,15 +235,15 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: v-bind(customFontFamily);
-    color: v-bind(customFontColor);
-    font-size: v-bind(customFontSize);
-    padding: v-bind(customPadding);
-    width: v-bind(customWidth);
-    height: v-bind(customHeight);
-    background: v-bind(customBackgroundColor);
-    border-radius: v-bind(customBorderRadius);
-    backdrop-filter: blur(v-bind(customBackgroundBlur)) saturate(1.4);
+    font-family: var(--nt-bf-font-family);
+    color: var(--nt-bf-font-color);
+    font-size: var(--nt-bf-font-size);
+    padding: var(--nt-bf-padding);
+    width: var(--nt-bf-width);
+    height: var(--nt-bf-height);
+    background: var(--nt-bf-background-color);
+    border-radius: var(--nt-bf-border-radius);
+    backdrop-filter: blur(var(--nt-bf-background-blur)) saturate(1.4);
     overflow: hidden;
     will-change: transform;
     transform: translateZ(0);
@@ -244,12 +265,12 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
   }
   .bookmarkFolder__container--border {
     border-style: solid;
-    border-width: v-bind(customBorderWidth);
-    border-color: v-bind(customBorderColor);
+    border-width: var(--nt-bf-border-width);
+    border-color: var(--nt-bf-border-color);
   }
   .bookmarkFolder__container--shadow {
     box-shadow:
-      0 4px 24px v-bind(customShadowColor),
+      0 4px 24px var(--nt-bf-shadow-color),
       0 1px 4px rgba(0, 0, 0, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
@@ -258,8 +279,8 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     position: relative;
     z-index: 1;
     display: grid;
-    gap: v-bind(customItemGap);
-    grid-auto-rows: v-bind(customItemHeight);
+    gap: var(--nt-bf-item-gap);
+    grid-auto-rows: var(--nt-bf-item-height);
     width: 100%;
     height: 100%;
     overflow-y: auto;
@@ -283,7 +304,7 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
     box-sizing: border-box;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.07);
-    border-radius: v-bind(customItemBorderRadius);
+    border-radius: var(--nt-bf-item-border-radius);
     border: 1px solid rgba(255, 255, 255, 0.08);
     user-select: none;
     transition:
@@ -328,8 +349,8 @@ const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
   }
 
   .folder__icon {
-    width: min(v-bind(customIconSize), 80%);
-    height: min(v-bind(customIconSize), 80%);
+    width: min(var(--nt-bf-icon-size), 80%);
+    height: min(var(--nt-bf-icon-size), 80%);
     display: flex;
     align-items: center;
     justify-content: center;

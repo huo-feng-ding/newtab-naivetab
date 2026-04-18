@@ -8,6 +8,38 @@ import { ICONS } from '@/logic/icons'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
+const customProgressColor = getStyleField(WIDGET_CODE, 'progressColor')
+const customTrackColor = getStyleField(WIDGET_CODE, 'trackColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customSize = getStyleField(WIDGET_CODE, 'size', 'vmin')
+const customClockFontFamily = getStyleField(WIDGET_CODE, 'clockFontFamily')
+const customClockFontColor = getStyleField(WIDGET_CODE, 'clockFontColor')
+const customClockFontSize = getStyleField(WIDGET_CODE, 'clockFontSize', 'vmin')
+const customLabelFontFamily = getStyleField(WIDGET_CODE, 'labelFontFamily')
+const customLabelFontSize = getStyleField(WIDGET_CODE, 'labelFontSize', 'px')
+const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
+
+const countdownStyle = computed(() => ({
+  '--nt-cd-clock-font-family': customClockFontFamily.value,
+  '--nt-cd-clock-font-color': customClockFontColor.value,
+  '--nt-cd-size': customSize.value,
+  '--nt-cd-custom-background-color': customBackgroundColor.value,
+  '--nt-cd-custom-background-blur': customBackgroundBlur.value,
+  '--nt-cd-custom-border-color': customBorderColor.value,
+  '--nt-cd-custom-border-width': customBorderWidth.value,
+  '--nt-cd-custom-shadow-color': customShadowColor.value,
+  '--nt-cd-custom-track-color': customTrackColor.value,
+  '--nt-cd-custom-progress-color': customProgressColor.value,
+  '--nt-cd-label-font-family': customLabelFontFamily.value,
+  '--nt-cd-label-font-size': customLabelFontSize.value,
+  '--nt-cd-label-font-color': customLabelFontColor.value,
+  '--nt-cd-clock-font-size': customClockFontSize.value,
+}))
+
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 // ─── 运行时持久化状态（与 localConfig 分离，不参与云同步）───
@@ -182,28 +214,13 @@ const progressRatio = computed(() => {
 
 const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio.value))
 
-// ─── 样式绑定 ───
-const customProgressColor = getStyleField(WIDGET_CODE, 'progressColor')
-const customTrackColor = getStyleField(WIDGET_CODE, 'trackColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-
-const customSize = getStyleField(WIDGET_CODE, 'size', 'vmin')
-const customClockFontFamily = getStyleField(WIDGET_CODE, 'clockFontFamily')
-const customClockFontColor = getStyleField(WIDGET_CODE, 'clockFontColor')
-const customClockFontSize = getStyleField(WIDGET_CODE, 'clockFontSize', 'vmin')
-const customLabelFontFamily = getStyleField(WIDGET_CODE, 'labelFontFamily')
-const customLabelFontSize = getStyleField(WIDGET_CODE, 'labelFontSize', 'px')
-const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="countdown__container"
+      :style="countdownStyle"
       :class="{
         'countdown__container--shadow': localConfig.countdown.isShadowEnabled,
         'countdown__container--finished': isFinished,
@@ -381,32 +398,32 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
 
 <style>
 #countdown {
-  font-family: v-bind(customClockFontFamily);
-  color: v-bind(customClockFontColor);
+  font-family: var(--nt-cd-clock-font-family);
+  color: var(--nt-cd-clock-font-color);
   user-select: none;
 
   .countdown__container {
     z-index: 10;
     position: absolute;
-    width: v-bind(customSize);
-    height: v-bind(customSize);
+    width: var(--nt-cd-size);
+    height: var(--nt-cd-size);
 
     /* 玻璃背景圆 */
     .countdown__bg {
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: v-bind(customBackgroundColor);
-      backdrop-filter: blur(v-bind(customBackgroundBlur));
-      -webkit-backdrop-filter: blur(v-bind(customBackgroundBlur));
-      border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+      background: var(--nt-cd-custom-background-color);
+      backdrop-filter: blur(var(--nt-cd-custom-background-blur));
+      -webkit-backdrop-filter: blur(var(--nt-cd-custom-background-blur));
+      border: var(--nt-cd-custom-border-width) solid var(--nt-cd-custom-border-color);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     &.countdown__container--shadow .countdown__bg {
       box-shadow:
-        0 2px 4px v-bind(customShadowColor),
-        0 6px 16px v-bind(customShadowColor),
+        0 2px 4px var(--nt-cd-custom-shadow-color),
+        0 6px 16px var(--nt-cd-custom-shadow-color),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
@@ -420,7 +437,7 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
 
       .ring__progress {
         transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        filter: drop-shadow(0 0 3px v-bind(customProgressColor));
+        filter: drop-shadow(0 0 3px var(--nt-cd-custom-progress-color));
       }
     }
 
@@ -438,9 +455,9 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
         left: 50%;
         transform: translateX(-50%);
         white-space: nowrap;
-        font-family: v-bind(customLabelFontFamily);
-        font-size: v-bind(customLabelFontSize);
-        color: v-bind(customLabelFontColor);
+        font-family: var(--nt-cd-label-font-family);
+        font-size: var(--nt-cd-label-font-size);
+        color: var(--nt-cd-label-font-color);
         line-height: 1;
         pointer-events: none;
       }
@@ -454,7 +471,7 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
       }
 
       .countdown__time {
-        font-size: v-bind(customClockFontSize);
+        font-size: var(--nt-cd-clock-font-size);
         letter-spacing: 0.02em;
         line-height: 1;
         display: flex;
@@ -522,8 +539,8 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
           border: none;
           border-bottom: 1px solid rgba(255, 255, 255, 0.4);
           color: inherit;
-          font-size: v-bind(customClockFontSize);
-          font-family: v-bind(customClockFontFamily);
+          font-size: var(--nt-cd-clock-font-size);
+          font-family: var(--nt-cd-clock-font-family);
           text-align: center;
           line-height: 1;
           outline: none;
@@ -538,7 +555,7 @@ const customLabelFontColor = getStyleField(WIDGET_CODE, 'labelFontColor')
 
         .edit__colon {
           opacity: 0.4;
-          font-size: v-bind(customClockFontSize);
+          font-size: var(--nt-cd-clock-font-size);
           line-height: 1;
         }
 

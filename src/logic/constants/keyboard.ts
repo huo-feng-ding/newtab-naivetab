@@ -156,8 +156,8 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   NumpadDecimal: { label: '.', textAlign: 'center', size: 1 },
 }
 
-export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST = [
-  // 'Escape', 需要支持按esc返回上一层级的文件夹
+export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET = [
+  'Escape',
   // 'F1',
   // 'F2',
   // 'F3',

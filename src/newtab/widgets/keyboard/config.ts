@@ -1,26 +1,27 @@
 export const WIDGET_CODE = 'keyboard'
 
+import type { TShortcutModifier } from '@/logic/globalShortcut/shortcut-utils'
+
 export const PRESERVE_FIELDS = ['keymap']
 
 export const WIDGET_CONFIG = {
   enabled: true,
   source: 2, // 书签来源：1浏览器，2扩展本身
-  isListenBackgroundKeystrokes: true, // 是否监听后台按键（含全局快捷键）
-  globalShortcutModifier: 'alt' as string, // 全局快捷键修饰键，如 "alt"、"ctrl+shift"
+  isGlobalShortcutEnabled: true, // 全局快捷键
+  shortcutInInputElement: true, // 输入元素中是否仍然触发全局快捷键
+  globalShortcutModifiers: ['alt'] as TShortcutModifier[], // 全局快捷键修饰键数组，如 ["alt"]、["ctrl", "shift"]
+  urlBlacklist: [] as string[], // URL 黑名单（在这些域名上不触发全局快捷键）
   isNewTabOpen: false,
   defaultExpandFolder: null as null | string,
   keymap: {
     KeyQ: {
       url: 'www.baidu.com',
-      name: '',
     },
     KeyW: {
       url: 'www.google.com',
-      name: '',
     },
     KeyE: {
       url: 'www.bing.com',
-      name: '',
     },
     KeyA: {
       url: 'https://gxfg.github.io/naivetab-doc/',

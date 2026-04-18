@@ -1,12 +1,27 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { URL_QWEATHER_HOME, WEATHER_TEMPERATURE_UNIT_MAP, WEATHER_SPEED_UNIT_MAP } from '@/logic/constants/index'
+import { WEATHER_TEMPERATURE_UNIT_MAP, WEATHER_SPEED_UNIT_MAP } from '@/logic/constants/weather'
+import { URL_QWEATHER_HOME } from '@/logic/constants/urls'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
 import { localConfig, getStyleField, globalState } from '@/logic/store'
 import { weatherState, weatherIndicesInfo, weatherWarningInfo } from '@/newtab/widgets/weather/logic'
 import { WIDGET_CODE } from './config'
+
+const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
+const customLabelSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.4)
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.2)
+const customLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.5)
+const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
+
+const nowWeatherStyle = computed(() => ({
+  '--nt-wn-icon-size': customIconSize.value,
+  '--nt-wn-label-size': customLabelSize.value,
+  '--nt-wn-font-size': customFontSize.value,
+  '--nt-wn-large-font-size': customLargeFontSize.value,
+  '--nt-wn-xlarge-font-size': customXLargeFontSize.value,
+}))
 
 const state = reactive({
   isWarningVisible: false,
@@ -72,15 +87,13 @@ const onOpenWeather = () => {
 const temperatureUnit = computed(() => WEATHER_TEMPERATURE_UNIT_MAP[localConfig.weather.temperatureUnit])
 const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.speedUnit])
 
-const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
-const customLabelSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.4)
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.2)
-const customLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.5)
-const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
 </script>
 
 <template>
-  <div id="now">
+  <div
+    id="now"
+    :style="nowWeatherStyle"
+  >
     <!-- 天气图标区域 -->
     <div
       v-if="localConfig.weather.iconEnabled"
@@ -297,7 +310,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
     }
 
     .weather-icon__wrap {
-      font-size: v-bind(customIconSize);
+      font-size: var(--nt-wn-icon-size);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -325,7 +338,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 5px;
 
       .text__condition {
-        font-size: v-bind(customLargeFontSize);
+        font-size: var(--nt-wn-large-font-size);
         font-weight: 700;
         letter-spacing: 0.03em;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
@@ -335,7 +348,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       .warning__icon {
         display: flex;
         align-items: center;
-        font-size: v-bind(customLabelSize);
+        font-size: var(--nt-wn-label-size);
         cursor: pointer;
         color: #f5a623;
         filter: drop-shadow(0 0 4px rgba(245, 166, 35, 0.6));
@@ -355,20 +368,20 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 2px;
 
       .temp__icon {
-        font-size: v-bind(customLabelSize);
+        font-size: var(--nt-wn-label-size);
         opacity: 0.75;
         /* svg icon 无法直接参与 baseline，用 translate 微调垂直居中 */
         transform: translateY(15%);
       }
       .temp__value {
-        font-size: v-bind(customXLargeFontSize);
+        font-size: var(--nt-wn-xlarge-font-size);
         font-weight: 800;
         line-height: 1;
         letter-spacing: -1px;
         text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
       .temp__unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 600;
         opacity: 0.8;
       }
@@ -391,18 +404,18 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 2px;
 
       .temp__secondary-label {
-        font-size: calc(v-bind(customFontSize) * 0.9);
+        font-size: calc(var(--nt-wn-font-size) * 0.9);
         opacity: 0.55;
         margin-bottom: 1px;
         letter-spacing: 0.02em;
       }
       .temp__secondary-value {
-        font-size: v-bind(customLargeFontSize);
+        font-size: var(--nt-wn-large-font-size);
         font-weight: 600;
         line-height: 1;
       }
       .temp__secondary-unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
         margin-bottom: 1px;
       }
@@ -414,7 +427,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       align-items: center;
       gap: 2px;
       .detail__icon {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
       }
     }
@@ -425,7 +438,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       align-items: center;
 
       .temp__range-value {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 500;
         opacity: 0.75;
         letter-spacing: 0.02em;
@@ -447,18 +460,18 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 3px;
 
       .detail__icon {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         flex-shrink: 0;
         opacity: 0.7;
         &.detail__icon--sunrise { color: #f5c842; opacity: 0.9; }
         &.detail__icon--sunset  { color: #a78bfa; opacity: 0.9; }
       }
       .detail__label {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 500;
       }
       .detail__sub {
-        font-size: calc(v-bind(customFontSize) * 0.9);
+        font-size: calc(var(--nt-wn-font-size) * 0.9);
         opacity: 0.65;
         &::before {
           content: '·';
@@ -470,7 +483,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
         }
       }
       .detail__badge {
-        font-size: calc(v-bind(customFontSize) * 0.85);
+        font-size: calc(var(--nt-wn-font-size) * 0.85);
         padding: 1px 5px;
         border-radius: 3px;
         background: rgba(255, 255, 255, 0.12);
@@ -481,7 +494,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
         backdrop-filter: blur(4px);
       }
       .detail__unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
       }
     }

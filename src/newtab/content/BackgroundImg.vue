@@ -3,8 +3,6 @@ import { NSpin } from 'naive-ui'
 import { localConfig } from '@/logic/store'
 import { imageState, isImageLoading } from '@/logic/image'
 
-const customOpacity = computed(() => localConfig.general.bgOpacity)
-
 // Parallax effect: mouse moves -> background slightly shifts
 const parallaxX = ref(0)
 const parallaxY = ref(0)
@@ -20,9 +18,11 @@ const containerStyle = computed(() => {
   if (localConfig.general.isBackgroundImageEnabled) {
     style.backgroundImage = `url(${imageState.currBackgroundImageFileObjectURL})`
   }
-  style['--parallax-x'] = `${parallaxX.value}px`
-  style['--parallax-y'] = `${parallaxY.value}px`
-  style['--parallax-expansion'] = `${parallaxExpansion.value}px`
+  style['--nt-parallax-x'] = `${parallaxX.value}px`
+  style['--nt-parallax-y'] = `${parallaxY.value}px`
+  style['--nt-parallax-expansion'] = `${parallaxExpansion.value}px`
+  style.filter = `blur(${localConfig.general.bgBlur}px)`
+  style.opacity = localConfig.general.bgOpacity
   return style
 })
 
@@ -89,9 +89,14 @@ let loadingTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(isImageLoading, (value) => {
   if (value) {
+    // 如果已有 base64 小图作为占位，不展示 loading spinner
+    const hasBase64Fallback = imageState.currBackgroundImageFileObjectURL.startsWith('data:')
+    if (hasBase64Fallback) {
+      return
+    }
     loadingTimer = setTimeout(() => {
       isShowLoadingSpinner.value = true
-    }, 300)
+    }, 500)
   } else {
     if (loadingTimer) {
       clearTimeout(loadingTimer)
@@ -147,17 +152,15 @@ onUnmounted(() => {
     background-repeat: no-repeat;
     background-position: center;
     transition: background-image 0.4s ease;
-    filter: blur(v-bind(`${localConfig.general.bgBlur}px`));
-    opacity: v-bind(customOpacity);
     will-change: transform;
 
     &.background__container--parallax {
       /* Expand by dynamic amount based on parallax intensity: intensity × 2 each side → total ×4 */
-      top: calc(-1 * var(--parallax-expansion, 40px));
-      left: calc(-1 * var(--parallax-expansion, 40px));
-      width: calc(100vw + calc(2 * var(--parallax-expansion, 40px)));
-      height: calc(100vh + calc(2 * var(--parallax-expansion, 40px)));
-      transform: translate(var(--parallax-x, 0), var(--parallax-y, 0));
+      top: calc(-1 * var(--nt-parallax-expansion, 40px));
+      left: calc(-1 * var(--nt-parallax-expansion, 40px));
+      width: calc(100vw + calc(2 * var(--nt-parallax-expansion, 40px)));
+      height: calc(100vh + calc(2 * var(--nt-parallax-expansion, 40px)));
+      transform: translate(var(--nt-parallax-x, 0), var(--nt-parallax-y, 0));
       transition: transform 100ms ease-out;
     }
   }

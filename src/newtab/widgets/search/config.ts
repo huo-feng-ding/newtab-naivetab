@@ -22,7 +22,7 @@ export const WIDGET_CONFIG = {
   width: 400,
   height: 45,
   borderRadius: 50,
-  fontFamily: 'Arial',
+  fontFamily: 'system',
   fontSize: 18,
   fontColor: ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)'],
   isBorderEnabled: false,

@@ -10,6 +10,37 @@ import { localConfig, globalState, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+
+const searchStyle = computed(() => ({
+  '--nt-s-font-family': customFontFamily.value,
+  '--nt-s-font-color': customFontColor.value,
+  '--nt-s-font-size': customFontSize.value,
+  '--nt-s-padding': customPadding.value,
+  '--nt-s-width': customWidth.value,
+  '--nt-s-height': customHeight.value,
+  '--nt-s-border-radius': customBorderRadius.value,
+  '--nt-s-border-width': customBorderWidth.value,
+  '--nt-s-border-color': customBorderColor.value,
+  '--nt-s-background-color': customBackgroundColor.value,
+  '--nt-s-shadow-color': customShadowColor.value,
+  '--nt-s-background-blur': customBackgroundBlur.value,
+}))
+
+// NDropdown 是 teleport 组件，不继承父级 CSS 变量，需显式传 width
+const searchDropdownStyle = computed(() => ({ width: customWidth.value }))
+
 const state = reactive({
   placementValue: 'bottom' as Placement,
   searchValue: '',
@@ -167,24 +198,13 @@ watch(isDragMode, () => {
   onClearValue()
 })
 
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="search__container"
+      :style="searchStyle"
       :class="{
         'search__container--focus': localConfig.search.isBorderEnabled && globalState.isSearchFocused,
         'search__container--border': localConfig.search.isBorderEnabled,
@@ -199,7 +219,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           :placement="state.placementValue"
           :show-arrow="true"
           :keyboard="false"
-          :style="`width: ${customWidth};`"
+          :style="searchDropdownStyle"
           @select="handleSelectSuggest"
           @clickoutside="handleSelectOutside"
         >
@@ -238,7 +258,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 
 <style>
 #search {
-  font-family: v-bind(customFontFamily);
+  font-family: var(--nt-s-font-family);
   user-select: none;
 
   .search__container {
@@ -247,9 +267,9 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: v-bind(customBorderRadius);
-    background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur)) saturate(1.4);
+    border-radius: var(--nt-s-border-radius);
+    background-color: var(--nt-s-background-color);
+    backdrop-filter: blur(var(--nt-s-background-blur)) saturate(1.4);
     transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
     will-change: transform;
 
@@ -294,32 +314,32 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
     }
     .n-input,
     .n-input--focus {
-      border-radius: v-bind(customBorderRadius) !important;
+      border-radius: var(--nt-s-border-radius) !important;
     }
     .input__main {
       position: relative;
       z-index: 1;
       flex: 1;
-      width: v-bind(customWidth);
-      height: v-bind(customHeight);
-      font-size: v-bind(customFontSize);
+      width: var(--nt-s-width);
+      height: var(--nt-s-height);
+      font-size: var(--nt-s-font-size);
       background-color: transparent;
       .n-input-wrapper {
-        padding: 0 v-bind(customPadding);
+        padding: 0 var(--nt-s-padding);
         .n-input__input-el {
-          height: v-bind(customHeight);
-          color: v-bind(customFontColor) !important;
-          caret-color: v-bind(customFontColor);
+          height: var(--nt-s-height);
+          color: var(--nt-s-font-color) !important;
+          caret-color: var(--nt-s-font-color);
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
         }
         .n-input__placeholder {
-          color: v-bind(customFontColor);
+          color: var(--nt-s-font-color);
           opacity: 0.4;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         .n-input__suffix {
           .n-base-clear {
-            color: v-bind(customFontColor);
+            color: var(--nt-s-font-color);
             opacity: 0.45;
             transition: opacity 0.18s ease, transform 0.15s ease;
             &:hover {
@@ -341,13 +361,13 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
       z-index: 1;
       flex-shrink: 0;
       width: auto;
-      padding: 0 v-bind(customPadding);
-      color: v-bind(customFontColor) !important;
+      padding: 0 var(--nt-s-padding);
+      color: var(--nt-s-font-color) !important;
       opacity: 0.65;
       cursor: pointer;
       transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
       .search__icon {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-s-font-size);
         display: block;
         filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
         transition: filter 0.18s ease;
@@ -376,26 +396,26 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
   }
 
   .search__container--border {
-    border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+    border: var(--nt-s-border-width) solid var(--nt-s-border-color);
   }
   .search__container--shadow {
     box-shadow:
-      0 4px 24px v-bind(customShadowColor),
+      0 4px 24px var(--nt-s-shadow-color),
       0 1px 4px rgba(0, 0, 0, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   .search__container--focus {
     &.search__container--shadow {
       box-shadow:
-        0 6px 32px v-bind(customShadowColor),
+        0 6px 32px var(--nt-s-shadow-color),
         0 2px 8px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.14);
     }
     &.search__container--border {
-      border-color: v-bind(customFontColor);
+      border-color: var(--nt-s-font-color);
     }
     /* 聚焦时背景微微提亮 */
-    background-color: color-mix(in srgb, v-bind(customBackgroundColor) 85%, rgba(255,255,255,0.08) 15%);
+    background-color: color-mix(in srgb, var(--nt-s-background-color) 85%, rgba(255,255,255,0.08) 15%);
   }
 }
 </style>

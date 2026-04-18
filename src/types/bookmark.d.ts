@@ -16,7 +16,7 @@ type BookmarkNode = chrome.bookmarks.BookmarkTreeNode
 
 interface TBookmarkEntry {
   url: string
-  name: string
+  name?: string
 }
 
 interface BookmarkItem {

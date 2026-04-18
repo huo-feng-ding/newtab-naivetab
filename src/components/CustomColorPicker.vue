@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { FAVORITE_SWATCHE_MAX_COUNT } from '@/logic/constants/index'
+import { FAVORITE_SWATCHE_MAX_COUNT } from '@/logic/constants/app'
 import { localConfig } from '@/logic/store'
 
 const props = defineProps({
@@ -14,6 +14,12 @@ const props = defineProps({
     default: '',
   },
 })
+
+const customEntryBackgroundColor = computed(() => props.value)
+
+const cssVars = computed(() => ({
+  '--nt-color-picker-entry-bg': customEntryBackgroundColor.value,
+}))
 
 const emit = defineEmits(['update:value'])
 
@@ -48,8 +54,6 @@ const removeFavoriteColor = () => {
   const targetIndex = localConfig.general.swatcheColors.indexOf(props.value)
   localConfig.general.swatcheColors.splice(targetIndex, 1)
 }
-
-const customEntryBackgroundColor = computed(() => props.value)
 </script>
 
 <template>
@@ -63,6 +67,7 @@ const customEntryBackgroundColor = computed(() => props.value)
       <div
         class="color-picker__entry"
         :class="props.class"
+        :style="cssVars"
       />
     </template>
 
@@ -110,7 +115,7 @@ const customEntryBackgroundColor = computed(() => props.value)
   height: 20px;
   border-radius: 3px;
   border: 1px solid #ccc;
-  background-color: v-bind(customEntryBackgroundColor);
+  background-color: var(--nt-color-picker-entry-bg);
   cursor: pointer;
 }
 

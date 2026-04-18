@@ -4,7 +4,6 @@ import { resolve } from 'node:path'
 import { defineConfig, type UserConfig, type PluginOption } from 'vite'
 import Vue from '@vitejs/plugin-vue'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
-import UnoCSS from 'unocss/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -20,9 +19,7 @@ export const sharedConfig: UserConfig = {
   root: r('src'),
   resolve: {
     alias: {
-      '~/': `${r('src')}/`,
       '@/': `${r('src')}/`,
-      'vue-i18n': 'vue-i18n/dist/vue-i18n.runtime.esm-bundler.js',
     },
   },
   define: {
@@ -31,7 +28,7 @@ export const sharedConfig: UserConfig = {
   },
   css: {
     postcss: {
-      plugins: [postcssPresetEnv()],
+      plugins: [postcssPresetEnv({ stage: 3, features: { 'nesting-rules': true } })],
     },
   },
   plugins: [
@@ -60,8 +57,9 @@ export const sharedConfig: UserConfig = {
         NaiveUiResolver(),
       ],
     }),
-    UnoCSS(), // https://github.com/unocss/unocss
     Icons(), // https://github.com/antfu/unplugin-icons
+
+    // visualizer(), // 打包分析工具，需要时启用
 
     // html内引用的资源直接存储在/extension/assets, 无需转换
     // rewrite assets to use relative path
@@ -75,14 +73,14 @@ export const sharedConfig: UserConfig = {
     // },
   ],
   optimizeDeps: {
-    include: ['vue', '@vueuse/core', 'webextension-polyfill'],
+    include: ['vue', '@vueuse/core', 'webextension-polyfill', 'naive-ui', 'vue-i18n'],
     exclude: ['vue-demi'],
   },
 }
 
 export default defineConfig(({ command }) => ({
   ...sharedConfig,
-  plugins: sharedConfig.plugins?.concat(visualizer() as PluginOption),
+  plugins: sharedConfig.plugins,
   base: command === 'serve' ? `http://localhost:${port}/` : '/dist/',
   server: {
     port,
@@ -94,8 +92,10 @@ export default defineConfig(({ command }) => ({
     target: 'esnext',
     watch: isDev ? {} : undefined,
     outDir: r('extension/dist'),
-    emptyOutDir: false,
+    emptyOutDir: false, // 保留未由 Vite 处理的静态资源
     sourcemap: isDev ? 'inline' : false,
+    minify: process.env.NO_MINIFY ? false : 'esbuild',
+    chunkSizeWarningLimit: 1000,
     // https://developer.chrome.com/docs/webstore/program_policies/#:~:text=Code%20Readability%20Requirements
     // terserOptions: {
     //   mangle: false,
@@ -104,10 +104,11 @@ export default defineConfig(({ command }) => ({
       input: {
         newtab: r('src/newtab/index.html'),
         popup: r('src/popup/index.html'),
+        options: r('src/options/index.html'),
       },
       output: {
         manualChunks(id) {
-          // vendor 分包规则
+          // 浏览器扩展从本地磁盘加载，无网络请求开销，chunk 不宜过多
           if (id.includes('node_modules')) {
             if (id.includes('naive-ui')) {
               return 'vendor-naive-ui'
@@ -115,24 +116,17 @@ export default defineConfig(({ command }) => ({
             if (id.includes('lunar-typescript')) {
               return 'vendor-lunar'
             }
-            if (['vue', '@vueuse/core', 'lodash-es', 'cheerio', 'axios', 'dayjs', 'driver.js'].some((pkg) => id.includes(pkg))) {
-              return 'vendor-libs'
-            }
-            return 'vendor-other'
-          }
-
-          if (id.includes('vite/modulepreload-polyfill')) {
+            // 其余第三方依赖统一归入一个 vendor chunk
             return 'vendor-libs'
           }
 
+          // 业务代码统一归入 main chunk，避免碎片化
           if (['src/components', 'src/logic', 'src/lib', '~icon'].some((pkg) => id.includes(pkg))) {
             return 'main'
           }
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
-    // minify: false, // 关闭压缩混淆（同时禁用 terser），debug时使用
   },
   test: {
     globals: true,

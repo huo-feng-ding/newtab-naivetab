@@ -21,6 +21,7 @@ export const ICONS = {
   countdownSpinDown: 'mdi:chevron-down',
   // setting__label
   calendarHoliday: 'mdi:calendar-star',
+  commandShortcut: 'ic:twotone-keyboard-command-key',
   calendarToday: 'mdi:calendar-today',
   calendarRest: 'mdi:bed',
   calendarWork: 'mdi:briefcase-outline',
@@ -107,6 +108,7 @@ export const ICONS = {
   arrowBackRounded: 'material-symbols:arrow-back-rounded',
   record: 'fluent:record-12-regular',
   stop: 'fluent:record-stop-12-regular',
+  close: 'mdi:close',
 }
 
 export type WidgetIconMeta = {
@@ -139,6 +141,7 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
 export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   general: { iconName: ICONS.settings, settingSize: 18 },
   focusMode: { iconName: ICONS.focus, settingSize: 18 },
+  commandShortcut: { iconName: ICONS.commandShortcut, settingSize: 18 },
   keyboard: { iconName: ICONS.keyboard, settingSize: 18 },
   bookmarkFolder: { iconName: ICONS.bookmarkFolder, settingSize: 18 },
   clockDate: { iconName: ICONS.clockAnalog, settingSize: 17 },

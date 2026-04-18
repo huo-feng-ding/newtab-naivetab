@@ -32,25 +32,8 @@ const props = withDefaults(defineProps<{
 
 // ── 样式 composable ──────────────────────────────────────────────────────────
 const {
-  // 书签字体（注入到整个键盘容器）
-  keycapBookmarkFontFamily,
-  // 键帽尺寸
-  keycapBaseSizeCss,
-  keycapPaddingCss,
-  // keycap-wrap 宽度 + 自定义 margin
   getKeycapWrapStyle,
-  // Shell
-  shellColor,
-  shellShadowColor,
-  shellBorderRadiusPx,
-  shellBackgroundBlurPx,
-  shellVPaddingCss,
-  shellHPaddingCss,
-  // Plate
-  plateColor,
-  plateBorderRadiusPx,
-  plateBackgroundBlurPx,
-  platePaddingCss,
+  layoutCssVars,
 } = useKeyboardStyle(props.unit, props.baseSize)
 
 // ── 显示开关 ─────────────────────────────────────────────────────────────────
@@ -70,6 +53,7 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
       },
       extraClass,
     ]"
+    :style="layoutCssVars"
   >
     <!-- 行迭代 -->
     <div
@@ -103,7 +87,7 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
 <style scoped>
 /* ── 键盘容器基础 ──────────────────────────────────────────────────────────── */
 .keyboard-layout {
-  font-family: v-bind(keycapBookmarkFontFamily);
+  font-family: var(--nt-kb-bookmark-font-family);
 
   /* ── 行 ── */
   .keyboard-layout__row {
@@ -113,20 +97,20 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
     .keyboard-layout__keycap-wrap {
       flex: 0 0 auto;
       position: relative;
-      padding: v-bind(keycapPaddingCss);
-      height: v-bind(keycapBaseSizeCss);
+      padding: var(--nt-kb-keycap-padding);
+      height: var(--nt-kb-keycap-height);
 
       /* ── 定位板（绝对定位，向外扩展 platePadding，置于键帽层之下） ── */
       .keyboard-layout__keycap-plate {
         z-index: -1;
         position: absolute;
-        top: calc(-1 * v-bind(platePaddingCss));
-        left: calc(-1 * v-bind(platePaddingCss));
-        width: calc(100% + v-bind(platePaddingCss) * 2);
-        height: calc(100% + v-bind(platePaddingCss) * 2);
-        background: v-bind(plateColor);
-        border-radius: v-bind(plateBorderRadiusPx);
-        backdrop-filter: blur(v-bind(plateBackgroundBlurPx));
+        top: calc(-1 * var(--nt-kb-plate-padding));
+        left: calc(-1 * var(--nt-kb-plate-padding));
+        width: calc(100% + var(--nt-kb-plate-padding) * 2);
+        height: calc(100% + var(--nt-kb-plate-padding) * 2);
+        background: var(--nt-kb-plate-color);
+        border-radius: var(--nt-kb-plate-radius);
+        backdrop-filter: blur(var(--nt-kb-plate-blur));
       }
     }
   }
@@ -134,10 +118,10 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
 
 /* ── Shell 外壳（isShellVisible = true） ─────────────────────────────────── */
 .keyboard-layout--shell {
-  padding: v-bind(shellVPaddingCss) v-bind(shellHPaddingCss);
-  border-radius: v-bind(shellBorderRadiusPx);
-  background-color: v-bind(shellColor) !important;
-  backdrop-filter: blur(v-bind(shellBackgroundBlurPx));
+  padding: var(--nt-kb-shell-v-padding) var(--nt-kb-shell-h-padding);
+  border-radius: var(--nt-kb-shell-radius);
+  background-color: var(--nt-kb-shell-color) !important;
+  backdrop-filter: blur(var(--nt-kb-shell-blur));
   /* 模拟玻璃质感的四边高光/阴影 */
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   border-left: 1px solid rgba(255, 255, 255, 0.10);
@@ -154,10 +138,10 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
       rgba(0, 0, 0, 0.06) 65%,
       rgba(0, 0, 0, 0.12) 100%
     ),
-    v-bind(shellColor) !important;
+    var(--nt-kb-shell-color) !important;
   box-shadow:
-    0px 8px 24px v-bind(shellShadowColor),
-    0px 3px 8px v-bind(shellShadowColor),
+    0px 8px 24px var(--nt-kb-shell-shadow),
+    0px 3px 8px var(--nt-kb-shell-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
     inset 0 -2px 4px rgba(0, 0, 0, 0.15);
 }

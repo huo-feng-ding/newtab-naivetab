@@ -21,7 +21,7 @@ export async function getManifest() {
       48: '/assets/img/icon/icon-48x48.png',
       128: '/assets/img/icon/icon-128x128.png',
     },
-    permissions: ['storage', 'favicon', 'tabs', 'scripting'],
+    permissions: ['storage', 'favicon', 'tabs', 'scripting', 'sessions', 'tabGroups'],
     host_permissions: ['*://*/*'],
     optional_permissions: ['bookmarks', 'notifications'],
     chrome_url_overrides: {
@@ -30,12 +30,12 @@ export async function getManifest() {
     background: {
       service_worker: '/dist/background/index.mjs',
     },
+    options_ui: {
+      page: '/dist/options/index.html',
+      open_in_tab: true,
+    },
     // 一个扩展可以有很多命令，但只能指定 4 个建议的键。
-    commands: {},
-    // options_ui: {
-    //   page: '/dist/options/index.html',
-    //   open_in_tab: true,
-    // },
+    // commands: {},
     // content_scripts: [
     //   {
     //     matches: [

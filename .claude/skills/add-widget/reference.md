@@ -58,5 +58,5 @@ const customFontSize  = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
 
 - **颜色字段**：统一使用双元素数组 `[浅色值, 深色值]`，`getStyleField` 自动处理
 - **图标**：必须先在 `src/logic/icons.ts` 的 `ICONS` 定义，再从常量引用，禁止硬编码
-- **Setting 原子组件**：所有表单项使用 `@/newtab/setting/fields` 中提供的 `ColorField`/`FontField`/`SliderField`/`SwitchField`/`ToggleColorField`
+- **Setting 原子组件**：所有表单项使用 `@/setting/fields` 中提供的 `ColorField`/`FontField`/`SliderField`/`SwitchField`/`ToggleColorField`
 - **定时任务**：必须使用 `addTimerTask`/`removeTimerTask`，禁止组件内自行 `setInterval`

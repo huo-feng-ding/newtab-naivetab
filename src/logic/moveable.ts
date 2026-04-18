@@ -1,5 +1,5 @@
 import { useToggle, useThrottleFn } from '@vueuse/core'
-import { globalState } from '@/logic/store'
+import { globalState, localConfig } from '@/logic/store'
 
 export const [isDragMode, toggleIsDragMode] = useToggle(false)
 export const [isDraftDrawerVisible, toggleIsDraftDrawerVisible] = useToggle(true)
@@ -196,6 +196,22 @@ watch(
 export const cleanupEvents = () => {
   handleMouseTaskListener(false)
   onResetMoveState()
+}
+
+/**
+ * 删除 widget 时的消失动画：缩小 + 淡出，动画结束后设置 enabled = false
+ */
+export const animateDeleteWidget = (code: WidgetCodes) => {
+  const container = document.querySelector(`.${code}__container`) as HTMLElement | null
+  if (container) {
+    const currentTransform = container.style.transform || ''
+    container.style.transition = 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease'
+    container.style.transform = currentTransform ? `${currentTransform} scale(0.3)` : 'scale(0.3)'
+    container.style.opacity = '0'
+  }
+  setTimeout(() => {
+    localConfig[code].enabled = false
+  }, 260)
 }
 
 /**

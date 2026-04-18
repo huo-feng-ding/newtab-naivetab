@@ -12,7 +12,7 @@ async function stubIndexHtml() {
     'newtab',
     'popup',
     'background',
-    // 'options',
+    'options',
   ]
 
   for (const view of views) {
@@ -43,15 +43,17 @@ async function stubIndexHtml() {
 }
 
 function writeManifest() {
-  execSync('npx esno ./scripts/manifest.ts', { stdio: 'inherit' })
+  execSync('esno ./scripts/manifest.ts', { stdio: 'inherit' })
 }
 
 function writeLocales() {
-  execSync('npx esno ./scripts/locale.ts', { stdio: 'inherit' })
+  execSync('esno ./scripts/locale.ts', { stdio: 'inherit' })
 }
 
 fs.ensureDirSync(r('extension'))
-fs.copySync(r('assets'), r('extension/assets'))
+fs.copySync(r('assets'), r('extension/assets'), {
+  filter: (src) => !src.endsWith('.DS_Store'),
+})
 
 writeManifest()
 writeLocales()
