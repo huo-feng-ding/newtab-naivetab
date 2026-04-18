@@ -267,10 +267,10 @@ const handlerDeleteMouseUp = () => {
 #draft-tool {
   z-index: 20;
   position: fixed;
-  bottom: -280px;
+  bottom: -300px;
   left: 25vw;
   width: 50vw;
-  min-height: 280px;
+  height: 280px;
   color: #fff;
   background-color: var(--nt-bg-moveable-tool-drawer);
   border-top-left-radius: 16px;
