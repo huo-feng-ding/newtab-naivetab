@@ -1,6 +1,7 @@
 import type { WidgetConfigByCode } from '@/newtab/widgets/registry'
 import { WIDGET_CODE_LIST } from '@/newtab/widgets/codes'
 import pkg from '../../package.json'
+import { COMMAND_SHORTCUT_CONFIG } from '@/logic/globalShortcut/shortcut-command'
 
 const UI_LANGUAGE = chrome.i18n.getUILanguage()
 const CURR_LANG = UI_LANGUAGE || 'en-US'
@@ -8,12 +9,17 @@ const CURR_LANG = UI_LANGUAGE || 'en-US'
 export const defaultFocusVisibleWidgetMap = {
   ...Object.fromEntries(WIDGET_CODE_LIST.map((code) => [code, false])) as Record<WidgetCodes, boolean>,
   clockDigital: true,
+  clockAnalog: true,
+  clockFlip: true,
+  clockNeon: true,
   date: true,
+  search: true,
 }
 
 const generalConfig = {
   isFirstOpen: true,
   version: pkg.version,
+  showBreakingChangeNotice: false, // 破坏性变更通知
   appearance: 'auto' as 'light' | 'dark' | 'auto',
   pageTitle: CURR_LANG === 'zh-CN' ? '新标签页' : 'NaiveTab',
   lang: CURR_LANG,
@@ -56,10 +62,10 @@ const generalConfig = {
     yOffsetValue: 50,
     yTranslateValue: -50,
   },
-  fontFamily: 'Arial',
+  fontFamily: 'system',
   fontSize: 14,
   fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
-  primaryColor: ['rgba(16, 152, 173, 1)', 'rgba(16, 152, 173, 1)'],
+  primaryColor: ['rgba(92, 150, 220, 1)', 'rgba(92, 150, 220, 1)'],
   backgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(53, 54, 58, 1)'],
   bgOpacity: 1,
   bgBlur: 0,
@@ -67,17 +73,10 @@ const generalConfig = {
   parallaxIntensity: 5,
   swatcheColors: [
     'rgba(255, 255, 255, 1)',
-    'rgba(16, 152, 173, 1)',
-    'rgba(159, 214, 255, 1)',
-    'rgba(213, 255, 203, 0.8)',
-    'rgba(255, 110, 110, 0.4)',
-    'rgba(250, 82, 82, 1)',
-    'rgba(101, 101, 101, 0.28)',
-    'rgba(122, 122, 122, 0.5)',
-    'rgba(209, 213, 219, 1)',
-    'rgba(73, 73, 77, 1)',
-    'rgba(44, 62, 80, 1)',
     'rgba(15, 23, 42, 1)',
+    'rgba(44, 62, 80, 1)',
+    'rgba(16, 152, 173, 1)',
+    'rgba(92, 150, 220, 1)',
   ],
 }
 
@@ -95,6 +94,7 @@ const widgetsDefaultConfig = (() => {
 
 export const defaultConfig = {
   general: generalConfig,
+  commandShortcut: COMMAND_SHORTCUT_CONFIG,
   ...widgetsDefaultConfig,
 }
 

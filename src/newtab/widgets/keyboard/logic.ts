@@ -4,7 +4,7 @@ import { createTab, padUrlHttps } from '@/logic/util'
 import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
 import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { globalState, localConfig, getAllCommandsConfig } from '@/logic/store'
+import { localConfig } from '@/logic/store'
 
 export const state = reactive({
   systemBookmarks: [] as BookmarkNode[],
@@ -178,14 +178,10 @@ export const handlePressKeycap = (keyCode: string) => {
 
 /**
  * 页面获得焦点/可见时刷新键盘相关数据
- * - 快捷键配置：用户可能在 chrome://extensions/shortcuts 修改了快捷键
  * - 系统书签：用户可能在其他页面修改了书签树
  * - keyboard 配置：由 setupKeyboardSyncListener 实时同步，无需在此处理
  */
 const refreshKeyboardData = () => {
-  if (globalState.isSettingDrawerVisible) {
-    getAllCommandsConfig()
-  }
   getSystemBookmarkForKeyboard()
 }
 

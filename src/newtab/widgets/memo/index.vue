@@ -4,6 +4,32 @@ import { globalState, localConfig, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+
+const memoStyle = computed(() => ({
+  '--nt-memo-font-family': customFontFamily.value,
+  '--nt-memo-font-color': customFontColor.value,
+  '--nt-memo-font-size': customFontSize.value,
+  '--nt-memo-border-radius': customBorderRadius.value,
+  '--nt-memo-background-color': customBackgroundColor.value,
+  '--nt-memo-background-blur': customBackgroundBlur.value,
+  '--nt-memo-border-width': customBorderWidth.value,
+  '--nt-memo-border-color': customBorderColor.value,
+  '--nt-memo-shadow-color': customShadowColor.value,
+  '--nt-memo-width': customWidth.value,
+  '--nt-memo-height': customHeight.value,
+}))
+
 const onFocus = () => {
   globalState.isInputFocused = true
 }
@@ -32,23 +58,13 @@ watch(
   },
 )
 
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="memo__container"
+      :style="memoStyle"
       :class="{
         'memo__container--border': localConfig.memo.isBorderEnabled,
         'memo__container--shadow': localConfig.memo.isShadowEnabled,
@@ -62,7 +78,6 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           type="textarea"
           placeholder=" "
           autosize
-          :style="isDragMode ? 'cursor: move;' : ''"
           :show-count="localConfig.memo.countEnabled"
           @focus="onFocus"
           @blur="onBlur"
@@ -75,14 +90,14 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 
 <style>
 #memo {
-  font-family: v-bind(customFontFamily);
+  font-family: var(--nt-memo-font-family);
 
   .memo__container {
     z-index: 10;
     position: absolute;
-    border-radius: v-bind(customBorderRadius);
-    background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur)) saturate(1.4);
+    border-radius: var(--nt-memo-border-radius);
+    background-color: var(--nt-memo-background-color);
+    backdrop-filter: blur(var(--nt-memo-background-blur)) saturate(1.4);
     transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
     will-change: transform;
 
@@ -125,7 +140,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
     }
     .n-input,
     .n-input--focus {
-      border-radius: v-bind(customBorderRadius);
+      border-radius: var(--nt-memo-border-radius);
     }
 
     .memo_wrap {
@@ -137,12 +152,12 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
       }
       .memo__input {
         padding: 0 8px;
-        width: v-bind(customWidth);
-        height: v-bind(customHeight);
-        font-size: v-bind(customFontSize);
+        width: var(--nt-memo-width);
+        height: var(--nt-memo-height);
+        font-size: var(--nt-memo-font-size);
         .n-input__textarea-el {
-          caret-color: v-bind(customFontColor);
-          color: v-bind(customFontColor);
+          caret-color: var(--nt-memo-font-color);
+          color: var(--nt-memo-font-color);
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
           letter-spacing: 0.2px;
           line-height: 1.6;
@@ -156,7 +171,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           transition: none !important;
         }
         .n-input-word-count {
-          color: v-bind(customFontColor) !important;
+          color: var(--nt-memo-font-color) !important;
           opacity: 0.45;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
           letter-spacing: 0.2px;
@@ -180,18 +195,18 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
   }
 
   .memo__container--border {
-    border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+    border: var(--nt-memo-border-width) solid var(--nt-memo-border-color);
   }
   .memo__container--shadow {
     box-shadow:
-      0 4px 24px v-bind(customShadowColor),
+      0 4px 24px var(--nt-memo-shadow-color),
       0 1px 4px rgba(0, 0, 0, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   /* 聚焦时阴影加深 */
   .memo__container--shadow:focus-within {
     box-shadow:
-      0 6px 32px v-bind(customShadowColor),
+      0 6px 32px var(--nt-memo-shadow-color),
       0 2px 8px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.14);
   }

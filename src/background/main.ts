@@ -1,102 +1,287 @@
-// ! background Cannot use import statement outside a module
-// import browser from 'webextension-polyfill'
-import { WIDGET_CONFIG } from '~/newtab/widgets/keyboard/config'
-import { log, createTab, padUrlHttps } from '@/logic/util'
-import { parseStoredData } from '@/logic/compress'
-import { gaProxy } from '@/logic/gtag'
-import { ALL_COMMAND_KEYCODE } from './config'
-
-// 缓存 keyboard 配置，避免每次按键都读取 storage + 解压
-let cachedKeyboardConfig = WIDGET_CONFIG
-
 /**
- * 监听配置变化，自动更新缓存
+ * Background Service Worker 入口
  *
- * 重要：返回 Promise 让 Chrome 等待异步操作完成
- * 否则 Service Worker 可能在 Promise resolve 前休眠，导致缓存更新失败
+ * Service Worker 不使用 ES module import，
+ * 所有依赖通过构建打包后的 dist 文件以 CommonJS 方式引入。
  */
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes['naive-tab-keyboard']) {
-    const raw = changes['naive-tab-keyboard'].newValue as string
-    if (raw && raw.length > 0) {
-      // 返回 Promise，Chrome 会等待其完成
-      return parseStoredData(raw)
-        .then((parsed) => {
-          cachedKeyboardConfig = parsed.data
-          log('Keyboard config updated')
-        })
-        .catch((e) => {
-          log('Update keyboard cache error', e)
-        })
+import { type TCommandEntry, type TSwCommandName, getCommandExecEnv } from '@/logic/globalShortcut/shortcut-command'
+import { log, createTab, padUrlHttps } from '@/logic/util'
+import { gaProxy } from '@/logic/gtag'
+import {
+  loadAndCacheKeyboardConfig,
+  loadAndCacheCommandConfig,
+  getCachedKeyboardConfig,
+  getCachedCommandShortcutConfig,
+} from './config-cache'
+import {
+  switchTab,
+  switchToEdgeTab,
+  closeTabsAround,
+  closeDuplicateTabs,
+  reloadAllTabs,
+  reloadAllTabsAllWindows,
+  moveTab,
+  moveToNewWindow,
+  moveTabToNextWindow,
+  mergeAllWindows,
+  groupCurrentTab,
+  ungroupCurrentTab,
+  toggleGroupCollapse,
+  closeGroupTabs,
+} from './commands'
+
+// ── 调试日志 ──────────────────────────────────────────────────────────────
+const debug = (...args: any[]) => {
+  console.log('[NaiveTab-bg]', ...args)
+}
+
+// ── 动态注册全局快捷键 Content Script ─────────────────────────────────────
+
+const registerGlobalShortcutContentScript = async () => {
+  try {
+    const registered = await chrome.scripting.getRegisteredContentScripts()
+    if (registered.some((s) => s.id === 'naivetab-global-shortcut')) {
+      debug('content script already registered')
+      return
     }
+
+    await chrome.scripting.registerContentScripts([{
+      id: 'naivetab-global-shortcut',
+      js: ['dist/contentScripts/index.global.js'],
+      matches: ['*://*/*'],
+      runAt: 'document_start',
+      persistAcrossSessions: true,
+    }])
+    debug('Global shortcut content script registered')
+  } catch (e) {
+    log('Register content script error', e)
   }
-})
+}
+
+registerGlobalShortcutContentScript()
+
+// ── Service Worker 启动时初始化缓存 ────────────────────────────────────────
+
+loadAndCacheKeyboardConfig()
+loadAndCacheCommandConfig()
+
+// ── Port 长连接：CS/newtab → SW 统一处理快捷键 ────────────────────────────
+
+const portMap = new Map<number, chrome.runtime.Port>()
 
 /**
- * 加载并缓存 keyboard 配置
- * 启动时执行一次，后续通过 onChanged 监听更新
+ * 处理书签快捷键按键事件
  */
-const loadAndCacheKeyboardConfig = async () => {
-  try {
-    const data = await chrome.storage.sync.get('naive-tab-keyboard')
-    const raw = data['naive-tab-keyboard'] as string
-    if (raw && raw.length > 0) {
-      const parsed = await parseStoredData(raw)
-      cachedKeyboardConfig = parsed.data
-      log('Keyboard config cached')
-    }
-  } catch (e) {
-    log('Load keyboard config error', e)
-  }
+const handleBookmarkShortcutKeydown = (key: string, _tabId: number) => {
+  const config = getCachedKeyboardConfig()
+  if (!config.isGlobalShortcutEnabled) return
+  const entry = config.keymap?.[key]
+  if (!entry?.url) return
+
+  const url = padUrlHttps(entry.url)
+  debug('Bookmark shortcut: opening', url)
+  chrome.tabs.create({ url })
 }
 
-// Service Worker 启动时初始化缓存
-loadAndCacheKeyboardConfig()
+/**
+ * 处理命令快捷键按键事件
+ */
+const handleCommandShortcutKeydown = (key: string, tabId: number) => {
+  const config = getCachedCommandShortcutConfig()
+  if (!config.isEnabled) return
+  if (!config.keymap) return
 
-let dblclickTimer: ReturnType<typeof setTimeout>
+  const entry = config.keymap[key] as TCommandEntry | undefined
+  if (!entry?.command) return
 
-let lastCommand = ''
+  const execIn = getCommandExecEnv(entry.command)
+  debug('Command shortcut:', entry.command, 'execIn:', execIn, 'tabId:', tabId)
 
-const handleKeyboard = async (command: string) => {
-  const keycode = command
-  if (!ALL_COMMAND_KEYCODE.includes(keycode)) {
-    return
-  }
-  // 直接使用缓存，无需每次读取 storage
-  if (!cachedKeyboardConfig.isListenBackgroundKeystrokes) {
-    return
-  }
-
-  let url: string = cachedKeyboardConfig.keymap[keycode] ? cachedKeyboardConfig.keymap[keycode].url : ''
-  if (url.length === 0) {
-    return
-  }
-  url = padUrlHttps(url)
-  if (!cachedKeyboardConfig.isDblclickOpen) {
-    createTab(url)
-    return
-  }
-  clearTimeout(dblclickTimer)
-  if (lastCommand === keycode) {
-    createTab(url)
+  if (execIn === 'sw') {
+    execSwCommand(entry.command as TSwCommandName, tabId)
   } else {
-    lastCommand = keycode
-    dblclickTimer = setTimeout(() => {
-      lastCommand = ''
-    }, cachedKeyboardConfig.dblclickIntervalTime)
+    const port = portMap.get(tabId)
+    if (port) {
+      try {
+        port.postMessage({
+          type: 'NAIVETAB_EXECUTE_COMMAND',
+          command: entry.command,
+        } satisfies GlobalShortcutCommandMessage)
+      } catch (e) {
+        log('Post command to CS error', e)
+      }
+    }
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  log('NaiveTab installed')
+/**
+ * SW 端直接执行的命令分发器
+ */
+const execSwCommand = (command: TSwCommandName, tabId: number) => {
+  switch (command) {
+    case 'toggleTabPinned':
+      chrome.tabs.get(tabId).then((tab) => {
+        chrome.tabs.update(tabId, { pinned: !tab.pinned }).catch(logLastError)
+      }).catch(logLastError)
+      break
+    case 'toggleTabMute':
+      chrome.tabs.get(tabId).then((tab) => {
+        chrome.tabs.update(tabId, { muted: !tab.mutedInfo?.muted }).catch(logLastError)
+      }).catch(logLastError)
+      break
+    case 'duplicateTab':
+      chrome.tabs.duplicate(tabId).catch(logLastError)
+      break
+    case 'closeTab':
+      chrome.tabs.remove(tabId).catch(logLastError)
+      break
+    case 'closeOtherTabs':
+      closeTabsAround(tabId, 'others')
+      break
+    case 'closeLeftTabs':
+      closeTabsAround(tabId, 'left')
+      break
+    case 'closeRightTabs':
+      closeTabsAround(tabId, 'right')
+      break
+    case 'nextTab':
+      switchTab(tabId, 1)
+      break
+    case 'prevTab':
+      switchTab(tabId, -1)
+      break
+    case 'firstTab':
+      switchToEdgeTab(tabId, 'first')
+      break
+    case 'lastTab':
+      switchToEdgeTab(tabId, 'last')
+      break
+    case 'reloadAllTabs':
+      reloadAllTabs(tabId)
+      break
+    case 'reloadAllTabsAllWindows':
+      reloadAllTabsAllWindows(tabId)
+      break
+    case 'newTab':
+      chrome.tabs.create({ index: undefined }).catch(logLastError)
+      break
+    case 'newTabAfter':
+      chrome.tabs.get(tabId).then((tab) => {
+        chrome.tabs.create({ index: (tab.index ?? 0) + 1, active: true }).catch(logLastError)
+      }).catch(logLastError)
+      break
+    case 'goBack':
+      chrome.tabs.goBack(tabId).catch(logLastError)
+      break
+    case 'goForward':
+      chrome.tabs.goForward(tabId).catch(logLastError)
+      break
+    case 'closeWindow':
+      chrome.tabs.get(tabId).then((tab) => {
+        if (!tab.windowId) return
+        chrome.windows.getAll().then((windows) => {
+          const sameTypeWindows = windows.filter((w) => w.incognito === tab.incognito)
+          if (sameTypeWindows.length <= 1) return
+          chrome.windows.remove(tab.windowId!).catch(logLastError)
+        }).catch(logLastError)
+      }).catch(logLastError)
+      break
+    case 'moveTabLeft':
+      moveTab(tabId, -1)
+      break
+    case 'moveTabRight':
+      moveTab(tabId, 1)
+      break
+    case 'moveToNewWindow':
+      moveToNewWindow(tabId)
+      break
+    case 'moveTabToNextWindow':
+      moveTabToNextWindow(tabId)
+      break
+    case 'newWindow':
+      chrome.windows.create().catch(logLastError)
+      break
+    case 'newIncognito':
+      chrome.windows.create({ incognito: true }).catch(logLastError)
+      break
+    case 'reopenClosedTab':
+      chrome.sessions.getRecentlyClosed({ maxResults: 1 }).then((sessions) => {
+        if (sessions.length > 0) {
+          // @ts-expect-error sessionId exists in Chrome runtime but not in @types/chrome
+          const sessionId = sessions[0].sessionId as string | undefined
+          if (sessionId) {
+            chrome.sessions.restore(sessionId).catch(logLastError)
+          }
+        }
+      }).catch(logLastError)
+      break
+    case 'closeDuplicateTabs':
+      closeDuplicateTabs(tabId)
+      break
+    case 'mergeAllWindows':
+      mergeAllWindows(tabId)
+      break
+    // 标签组
+    case 'groupCurrentTab':
+      groupCurrentTab(tabId)
+      break
+    case 'ungroupCurrentTab':
+      ungroupCurrentTab(tabId)
+      break
+    case 'toggleGroupCollapse':
+      toggleGroupCollapse(tabId)
+      break
+    case 'closeGroupTabs':
+      closeGroupTabs(tabId)
+      break
+    default:
+      command satisfies never
+      log('Unknown SW command:', command)
+  }
+}
+
+const logLastError = (e: Error) => {
+  log('Chrome API error:', e)
+}
+
+// ── Port 连接管理 ──────────────────────────────────────────────────────────
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== 'naivetab-shortcut') return
+  if (port.sender?.id !== chrome.runtime.id) return
+
+  const tabId = port.sender?.tab?.id
+  if (!tabId) return
+
+  portMap.set(tabId, port)
+  debug('Port connected for tab', tabId, 'total:', portMap.size)
+
+  port.onMessage.addListener((msg: GlobalShortcutKeydownMessage) => {
+    if (msg.type === 'NAIVETAB_KEYDOWN') {
+      if (msg.source === 'bookmark') {
+        handleBookmarkShortcutKeydown(msg.key, tabId)
+      } else if (msg.source === 'command') {
+        handleCommandShortcutKeydown(msg.key, tabId)
+      } else {
+        log('Unknown source in keydown message:', msg)
+      }
+    }
+  })
+
+  port.onDisconnect.addListener(() => {
+    void chrome.runtime.lastError
+    portMap.delete(tabId)
+    debug('Port disconnected for tab', tabId, 'remaining:', portMap.size)
+  })
 })
 
-chrome.commands.onCommand.addListener((command) => {
-  log(`onCommand: ${command}`)
-  handleKeyboard(command)
-  gaProxy('press', ['service', 'command'], {
-    command,
-  })
+// ── Content Script 消息监听 ────────────────────────────────────────────────
+
+chrome.runtime.onMessage.addListener((message: ContentScriptToBackgroundMessage) => {
+  if (message.type === 'NAIVETAB_OPEN_URL') {
+    createTab(message.url)
+    return
+  }
 })
 
 addEventListener('unhandledrejection', async (event) => {

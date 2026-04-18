@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { moveState, isDragMode } from '@/logic/moveable'
-import { getStyleConst } from '@/logic/store'
+import { localState } from '@/logic/store'
+import { styleConst } from '@/styles/const'
 
-const auxiliaryLineMain = getStyleConst('auxiliaryLineMain')
-const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
+const lineStyle = computed(() => {
+  const c = styleConst.value
+  const ac = localState.value.currAppearanceCode
+  return {
+    '--nt-auxiliary-line-main': c.auxiliaryLineMain[ac] || c.auxiliaryLineMain[0],
+    '--nt-auxiliary-line-bound': c.auxiliaryLineBound[ac] || c.auxiliaryLineBound[0],
+  }
+})
 </script>
 
 <template>
   <div
     v-if="isDragMode"
     class="guide__line"
+    :style="lineStyle"
   >
     <div
       class="axis xaxis__center"
@@ -62,11 +70,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      v-bind(auxiliaryLineMain) 15%,
-      v-bind(auxiliaryLineMain) 85%,
+      var(--nt-auxiliary-line-main) 15%,
+      var(--nt-auxiliary-line-main) 85%,
       transparent 100%
     );
-    box-shadow: 0 0 6px 1px v-bind(auxiliaryLineMain);
+    box-shadow: 0 0 6px 1px var(--nt-auxiliary-line-main);
     transform: translateX(-50%);
   }
 
@@ -79,11 +87,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to right,
       transparent 0%,
-      v-bind(auxiliaryLineMain) 15%,
-      v-bind(auxiliaryLineMain) 85%,
+      var(--nt-auxiliary-line-main) 15%,
+      var(--nt-auxiliary-line-main) 85%,
       transparent 100%
     );
-    box-shadow: 0 0 6px 1px v-bind(auxiliaryLineMain);
+    box-shadow: 0 0 6px 1px var(--nt-auxiliary-line-main);
     transform: translateY(-50%);
   }
 
@@ -105,11 +113,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to right,
       transparent 0%,
-      v-bind(auxiliaryLineBound) 20%,
-      v-bind(auxiliaryLineBound) 80%,
+      var(--nt-auxiliary-line-bound) 20%,
+      var(--nt-auxiliary-line-bound) 80%,
       transparent 100%
     );
-    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
+    box-shadow: 0 0 8px 2px var(--nt-auxiliary-line-bound);
   }
 
   .bound__bottom {
@@ -121,11 +129,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to right,
       transparent 0%,
-      v-bind(auxiliaryLineBound) 20%,
-      v-bind(auxiliaryLineBound) 80%,
+      var(--nt-auxiliary-line-bound) 20%,
+      var(--nt-auxiliary-line-bound) 80%,
       transparent 100%
     );
-    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
+    box-shadow: 0 0 8px 2px var(--nt-auxiliary-line-bound);
   }
 
   .bound__left {
@@ -137,11 +145,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      v-bind(auxiliaryLineBound) 20%,
-      v-bind(auxiliaryLineBound) 80%,
+      var(--nt-auxiliary-line-bound) 20%,
+      var(--nt-auxiliary-line-bound) 80%,
       transparent 100%
     );
-    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
+    box-shadow: 0 0 8px 2px var(--nt-auxiliary-line-bound);
   }
 
   .bound__right {
@@ -153,11 +161,11 @@ const auxiliaryLineBound = getStyleConst('auxiliaryLineBound')
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      v-bind(auxiliaryLineBound) 20%,
-      v-bind(auxiliaryLineBound) 80%,
+      var(--nt-auxiliary-line-bound) 20%,
+      var(--nt-auxiliary-line-bound) 80%,
       transparent 100%
     );
-    box-shadow: 0 0 8px 2px v-bind(auxiliaryLineBound);
+    box-shadow: 0 0 8px 2px var(--nt-auxiliary-line-bound);
   }
 }
 </style>

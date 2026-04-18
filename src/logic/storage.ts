@@ -65,10 +65,13 @@
  */
 import md5 from 'crypto-js/md5'
 import { useDebounceFn } from '@vueuse/core'
-import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY, KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/index'
+import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY } from '@/logic/constants/app'
+import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/keyboard'
 import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
 import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
-import { localConfig, localState, globalState, switchSettingDrawerVisible, updateSetting, mergeState } from '@/logic/store'
+import { localConfig, localState, globalState, switchSettingDrawerVisible } from '@/logic/store'
+import { mergeState } from '@/logic/config-merge'
+import { handleStateResetAndUpdate, updateSetting } from '@/logic/config-update'
 import { clearDatabase } from '@/logic/database'
 import { COMPRESS_PREFIX, compressString, decompressString, shouldCompress, parseStoredData } from '@/logic/compress'
 
@@ -193,8 +196,8 @@ const uploadConfigFn = async (field: ConfigField) => {
       log(`Upload config-${field} write rate warning`, `${count}/${MAX_WRITE_PER_MINUTE} per minute`)
       window.$message.warning(
         window.$t('general.syncRateWarning')
-          .replace('{count}', String(count))
-          .replace('{max}', String(MAX_WRITE_PER_MINUTE)),
+          .replace('__count__', String(count))
+          .replace('__max__', String(MAX_WRITE_PER_MINUTE)),
       )
     }
 
@@ -249,14 +252,14 @@ const uploadConfigFn = async (field: ConfigField) => {
       const finalBytes = new TextEncoder().encode(finalPayload).length
       if (finalBytes > SYNC_SIZE_LIMIT) {
         log(`Upload config-${field} size exceeded`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.error(window.$t('general.syncSizeExceeded').replace('{field}', field).replace('{size}', `${(finalBytes / 1024).toFixed(1)}`))
+        window.$message.error(window.$t('general.syncSizeExceeded').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
         localState.value.isUploadConfigStatusMap[field].loading = false
         resolve(false)
         return
       }
       if (finalBytes > SYNC_SIZE_WARN) {
         log(`Upload config-${field} size warning`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.warning(window.$t('general.syncSizeWarning').replace('{field}', field).replace('{size}', `${(finalBytes / 1024).toFixed(1)}`))
+        window.$message.warning(window.$t('general.syncSizeWarning').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
       }
 
       const payload = { [`naive-tab-${field}`]: finalPayload }
@@ -343,8 +346,12 @@ export const handleWatchLocalConfigChange = () => {
  * @returns Promise<boolean> 同步是否成功
  */
 export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
+  // 安全兜底：确保 isUploadConfigStatusMap[field] 存在（popup 不会调用 handleStateResetAndUpdate）
+  if (!localState.value.isUploadConfigStatusMap[field]) {
+    localState.value.isUploadConfigStatusMap[field] = { ...defaultUploadStatusItem }
+  }
   // 标记本地有修改（如果尚未标记）
-  if (!localState.value.isUploadConfigStatusMap[field]?.dirty) {
+  if (!localState.value.isUploadConfigStatusMap[field].dirty) {
     localState.value.isUploadConfigStatusMap[field].dirty = true
     localState.value.isUploadConfigStatusMap[field].localModifiedTime = Date.now()
   }
@@ -361,11 +368,19 @@ export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
  * popup 修改书签后通过 flushConfigSync('keyboard') 立即写入 chrome.storage.sync
  * newtab 通过此监听器实时感知变化并更新 localConfig.keyboard
  *
+ * 【数据格式】
+ * parseStoredData 自动处理 gzip 压缩数据（>4000 字节时启用 gzip 压缩）
+ *
  * 【防循环更新】
  * 通过比较 syncId 判断是否需要更新，避免本地修改后又触发 onChanged 形成循环
  *
+ * 【注意：直接赋值的副作用】
+ * localConfig.keyboard = parsed.data 会触发 watchLocalConfigChange 中的 watcher，
+ * 导致排队上传（debounce）。但由于 MD5 去重机制，上传时会发现 syncId 相同而跳过实际上传，
+ * 因此不会造成真正的循环上传。
+ *
  * 【注意】
- * 此监听器只在 newtab 页面注册，Service Worker 有自己的独立监听逻辑
+ * 此监听器只在 newtab 页面注册，Service Worker 有自己的独立监听逻辑（background/main.ts）
  */
 export const setupKeyboardSyncListener = () => {
   chrome.storage.onChanged.addListener((changes) => {
@@ -387,15 +402,15 @@ export const setupKeyboardSyncListener = () => {
           return
         }
 
-        // 直接更新 localConfig.keyboard
-        // popup 和 newtab 运行在同一设备同一版本，无需版本感知合并
-        localConfig.keyboard = parsed.data
-        log('Sync keyboard updated from storage.onChanged')
-
-        // 更新同步状态
+        // 先更新同步状态，防止后续替换对象时触发防抖上传
+        // uploadConfigFn 中的 MD5 去重会检测到 syncId 相同而跳过上传
         localState.value.isUploadConfigStatusMap.keyboard.syncId = newSyncId
         localState.value.isUploadConfigStatusMap.keyboard.syncTime = parsed.syncTime
         localState.value.isUploadConfigStatusMap.keyboard.dirty = false
+
+        // 整体替换 keyboard 配置对象
+        localConfig.keyboard = parsed.data
+        log('Sync keyboard updated from storage.onChanged')
       })
       .catch((e) => {
         log('Sync keyboard parse error', e)
@@ -417,9 +432,44 @@ export const handleMissedUploadConfig = async () => {
   for (const field of Object.keys(localState.value.isUploadConfigStatusMap) as ConfigField[]) {
     if (localState.value.isUploadConfigStatusMap[field].loading) {
       log('Handle missed upload config', field)
-      uploadConfigFn(field)
+      await uploadConfigFn(field)
     }
   }
+}
+
+/**
+ * 页面启动时初始化配置同步
+ *
+ * 所有需要读写配置的页面（newtab、options）都应在 onMounted 中调用此函数。
+ * 按顺序执行：初始化状态字段 → 拉取云端配置 → 重试未完成上传 → 注册变更监听 → 监听 popup 修改
+ */
+export const setupPageConfigSync = async () => {
+  handleStateResetAndUpdate()
+  await loadRemoteConfig()
+  await handleMissedUploadConfig()
+  handleWatchLocalConfigChange()
+  setupKeyboardSyncListener()
+}
+
+/**
+ * 监听同设备其他页面的 localStorage 变化
+ * 当 options 和 newtab 同时打开时，保持配置同步
+ */
+export const setupLocalStorageSyncListener = () => {
+  window.addEventListener('storage', (e) => {
+    if (!e.key || (!e.key.startsWith('c-') && e.key !== 'l-state')) return
+    if (!e.newValue) return
+    const newConfig = JSON.parse(e.newValue)
+    const field = e.key === 'l-state' ? 'state' : e.key.replace('c-', '')
+    if (field !== 'state' && localConfig[field]) {
+      // 内容未变化则跳过，避免触发冗余上传
+      if (JSON.stringify(localConfig[field]) === JSON.stringify(newConfig)) {
+        return
+      }
+      // 深合并保留新增的默认字段
+      localConfig[field] = mergeState(localConfig[field], newConfig)
+    }
+  })
 }
 
 // ── 版本感知合并策略 ─────────────────────────
@@ -533,11 +583,12 @@ export const loadRemoteConfig = () => {
       }
       try {
         const pendingConfig = {} as typeof defaultConfig
+        const uploadPromises: Promise<unknown>[] = []
         for (const field of Object.keys(defaultConfig) as ConfigField[]) {
           if (!Object.prototype.hasOwnProperty.call(data, `naive-tab-${field}`)) {
             // 云端无该字段，上传本地配置进行初始化
             log(`Config-${field} initialize`)
-            uploadConfigFn(field)
+            uploadPromises.push(uploadConfigFn(field))
           } else {
             const rawData = data[`naive-tab-${field}`] as string
             let target: SyncPayload
@@ -599,7 +650,7 @@ export const loadRemoteConfig = () => {
               // 场景3：本地修改更新，上传本地配置
               // 说明：本地最后修改时间晚于云端同步时间，本地优先
               log(`Config-${field} upload local (local newer: ${localModifiedTime} > ${targetSyncTime})`)
-              uploadConfigFn(field)
+              uploadPromises.push(uploadConfigFn(field))
             } else {
               // 场景4：云端修改更新，使用版本感知合并策略
               // 说明：云端更新，但需考虑版本差异，以较新版本为模板合并
@@ -619,6 +670,10 @@ export const loadRemoteConfig = () => {
           }
         }
         console.timeEnd('loadRemoteConfig')
+        // 等待所有初始化上传完成
+        if (uploadPromises.length > 0) {
+          await Promise.allSettled(uploadPromises)
+        }
         if (Object.keys(pendingConfig).length === 0) {
           resolve(true)
           return
@@ -711,6 +766,53 @@ export const exportSetting = () => {
   const filename = `naivetab-v${window.appVersion}-${dayjs().format('YYYYMMDD-HHmmss')}.json`
   downloadJsonByTagA(localConfig, filename)
   window.$message.success(`${window.$t('common.export')}${window.$t('common.success')}`)
+}
+
+/**
+ * 轻量级拉取云端 keyboard 配置（仅供 popup 等短生命周期上下文使用）
+ *
+ * 与 loadRemoteConfig 的区别：
+ * - 只读取 keyboard 一个字段，不遍历所有 defaultConfig
+ * - 不触发 uploadConfigFn，不产生任何写入
+ * - 不调用 updateSetting，不触发全局配置更新
+ * - 只在云端 syncId 与本地不同时才替换 localConfig.keyboard
+ *
+ * chrome.storage.sync.get 读的是本地缓存的同步数据，不依赖实时网络。
+ */
+export const loadRemoteKeyboardConfig = async () => {
+  try {
+    const data = await chrome.storage.sync.get('naive-tab-keyboard')
+    const raw = data['naive-tab-keyboard'] as string
+    if (!raw || raw.length === 0) {
+      log('Load remote keyboard config: empty')
+      return false
+    }
+
+    const parsed = await parseStoredData(raw)
+    const newSyncId = parsed.syncId
+    const currSyncId = localState.value.isUploadConfigStatusMap.keyboard?.syncId
+
+    // syncId 相同说明本地已是最新，跳过
+    if (newSyncId === currSyncId) {
+      log('Load remote keyboard config: same syncId, skip')
+      return false
+    }
+
+    // 更新同步状态并替换配置
+    if (!localState.value.isUploadConfigStatusMap.keyboard) {
+      localState.value.isUploadConfigStatusMap.keyboard = { ...defaultUploadStatusItem }
+    }
+    localState.value.isUploadConfigStatusMap.keyboard.syncId = newSyncId
+    localState.value.isUploadConfigStatusMap.keyboard.syncTime = parsed.syncTime
+    localState.value.isUploadConfigStatusMap.keyboard.dirty = false
+    localConfig.keyboard = parsed.data
+
+    log('Load remote keyboard config: updated from cloud')
+    return true
+  } catch (e) {
+    log('Load remote keyboard config error', e)
+    return false
+  }
 }
 
 export const resetSetting = async () => {

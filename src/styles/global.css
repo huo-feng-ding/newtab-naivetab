@@ -9,8 +9,8 @@ body {
   overflow: hidden;
   font-family: arial, sans-serif;
   font-size: 14px;
-  color: var(--text-color-main) !important;
-  background-color: var(--bg-main) !important;
+  color: var(--nt-text-color-main) !important;
+  background-color: var(--nt-bg-main) !important;
   /* GPU acceleration for smoother animations */
   transform: translateZ(0);
   -webkit-font-smoothing: antialiased;
@@ -22,6 +22,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Prevent SVG icons from receiving focus, avoiding aria-hidden a11y warnings
+   when Naive UI modals/drawers restore focus to a hidden background element */
+svg.iconify,
+svg[role="img"],
+svg[aria-hidden="true"] {
+  outline: none;
 }
 
 /* ============================================================
@@ -186,12 +194,12 @@ body {
 }
 
 .action-btn--default {
-  box-shadow: 0 1px 3px rgba(128, 128, 128, 0.15),
-              0 1px 1px rgba(128, 128, 128, 0.08),
+  box-shadow: 0 1px 3px var(--gray-alpha-15),
+              0 1px 1px var(--gray-alpha-08),
               inset 0 1px 0 rgba(255, 255, 255, 0.2);
   &:hover {
-    box-shadow: 0 3px 8px rgba(128, 128, 128, 0.2),
-                0 1px 2px rgba(128, 128, 128, 0.12),
+    box-shadow: 0 3px 8px var(--gray-alpha-20),
+                0 1px 2px var(--gray-alpha-12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.25);
   }
 }

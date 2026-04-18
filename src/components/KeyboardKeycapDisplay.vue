@@ -4,7 +4,7 @@
  *
  * 单个键帽的纯展示组件，widget（newtab）和 popup 共用同一套 DOM 结构。
  * - 仅负责渲染，不包含任何业务逻辑（数据获取、事件派发等由外层处理）
- * - 尺寸 / 颜色通过父级注入的 CSS 变量（--keycap-*）驱动，无需 props 传递
+ * - 尺寸 / 颜色通过父级注入的 CSS 变量（--nt-kb-*）驱动，无需 props 传递
  * - 外层通过 :style 绑定 keycapCssVars（来自 useKeyboardStyle）注入所有变量
  *
  * 视觉层级（从外到内）：
@@ -40,7 +40,7 @@ const props = withDefaults(
     imgDraggable?: boolean // 图标是否可拖拽（popup 拖拽排序时开启）
     isSelected?: boolean // 选中高亮（popup 书签选择态）
     isLoading?: boolean // 加载动画
-    isBorderEnabled?: boolean // 显示自定义边框（--keycap-border-*）
+    isBorderEnabled?: boolean // 显示自定义边框（--nt-kb-border-*）
 
     // 内容显示开关
     showCapKey?: boolean // 显示键位标识
@@ -176,10 +176,10 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   position: relative;
   width: 100%;
   height: 100%;
-  color: var(--keycap-main-font-color);
-  background-color: var(--keycap-main-bg-color);
-  backdrop-filter: blur(var(--keycap-background-blur));
-  border-radius: var(--keycap-border-radius);
+  color: var(--nt-kb-main-font-color);
+  background-color: var(--nt-kb-main-bg-color);
+  backdrop-filter: blur(var(--nt-kb-background-blur));
+  border-radius: var(--nt-kb-border-radius);
   border-style: solid;
   box-sizing: border-box;
   cursor: pointer;
@@ -199,13 +199,13 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     width: 100%;
     height: 100%;
     z-index: 1;
-    background: color-mix(in srgb, var(--custom-primary-color) 20%, transparent);
-    color: var(--custom-primary-color);
+    background: color-mix(in srgb, var(--nt-kb-primary-color) 20%, transparent);
+    color: var(--nt-kb-primary-color);
     font-size: 14px;
-    border-radius: calc(var(--keycap-border-radius) - 1px);
+    border-radius: calc(var(--nt-kb-border-radius) - 1px);
     box-shadow:
-      inset 0 0 0 1.5px var(--custom-primary-color),
-      0 0 8px color-mix(in srgb, var(--custom-primary-color) 28%, transparent);
+      inset 0 0 0 1.5px var(--nt-kb-primary-color),
+      0 0 8px color-mix(in srgb, var(--nt-kb-primary-color) 28%, transparent);
   }
 
   /* ── 键帽顶面（纵向三段式：label / img / name） ── */
@@ -230,7 +230,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       display: flex;
       justify-content: center;
       align-items: center;
-      color: var(--custom-primary-color);
+      color: var(--nt-kb-primary-color);
       font-size: 190%;
     }
 
@@ -240,12 +240,12 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       width: 100%;
       line-height: 1;
       padding-top: 1%;
-      font-family: var(--keycap-key-font-family);
-      font-size: var(--keycap-key-font-size);
+      font-family: var(--nt-kb-key-font-family);
+      font-size: var(--nt-kb-key-font-size);
       font-weight: 500;
     }
 
-    /* 图标区（居中弹性伸缩，transform scale 由 --keycap-favicon-size 控制大小） */
+    /* 图标区（居中弹性伸缩，transform scale 由 --nt-kb-favicon-size 控制大小） */
     .keycap__img {
       flex: 1 1 0;
       min-height: 0;
@@ -258,7 +258,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
       .img__wrap {
         height: 100%;
-        transform: scale(var(--keycap-favicon-size));
+        transform: scale(var(--nt-kb-favicon-size));
 
         .img__type {
           height: 100%;
@@ -280,7 +280,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       flex: 0 0 auto;
       width: 100%;
       line-height: 1;
-      font-size: var(--keycap-bookmark-font-size);
+      font-size: var(--nt-kb-bookmark-font-size);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -295,7 +295,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       width: 22%;
       height: 3px;
       border-radius: 2px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0%, var(--keycap-main-font-color) 40%, rgba(0, 0, 0, 0.25) 100%);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0%, var(--nt-kb-main-font-color) 40%, rgba(0, 0, 0, 0.25) 100%);
       opacity: 0.7;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
@@ -307,8 +307,8 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   box-shadow: none;
 
   .keycap__stage-flat {
-    padding: var(--keycap-stage-flat-padding);
-    border-radius: var(--keycap-border-radius);
+    padding: var(--nt-kb-stage-flat-padding);
+    border-radius: var(--nt-kb-border-radius);
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.06) 100%);
@@ -320,7 +320,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* ── GMK 型别（仿 Cherry 高度，顶厚底薄三层边框 + 外阴影） ─────────────── */
 .row__keycap-gmk {
-  border-width: var(--keycap-gmk-top-border) var(--keycap-gmk-h-border) var(--keycap-gmk-bot-border);
+  border-width: var(--nt-kb-gmk-top-border) var(--nt-kb-gmk-h-border) var(--nt-kb-gmk-bot-border);
   border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.08);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.45),
@@ -347,7 +347,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* ── DSA 型别（球面均等高度，四边等宽 + 辐射渐变顶面） ──────────────────── */
 .row__keycap-dsa {
-  border-width: var(--keycap-dsa-border);
+  border-width: var(--nt-kb-dsa-border);
   border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.06);
   box-shadow:
     0 3px 7px rgba(0, 0, 0, 0.4),
@@ -379,7 +379,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* 自定义边框高亮（使用 outline 避免影响布局） */
 .row__keycap--border {
-  outline: var(--keycap-border-width) solid var(--keycap-border-color);
+  outline: var(--nt-kb-border-width) solid var(--nt-kb-border-color);
 }
 
 /* 按下态（popup 点击书签 / widget 键盘按下） */

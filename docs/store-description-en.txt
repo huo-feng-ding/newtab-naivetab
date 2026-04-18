@@ -1,0 +1,60 @@
+🔷 NaiveTab — Visual Keyboard New Tab
+
+🔗 GitHub : https://github.com/GXFG/newtab-naivetab
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visual keyboard for bookmarks & browser commands — one-press access.
+Drag & drop layout, full customization, focus mode, and cloud sync.
+
+
+⌨️  Visual Keyboard — Your Productivity Accelerator
+
+Say goodbye to layers of clicks — manage your browser with a familiar keyboard layout.
+
+📂 Bookmark Keyboard
+   Display bookmarks on your new tab in a real keyboard layout.
+   ✓ Customizable key mappings
+   ✓ Customizable keyboard layout
+   ✓ Customizable themes
+   ✓ Quick access to your favorite sites from the new tab
+
+⚡ Command Keyboard
+   Execute browser commands on any page via modifier key combos (e.g. Ctrl+Shift + key).
+   ✓ Customizable command bindings
+   ✓ Customizable modifier combos
+   ✓ Domain black/whitelists
+   ✓ Tab management / page actions / scroll control — no mouse needed
+
+
+🌟 Built-in Widgets
+
+⏰ Time & Date
+   🕐  Clock             Digital, analog, flip, and neon styles
+   📅  Date              Customizable format and style
+   🗓️ Perpetual Calendar Lunar calendar, holidays
+
+🛠️ Productivity Tools
+   🔍 Search Bar       Customizable search engine for quick queries
+   📁 Folder Bookmarks Grid view for bookmark folders
+   📝 Memo             Notes and to-do lists
+   📊 Year Progress    Percentage + dot grid visualization
+   🌤️ Weather          Temperature, wind, humidity, daily indices, alerts
+   📰 News             Multi-platform trending aggregation
+
+
+🎯 Core Capabilities
+
+   🖱️ Free Drag & Drop    — Place widgets anywhere, fits all resolutions
+   🎨 Full Customization  — Font, color, background, border, shadow, all adjustable
+   🖼️ Dynamic Wallpapers  — Bing Photo of the Day + local images
+   🌗 Auto Dark Mode      — Follows system appearance
+   🎯 Focus Mode          — Right-click toggle, show only what you need
+   ☁️  Cross-device Sync  — Sync via browser, local backup support
+   🌐 Multilingual        — Simplified Chinese + English
+   📖 Open Source         — Source code open for contributions
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Made with ❤️ by GXFG  |  License: GPL-3.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

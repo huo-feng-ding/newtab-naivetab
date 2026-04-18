@@ -6,6 +6,16 @@ import NowWeather from './NowWeather.vue'
 import ForecastWeather from './ForecastWeather.vue'
 import { WIDGET_CODE } from './config'
 
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
+
+const weatherStyle = computed(() => ({
+  '--nt-w-font-family': customFontFamily.value,
+  '--nt-w-font-color': customFontColor.value,
+  '--nt-w-font-size': customFontSize.value,
+}))
+
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 let weatherConfigChangeHandle: ReturnType<typeof handleWatchWeatherConfigChange> | null = null
@@ -29,15 +39,13 @@ watch(isRender, (value) => {
   refreshWeather()
 })
 
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="weather__container"
+      :style="weatherStyle"
     >
       <NowWeather />
       <ForecastWeather />
@@ -47,14 +55,14 @@ const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
 
 <style>
 #weather {
-  font-family: v-bind(customFontFamily);
-  color: v-bind(customFontColor);
   user-select: none;
   .weather__container {
     z-index: 10;
     position: absolute;
     text-align: center;
-    font-size: v-bind(customFontSize);
+    font-family: var(--nt-w-font-family);
+    color: var(--nt-w-font-color);
+    font-size: var(--nt-w-font-size);
   }
 }
 </style>

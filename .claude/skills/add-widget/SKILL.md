@@ -119,7 +119,7 @@ export const WIDGET_GROUPS: Array<{
   codes: WidgetCodes[]
 }> = [
   {
-    labelKey: 'widgetGroup.time',
+    labelKey: 'widgetGroup.timeAndDate',
     codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组（time/bookmark/tool 三选一）
   },
 ]
@@ -138,15 +138,15 @@ export const WIDGET_GROUPS: Array<{
 
 ## 可选：添加专属设置面板
 
-自 v2.0.0 起，所有设置面板统一管理在 `src/newtab/setting/` 目录下。新增专属设置面板步骤：
+自 v2.0.0 起，所有设置面板统一管理在 `src/setting/` 目录下。新增专属设置面板步骤：
 
 ### 步骤 1 — 新建面板文件
 
-新建目录 `src/newtab/setting/panes/MyWidgetSetting/`，并创建 `index.vue`：
+新建目录 `src/setting/panes/MyWidgetSetting/`，并创建 `index.vue`：
 
 ```vue
 <template>
-  <SettingPaneContent>
+  <SettingFormWrap>
     <!-- 在这里使用原子组件（ColorField, FontField, SliderField, etc.）构建表单 -->
     <SwitchField
       v-model="localConfig.myWidget.enabled"
@@ -157,21 +157,21 @@ export const WIDGET_GROUPS: Array<{
       :label="$t('common.color')"
     />
     <!-- ... 更多表单项 -->
-  </SettingPaneContent>
+  </SettingFormWrap>
 </template>
 
 <script setup lang="ts">
-import { SettingPaneContent } from '@/newtab/setting/components/SettingPaneContent'
-import { SwitchField, ColorField } from '@/newtab/setting/fields'
+import { SettingFormWrap } from '@/setting/components/SettingFormWrap'
+import { SwitchField, ColorField } from '@/setting/fields'
 import { localConfig } from '@/logic/store'
 </script>
 ```
 
-**所有表单项必须使用 `src/newtab/setting/fields` 中提供的原子组件。**
+**所有表单项必须使用 `src/setting/fields` 中提供的原子组件。**
 
 ### 步骤 2 — 注册设置面板
 
-在 `src/newtab/setting/registry.ts` 中注册：
+在 `src/setting/registry.ts` 中注册：
 
 在 `SETTING_GROUPS` 对应的分组（通常是 `widget`）的 `items` 数组添加配置项：
 ```ts

@@ -1,55 +1,111 @@
 <div align="center">
-  <img src="./assets/img/icon/icon.png" width="100" height="100" />
-  <h1 align="center">NaiveTab</h1>
-  <p align="center">A minimal yet powerful new tab extension — turn every new tab into a productive starting point</p>
-  <p align="center">English | <a href="https://github.com/GXFG/newtab-naivetab/blob/main/README.md">中文</a></p>
+  <img src="./assets/img/icon/icon-128x128.png" width="128" height="128" alt="NaiveTab Logo" />
+  <h1>NaiveTab</h1>
+  <p>Visual keyboard for bookmarks & browser commands — one-press access. Drag & drop layout, full customization, focus mode, and cloud sync.</p>
+  <p>
+    <a href="https://github.com/GXFG/newtab-naivetab/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/GXFG/newtab-naivetab?color=blue&style=flat-square" alt="License" />
+    </a>
+    <a href="https://github.com/GXFG/newtab-naivetab/stargazers">
+      <img src="https://img.shields.io/github/stars/GXFG/newtab-naivetab?style=flat-square" alt="Stars" />
+    </a>
+  </p>
+  <p>
+    English | <a href="https://github.com/GXFG/newtab-naivetab/blob/main/README.md">中文</a>
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/Vue%203-4FC08D?style=flat-square&logo=vue.js&logoColor=white" alt="Vue 3" />
+    <img src="https://img.shields.io/badge/Naive%20UI-18A058?style=flat-square" alt="Naive UI" />
+    <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/Vitesse--webext-333333?style=flat-square" alt="Vitesse-webext" />
+  </p>
 </div>
+
+---
+
+## ⌨️ Visual Keyboard — Your Productivity Accelerator
+
+Say goodbye to layers of clicks — manage your browser with a familiar keyboard layout.
+
+|                | **Bookmark Keyboard**                                      | **Command Keyboard**                                             |
+|----------------|------------------------------------------------------------|------------------------------------------------------------------|
+| **What**       | Display bookmarks on your new tab in a real keyboard layout | Execute browser commands on any page via modifier + key combos   |
+| **How**        | Open a new tab, press the corresponding key to open a site  | Set a modifier combo (e.g. `Ctrl+Shift`), press any key to trigger |
+| **Configurable** | Key mappings, keyboard layout, themes                    | Command bindings, modifier combos, domain black/whitelists       |
+| **Use Case**   | Quick access to your favorite sites from the new tab       | Tab management, page actions, scroll control — no mouse needed   |
 
 ## 🌟 Features
 
 ### Built-in Widgets
 
-| Widget | Description |
-|--------|-------------|
-| **⌨️ Bookmark Keyboard** | Display bookmarks as a physical keyboard layout for instant access. Set global shortcuts to open bookmarks from anywhere in the browser. |
-| **📁 Folder Bookmarks** | Browse native bookmark folders in a grid. Navigate into/out of subfolders, toggle icon & label visibility, and freely adjust columns, gap, border-radius, and row height. Supports opening links in a new tab. |
-| **🕐 Clock** | Digital clock, analog clock, flip clock, and neon clock — multiple styles to choose from. |
-| **📆 Date** | Clean date display with customizable format and style. |
-| **📅 Perpetual Calendar** | Includes lunar calendar, public holidays, and statutory holidays. Easily check working days and plan your schedule. |
-| **📊 Year Progress** | Visualize how much of the year has passed with a day count, percentage, and dot grid. Make every day count. |
-| **🔍 Search Bar** | Customizable search engine for quick searches right from your new tab. |
-| **📝 Memo** | Editable notes and to-do lists — jot down ideas and tasks on the fly. |
-| **🌤 Weather** | Real-time temperature, wind speed, humidity, daily indices, and severe weather alerts. Powered by QWeather. |
-| **📰 News** | Aggregated trending content — all in one view. |
+**⏰ Time & Date**
+
+| Widget        | Description                        |
+|---------------|------------------------------------|
+| Clock         | Digital, analog, flip, neon styles |
+| Date          | Customizable format & style        |
+| Perpetual Calendar | Lunar calendar, holidays       |
+
+**🛠 Productivity Tools**
+
+| Widget            | Description                            |
+|-------------------|----------------------------------------|
+| Search Bar        | Customizable search engine             |
+| Folder Bookmarks  | Grid view for bookmark folders         |
+| Memo              | Notes & to-do lists                    |
+| Year Progress     | Percentage + dot grid visualization    |
+| Weather           | Temp, wind, humidity, daily indices    |
+| News              | Multi-platform trending aggregation    |
 
 ### Core Capabilities
 
-- 🖱️ **Free Layout** — Drag any widget anywhere on the screen; works across all screen resolutions
-- 🎨 **Deep Customization** — Tune font, size, color, background, border, shadow, and blur for every widget
-- 🖼️ **Custom Backgrounds** — Bing Photo of the Day, local images, or a single pinned wallpaper
-- 🌗 **Auto Theme** — Automatically switches between light and dark mode based on system appearance
-- 🎯 **Focus Mode** — Show only the widgets you need; toggle it instantly from the right-click menu
-- ☁️ **Cross-device Sync** — Sync settings across devices via browser sync (sign-in required); export backups locally
-- 🌐 **Multilingual** — Supports Simplified Chinese and English
-- 🔒 **Open Source, Zero Data Collection** — No telemetry, no tracking. Your data stays yours
+- 🖱️ **Free Drag & Drop** — Place widgets anywhere, fits all resolutions
+- 🎨 **Full Customization** — Font, color, background, border, shadow, all adjustable
+- 🖼️ **Dynamic Wallpapers** — Bing Photo of the Day + local images
+- 🌗 **Auto Dark Mode** — Follows system appearance
+- 🎯 **Focus Mode** — Right-click toggle, show only what you need
+- ☁️ **Cross-device Sync** — Sync via browser, local backup support
+- 🌐 **Multilingual** — Simplified Chinese + English
+- 📖 **Open Source** — Source code open for contributions
 
-## 🚀 Get Started
+## 🛠️ Install Now
 
-- 📖 [Documentation](https://gxfg.github.io/naivetab-doc)
-- ☕ [Buy me a coffee](https://github.com/GXFG/newtab-naivetab/blob/main/sponsor.md)
+<div align="center">
+  <a href="https://chrome.google.com/webstore/detail/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5/hhfebdcoeoddbdhgcgflblcjcgogijem">
+    <img src="https://img.shields.io/badge/Chrome%20Web%20Store-Install-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
+  </a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5/kejadmppkffccjopodhekdnmkofidmjl">
+    <img src="https://img.shields.io/badge/Edge%20Add--ons-Install-0078D7?style=for-the-badge&logo=microsoft-edge&logoColor=white" alt="Microsoft Edge" />
+  </a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5">
+    <img src="https://img.shields.io/badge/Firefox%20Add--ons-Install-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Firefox Add-ons" />
+  </a>
+</div>
 
-## 🛠️ Install
+---
 
-- [Chrome Web Store](https://chrome.google.com/webstore/detail/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5/hhfebdcoeoddbdhgcgflblcjcgogijem)
-- [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5/kejadmppkffccjopodhekdnmkofidmjl)
-- [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/naivetab-%E6%96%B0%E6%A0%87%E7%AD%BE%E9%A1%B5)
+## ☕ Buy Me a Coffee
 
-## 📜 Changelog
+Enjoying NaiveTab? Consider [buying me a coffee](sponsor.md) to support ongoing development!
 
-[View the changelog](https://github.com/GXFG/newtab-naivetab/blob/main/CHANGELOG.md)
+---
 
-## 🌼 Acknowledgements
+<div align="center">
 
-- [Naive UI](https://www.naiveui.com)
-- [Vitesse-webext](https://github.com/antfu/vitesse-webext)
-- [icones](https://icones.js.org)
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=GXFG/newtab-naivetab&type=Date)](https://star-history.com/#GXFG/newtab-naivetab&Date)
+
+</div>
+
+---
+
+<div align="center">
+  <p>
+    <a href="https://github.com/GXFG/newtab-naivetab/blob/main/LICENSE">
+      <img src="https://img.shields.io/badge/License-GPL--3.0-red?style=flat-square" alt="License" />
+    </a>
+    <br />
+    <sub>Made with ❤️ by GXFG</sub>
+  </p>
+</div>

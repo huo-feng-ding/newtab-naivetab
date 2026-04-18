@@ -1,12 +1,14 @@
 # NaiveTab 开发规范
 
-这是NaiveTab，一个优雅的新标签页浏览器扩展项目。本文档定义了项目的开发规范，所有 AI 辅助开发必须遵守。AI阅读此文档后在回复前输出 "(-.-)已阅读CLAUDE.md"。
+这是NaiveTab，一个浏览器新标签页扩展项目。本文档定义了项目的开发规范，所有 AI 辅助开发必须遵守。AI阅读此文档后在回复前输出 "(-.-)已阅读CLAUDE.md"。
 
 **强制必须遵循**：
-- 所有 AI 与用户的沟通、代码注释、文档编写等，都必须使用中文。
+- 所有 AI 的输出要方便中文用户理解，例如：思考过程、与用户的沟通、代码注释、文档编写、等等，都**必须使用中文**，只有关键的技术名词保持英文。
 - 编程是一个严肃场景，遇到不清楚的点不要猜测，及时与用户确认。最终修改代码前要先给出具体的实施方案让用户审阅。
 - 每次修改代码后，必须审视本次改动是否涉及新的规律、约定、坑点或架构决策。若有，须在当次对话结束前将相关内容补充至本文件，不得遗留到下次。
 - 每次更新本文件后，必须检查全文是否存在内容重复、表述冲突或章节错位，及时合并或删除冗余内容，保持文件规范整洁。
+- 新增或修改内容时必须归入已有对应章节，禁止随意新建章节或错位放置。
+- 本文件是活跃文档，发现过时描述要及时修正或删除，避免误导后续对话。
 
 ---
 
@@ -22,7 +24,7 @@
 
 ### BEM 命名
 
-**采用简化版 BEM：`block__element--modifier`，使用双下划线分隔元素、双连字符分隔修饰符。**
+**必须采用BEM命名规范：`block__element--modifier`，使用双下划线分隔元素、双连字符分隔修饰符。**
 
 - `block`：组件级名称，使用 camelCase（如 `clockDigital`、`bookmarkFolder`）
 - `block__element`：子元素使用双下划线连接（如 `time__text`、`text__digit`）
@@ -32,14 +34,13 @@
 
 ### PostCSS 嵌套
 
-**使用 PostCSS 嵌套语法，选择器直接写在父级花括号内，不使用 `&` 拼接类名。**
+**必须使用 PostCSS 嵌套语法，选择器直接写在父级花括号内，不使用 `&` 拼接类名。**
 
 - Widget 样式外层使用 `#widgetCode` 作为最外层选择器（由 `WidgetWrap` 自动设置 id）
 - 嵌套层级不超过 4 层，过深时拆分为独立类
 - `v-bind()` 用于绑定响应式配置，返回值来自 `getStyleField()`
 - `widget__wrap` div 的 style 被 `v-bind` 用于存放 CSS 变量，不可再对其进行 `:style` 绑定
 - 使用 `backdrop-filter` 时必须同时加 `-webkit-backdrop-filter` 前缀
-- 硬编码颜色必须同时写浅色和深色规则（`:root[data-theme='dark']` 或 `.dark` 选择器）
 
 ## Vue 组件
 
@@ -49,6 +50,37 @@
 - 内部多字段状态使用 `reactive`，单一状态值使用 `ref`
 - 组件类型通过 `typeof` 推导，不重复定义接口
 - 组件不是全局注册的，使用前必须 `import`
+
+### v-bind 变量声明顺序（TDZ 陷阱）
+
+**所有 CSS `v-bind()` 引用的变量声明，必须放在 `<script setup>` 的最顶部——imports 之后、任何逻辑代码（函数调用、`watch`、`onMounted`、`reactive` 等）之前。**
+
+**根因：** Vue SFC 编译器会将 `<script setup>` 编译为 `setup()` 函数，并在顶部生成 `useCssVars()` 调用，该调用同步引用所有 `v-bind()` 变量。如果这些变量声明在非 hoistable 代码之后，生产模式下会触发 `ReferenceError: Cannot access 'xxx' before initialization`（TDZ 错误）。dev 模式因 ES modules 的特殊 TDZ 处理不会暴露此问题。
+
+```vue
+<script setup lang="ts">
+import { getStyleField } from '@/logic/store'
+
+// ✅ 正确：v-bind 变量在最顶部
+const WIDGET_CODE = 'myWidget'
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+
+// 之后才能写 onMounted、watch、函数声明等
+onMounted(() => { ... })
+</script>
+```
+
+```vue
+<script setup lang="ts">
+import { getStyleField } from '@/logic/store'
+
+// ❌ 错误：v-bind 变量声明在 onMounted 之后
+onMounted(() => { ... })
+
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+</script>
+```
 
 ## 函数声明
 
@@ -76,6 +108,14 @@
 | Vue 组件 | PascalCase | `SettingPaneContent.vue` |
 | CSS 类名 | camelCase + BEM | `clockDigital__container--shadow` |
 
+## 模块拆分规范
+
+**当从模块 A 提取代码到新模块 B 后，禁止在 A 中写 `export { xxx } from './B'` 做兼容重导出。**
+
+有更新就要立即修改所有调用方的 import 语句，不留过渡层。这样做避免增加维护成本、模糊模块边界。
+
+**正确做法：** 提取代码后，搜索所有引用了被提取符号的文件，逐一修改其 import 指向新模块，确认 type-check 通过即完成。
+
 ## TypeScript
 
 - 函数参数与返回值类型必须显式标注
@@ -83,6 +123,23 @@
 - 类型注解必须显式，不依赖 implicit any
 - 未使用的变量必须删除，不保留注释掉的死代码
 - 一行超过 120 字符时换行
+
+## 注释规范
+
+**多行注释必须使用 `/** ... */` 格式，禁止用 `//` 逐行拼接。**
+
+```ts
+// ❌ 禁止：// 拼接多行
+// 架构说明：
+// 1. 本地缓存 keymap
+// 2. 直接调用 chrome.tabs.create
+
+/**
+ * 架构说明
+ * 1. 本地缓存 keymap
+ * 2. 直接调用 chrome.tabs.create
+ */
+```
 
 ## 错误处理
 
@@ -169,8 +226,8 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 ### 添加新文案步骤
 1. 在 `src/locales/zh-CN.json` 和 `en-US.json` 的 `general` 命名空间下添加 key
-2. 使用 `{placeholder}` 作为变量占位符
-3. 代码中使用 `.replace('{placeholder}', value)` 替换变量
+2. 使用 `__xxx__` 作为变量占位符（如 `__field__`、`__count__`），不可用 `{xxx}` 会被 vue-i18n 解析为空
+3. 代码中使用 `.replace('__xxx__', value)` 替换变量
 4. 确保两个语言文件同步更新
 
 
@@ -217,7 +274,7 @@ export const WIDGET_GROUPS: Array<{
   codes: WidgetCodes[]
 }> = [
   {
-    labelKey: 'widgetGroup.time',
+    labelKey: 'widgetGroup.timeAndDate',
     codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组
   },
 ]
@@ -252,26 +309,11 @@ export const WIDGET_CONFIG = { /* ... */ }
 
 ## 定时任务生命周期管理
 
-Widget 中需要定时刷新数据时（如时钟），必须使用 `src/logic/task.ts` 提供的统一任务管理系统，**不可在组件内自行 `setInterval`**。
+Widget 中需要定时刷新数据时，必须使用 [src/logic/task.ts](src/logic/task.ts) 的统一任务管理系统，**不可自行 `setInterval`**。
 
-```ts
-import { addTimerTask, removeTimerTask } from '@/logic/task'
-
-const isRender = getIsWidgetRender(WIDGET_CODE)
-
-watch(isRender, (value) => {
-  if (!value) {
-    removeTimerTask(WIDGET_CODE)  // 组件禁用时必须移除任务
-    return
-  }
-  updateTime()                    // 立即执行一次
-  addTimerTask(WIDGET_CODE, updateTime)
-}, { immediate: true })
-```
-
-- 全局 timer 每 **1000ms** 触发一次，所有 Widget 共享此定时器
-- `addTimerTask` 会立即执行一次 task，再加入轮询列表
-- 组件卸载时不需要手动移除，`WidgetWrap` 的 `isEnabled` watch 会自动处理
+- 使用 `addTimerTask` / `removeTimerTask` 管理任务，`watch(isRender)` 控制添加/移除
+- 全局 timer 每 **1000ms** 触发一次，`addTimerTask` 会立即执行一次
+- 组件卸载无需手动移除，`WidgetWrap` 的 `isEnabled` watch 会自动处理
 
 ## WidgetWrap 机制说明
 
@@ -371,98 +413,39 @@ if (compareLeftVersionLessThanRightVersions(version, 'x.y.z')) {
 
 ## 云同步架构与规范
 
-项目使用 Chrome 浏览器原生 `chrome.storage.sync` 实现跨设备配置云同步，核心架构为**版本感知的 Last-Write-Wins**策略。
-
-### 存储架构
-| 位置 | 存储方式 | 键格式 | 说明 |
-|------|----------|--------|------|
-| 本地 | `localStorage` | `c-{field}` | 每个配置项单独存储，响应式自动持久化 |
-| 云端 | `chrome.storage.sync` | `naive-tab-{field}` | 每个配置项单独存储，遵循 Chrome 配额限制 |
-| 状态 | `localState` | `isUploadConfigStatusMap[field]` | 维护每个配置项的同步状态（dirty, syncTime, syncId 等） |
+核心架构为**版本感知的 Last-Write-Wins**，详见 [src/logic/storage.ts](src/logic/storage.ts)。
 
 ### 同步策略
-**版本感知的 Last-Write-Wins**:
-| 条件 | 操作 |
-|------|------|
-| `syncId` 相同（内容一致） | 跳过，不做任何操作 |
-| 本地 `dirty = false`（无未同步修改） | 使用**版本感知合并策略** |
-| 本地 `dirty = true` 且 `localModifiedTime > syncTime` | 上传本地配置（本地修改优先） |
-| 本地 `dirty = true` 且 `localModifiedTime <= syncTime` | 使用**版本感知合并策略** |
+- `syncId` 相同 → 跳过
+- 本地 `dirty = false` → 使用版本感知合并策略
+- 本地 `dirty = true` 且 `localModifiedTime > syncTime` → 上传本地
+- 本地 `dirty = true` 且 `localModifiedTime <= syncTime` → 版本感知合并
 
-**版本感知合并策略**（核心原则：版本较新的一方优先）:
-| 场景 | 合并方式 |
-|------|----------|
-| 版本相同 | 直接采用远程配置覆盖本地 |
-| 本地版本较新 | 以本地结构为模板，合并远程值 → **保留本地新增字段** |
-| 远程版本较新 | 以远程结构为模板，合并本地值 → **保留远程新增字段** |
+**版本感知合并**：版本较新的一方优先，保留该方新增字段。
 
-### Chrome 配额限制应对
-Chrome `storage.sync` 有严格的配额限制，代码中已做完整防护：
-| 限制项 | 限制值 | 应对措施 |
-|--------|--------|----------|
-| 单 key 大小 | 8KB | - 代码留 200 字节余量，超限时拦截并告警<br>- keyboard 配置自动清理空条目 + 截断超长字段<br>- 大小超过阈值自动 gzip 压缩 |
-| 总容量 | ~100KB | 当前配置项数量约 10 个，远低于限制 |
-| 写入频率 | 120 次/分钟 | - 2 秒防抖写入，最大延迟 5 秒<br>- 频率超过 80% 时告警提醒用户 |
+### Chrome 配额限制
+单 key 8KB、总量 ~100KB、120 次/分钟。代码已做 2 秒防抖写入 + gzip 自动压缩 + 超限拦截。
 
-### 新增 Widget 同步注意事项
-新增 Widget 时**无需手动修改同步相关代码**，系统自动处理：
-1. `src/logic/config.ts` 通过 `import.meta.glob` 自动扫描，会自动加入 `defaultConfig`
-2. `src/logic/store.ts` 通过遍历 `WIDGET_CODE_LIST` 自动创建本地存储
-3. `src/logic/storage.ts` 会自动为新增 Widget 初始化同步状态
-4. 启动时 `handleStateResetAndUpdate` 会**增量新增**缺失字段的同步状态
+### 新增 Widget
+无需手动修改同步代码，系统通过 glob 和遍历自动处理。
 
-### 故障恢复机制
-- 本地修改立即标记 `dirty = true` 并更新 `localModifiedTime`
-- **只有上传成功后**才清除 `dirty` 和更新 `syncTime`/`syncId`
-- 上传失败保留 `dirty` 状态，页面重新加载后 `handleMissedUploadConfig` 会自动重试
-- 压缩解析失败自动降级尝试原始 JSON 解析，兼容旧格式数据
+### 故障恢复
+本地修改标记 `dirty`，上传成功才清除。压缩解析失败降级尝试原始 JSON（详见 [compress.ts](src/logic/compress.ts)）。
 
 ### popup 书签同步机制
-
-**通过 `setupKeyboardSyncListener` 实现 popup 修改书签后 newtab 实时感知。**
-
-#### 数据流
-```
-popup 修改 localConfig.keyboard.keymap[code]
-    ↓
-flushConfigSync('keyboard') → chrome.storage.sync.set（立即写入，跳过防抖）
-    ↓
-chrome.storage.onChanged 事件触发
-    ├─ newtab: setupKeyboardSyncListener → 更新 localConfig.keyboard → Vue 渲染
-    └─ Service Worker: onChanged 监听 → 更新缓存 → 快捷键生效
-```
-
-#### 关键函数
-| 函数 | 文件 | 用途 |
-|------|------|------|
-| `setupKeyboardSyncListener` | `storage.ts` | newtab 启动时注册，监听 keyboard 配置变化 |
-| `flushConfigSync` | `storage.ts` | popup 修改后强制立即同步，跳过 2 秒防抖 |
-| `parseStoredData` | `compress.ts` | 自动解压 gzip 格式，兼容新旧数据格式 |
-
-#### 为什么 popup 需要 `flushConfigSync`
-- popup 关闭后 JavaScript 环境销毁，防抖回调不会执行
-- 必须在 `handleCommit` 中强制同步，确保 Service Worker 能收到更新
+通过 `setupKeyboardSyncListener` 实现 popup 修改书签后 newtab 实时感知。popup 必须在 `handleCommit` 中调用 `flushConfigSync` 强制同步（跳过 2 秒防抖），否则 popup 销毁后防抖回调不会执行。
 
 ### 后台脚本与 keyboard 配置
 
-**后台脚本 `src/background/main.ts` 直接依赖 keyboard（书签快捷键）配置，修改该配置结构时必须同步考虑后台脚本的兼容性。**
+后台脚本 `src/background/main.ts` 以 Service Worker 运行，无法使用 Vue 响应式状态，采用**缓存 + 监听模式**。修改 keyboard 配置时：
 
-#### 架构说明
-- 后台脚本以 Service Worker 形式运行，无法使用 Vue 响应式状态
-- 采用**缓存 + 监听模式**：启动时一次性读取配置到内存，按键时直接读缓存（~0ms 响应）
-- 通过 `chrome.storage.onChanged` 监听配置变化，自动更新缓存
-- 配置超过 4000 字节时会 gzip 压缩，后台脚本通过 `parseStoredData` 自动解压
-- **onChanged 监听器必须返回 Promise**，否则 Service Worker 可能在异步 resolve 前休眠，导致缓存更新失败
-
-#### 修改 keyboard 配置时的注意事项
 | 修改类型 | 后台脚本影响 |
 |----------|--------------|
-| 新增字段 | 无影响（缓存自动合并新字段） |
+| 新增字段 | 无影响 |
 | 重命名/删除字段 | **必须同步修改** `main.ts` 中的字段引用 |
-| 修改 keymap 结构 | **必须同步修改** `main.ts` 中的 keymap 访问逻辑 |
-| 修改默认值 | 无影响（后台脚本只读用户配置） |
+| 修改 keymap 结构 | **必须同步修改** `main.ts` 中的访问逻辑 |
 
-**Why:** 后台脚本独立运行，不会随 Vue 代码同步更新，遗漏修改会导致快捷键功能异常。
+**注意：** `onChanged` 监听器必须返回 `Promise`，否则 Service Worker 可能在异步 resolve 前休眠。
 
 ---
 
@@ -484,75 +467,27 @@ fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)']
 
 ## 主题色派生色用法
 
-**需要使用主题色的半透明版本（如激活态背景、边框）时，必须用以下方式，不可用其他替代方案。**
+需要使用主题色半透明版本时，通过 `customPrimaryColor`（来自 `@/logic/store`）正则替换 alpha 通道生成。详见 [store.ts](src/logic/store.ts) `customPrimaryColor`。
 
-```ts
-import { customPrimaryColor } from '@/logic/store'
-
-// 通过正则替换 alpha 通道生成半透明派生色
-const primaryBg      = computed(() => customPrimaryColor.value.replace(/[\d.]+\)$/, '0.08)'))
-const primaryBgHover = computed(() => customPrimaryColor.value.replace(/[\d.]+\)$/, '0.14)'))
-const primaryBorder  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)$/, '0.28)'))
-const primaryIconBg  = computed(() => customPrimaryColor.value.replace(/[\d.]+\)$/, '0.14)'))
-```
-
-```css
-/* 在 <style scoped> 中通过 v-bind() 使用 */
-.item--active {
-  background-color: v-bind(primaryBg);
-  border-color: v-bind(primaryBorder);
-}
-```
-
-**为什么这样做：**
-- `customPrimaryColor` 的值格式为 `rgba(r, g, b, 1)` 字符串，从 `@/logic/store` 导入，自动跟随当前外观
-- Naive UI **不提供** `--n-primary-color-rgb` 这类 CSS 变量，直接用会 fallback 到 Naive UI 默认绿色（`#18a058`）
-- **不能**直接拼接十六进制 alpha 后缀，格式不兼容
+**注意：** Naive UI 不提供 `--n-primary-color-rgb` CSS 变量；**不能**直接拼接十六进制 alpha 后缀，格式不兼容。
 
 ## CSS 变量 / Naive UI 主题变量
 
-优先使用 Naive UI 注入的 CSS 变量，这些变量会随主题自动切换：
+优先使用 Naive UI CSS 变量（`--n-text-color`、`--n-color`、`--n-border-color` 等），自动跟随主题切换。
 
-```css
-/* ✅ 自动适配深/浅色 */
-.my-item {
-  color: var(--n-text-color);
-  background-color: var(--n-color);
-  border-color: var(--n-border-color);
-}
-```
+常用变量见 [tokens.css](src/styles/tokens.css) 和 Naive UI 文档。
 
-常用 Naive UI CSS 变量：
-| 变量名 | 含义 |
-|--------|------|
-| `--n-text-color` | 主文字颜色 |
-| `--n-text-color-2` | 次要文字颜色 |
-| `--n-text-color-3` | 辅助文字颜色（更淡）|
-| `--n-color` | 组件背景色 |
-| `--n-color-hover` | 悬停背景色 |
-| `--n-border-color` | 边框颜色 |
-| `--n-primary-color` | 主题色 |
-| `--n-divider-color` | 分割线颜色 |
-| `--n-card-color` | Card 背景色 |
-| `--n-modal-color` | Modal 背景色 |
+## 中性灰色 Token
+
+**禁止硬编码 `rgba(128, 128, 128, 0.xx)` 或 `rgba(255, 255, 255, 0.xx)`，必须使用 `--gray-alpha-xx` 系列变量。** 浅色模式为 `128` 通道，深色模式自动切换为 `255` 通道。
+
+完整 token 列表见 [tokens.css](src/styles/tokens.css) `--gray-alpha-xx`（共 13 个层级：03/05/06/08/10/12/15/20/35/55/65/70/75/85）。
+
+新增透明度层级时先检查 tokens.css 是否已有近似值。
 
 ## 硬编码颜色必须覆盖双模式
 
-若确实需要硬编码颜色（不依赖配置且 Naive UI 变量无法覆盖），**必须同时写浅色和深色规则**：
-
-```css
-/* ✅ 正确：浅色和深色都覆盖 */
-.badge {
-  background-color: rgba(0, 0, 0, 0.06);
-  color: rgba(0, 0, 0, 0.65);
-}
-
-:root[data-theme='dark'] .badge,
-.dark .badge {
-  background-color: rgba(255, 255, 255, 0.10);
-  color: rgba(255, 255, 255, 0.75);
-}
-```
+确实需要硬编码颜色时，**必须同时写浅色和深色规则**（`:root[data-theme='dark']` 或 `.dark`），优先使用 `--gray-alpha-xx` token 替代。
 
 ## CSS 样式规范
 
@@ -611,11 +546,11 @@ NaiveTab 的 Widget 统一使用"玻璃光感"设计语言，已在 `bookmarkFol
 自 v2.0.0 起，设置面板采用全新目录结构，所有设置面板统一管理：
 
 ```
-src/newtab/setting/
+src/setting/
 ├── components/          # 通用组件
 │   ├── SettingIconGroup.vue
-│   ├── SettingPaneContent.vue
-│   └── SettingPaneTitle.vue
+│   ├── SettingFormWrap.vue
+│   └── SettingHeaderBar.vue
 ├── fields/              # 表单原子组件
 │   ├── ColorField.vue
 │   ├── FontField.vue
@@ -634,14 +569,14 @@ src/newtab/setting/
 
 ## 设置面板注册
 
-新增设置面板必须在 `src/newtab/setting/registry.ts` 中注册：
+新增设置面板必须在 `src/setting/registry.ts` 中注册：
 
 在 `SETTING_GROUPS` 对应分组（`global`/`widget`/`other`）的 `items` 数组中添加配置项：
 ```ts
 { code: 'myWidget', labelKey: 'setting.myWidget' },
 ```
 
-面板组件文件必须为 `src/newtab/setting/panes/{code}/index.vue`，通过异步组件自动加载。
+面板组件文件必须为 `src/setting/panes/{code}/index.vue`，通过异步组件自动加载。
 
 **分组规则：**
 - `global`: 全局功能配置（通用、专注模式）
@@ -650,47 +585,20 @@ src/newtab/setting/
 
 ## Setting 原子组件
 
-**所有 Setting 面板开发必须统一使用 `src/newtab/setting/fields` 中的原子组件，禁止自行封装或直接使用 Naive UI 组件。**
+**所有 Setting 面板必须使用 `src/setting/fields` 中的原子组件，禁止自行封装或直接使用 Naive UI 组件。**
 
-### 可用原子组件
-| 组件名 | 用途 | 特点 |
-|--------|------|------|
-| `ColorField` | 颜色选择 | 自动处理 `currAppearanceCode`，支持字符串/数组类型 |
-| `FontField` | 字体设置 | 包含字体选择 + 颜色 + 字号，自动处理双主题 |
-| `SliderField` | 滑块输入 | 数值范围调节 |
-| `SwitchField` | 开关切换 | 简单的布尔开关 |
-| `ToggleColorField` | 开关+颜色 | 适用于边框/阴影等需要启用开关+颜色配置，支持额外显示宽度输入 |
+| 组件 | 用途 |
+|------|------|
+| `ColorField` | 颜色选择 |
+| `FontField` | 字体设置（字体+颜色+字号） |
+| `SliderField` | 滑块输入 |
+| `SwitchField` | 布尔开关 |
+| `ToggleColorField` | 开关+颜色（支持附加宽度输入） |
 
-### 使用示例
+详见 [fields/index.ts](src/setting/fields/index.ts)。
 
-```vue
-<template>
-  <ColorField v-model="localConfig.xxx.color" :label="$t('common.color')" />
-  <FontField
-    v-model:font-family="localConfig.xxx.fontFamily"
-    v-model:font-color="localConfig.xxx.fontColor"
-    v-model:font-size="localConfig.xxx.fontSize"
-    :label="$t('common.font')"
-  />
-  <SliderField v-model="localConfig.xxx.size" :label="$t('common.size')" :min="10" :max="100" />
-  <SwitchField v-model="localConfig.xxx.enabled" :label="$t('common.enabled')" />
-  <ToggleColorField
-    v-model="localConfig.xxx.isBorderEnabled"
-    v-model:color="localConfig.xxx.borderColor"
-    v-model:width="localConfig.xxx.borderWidth"
-    :label="$t('common.borderColor')"
-    :show-width="true"
-  />
-</template>
-<script setup>
-import { ColorField, FontField, SliderField, SwitchField, ToggleColorField } from '@/newtab/setting/fields'
-</script>
-```
-
-### 重要说明
-- 所有颜色相关组件已内置 `currAppearanceCode` 处理逻辑，**无需在模板中手动取值**
-- 传递完整数组即可，组件内部会自动读取当前主题对应的颜色值
-- `ToggleColorField` 的 `width` prop 用于边框宽度，仅当 `show-width="true"` 时才显示
+- 所有颜色组件已内置 `currAppearanceCode`，**无需手动取值**，传递完整数组即可
+- `ToggleColorField` 的 `width` 仅当 `show-width="true"` 时才显示
 
 ## 设置面板图标
 
@@ -738,6 +646,8 @@ if (hasPermission) {
 # 发布流程
 
 ## 版本号更新
+
+**`package.json` 中的 `version` 字段只能由用户手动修改，AI 禁止自行变更版本号。**
 
 发布前必须同步更新以下两处，且版本号保持一致：
 1. **`package.json`** → `version` 字段

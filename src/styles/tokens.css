@@ -46,7 +46,28 @@
   --opacity-secondary: 0.65;
   --opacity-primary: 0.85;
 
-  /* --- Default system colors before JS loads (avoid flash on load */
+  /* --- Neutral Gray Alpha Tokens ---
+     用法：直接使用 --gray-alpha-xx，如 var(--gray-alpha-05)
+     浅色模式：rgba(128, 128, 128, 0.xx)
+     深色模式：通过 :root[data-theme='dark'] 覆盖为 rgba(255, 255, 255, 0.xx)
+     避免在各处硬编码 rgba(128, 128, 128, 0.xx)
+  */
+  --gray-alpha-03: rgba(128, 128, 128, 0.03);
+  --gray-alpha-05: rgba(128, 128, 128, 0.05);
+  --gray-alpha-06: rgba(128, 128, 128, 0.06);
+  --gray-alpha-08: rgba(128, 128, 128, 0.08);
+  --gray-alpha-10: rgba(128, 128, 128, 0.10);
+  --gray-alpha-12: rgba(128, 128, 128, 0.12);
+  --gray-alpha-15: rgba(128, 128, 128, 0.15);
+  --gray-alpha-20: rgba(128, 128, 128, 0.20);
+  --gray-alpha-35: rgba(128, 128, 128, 0.35);
+  --gray-alpha-55: rgba(128, 128, 128, 0.55);
+  --gray-alpha-65: rgba(128, 128, 128, 0.65);
+  --gray-alpha-70: rgba(128, 128, 128, 0.70);
+  --gray-alpha-75: rgba(128, 128, 128, 0.75);
+  --gray-alpha-85: rgba(128, 128, 128, 0.85);
+
+  /* --- Default system colors before JS loads (avoid flash on load) */
   @media (prefers-color-scheme: light) {
     :root {
       --bg-main: #ffffff;
@@ -59,4 +80,25 @@
       --text-color-main: #ffffff;
     }
   }
+}
+
+/* --- Neutral Gray Alpha Tokens (Dark Mode Override) ---
+   深色模式下将中性灰色切换为白色通道，保持相同的透明度感知
+*/
+:root[data-theme='dark'],
+.dark {
+  --gray-alpha-03: rgba(255, 255, 255, 0.03);
+  --gray-alpha-05: rgba(255, 255, 255, 0.05);
+  --gray-alpha-06: rgba(255, 255, 255, 0.06);
+  --gray-alpha-08: rgba(255, 255, 255, 0.08);
+  --gray-alpha-10: rgba(255, 255, 255, 0.10);
+  --gray-alpha-12: rgba(255, 255, 255, 0.12);
+  --gray-alpha-15: rgba(255, 255, 255, 0.15);
+  --gray-alpha-20: rgba(255, 255, 255, 0.20);
+  --gray-alpha-35: rgba(255, 255, 255, 0.35);
+  --gray-alpha-55: rgba(255, 255, 255, 0.55);
+  --gray-alpha-65: rgba(255, 255, 255, 0.65);
+  --gray-alpha-70: rgba(255, 255, 255, 0.70);
+  --gray-alpha-75: rgba(255, 255, 255, 0.75);
+  --gray-alpha-85: rgba(255, 255, 255, 0.85);
 }

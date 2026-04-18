@@ -43,7 +43,7 @@ export const WIDGET_GROUPS: Array<{
   codes: WidgetCodes[]
 }> = [
   {
-    labelKey: 'widgetGroup.time',
+    labelKey: 'widgetGroup.timeAndDate',
     codes: ['clockDigital', 'clockAnalog', 'clockFlip', 'clockNeon', 'date', 'calendar', 'yearProgress', 'countdown'],
   },
   {

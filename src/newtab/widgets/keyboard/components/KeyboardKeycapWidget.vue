@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { getFaviconFromUrl } from '@/logic/bookmark'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '~/newtab/widgets/keyboard/logic'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '@/newtab/widgets/keyboard/logic'
 import { localConfig } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'

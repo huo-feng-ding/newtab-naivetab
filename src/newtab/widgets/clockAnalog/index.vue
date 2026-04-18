@@ -4,6 +4,27 @@ import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/log
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const numberScaleFontFamily = computed(() => localConfig.clockAnalog.numberScaleFontFamily)
+const numberScaleFontSize = computed(() => `${localConfig.clockAnalog.numberScaleFontSize}px`)
+const numberScaleFontColor = computed(() => {
+  const colors = localConfig.clockAnalog.numberScaleFontColor
+  return Array.isArray(colors) ? colors[localState.value.currAppearanceCode] : colors
+})
+const hourDeg = computed(() => `${state.hourDeg}deg`)
+const minuteDeg = computed(() => `${state.minuteDeg}deg`)
+const secondDeg = computed(() => `${state.secondDeg}deg`)
+
+const clockAnalogStyle = computed(() => ({
+  '--nt-ca-custom-width': customWidth.value,
+  '--nt-ca-number-scale-font-family': numberScaleFontFamily.value,
+  '--nt-ca-number-scale-font-size': numberScaleFontSize.value,
+  '--nt-ca-number-scale-font-color': numberScaleFontColor.value,
+  '--nt-ca-hour-deg': hourDeg.value,
+  '--nt-ca-minute-deg': minuteDeg.value,
+  '--nt-ca-second-deg': secondDeg.value,
+}))
+
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 const currTheme = computed(() => localState.value.currAppearanceLabel)
@@ -149,22 +170,13 @@ addVisibilityTask(WIDGET_CODE, (hidden) => {
   }
 })
 
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const numberScaleFontFamily = computed(() => localConfig.clockAnalog.numberScaleFontFamily)
-const numberScaleFontSize = computed(() => `${localConfig.clockAnalog.numberScaleFontSize}px`)
-const numberScaleFontColor = computed(() => {
-  const colors = localConfig.clockAnalog.numberScaleFontColor
-  return Array.isArray(colors) ? colors[localState.value.currAppearanceCode] : colors
-})
-const hourDeg = computed(() => `${state.hourDeg}deg`)
-const minuteDeg = computed(() => `${state.minuteDeg}deg`)
-const secondDeg = computed(() => `${state.secondDeg}deg`)
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="clockAnalog__container"
+      :style="clockAnalogStyle"
     >
       <div
         v-show="state.isClockVisible"
@@ -220,15 +232,15 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
     text-align: center;
     .container__clock {
       position: relative;
-      height: v-bind(customWidth);
-      width: v-bind(customWidth);
+      height: var(--nt-ca-custom-width);
+      width: var(--nt-ca-custom-width);
       background-size: 100%;
       .clock__base {
         position: absolute;
         top: 0;
         left: 0;
-        height: v-bind(customWidth);
-        width: v-bind(customWidth);
+        height: var(--nt-ca-custom-width);
+        width: var(--nt-ca-custom-width);
         border-radius: 50%;
         background-size: 100%;
       }
@@ -236,13 +248,13 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
         transition: transform 0.3s cubic-bezier(0.4, 2.08, 0.55, 0.44);
       }
       .clock__hour {
-        transform: rotateZ(v-bind(hourDeg));
+        transform: rotateZ(var(--nt-ca-hour-deg));
       }
       .clock__minute {
-        transform: rotateZ(v-bind(minuteDeg));
+        transform: rotateZ(var(--nt-ca-minute-deg));
       }
       .clock__second {
-        transform: rotateZ(v-bind(secondDeg));
+        transform: rotateZ(var(--nt-ca-second-deg));
       }
 
       .clock__number-scale {
@@ -259,9 +271,9 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
           span {
             display: block;
             text-align: center;
-            font-family: v-bind(numberScaleFontFamily);
-            font-size: v-bind(numberScaleFontSize);
-            color: v-bind(numberScaleFontColor);
+            font-family: var(--nt-ca-number-scale-font-family);
+            font-size: var(--nt-ca-number-scale-font-size);
+            color: var(--nt-ca-number-scale-font-color);
             font-weight: 600;
             line-height: 1;
             min-width: 1.5em;

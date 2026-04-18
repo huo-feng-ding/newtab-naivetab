@@ -3,10 +3,20 @@ import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { gaProxy } from '@/logic/gtag'
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
-import { isDragMode, toggleIsDragMode, isDraftDrawerVisible, handleToggleIsDraftDrawerVisible, moveState } from '@/logic/moveable'
-import { getStyleConst, customPrimaryColor, localConfig, globalState } from '@/logic/store'
+import { isDragMode, toggleIsDragMode, isDraftDrawerVisible, handleToggleIsDraftDrawerVisible, moveState, animateDeleteWidget } from '@/logic/moveable'
+import { customPrimaryColor, localConfig, localState, globalState } from '@/logic/store'
+import { styleConst } from '@/styles/const'
 import { widgetsRegistry } from '@/newtab/widgets/registry'
 import { WIDGET_GROUPS } from '@/newtab/widgets/codes'
+
+const draftDrawerStyle = computed(() => {
+  const c = styleConst.value
+  const ac = localState.value.currAppearanceCode
+  return {
+    '--nt-bg-moveable-tool-drawer': c.bgMoveableToolDrawer[ac] || c.bgMoveableToolDrawer[0],
+    '--nt-draft-custom-primary-color': customPrimaryColor.value,
+  }
+})
 
 const state = reactive({
   isCursorInDraftDrawer: false,
@@ -122,8 +132,10 @@ onUnmounted(() => {
 })
 
 const onDeleteComponent = () => {
-  localConfig[moveState.currDragTarget.code].enabled = false
-  gaProxy('delete', ['widget', moveState.currDragTarget.code], {
+  const code = moveState.currDragTarget.code
+  if (!code) return
+  animateDeleteWidget(code as WidgetCodes)
+  gaProxy('delete', ['widget', code], {
     enabled: false,
   })
 }
@@ -141,15 +153,12 @@ const handlerDeleteMouseUp = () => {
   moveState.isDeleteHover = false
 }
 
-const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
-const bgMoveableWidgetDelete = getStyleConst('bgMoveableWidgetDelete')
-const bgMoveableToolDrawer = getStyleConst('bgMoveableToolDrawer')
-const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
 </script>
 
 <template>
   <div
     id="draft-tool"
+    :style="draftDrawerStyle"
     :class="{
       'draft-tool--active': isDragMode && isDraftDrawerVisible,
       'draft-tool--shadow': isDragMode,
@@ -258,12 +267,12 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
 #draft-tool {
   z-index: 20;
   position: fixed;
-  bottom: -265px;
+  bottom: -300px;
   left: 25vw;
   width: 50vw;
-  height: 265px;
+  height: 280px;
   color: #fff;
-  background-color: v-bind(bgMoveableToolDrawer);
+  background-color: var(--nt-bg-moveable-tool-drawer);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   transition: all 300ms cubic-bezier(0.34, 1.06, 0.64, 1);
@@ -300,7 +309,7 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
       align-items: center;
       width: 5vw;
       height: 26px;
-      background-color: v-bind(bgMoveableToolDrawer);
+      background-color: var(--nt-bg-moveable-tool-drawer);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-top-left-radius: 8px;
@@ -334,7 +343,7 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
       }
     }
     .drawer__switch:hover {
-      color: v-bind(customPrimaryColor);
+      color: var(--nt-draft-custom-primary-color);
       .switch__icon {
         opacity: 1;
       }
@@ -509,9 +518,11 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
     height: 200px;
     cursor: pointer;
     background: radial-gradient(circle at 30% 30%, rgba(255, 100, 100, 1), rgba(220, 38, 38, 1));
-    box-shadow: -4px 4px 20px rgba(220, 38, 38, 0.5);
+    box-shadow:
+      -4px 4px 20px rgba(220, 38, 38, 0.5),
+      0 0 30px rgba(255, 80, 80, 0.15);
     transition: all 300ms cubic-bezier(0.34, 1.06, 0.64, 1);
-    transform: rotate(45deg);
+    transform: rotate(45deg) scale(1);
     .delete__icon {
       position: absolute;
       bottom: 20px;
@@ -520,17 +531,28 @@ const borderMoveableToolItem = getStyleConst('borderMoveableToolItem')
       color: #fff;
       transform: rotate(-45deg);
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-      transition: transform 200ms ease, filter 200ms ease;
+      transition: transform 250ms cubic-bezier(0.34, 1.06, 0.64, 1), filter 250ms ease;
     }
   }
   .tool__delete--active {
     top: -100px;
     right: -100px;
+    box-shadow:
+      -4px 4px 30px rgba(220, 38, 38, 0.7),
+      0 0 50px rgba(255, 80, 80, 0.25);
   }
   .tool__delete:hover {
+    transform: rotate(45deg) scale(1.12);
+    box-shadow:
+      -6px 6px 40px rgba(220, 38, 38, 0.8),
+      0 0 60px rgba(255, 80, 80, 0.35);
     .delete__icon {
-      filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.4));
+      filter: drop-shadow(0 2px 12px rgba(255, 255, 255, 0.5));
+      transform: rotate(-45deg) scale(1.15);
     }
+  }
+  .tool__delete--active:hover {
+    transform: rotate(45deg) scale(1.12);
   }
 }
 </style>

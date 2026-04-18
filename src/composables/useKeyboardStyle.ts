@@ -12,7 +12,7 @@
  * 这样两侧的视觉计算公式完全一致，改一处即可同步更新。
  */
 
-import { TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP } from '@/logic/constants/index'
+import { TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP } from '@/logic/constants/app'
 import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, SPACE_KEYCODE_LIST } from '@/logic/constants/keyboard'
 import { currKeyboardConfig } from '@/logic/keyboard'
 import { localConfig, getStyleField, customPrimaryColor } from '@/logic/store'
@@ -268,22 +268,38 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   // 汇总所有 keycap 相关 CSS 变量，通过 :style 注入到 KeyboardKeycapDisplay 根节点
 
   const keycapCssVars = computed(() => ({
-    '--keycap-main-font-color': mainFontColor.value,
-    '--keycap-main-bg-color': mainBgColor.value,
-    '--keycap-background-blur': keycapBackgroundBlurPx.value,
-    '--keycap-border-radius': borderRadiusCss.value,
-    '--custom-primary-color': customPrimaryColor.value,
-    '--keycap-key-font-family': keycapKeyFontFamily.value,
-    '--keycap-key-font-size': keycapKeyFontSizeCss.value,
-    '--keycap-bookmark-font-size': keycapBookmarkFontSizeCss.value,
-    '--keycap-favicon-size': faviconSize.value,
-    '--keycap-stage-flat-padding': keycapInnerPaddingCss.value,
-    '--keycap-gmk-top-border': gmkTopBorderCss.value,
-    '--keycap-gmk-h-border': gmkHBorderCss.value,
-    '--keycap-gmk-bot-border': gmkBotBorderCss.value,
-    '--keycap-dsa-border': dsaBorderCss.value,
-    '--keycap-border-width': keycapBorderWidthCss.value,
-    '--keycap-border-color': keycapBorderColor.value,
+    '--nt-kb-main-font-color': mainFontColor.value,
+    '--nt-kb-main-bg-color': mainBgColor.value,
+    '--nt-kb-background-blur': keycapBackgroundBlurPx.value,
+    '--nt-kb-border-radius': borderRadiusCss.value,
+    '--nt-kb-primary-color': customPrimaryColor.value,
+    '--nt-kb-key-font-family': keycapKeyFontFamily.value,
+    '--nt-kb-key-font-size': keycapKeyFontSizeCss.value,
+    '--nt-kb-bookmark-font-size': keycapBookmarkFontSizeCss.value,
+    '--nt-kb-favicon-size': faviconSize.value,
+    '--nt-kb-stage-flat-padding': keycapInnerPaddingCss.value,
+    '--nt-kb-gmk-top-border': gmkTopBorderCss.value,
+    '--nt-kb-gmk-h-border': gmkHBorderCss.value,
+    '--nt-kb-gmk-bot-border': gmkBotBorderCss.value,
+    '--nt-kb-dsa-border': dsaBorderCss.value,
+    '--nt-kb-border-width': keycapBorderWidthCss.value,
+    '--nt-kb-border-color': keycapBorderColor.value,
+  }))
+
+  const layoutCssVars = computed(() => ({
+    '--nt-kb-bookmark-font-family': keycapBookmarkFontFamily.value,
+    '--nt-kb-keycap-padding': keycapPaddingCss.value,
+    '--nt-kb-keycap-height': keycapBaseSizeCss.value,
+    '--nt-kb-plate-padding': platePaddingCss.value,
+    '--nt-kb-plate-color': plateColor.value,
+    '--nt-kb-plate-radius': plateBorderRadiusPx.value,
+    '--nt-kb-plate-blur': plateBackgroundBlurPx.value,
+    '--nt-kb-shell-v-padding': shellVPaddingCss.value,
+    '--nt-kb-shell-h-padding': shellHPaddingCss.value,
+    '--nt-kb-shell-radius': shellBorderRadiusPx.value,
+    '--nt-kb-shell-color': shellColor.value,
+    '--nt-kb-shell-blur': shellBackgroundBlurPx.value,
+    '--nt-kb-shell-shadow': shellShadowColor.value,
   }))
 
   // ── 返回值 ────────────────────────────────────────────────────────────────
@@ -291,27 +307,11 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     // 基准
     base,
 
-    // Shell 样式
-    shellColor,
-    shellShadowColor,
-    shellBorderRadiusPx,
-    shellBackgroundBlurPx,
-    shellVPaddingCss,
-    shellHPaddingCss,
-
-    // Plate 样式
-    plateColor,
-    plateBorderRadiusPx,
-    plateBackgroundBlurPx,
-    platePaddingCss,
-
-    // Keycap 尺寸
-    keycapBaseSizeCss,
-    keycapPaddingCss,
-    keycapBookmarkFontFamily,
-
     // CSS 变量集合（注入 KeyboardKeycapDisplay）
     keycapCssVars,
+
+    // CSS 变量集合（注入 KeyboardLayout）
+    layoutCssVars,
 
     // 配置读取
     getCustomLabel,
