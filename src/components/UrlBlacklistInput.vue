@@ -20,7 +20,7 @@ const model = defineModel<string[]>({ default: [] })
 const MAX_TAG_COUNT = 20
 const MAX_TAG_LENGTH = 100
 
-const tipsContent = window.$t('general.urlBlacklistTips')
+const tipsContent = window.$t('generalSetting.urlBlacklistTips')
 
 /**
  * 清理域名：去掉协议前缀、路径、参数、锚点，只保留域名（+端口），统一转小写
@@ -54,7 +54,7 @@ const handleUpdate = (value: string[]) => {
       :check-str="
         (tag: string) => {
           if (tag.length > MAX_TAG_LENGTH) {
-            return $t('general.urlBlacklistTooLong').replace('__max__', String(MAX_TAG_LENGTH))
+            return $t('generalSetting.urlBlacklistTooLong').replace('__max__', String(MAX_TAG_LENGTH))
           }
           return ''
         }

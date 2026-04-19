@@ -157,7 +157,7 @@ export const COMMAND_SHORTCUT_CODE = 'commandShortcut'
 export const PRESERVE_FIELDS = ['isEnabled', 'modifiers', 'keymap']
 
 export const COMMAND_SHORTCUT_CONFIG = {
-  isEnabled: false,
+  isEnabled: true,
   shortcutInInputElement: true,
   urlBlacklist: [] as string[],
   modifiers: ['shift', 'alt'] as TShortcutModifier[],

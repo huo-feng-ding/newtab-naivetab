@@ -49,7 +49,7 @@ const onOpenPicker = async () => {
       await ensureBookmarkRoot()
       state.showPicker = true
     } else {
-      window.$message.error(window.$t('permission.bookmark') as string)
+      window.$message.error(window.$t('browserPermission.bookmark') as string)
     }
   }
 }
@@ -108,7 +108,7 @@ const onResetFolder = () => {
               class="setting__item-ele setting__item-ml action-btn action-btn--default"
               @click="onResetFolder"
             >
-              <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{ $t('general.resetSettingValue') }}
+              <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{ $t('generalSetting.resetSettingValue') }}
             </NButton>
           </div>
         </div>
@@ -127,7 +127,7 @@ const onResetFolder = () => {
 
       <SwitchField
         v-model="localConfig.bookmarkFolder.isNewTabOpen"
-        :label="$t('general.newTabOpen')"
+        :label="$t('generalSetting.newTabOpen')"
       />
 
       <SwitchField

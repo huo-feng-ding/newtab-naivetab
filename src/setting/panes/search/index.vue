@@ -121,7 +121,7 @@ const searchSelectRenderLabel = (option: typeof SEARCH_ENGINE_LIST[0]) => {
       </NFormItem>
       <SwitchField
         v-model="localConfig.search.isNewTabOpen"
-        :label="$t('general.newTabOpen')"
+        :label="$t('generalSetting.newTabOpen')"
       />
       <SwitchField
         v-model="localConfig.search.iconEnabled"

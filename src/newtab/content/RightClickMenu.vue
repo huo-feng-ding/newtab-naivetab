@@ -113,6 +113,12 @@ const menuActionMap: Record<string, () => void | Promise<void>> = {
     await downloadCurrentWallpaper()
     gaProxy('click', ['rightMenu', 'downloadWallpaper'])
   },
+  changeWallpaper: () => {
+    globalState.isBackgroundDrawerAutoOpen = true
+    switchSettingDrawerVisible(true)
+    globalState.currSettingTabCode = 'general'
+    gaProxy('click', ['rightMenu', 'changeWallpaper'])
+  },
   aboutSponsor: () => {
     openSettingPane('aboutSponsor')
   },
@@ -257,22 +263,39 @@ onUnmounted(() => {
           </template>
         </div>
 
-        <!-- 底部图标行：下载壁纸 & 买杯咖啡 & 关于 -->
+        <!-- 底部图标行：更换壁纸 & 下载壁纸 | 买杯咖啡 & 关于 -->
         <div class="ctx-menu__footer">
-          <n-tooltip
-            v-if="isDownloadVisible"
-            trigger="hover"
-            placement="bottom"
-          >
-            <template #trigger>
-              <Icon
-                :icon="ICONS.downloadFill"
-                class="ctx-menu__footer-icon"
-                @click.stop="onSelectMenu('downloadWallpaper')"
-              />
-            </template>
-            {{ $t('rightMenu.downloadWallpaper') }}
-          </n-tooltip>
+          <template v-if="isDownloadVisible">
+            <n-tooltip
+              trigger="hover"
+              placement="bottom"
+            >
+              <template #trigger>
+                <Icon
+                  :icon="ICONS.imageSquare"
+                  class="ctx-menu__footer-icon"
+                  @click.stop="onSelectMenu('changeWallpaper')"
+                />
+              </template>
+              {{ $t('rightMenu.changeWallpaper') }}
+            </n-tooltip>
+            <n-tooltip
+              trigger="hover"
+              placement="bottom"
+            >
+              <template #trigger>
+                <Icon
+                  :icon="ICONS.downloadFill"
+                  class="ctx-menu__footer-icon"
+                  @click.stop="onSelectMenu('downloadWallpaper')"
+                />
+              </template>
+              {{ $t('rightMenu.downloadWallpaper') }}
+            </n-tooltip>
+
+            <div class="ctx-menu__footer-divider" />
+          </template>
+
           <n-tooltip
             trigger="hover"
             placement="bottom"
@@ -517,6 +540,17 @@ onUnmounted(() => {
     background var(--transition-fast),
     transform 0.1s ease,
     box-shadow var(--transition-fast);
+}
+
+.ctx-menu__footer-divider {
+  width: 1px;
+  height: 16px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--nt-cm-divider) 50%,
+    transparent 100%
+  );
 }
 
 .ctx-menu__footer-icon:hover {

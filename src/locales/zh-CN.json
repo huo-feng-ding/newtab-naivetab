@@ -41,7 +41,7 @@
     "text": "文本",
     "font": "字体",
     "fontSize": "字体大小",
-    "letterSpacing": "字体间距",
+    "letterSpacing": "字间距",
     "color": "颜色",
     "primaryColor": "主题色",
     "fontColor": "字体色",
@@ -57,6 +57,8 @@
     "drawerSite": "侧边栏位置",
     "local": "本地",
     "network": "网络",
+    "loadMore": "加载更多",
+    "loaded": "已加载全部",
     "uhd": "UHD分辨率",
     "bing": "Bing",
     "pexels": "Pexels",
@@ -97,22 +99,16 @@
     "login": "登录",
     "behavior": "配置项"
   },
-  "form": {
-    "applyToAppearance": "应用于外观",
-    "photoOfTheDay": "Bing每日壁纸"
-  },
-  "permission": {
+  "browserPermission": {
     "bookmark": "需要浏览器权限访问您的书签"
-  },
-  "popup": {
-    "browserBookmark": "浏览器书签",
-    "commitBtnTips": "拖拽书签调整顺序"
   },
   "prompts": {
     "linkTips": "点击(?)图标，访问以下链接",
     "pleaseWait": "执行中，请稍等",
     "imageTooLarge": "图片体积过大",
-    "favoriteLimt": "收藏已达上限",
+    "imageLoadFailed": "加载失败",
+    "noImageAvailable": "暂无图片",
+    "favoriteLimit": "收藏已达上限",
     "widgetDrawerTips": "将组件拖到工作区",
     "breakingChangeNotice": "请重点关注下方日志中标记为 `!` 的变更"
   },
@@ -123,7 +119,8 @@
     "fullscreen": "全屏模式",
     "focusMode": "专注模式",
     "editFocusMode": "编辑专注模式",
-    "downloadWallpaper": "下载壁纸"
+    "downloadWallpaper": "下载壁纸",
+    "changeWallpaper": "更换壁纸"
   },
   "sponsor": {
     "title": "🔥「续命模式激活！今日代码含 ☕️ 量 200%」",
@@ -142,7 +139,6 @@
     "prevStep": "上一步",
     "nextStep": "下一步",
     "doneStep": "完成",
-    "tipsTitle": "提示",
     "stepTitle1": "添加组件 🧩",
     "stepDescription1": "这是底部组件库，引导结束后可尝试拖拽组件到页面任意位置。点击「下一步」继续了解",
     "stepTitle2": "删除 & 退出编辑 🗑️",
@@ -168,7 +164,6 @@
     "bookmark": "书签",
     "keyboard": "书签键盘",
     "bookmarkFolder": "文件夹书签",
-    "bookmarkConfig": "书签配置",
     "clockDate": "时钟/日期",
     "clock": "时钟",
     "clockDigital": "数字时钟",
@@ -187,10 +182,8 @@
     "aboutSponsor": "买杯咖啡",
     "openInNewTab": "全屏设置页"
   },
-  "general": {
+  "generalSetting": {
     "total": "总计",
-    "globalStyle": "全局样式",
-    "generalLabel": "通用",
     "pageTitle": "页面标题",
     "followSystem": "跟随系统",
     "defaultFocus": "载入时聚焦",
@@ -221,7 +214,6 @@
     "downloadFailed": "壁纸下载失败，请重试",
     "resetSettingLabel": "重置设置",
     "resetSettingValue": "重置",
-    "reset": "重置",
     "resetAllSettingValue": "重置全部设置",
     "resetSettingTips": "遇到无法解决的问题可尝试重置设置，注意备份当前配置",
     "quickReset": "部分重置",
@@ -232,14 +224,15 @@
     "overwriteUrlConfirm": "当前按键已有 URL，确认覆盖为当前标签页地址？",
     "language": "主语言",
     "timeLanguage": "日期语言",
-    "saveCurrendImage": "保存当前背景",
     "localBackgroundTips": "本地背景图不会进行云同步，仅在当前设备生效",
     "focusModeTips": "在专注模式下，仅显示你选择的组件",
     "parallax": "背景视差效果",
     "parallaxTips": "鼠标移动时背景会轻微跟随移动，增加动态层次感",
     "parallaxIntensity": "视差强度",
     "urlBlacklistTips": "在这些域名下不触发快捷键。输入内容会自动清理协议前缀、路径和大小写。\n\n支持的域名格式：\n• google.com — 匹配 google.com 及所有子域名（如 docs.google.com）\n• *.google.com — 仅匹配子域名，不匹配 google.com 本身\n\n注意：不支持端口号；特殊页面（chrome:// 等）始终不触发。",
-    "urlBlacklistTooLong": "域名不能超过 __max__ 个字符"
+    "urlBlacklistTooLong": "域名不能超过 __max__ 个字符",
+    "photoOfTheDay": "Bing每日壁纸",
+    "browserBookmark": "浏览器书签"
   },
   "clock": {
     "showColon": "显示冒号",
@@ -273,7 +266,6 @@
     "defaultDisplayFolderTitle": "默认展开文件夹",
     "rootDirectory": "根目录",
     "listenBackgroundKeystrokes": "全局快捷键",
-    "configBookmark": "配置书签",
     "keyboard": "键盘",
     "presetTheme": "预设主题",
     "shell": "外壳",
@@ -283,13 +275,8 @@
     "keycap": "按键",
     "keycapVisualType": "键帽类型",
     "tactileBumps": "触摸点",
-    "customKeys": "自定义快捷键",
-    "keyLabel": "按键",
     "urlLabel": "地址",
     "nameLabel": "名称",
-    "namePlaceholder": "可选",
-    "shortcutLabel": "快捷键",
-    "shortcutTip": "跟随全局修饰键配置",
     "themeGroup": {
       "classic": "经典灵感",
       "atmosphere": "自然氛围",
@@ -305,24 +292,18 @@
     "globalModifier": "全局修饰键",
     "modifierConflict": "此修饰键与指令键盘相同，可能导致冲突",
     "urlBlacklist": "域名黑名单",
-    "globalModifierTips": "按下组合键（如 __alt__）+ 键盘按键即可触发全局快捷键，特殊页面（chrome:// 等）不支持。",
+    "globalModifierTips": "按下修饰键 + 字母键即可触发全局快捷键（如修饰键__alt__ + A）。\n特殊页面（chrome:// 等）不触发。",
     "recordModifier": "按下修饰键录制",
     "requireModifier": "请至少按下一个修饰键",
-    "noModifier": "未设置修饰键",
-    "notSupported": "不支持全局快捷键",
-    "addShortcut": "添加快捷方式",
-    "noShortcutBound": "未绑定快捷键",
     "shortcutNote": "快捷键在输入框聚焦时自动禁用。特殊页面（chrome:// 等）不支持。",
     "shortcutInInputElement": "输入框中触发",
     "shortcutInInputElementNote": "开启后，在输入框/文本域中打字时也会触发已绑定的书签快捷键，请避免设置与常用打字快捷键冲突的组合",
     "recording": "正在录制...",
-    "shortcutConflict": "该快捷键已被占用",
     "selectKeycapTip": "点击键盘按键进行编辑"
   },
   "bookmarkFolder": {
     "defaultDisplayFolderTitle": "默认展开文件夹",
     "rootDirectory": "根目录",
-    "layoutInline": "布局（列 × 行）",
     "layoutColumns": "布局列数",
     "hideIcon": "隐藏图标",
     "hideName": "隐藏名称",
@@ -339,49 +320,49 @@
     "suggestion": "搜索建议"
   },
   "calendar": {
-    "january": "一月",
-    "february": "二月",
-    "march": "三月",
-    "april": "四月",
-    "may": "五月",
-    "june": "六月",
-    "july": "七月",
-    "august": "八月",
-    "september": "九月",
-    "october": "十月",
-    "november": "十一月",
-    "december": "十二月",
-    "monday": "周一",
-    "tuesday": "周二",
-    "wednesday": "周三",
-    "thursday": "周四",
-    "friday": "周五",
-    "saturday": "周六",
-    "sunday": "周日",
+    "weekBeginsOn": "一周开始于",
+    "festivalCountdown": "节日倒数",
+    "day": "日期",
+    "desc": "描述",
+    "holiday": "节日",
     "today": "今",
     "work": "班",
     "rest": "休",
     "todayDesc": "今日",
     "restDesc": "休息日",
     "workDesc": "工作日",
-    "weekBeginsOn": "一周开始于",
-    "festivalCountdown": "节日倒数",
-    "day": "日期",
-    "desc": "描述",
-    "holiday": "节日"
+    "month": {
+      "january": "一月",
+      "february": "二月",
+      "march": "三月",
+      "april": "四月",
+      "may": "五月",
+      "june": "六月",
+      "july": "七月",
+      "august": "八月",
+      "september": "九月",
+      "october": "十月",
+      "november": "十一月",
+      "december": "十二月"
+    },
+    "weekday": {
+      "monday": "周一",
+      "tuesday": "周二",
+      "wednesday": "周三",
+      "thursday": "周四",
+      "friday": "周五",
+      "saturday": "周六",
+      "sunday": "周日"
+    }
   },
   "yearProgress": {
     "isRealtime": "实时计算",
     "percentage": "百分比",
     "decimal": "保留小数位",
-    "block": "砖块"
+    "block": "进度砖块"
   },
   "weather": {
-    "warning": "天气预警",
     "city": "城市",
-    "temperatureUnit": "温度单位",
-    "speedUnit": "速度单位",
-    "forecast": "未来预报",
     "icon": "天气图标",
     "feelsLike": "体感",
     "windScaleUnit": "级"
@@ -397,11 +378,10 @@
     "zhihu": "知乎",
     "weibo": "微博",
     "kr36": "36氪",
-    "bilibili": "B站",
     "v2ex": "V2EX"
   },
   "countdown": {
-    "clock": "时钟",
+    "clockStyle": "时钟样式",
     "defaultDuration": "默认时长",
     "showHours": "显示小时位",
     "strokeWidth": "进度环宽度",
@@ -409,27 +389,12 @@
     "trackColor": "轨道颜色",
     "notifyTitle": "倒计时结束",
     "notifyBody": "计时已完成",
-    "label": "标签文字",
-    "labelFontSize": "标签字体大小",
-    "labelFontColor": "标签颜色"
+    "label": "标签文字"
   },
   "commandShortcut": {
     "enabled": "启用指令键盘",
-    "modifier": "修饰键",
-    "modifierTip": "按下修饰键 + 按键来触发指令",
     "modifierConflict": "此修饰键与书签快捷键相同，可能导致冲突",
-    "shortcutInInputElement": "输入框中触发",
-    "urlBlacklist": "域名黑名单",
-    "binding": "按键绑定",
-    "currentBindings": "当前绑定",
-    "selectCommand": "选择指令",
-    "noBindings": "暂无绑定",
-    "key": "按键",
-    "command": "指令",
-    "actions": "操作",
-    "pressKeyHint": "按下要绑定的按键",
     "confirmDelete": "确定要删除「__key__」的指令绑定吗？",
-    "alreadyBound": "__key__ 已有绑定",
     "bindingTip": "点击按键为其绑定或修改指令",
     "toast": {
       "copyPageUrl": "已复制-页面URL",

@@ -3,6 +3,7 @@ import { FAVORITE_IMAGE_MAX_COUNT } from '@/logic/constants/app'
 import { createTab, downloadImageByUrl } from '@/logic/util'
 import { customPrimaryColor, localConfig, localState, colorMixWithAlpha } from '@/logic/store'
 import { isImageLoading, getImageUrlFromName } from '@/logic/image'
+import { IMAGE_NETWORK_SOURCE } from '@/logic/constants/image'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 
@@ -10,7 +11,7 @@ const props = defineProps({
   data: {
     type: Object as () => {
       url?: string // 存在url时优先使用url，忽略name
-      networkSourceType?: 1 | 2 // 1 Bing, 2 Pexels
+      networkSourceType?: (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE] // IMAGE_NETWORK_SOURCE.BING | IMAGE_NETWORK_SOURCE.PEXELS
       name?: string
       desc?: string
     },
@@ -35,13 +36,21 @@ const isHasImage = computed(() => (props.data.url && props.data.url.length !== 0
 const isToolbarVisible = computed(() => props.data.name && props.data.name.length !== 0)
 
 const currImageUrl = computed(() => {
-  let url = ''
-  if (props.data.url && props.data.url.length !== 0) {
-    url = props.data.url
-  } else if (props.data.networkSourceType && props.data.name) {
-    url = getImageUrlFromName(props.data.networkSourceType, props.data.name)
+  if (props.data.url?.length) return props.data.url
+  if (props.data.networkSourceType && props.data.name) {
+    return getImageUrlFromName(props.data.networkSourceType, props.data.name)
   }
-  return url
+  return ''
+})
+
+const isImageError = ref(false)
+
+const onImageError = () => {
+  isImageError.value = true
+}
+
+watch(currImageUrl, () => {
+  isImageError.value = false
 })
 
 const isCurrSelectedImage = computed(() => {
@@ -66,13 +75,11 @@ const onSelectImage = () => {
 }
 
 const getOriginalImageUrl = () => {
-  let url = ''
-  if (props.data.url) {
-    url = props.data.url
-  } else if (props.data.networkSourceType && props.data.name) {
-    url = getImageUrlFromName(props.data.networkSourceType, props.data.name, 'high')
+  if (props.data.url?.length) return props.data.url
+  if (props.data.networkSourceType && props.data.name) {
+    return getImageUrlFromName(props.data.networkSourceType, props.data.name, 'high')
   }
-  return url
+  return ''
 }
 
 const onViewImage = () => {
@@ -82,17 +89,19 @@ const onViewImage = () => {
 
 const onSaveImage = () => {
   const url = getOriginalImageUrl()
+  if (!url) return
   downloadImageByUrl(url, props.data.name)
 }
 
+const favoriteImageNameSet = computed(() => new Set(localConfig.general.favoriteImageList.map((item) => item.name)))
+
 const isFavoriteIconVisible = computed(() => {
-  const favoriteBackgroundNameList = localConfig.general.favoriteImageList.map((item) => item.name)
-  return !favoriteBackgroundNameList.includes(props.data.name || '')
+  return !favoriteImageNameSet.value.has(props.data.name || '')
 })
 
 const onFavoriteImage = () => {
   if (localConfig.general.favoriteImageList.length >= FAVORITE_IMAGE_MAX_COUNT) {
-    window.$message.error(window.$t('prompts.favoriteLimt'))
+    window.$message.error(window.$t('prompts.favoriteLimit'))
     return
   }
   if (!props.data.networkSourceType) {
@@ -108,6 +117,7 @@ const onFavoriteImage = () => {
 
 const onUnFavoriteImage = () => {
   const index = localConfig.general.favoriteImageList.findIndex((item) => item.name === props.data.name)
+  if (index === -1) return
   localConfig.general.favoriteImageList.splice(index, 1)
 }
 
@@ -127,11 +137,11 @@ const cssVars = computed(() => ({
   >
     <NSpin :show="isCurrSelectedImage && isImageLoading">
       <div
-        v-if="!isHasImage"
+        v-if="!isHasImage || isImageError"
         class="image__empty"
       >
         <Icon :icon="ICONS.imageSquare" />
-        <span class="image__empty-text">暂无图片</span>
+        <span class="image__empty-text">{{ isImageError ? $t('prompts.imageLoadFailed') : $t('prompts.noImageAvailable') }}</span>
       </div>
 
       <!-- 懒加载的img不支持reactive变量 -->
@@ -139,12 +149,14 @@ const cssVars = computed(() => ({
         v-else-if="lazy"
         v-lazy="currImageUrl"
         alt=""
+        @error="onImageError"
         @click="onSelectImage()"
       />
       <img
         v-else
         :src="currImageUrl"
         alt=""
+        @error="onImageError"
         @click="onSelectImage()"
       />
     </NSpin>

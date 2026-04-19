@@ -152,14 +152,14 @@ const handleCommandSelect = (cmd: TCommandName) => {
 
       <SwitchField
         v-model="localConfig.commandShortcut.shortcutInInputElement"
-        :label="$t('commandShortcut.shortcutInInputElement')"
+        :label="$t('keyboard.shortcutInInputElement')"
       />
 
-      <NFormItem :label="$t('commandShortcut.urlBlacklist')">
+      <NFormItem :label="$t('keyboard.urlBlacklist')">
         <UrlBlacklistInput v-model="localConfig.commandShortcut.urlBlacklist" />
       </NFormItem>
 
-      <NFormItem :label="$t('commandShortcut.modifier')">
+      <NFormItem :label="$t('keyboard.globalModifier')">
         <GlobalShortcutRecorder v-model="localConfig.commandShortcut.modifiers" />
       </NFormItem>
 

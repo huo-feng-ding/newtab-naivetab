@@ -52,6 +52,7 @@ export const globalState = reactive({
   isInputFocused: false,
   currSettingTabCode: 'general',
   currSettingAnchor: '',
+  isBackgroundDrawerAutoOpen: false,
 })
 
 /**

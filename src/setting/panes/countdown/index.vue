@@ -124,7 +124,7 @@ const durationSeconds = computed({
         v-model:font-family="localConfig.countdown.clockFontFamily"
         v-model:font-color="localConfig.countdown.clockFontColor"
         v-model:font-size="localConfig.countdown.clockFontSize"
-        :label="`${$t('countdown.clock')}${$t('common.font')}`"
+        :label="`${$t('countdown.clockStyle')}${$t('common.font')}`"
       />
       <!-- 标签字体 -->
       <FontField

@@ -1,13 +1,44 @@
 <script setup lang="ts">
+import { RecycleScroller } from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { LOCAL_BACKGROUND_IMAGE_MAX_SIZE_M, SECOND_MODAL_WIDTH } from '@/logic/constants/app'
 import { databaseStore } from '@/logic/database'
 import { compressedImageUrlToBase64 } from '@/logic/util'
 import { localConfig, localState } from '@/logic/store'
-import { previewImageListMap, imageState, isImageLoading, isImageListLoading, updateBingImages, updatePexelsImages } from '@/logic/image'
+import { BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
+import { previewImageListMap, imageLocalState, imageState, isImageLoading, isImageListLoading, updateBingImages, updatePexelsImages } from '@/logic/image'
+import { getPexelsImagesData } from '@/api/image'
+import { log } from '@/logic/util'
 import Tips from '@/components/Tips.vue'
 import BackgroundDrawerImageElement from './BackgroundDrawerImageElement.vue'
+
+type ImageRow = {
+  items: Array<TImage.BaseImageItem>
+  key: string
+  isLoadMore?: boolean
+}
+
+const chunkArray = (arr: Array<TImage.BaseImageItem>, size: number, appendLoadMore = false): Array<ImageRow> => {
+  const result: Array<ImageRow> = []
+  for (let i = 0; i < arr.length; i += size) {
+    result.push({ items: arr.slice(i, i + size), key: `row-${i}` })
+  }
+  if (appendLoadMore) {
+    result.push({ items: [], key: 'load-more', isLoadMore: true })
+  }
+  return result
+}
+
+const chunkedPreviewMap = computed((): Record<string, Array<ImageRow>> => {
+  const map: Record<string, Array<ImageRow>> = {}
+  for (const source of Object.keys(previewImageListMap.value)) {
+    const shouldAppendLoadMore = source === 'pexels'
+    map[source] = chunkArray(previewImageListMap.value[source], 3, shouldAppendLoadMore)
+  }
+  return map
+})
 
 const props = defineProps({
   show: {
@@ -23,9 +54,9 @@ const onCloseModal = () => {
 }
 
 const backgroundImageSourceList = computed(() => [
-  { label: window.$t('common.local'), value: 0 },
-  { label: window.$t('common.network'), value: 1 },
-  { label: window.$t('form.photoOfTheDay'), value: 2 },
+  { label: window.$t('common.local'), value: BACKGROUND_IMAGE_SOURCE.LOCAL },
+  { label: window.$t('common.network'), value: BACKGROUND_IMAGE_SOURCE.NETWORK },
+  { label: window.$t('generalSetting.photoOfTheDay'), value: BACKGROUND_IMAGE_SOURCE.BING_PHOTO },
 ])
 
 watch(
@@ -58,6 +89,10 @@ const onBackgroundImageFileChange = async (e: Event) => {
     window.$message.error(window.$t('prompts.imageTooLarge'))
     return
   }
+  // 释放旧的 ObjectURL
+  if (imageState.currBackgroundImageFileObjectURL) {
+    URL.revokeObjectURL(imageState.currBackgroundImageFileObjectURL)
+  }
   const imageUrl = URL.createObjectURL(file)
   imageState.currBackgroundImageFileName = file.name
   imageState.currBackgroundImageFileObjectURL = imageUrl
@@ -88,8 +123,14 @@ const onBackgroundImageFileChange = async (e: Event) => {
 
 // 确保协议为https，否则会导致报错 Tainted canvases may not be exported
 const handleCustomUrlStartWithHttps = () => {
-  const httpsUrl = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode].replace('http://', 'https://')
-  localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode] = httpsUrl
+  let url = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode]
+  // 去掉可能的协议前缀后补 https
+  url = url.replace(/^https?:\/\//, 'https://')
+  // 没有协议前缀时自动补 https://
+  if (url.length > 0 && !url.startsWith('https://') && !url.startsWith('http://')) {
+    url = 'https://' + url
+  }
+  localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode] = url
 }
 
 const handleCustomUrlUpdate = () => {
@@ -101,6 +142,29 @@ const handleBackgroundImageCustomUrlBlur = () => {
   // 当只单独设置了浅色or深色外观的背景时，默认同步另一外观为相同的背景
   if (localConfig.general.backgroundImageCustomUrls[+!localState.value.currAppearanceCode].length === 0) {
     localConfig.general.backgroundImageCustomUrls[+!localState.value.currAppearanceCode] = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode]
+  }
+}
+
+const isPexelsLoadingMore = ref(false)
+
+const loadMorePexels = async () => {
+  if (isPexelsLoadingMore.value) return
+  const pexels = imageLocalState.value.pexels
+  const currentPage = pexels.currentPage || 1
+  if (currentPage > 100) return
+  isPexelsLoadingMore.value = true
+  try {
+    const data = await getPexelsImagesData({ page: currentPage, per_page: 80 })
+    const newList = data.photos.map((item: TImage.PexelsImageItem) => ({
+      name: `${item.id}`,
+      desc: `${item.alt} (${item.photographer})`,
+    }))
+    pexels.list.push(...newList)
+    pexels.currentPage = currentPage + 1
+  } catch (e) {
+    log('loadMorePexels error:', e)
+  } finally {
+    isPexelsLoadingMore.value = false
   }
 }
 </script>
@@ -147,7 +211,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
 
             <!-- local -->
             <NFormItem
-              v-if="localConfig.general.backgroundImageSource === 0"
+              v-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL"
               :label="$t('common.select')"
             >
               <div class="form__local">
@@ -164,7 +228,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
                     </template>
                     {{ $t('common.import') }}
                   </NButton>
-                  <Tips :content="$t('general.localBackgroundTips')" />
+                  <Tips :content="$t('generalSetting.localBackgroundTips')" />
                 </div>
                 <p
                   v-if="imageState.currBackgroundImageFileName"
@@ -187,7 +251,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
             </NFormItem>
 
             <!-- network -->
-            <template v-else-if="localConfig.general.backgroundImageSource === 1">
+            <template v-else-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK">
               <NFormItem :label="`${$t('common.custom')}`">
                 <NSwitch
                   v-model:value="localConfig.general.isBackgroundImageCustomUrlEnabled"
@@ -210,7 +274,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
             </template>
             <!-- 网络（未开启自定义），每日一图时展示 -->
             <NFormItem
-              v-if="localConfig.general.backgroundImageSource !== 0 && !localConfig.general.isBackgroundImageCustomUrlEnabled"
+              v-if="localConfig.general.backgroundImageSource !== BACKGROUND_IMAGE_SOURCE.LOCAL && !localConfig.general.isBackgroundImageCustomUrlEnabled"
               :label="$t('common.uhd')"
             >
               <NSwitch
@@ -237,7 +301,7 @@ const handleBackgroundImageCustomUrlBlur = () => {
 
         <!-- list 仅来源为网络 且 非定制Url时展示 -->
         <NSpin
-          v-if="localConfig.general.backgroundImageSource === 1 && !localConfig.general.isBackgroundImageCustomUrlEnabled"
+          v-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK && !localConfig.general.isBackgroundImageCustomUrlEnabled"
           :show="isImageListLoading"
           class="image-list__spin"
         >
@@ -251,18 +315,44 @@ const handleBackgroundImageCustomUrlBlur = () => {
               :tab="$t(`common.${source}`)"
               :name="source"
             >
-              <div class="picker__images">
-                <div
-                  v-for="item in previewImageListMap[source]"
-                  :key="item.name"
-                  class="image__item"
+              <div class="tab__wrap">
+                <RecycleScroller
+                  v-slot="{ item: row }"
+                  class="picker__images"
+                  :items="chunkedPreviewMap[source]"
+                  :item-size="100"
+                  key-field="key"
                 >
-                  <BackgroundDrawerImageElement
-                    :data="item"
-                    select
-                    :delete="source === 'favorite'"
-                  />
-                </div>
+                  <div
+                    v-if="row.isLoadMore"
+                    class="pexels__load-more"
+                  >
+                    <NButton
+                      size="small"
+                      :loading="isPexelsLoadingMore"
+                      :disabled="(imageLocalState.pexels.currentPage || 1) > 100"
+                      @click="loadMorePexels"
+                    >
+                      {{ (imageLocalState.pexels.currentPage || 1) > 100 ? $t('common.loaded') : $t('common.loadMore') }}
+                    </NButton>
+                  </div>
+                  <div
+                    v-else
+                    class="image__row"
+                  >
+                    <div
+                      v-for="(item, colIdx) in row.items"
+                      :key="`${row.key}-${item.name}-${colIdx}`"
+                      class="image__item"
+                    >
+                      <BackgroundDrawerImageElement
+                        :data="item"
+                        select
+                        :delete="source === 'favorite'"
+                      />
+                    </div>
+                  </div>
+                </RecycleScroller>
               </div>
             </NTabPane>
           </NTabs>
@@ -274,11 +364,28 @@ const handleBackgroundImageCustomUrlBlur = () => {
 
 <style>
 .drawer__content {
-  .n-tabs .n-tabs-nav {
-    position: sticky;
-    top: -17px;
-    z-index: 1;
-    background-color: var(--n-tab-color-segment);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .n-tabs {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .n-tabs-nav {
+      position: sticky;
+      top: -17px;
+      z-index: 1;
+      background-color: var(--n-tab-color-segment);
+      flex-shrink: 0;
+    }
+
+    .n-tabs-pane-wrapper {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
   }
 
   .content__config-section {
@@ -333,19 +440,43 @@ const handleBackgroundImageCustomUrlBlur = () => {
   }
 
   .image-list__spin {
+    flex: 1;
     margin-top: 4px;
+    min-height: 0;
+    height: 0;
+
+    .n-spin-content {
+      height: 100%;
+    }
   }
 
   .picker__images {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 2px 1px 6px;
-
+    /* 这里必须指定高度 */
+    height: calc(100vh - 320px);
+    .vue-recycle-scroller__item-view {
+      padding: 4px;
+    }
+    .image__row {
+      display: flex;
+      gap: 8px;
+    }
     .image__item {
+      flex: 0 0 calc((100% - 16px) / 3);
       aspect-ratio: 16 / 9;
       min-height: 70px;
     }
+  }
+
+  .tab__wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .pexels__load-more {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
   }
 }
 </style>

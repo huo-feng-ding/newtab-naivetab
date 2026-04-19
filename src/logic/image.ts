@@ -3,6 +3,8 @@ import { getBingImagesData, getPexelsImagesData } from '@/api'
 import { log, urlToFile, compressedImageUrlToBase64, downloadImageByUrl } from '@/logic/util'
 import { databaseStore } from '@/logic/database'
 import { localConfig, localState } from '@/logic/store'
+import { IMAGE_NETWORK_SOURCE, BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
+import type { ImageNetworkSource } from '@/logic/constants/image'
 
 const BING_QUALITY_MAP = {
   low: '1366x768',
@@ -13,7 +15,7 @@ const BING_QUALITY_MAP = {
 const PEXELS_QUALITY_MAP = {
   low: '&h=192&w=341',
   medium: '&h=1080&w=1920',
-  high: '',
+  high: '', // 不加参数为原图
 }
 
 // cn.bing.com//th?id=OHR.YurisNight_ZH-CN5738817931_1366x768.jpg
@@ -26,15 +28,14 @@ const getPexelsImageUrlFromName = (name: string, quality = 'low' as TImage.quali
   return `https://images.pexels.com/photos/${name}/pexels-photo-${name}.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop${PEXELS_QUALITY_MAP[quality]}`
 }
 
-// networkSourceType: 1 Bing, 2 Pexels
-export const getImageUrlFromName = (networkSourceType: 1 | 2, name: string, quality = 'low' as TImage.quality) => {
-  let url = ''
-  if (networkSourceType === 1) {
-    url = getBingImageUrlFromName(name, quality)
-  } else if (networkSourceType === 2) {
-    url = getPexelsImageUrlFromName(name, quality)
+export const getImageUrlFromName = (networkSourceType: ImageNetworkSource, name: string, quality = 'low' as TImage.quality) => {
+  if (networkSourceType === IMAGE_NETWORK_SOURCE.BING) {
+    return getBingImageUrlFromName(name, quality)
   }
-  return url
+  if (networkSourceType === IMAGE_NETWORK_SOURCE.PEXELS) {
+    return getPexelsImageUrlFromName(name, quality)
+  }
+  return ''
 }
 
 export const imageLocalState = useStorageLocal('data-images', {
@@ -45,6 +46,7 @@ export const imageLocalState = useStorageLocal('data-images', {
   pexels: {
     syncTime: 0,
     list: [] as TImage.BaseImageItem[],
+    currentPage: 1,
   },
 })
 
@@ -56,6 +58,10 @@ export const imageState = reactive({
 const localBingList = ref<TImage.BaseImageItem[]>([])
 
 const getLocalBingList = async () => {
+  // 本地文件内容固定，只加载一次
+  if (localBingList.value.length > 0) {
+    return
+  }
   try {
     const response = await fetch('/assets/bing-wallpaper.md')
     const text = await response.text()
@@ -63,6 +69,9 @@ const getLocalBingList = async () => {
     const lines = text.split('\n')
     const batchSize = 100
     let index = 0
+
+    // 清空旧数据，避免重复累积
+    localBingList.value = []
 
     const processBatch = () => {
       const batch = lines.slice(index, index + batchSize)
@@ -97,11 +106,11 @@ export const previewImageListMap = computed(() => ({
   favorite: localConfig.general.favoriteImageList,
   bing: [...imageLocalState.value.bing.list, ...localBingList.value].map((item) => ({
     ...item,
-    networkSourceType: 1,
+    networkSourceType: IMAGE_NETWORK_SOURCE.BING,
   })),
   pexels: imageLocalState.value.pexels.list.map((item) => ({
     ...item,
-    networkSourceType: 2,
+    networkSourceType: IMAGE_NETWORK_SOURCE.PEXELS,
   })),
 }))
 
@@ -129,17 +138,20 @@ const getBingImageList = async () => {
 const getPexelsImageList = async () => {
   try {
     isImageListLoading.value = true
+    const currentPage = imageLocalState.value.pexels.currentPage || 1
     const data = await getPexelsImagesData({
-      page: 1,
-      per_page: 30,
+      page: currentPage,
+      per_page: 80,
     })
     isImageListLoading.value = false
     imageLocalState.value.pexels.syncTime = dayjs().valueOf()
-    imageLocalState.value.pexels.list = data.photos.map((item: TImage.PexelsImageItem) => ({
+    const newList = data.photos.map((item: TImage.PexelsImageItem) => ({
       name: `${item.id}`,
       desc: `${item.alt} (${item.photographer})`,
     }))
-    log('Image update PexelsImageList')
+    imageLocalState.value.pexels.list.push(...newList)
+    imageLocalState.value.pexels.currentPage = currentPage + 1
+    log('Image update PexelsImageList, page:', currentPage, 'added:', newList.length)
   } catch (e) {
     isImageListLoading.value = false
   }
@@ -161,13 +173,16 @@ export const updatePexelsImages = async () => {
   if (currTS - imageLocalState.value.pexels.syncTime <= 3600000 * 3) {
     return
   }
+  // 重新同步时清空列表、重置为第1页
+  imageLocalState.value.pexels.list = []
+  imageLocalState.value.pexels.currentPage = 1
   await getPexelsImageList()
 }
 
 const getCurrNetworkBackgroundImageUrl = (applyToAppearanceCode = localState.value.currAppearanceCode) => {
   let imageUrl = ''
   const quality: TImage.quality = localConfig.general.backgroundImageHighQuality ? 'high' : 'medium'
-  if (localConfig.general.backgroundImageSource === 1) {
+  if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK) {
     // 网络
     if (localConfig.general.isBackgroundImageCustomUrlEnabled) {
       imageUrl = localConfig.general.backgroundImageCustomUrls[applyToAppearanceCode]
@@ -178,7 +193,7 @@ const getCurrNetworkBackgroundImageUrl = (applyToAppearanceCode = localState.val
         quality,
       )
     }
-  } else if (localConfig.general.backgroundImageSource === 2) {
+  } else if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.BING_PHOTO) {
     // bing每日一图
     const todayImage = imageLocalState.value.bing.list[0]
     const name = todayImage?.name
@@ -199,7 +214,7 @@ export const downloadCurrentWallpaper = async () => {
   const quality: TImage.quality = localConfig.general.backgroundImageHighQuality ? 'high' : 'medium'
 
   // 来源=0：本地上传，从 DB 取 ObjectURL
-  if (localConfig.general.backgroundImageSource === 0) {
+  if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL) {
     const objectUrl = imageState.currBackgroundImageFileObjectURL
     const filename = imageState.currBackgroundImageFileName || 'wallpaper.jpg'
     if (!objectUrl) return
@@ -213,17 +228,17 @@ export const downloadCurrentWallpaper = async () => {
   // 来源=1或2：网络/每日一图，构造 URL
   const appearanceCode = localState.value.currAppearanceCode
   let url = ''
-  if (localConfig.general.backgroundImageSource === 1) {
+  if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK) {
     if (localConfig.general.isBackgroundImageCustomUrlEnabled) {
       url = localConfig.general.backgroundImageCustomUrls[appearanceCode]
     } else {
       const name = localConfig.general.backgroundImageNames && localConfig.general.backgroundImageNames[appearanceCode]
       url = getImageUrlFromName(localConfig.general.backgroundNetworkSourceType, name, quality)
     }
-  } else if (localConfig.general.backgroundImageSource === 2) {
+  } else if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.BING_PHOTO) {
     const todayImage = imageLocalState.value.bing.list[0]
     const name = todayImage && todayImage.name
-    url = name ? getImageUrlFromName(1, name, quality) : ''
+    url = name ? getImageUrlFromName(IMAGE_NETWORK_SOURCE.BING, name, quality) : ''
   }
 
   if (!url) return
@@ -250,17 +265,17 @@ export const downloadCurrentWallpaper = async () => {
 let pendingAppearanceCode: number | null = null
 
 const renderRawBackgroundImage = async () => {
-  console.time('RenderRawImage')
+  const start = performance.now()
   isImageLoading.value = true
   // 记录本次请求的目标外观码
   const targetAppearanceCode = localState.value.currAppearanceCode
   pendingAppearanceCode = targetAppearanceCode
   try {
     let dbData: TImage.BackgroundImageItem | null = null
-    const storeName = localConfig.general.backgroundImageSource === 0 ? 'localBackgroundImages' : 'currBackgroundImages'
+    const storeName = localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL ? 'localBackgroundImages' : 'currBackgroundImages'
     dbData = await databaseStore(storeName, 'get', targetAppearanceCode)
     if (!dbData) {
-      if (localConfig.general.backgroundImageSource === 0) {
+      if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL) {
         // 首次选择 backgroundImageSource=0本地 时无数据，直接退出
         imageState.currBackgroundImageFileObjectURL = ''
         isImageLoading.value = false
@@ -280,7 +295,7 @@ const renderRawBackgroundImage = async () => {
       databaseStore('currBackgroundImages', 'put', dbData)
       localStorage.setItem('l-firstScreen', smallBase64)
       // 每日一图，需要同时设置深色&浅色外观为同一张壁纸
-      if (localConfig.general.backgroundImageSource === 2) {
+      if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.BING_PHOTO) {
         databaseStore('currBackgroundImages', 'put', {
           ...dbData,
           appearanceCode: +!targetAppearanceCode,
@@ -291,21 +306,29 @@ const renderRawBackgroundImage = async () => {
     if (pendingAppearanceCode !== targetAppearanceCode) {
       return
     }
-    imageState.currBackgroundImageFileName = localConfig.general.backgroundImageSource === 0 ? dbData.file.name : ''
-    requestIdleCallback(() => {
-      const rawBlobUrl = URL.createObjectURL((dbData as TImage.BackgroundImageItem).file)
-      const rawImageEle = new Image()
-      rawImageEle.src = rawBlobUrl
-      rawImageEle.onload = () => {
-        // 过期回调：用户已切换主题，释放资源并放弃更新
-        if (pendingAppearanceCode !== targetAppearanceCode) {
-          URL.revokeObjectURL(rawBlobUrl)
-          return
-        }
-        imageState.currBackgroundImageFileObjectURL = rawBlobUrl
-        isImageLoading.value = false
-        console.timeEnd('RenderRawImage')
+    imageState.currBackgroundImageFileName = localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL ? dbData.file.name : ''
+    const rawBlobUrl = URL.createObjectURL((dbData as TImage.BackgroundImageItem).file)
+    const rawImageEle = new Image()
+    rawImageEle.src = rawBlobUrl
+    // decode() 让浏览器提前解码，避免赋值时的渲染卡顿
+    rawImageEle.decode().then(() => {
+      // 过期回调：用户已切换主题，释放资源并放弃更新
+      if (pendingAppearanceCode !== targetAppearanceCode) {
+        URL.revokeObjectURL(rawBlobUrl)
+        return
       }
+      imageState.currBackgroundImageFileObjectURL = rawBlobUrl
+      isImageLoading.value = false
+      const elapsed = (performance.now() - start).toFixed(2)
+      console.log(`RenderRawImage: ${elapsed}ms`)
+    }).catch(() => {
+      // decode 失败（如图片损坏），回退到直接赋值
+      if (pendingAppearanceCode !== targetAppearanceCode) {
+        URL.revokeObjectURL(rawBlobUrl)
+        return
+      }
+      imageState.currBackgroundImageFileObjectURL = rawBlobUrl
+      isImageLoading.value = false
     })
   } catch (e) {
     console.error('renderRawBackgroundImage error:', e)
@@ -315,7 +338,7 @@ const renderRawBackgroundImage = async () => {
 
 const setCurrSmallBackgroundImage = async () => {
   let dbData: TImage.BackgroundImageItem | null = null
-  const storeName = localConfig.general.backgroundImageSource === 0 ? 'localBackgroundImages' : 'currBackgroundImages'
+  const storeName = localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL ? 'localBackgroundImages' : 'currBackgroundImages'
   dbData = await databaseStore(storeName, 'get', localState.value.currAppearanceCode)
   if (!dbData) {
     return
@@ -349,7 +372,7 @@ export const initBackgroundImage = () => {
     imageState.currBackgroundImageFileObjectURL = localImage
   }
   // 渲染原图
-  if (localConfig.general.backgroundImageSource === 2) {
+  if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.BING_PHOTO) {
     refreshTodayImage()
   } else {
     renderRawBackgroundImage()
@@ -381,7 +404,7 @@ watch(
     }
     deleteCurrSmallBackgroundImage()
     // 背景图来源为本地，需要独立存储预览图
-    if (localConfig.general.backgroundImageSource === 0) {
+    if (localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL) {
       setCurrSmallBackgroundImage()
     }
     await deleteCurrRawBackgroundImageInDB()

@@ -366,7 +366,7 @@ const onHandleInputBlur = () => {
                     />
                   </NButton>
                 </template>
-                {{ $t('general.overwriteUrlConfirm') }}
+                {{ $t('generalSetting.overwriteUrlConfirm') }}
               </NPopconfirm>
               <NButton
                 v-else

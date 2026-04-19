@@ -41,7 +41,7 @@ const addFavoriteColor = () => {
     return
   }
   if (localConfig.general.swatcheColors.length >= FAVORITE_SWATCHE_MAX_COUNT) {
-    window.$message.error(window.$t('prompts.favoriteLimt'))
+    window.$message.error(window.$t('prompts.favoriteLimit'))
     return
   }
   localConfig.general.swatcheColors.push(props.value)

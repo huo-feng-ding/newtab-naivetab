@@ -2,6 +2,7 @@ import type { WidgetConfigByCode } from '@/newtab/widgets/registry'
 import { WIDGET_CODE_LIST } from '@/newtab/widgets/codes'
 import pkg from '../../package.json'
 import { COMMAND_SHORTCUT_CONFIG } from '@/logic/globalShortcut/shortcut-command'
+import { IMAGE_NETWORK_SOURCE, BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
 
 const UI_LANGUAGE = chrome.i18n.getUILanguage()
 const CURR_LANG = UI_LANGUAGE || 'en-US'
@@ -31,27 +32,27 @@ const generalConfig = {
   isFocusMode: false,
   focusVisibleWidgetMap: defaultFocusVisibleWidgetMap,
   isBackgroundImageEnabled: true,
-  backgroundImageSource: 1 as 0 | 1 | 2, // 0 localFile, 1 network, 2 bing Photo of the Day
-  backgroundNetworkSourceType: 1 as 1 | 2, // 1 Bing, 2 Pexels
+  backgroundImageSource: BACKGROUND_IMAGE_SOURCE.NETWORK as (typeof BACKGROUND_IMAGE_SOURCE)[keyof typeof BACKGROUND_IMAGE_SOURCE],
+  backgroundNetworkSourceType: IMAGE_NETWORK_SOURCE.BING as (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE],
   backgroundImageHighQuality: false,
   backgroundImageNames: ['DarwinsArch_ZH-CN9740478501', 'DolomitesMW_ZH-CN3307894335'],
   isBackgroundImageCustomUrlEnabled: false,
   backgroundImageCustomUrls: ['https://cn.bing.com/th?id=OHR.DarwinsArch_ZH-CN9740478501_1920x1080.jpg', 'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg'],
   favoriteImageList: [
-    { networkSourceType: 1, name: 'DarwinsArch_ZH-CN9740478501' },
-    { networkSourceType: 1, name: 'ChukchiSea_ZH-CN7218471261' },
-    { networkSourceType: 1, name: 'DolomitesMW_ZH-CN3307894335' },
-    { networkSourceType: 1, name: 'YosemiteNightSky_ZH-CN5864740024' },
-    { networkSourceType: 1, name: 'LavaTube_ZH-CN5458469336' },
-    { networkSourceType: 1, name: 'YurisNight_ZH-CN5738817931' },
-    { networkSourceType: 1, name: 'PrathameshJaju_ZH-CN2207606082' },
-    { networkSourceType: 1, name: 'AthensAcropolis_ZH-CN9942357439' },
-    { networkSourceType: 1, name: 'Balsamroot_ZH-CN9456182640' },
-    { networkSourceType: 1, name: 'ChurchillBears_ZH-CN1430090934' },
-    { networkSourceType: 1, name: 'WinterHalo_ZH-CN0666553211' },
-    { networkSourceType: 2, name: '19161535' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DarwinsArch_ZH-CN9740478501' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'ChukchiSea_ZH-CN7218471261' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DolomitesMW_ZH-CN3307894335' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'YosemiteNightSky_ZH-CN5864740024' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'LavaTube_ZH-CN5458469336' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'YurisNight_ZH-CN5738817931' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'PrathameshJaju_ZH-CN2207606082' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'AthensAcropolis_ZH-CN9942357439' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'Balsamroot_ZH-CN9456182640' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'ChurchillBears_ZH-CN1430090934' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'WinterHalo_ZH-CN0666553211' },
+    { networkSourceType: IMAGE_NETWORK_SOURCE.PEXELS, name: '19161535' },
   ] as {
-    networkSourceType: 1 | 2
+    networkSourceType: (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE]
     name: string
   }[],
   layout: {
