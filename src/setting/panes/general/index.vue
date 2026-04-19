@@ -26,7 +26,7 @@ const state = reactive({
 })
 
 const themeList = computed(() => [
-  { label: window.$t('general.followSystem'), value: 'auto' },
+  { label: window.$t('generalSetting.followSystem'), value: 'auto' },
   { label: window.$t('common.light'), value: 'light' },
   { label: window.$t('common.dark'), value: 'dark' },
 ])
@@ -39,16 +39,16 @@ const drawerPlacementList = [
 ] as { value: TDrawerPlacement | 'right', icon: string, style: Record<string, string> }[]
 
 const focusElementList = computed(() => [
-  { label: window.$t('general.focusBrowserDefault'), value: 'default' },
-  { label: window.$t('general.focusRoot'), value: 'root' },
+  { label: window.$t('generalSetting.focusBrowserDefault'), value: 'default' },
+  { label: window.$t('generalSetting.focusRoot'), value: 'root' },
   { label: window.$t('setting.search'), value: 'search' },
   { label: window.$t('setting.memo'), value: 'memo' },
   { label: window.$t('setting.keyboard'), value: 'keyboard' },
 ])
 
 const loadPageAnimationTypeList = computed(() => [
-  { label: window.$t('general.fadeIn'), value: 'fade-in' },
-  { label: window.$t('general.zoomIn'), value: 'zoom-in' },
+  { label: window.$t('generalSetting.fadeIn'), value: 'fade-in' },
+  { label: window.$t('generalSetting.zoomIn'), value: 'zoom-in' },
 ])
 
 const onChangeLocale = (locale: string) => {
@@ -59,6 +59,29 @@ const onChangeLocale = (locale: string) => {
 const openBackgroundDrawer = () => {
   state.isBackgroundDrawerVisible = true
 }
+
+const onBackgroundDrawerClose = () => {
+  state.isBackgroundDrawerVisible = false
+  globalState.isBackgroundDrawerAutoOpen = false
+}
+
+// 组件挂载时立即检查是否需要自动打开
+onMounted(() => {
+  if (globalState.isBackgroundDrawerAutoOpen) {
+    globalState.isBackgroundDrawerAutoOpen = false
+    openBackgroundDrawer()
+  }
+})
+
+watch(
+  () => globalState.isBackgroundDrawerAutoOpen,
+  (value: boolean) => {
+    if (value) {
+      globalState.isBackgroundDrawerAutoOpen = false
+      openBackgroundDrawer()
+    }
+  },
+)
 
 const syncTime = computed(() => {
   if (!Object.prototype.hasOwnProperty.call(localState.value, 'isUploadConfigStatusMap')) {
@@ -141,7 +164,10 @@ const cssVars = computed(() => ({
 
 <template>
   <div :style="cssVars">
-    <BackgroundDrawer v-model:show="state.isBackgroundDrawerVisible" />
+    <BackgroundDrawer
+      :show="state.isBackgroundDrawerVisible"
+      @update:show="onBackgroundDrawerClose"
+    />
 
     <SettingHeaderBar
       :title="$t('setting.general')"
@@ -153,7 +179,7 @@ const cssVars = computed(() => ({
       hide-reset
     >
       <template #behavior>
-        <NFormItem :label="$t('general.pageTitle')">
+        <NFormItem :label="$t('generalSetting.pageTitle')">
           <NInput
             v-model:value="localConfig.general.pageTitle"
             type="text"
@@ -161,13 +187,13 @@ const cssVars = computed(() => ({
           />
         </NFormItem>
 
-        <NFormItem :label="$t('general.defaultFocus')">
+        <NFormItem :label="$t('generalSetting.defaultFocus')">
           <NSelect
             v-model:value="localConfig.general.openPageFocusElement"
             :options="focusElementList"
             size="small"
           />
-          <Tips :content="$t('general.defaultFocusTips')" />
+          <Tips :content="$t('generalSetting.defaultFocusTips')" />
         </NFormItem>
 
         <!-- drawer site -->
@@ -192,7 +218,7 @@ const cssVars = computed(() => ({
         <!-- language -->
         <div class="setting__form_wrap">
           <NFormItem
-            :label="$t('general.language')"
+            :label="$t('generalSetting.language')"
             class="n-form-item--half"
           >
             <NSelect
@@ -203,7 +229,7 @@ const cssVars = computed(() => ({
             />
           </NFormItem>
           <NFormItem
-            :label="`${$t('general.timeLanguage')}`"
+            :label="`${$t('generalSetting.timeLanguage')}`"
             class="n-form-item--half"
           >
             <NSelect
@@ -245,7 +271,7 @@ const cssVars = computed(() => ({
         <ColorField
           v-model="localConfig.general.primaryColor"
           :label="$t('common.primaryColor')"
-          :tips="$t('general.primaryColorTips')"
+          :tips="$t('generalSetting.primaryColorTips')"
         />
 
         <ColorField
@@ -289,19 +315,19 @@ const cssVars = computed(() => ({
           :max="1"
         />
 
-        <NFormItem :label="$t('general.parallax')">
+        <NFormItem :label="$t('generalSetting.parallax')">
           <NSwitch
             v-model:value="localConfig.general.isParallaxEnabled"
             size="small"
           />
-          <Tips :content="$t('general.parallaxTips')" />
+          <Tips :content="$t('generalSetting.parallaxTips')" />
         </NFormItem>
 
         <Transition name="setting-expand">
           <SliderField
             v-if="localConfig.general.isParallaxEnabled"
             v-model="localConfig.general.parallaxIntensity"
-            :label="$t('general.parallaxIntensity')"
+            :label="$t('generalSetting.parallaxIntensity')"
             :step="1"
             :min="0"
             :max="20"
@@ -309,7 +335,7 @@ const cssVars = computed(() => ({
           />
         </Transition>
 
-        <NFormItem :label="$t('general.loadPageAnimation')">
+        <NFormItem :label="$t('generalSetting.loadPageAnimation')">
           <NSwitch
             v-model:value="localConfig.general.isLoadPageAnimationEnabled"
             size="small"
@@ -336,11 +362,11 @@ const cssVars = computed(() => ({
       <template #footer>
         <!-- setting -->
         <NDivider title-placement="left">
-          {{ $t('general.settingDividerSetting') }}
+          {{ $t('generalSetting.settingDividerSetting') }}
         </NDivider>
 
         <!-- 同步时间 -->
-        <NFormItem :label="$t('general.syncTime')">
+        <NFormItem :label="$t('generalSetting.syncTime')">
           <NSpin
             :show="isUploadConfigLoading"
             size="small"
@@ -353,22 +379,22 @@ const cssVars = computed(() => ({
               <span class="sync-time__text">{{ syncTime }}</span>
             </div>
           </NSpin>
-          <Tips :content="$t('general.syncTimeTips')" />
+          <Tips :content="$t('generalSetting.syncTimeTips')" />
         </NFormItem>
 
         <!-- 配置占用大小 -->
-        <NFormItem :label="$t('general.syncStorageSize')">
+        <NFormItem :label="$t('generalSetting.syncStorageSize')">
           <NCollapse :default-expanded-names="[]">
             <NCollapseItem name="storage">
               <template #header>
                 <div class="storage-header">
                   <div class="storage-header__title">
-                    <span class="storage-header__field">{{ $t('general.total') }}</span>
+                    <span class="storage-header__field">{{ $t('generalSetting.total') }}</span>
                     <span class="storage-header__total">
                       {{ (totalBytes / 1024).toFixed(1) }}KB / ~100KB
                     </span>
                     <Tips
-                      :content="$t('general.syncStorageSizeTips')"
+                      :content="$t('generalSetting.syncStorageSizeTips')"
                       class="storage-header__tips"
                     />
                   </div>
@@ -429,7 +455,7 @@ const cssVars = computed(() => ({
           </NCollapse>
         </NFormItem>
 
-        <NFormItem :label="$t('general.importExportSettingsLabel')">
+        <NFormItem :label="$t('generalSetting.importExportSettingsLabel')">
           <NButton
             class="action-btn action-btn--primary"
             type="primary"
@@ -439,7 +465,7 @@ const cssVars = computed(() => ({
             @click="onImportSetting"
           >
             <template #icon><Icon :icon="ICONS.importFile" /></template>
-            {{ $t('general.importSettingsValue') }}
+            {{ $t('generalSetting.importSettingsValue') }}
           </NButton>
           <input
             ref="importSettingInputEl"
@@ -448,7 +474,7 @@ const cssVars = computed(() => ({
             accept=".json"
             @change="onImportFileChange"
           />
-          <Tips :content="$t('general.importSettingsTips')" />
+          <Tips :content="$t('generalSetting.importSettingsTips')" />
           <NButton
             class="setting__item-ml action-btn action-btn--primary"
             type="primary"
@@ -457,12 +483,12 @@ const cssVars = computed(() => ({
             @click="onExportSetting()"
           >
             <template #icon><Icon :icon="ICONS.exportFile" /></template>
-            {{ $t('general.exportSettingValue') }}
+            {{ $t('generalSetting.exportSettingValue') }}
           </NButton>
-          <Tips :content="$t('general.exportSettingTips')" />
+          <Tips :content="$t('generalSetting.exportSettingTips')" />
         </NFormItem>
 
-        <NFormItem :label="$t('general.clearStorageLabel')">
+        <NFormItem :label="$t('generalSetting.clearStorageLabel')">
           <NButton
             class="action-btn action-btn--warning"
             type="warning"
@@ -472,12 +498,12 @@ const cssVars = computed(() => ({
             @click="refreshSetting()"
           >
             <template #icon><Icon :icon="ICONS.clearOutlined" /></template>
-            {{ $t('general.clearStorageValue') }}
+            {{ $t('generalSetting.clearStorageValue') }}
           </NButton>
-          <Tips :content="$t('general.clearStorageTips')" />
+          <Tips :content="$t('generalSetting.clearStorageTips')" />
         </NFormItem>
 
-        <NFormItem :label="$t('general.resetSettingLabel')">
+        <NFormItem :label="$t('generalSetting.resetSettingLabel')">
           <NPopconfirm @positive-click="onResetSetting()">
             <template #trigger>
               <NButton
@@ -487,12 +513,12 @@ const cssVars = computed(() => ({
                 secondary
               >
                 <template #icon><Icon :icon="ICONS.restoreTwotone" /></template>
-                {{ $t('general.resetAllSettingValue') }}
+                {{ $t('generalSetting.resetAllSettingValue') }}
               </NButton>
             </template>
-            {{ `${$t('common.confirm')} ${$t('general.resetAllSettingValue')}` }}?
+            {{ `${$t('common.confirm')} ${$t('generalSetting.resetAllSettingValue')}` }}?
           </NPopconfirm>
-          <Tips :content="$t('general.resetSettingTips')" />
+          <Tips :content="$t('generalSetting.resetSettingTips')" />
         </NFormItem>
       </template>
     </SettingFormWrap>

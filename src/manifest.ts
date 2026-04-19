@@ -21,7 +21,7 @@ export async function getManifest() {
       48: '/assets/img/icon/icon-48x48.png',
       128: '/assets/img/icon/icon-128x128.png',
     },
-    permissions: ['storage', 'favicon', 'tabs', 'scripting', 'sessions', 'tabGroups'],
+    permissions: ['storage', 'tabs', 'scripting', 'sessions', 'tabGroups'],
     host_permissions: ['*://*/*'],
     optional_permissions: ['bookmarks', 'notifications'],
     chrome_url_overrides: {
@@ -70,6 +70,9 @@ export async function getManifest() {
         strict_min_version: '130.0',
       },
     }
+  } else {
+    // favicon permission 仅 Chrome 支持
+    manifest.permissions!.push('favicon')
   }
   return manifest
 }

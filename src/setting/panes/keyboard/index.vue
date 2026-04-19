@@ -120,7 +120,7 @@ const modifierConflictWarning = computed(() => {
         </NButton>
       </NFormItem>
 
-      <NFormItem :label="$t('general.newTabOpen')">
+      <NFormItem :label="$t('generalSetting.newTabOpen')">
         <NSwitch
           v-model:value="localConfig.keyboard.isNewTabOpen"
           size="small"

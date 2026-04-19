@@ -65,7 +65,7 @@ const handleQuickReset = () => {
   }
 
   Object.assign(localConfig[code], defaultValue, preserved)
-  window.$message?.success(`${window.$t('general.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
+  window.$message?.success(`${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
 }
 
 // 完全重置：只保留 enabled 和 layout（原有逻辑）
@@ -79,7 +79,7 @@ const handleFullReset = () => {
   if (current.enabled !== undefined) preserved.enabled = current.enabled
   if (current.layout !== undefined) preserved.layout = JSON.parse(JSON.stringify(current.layout))
   Object.assign(localConfig[code], defaultValue, preserved)
-  window.$message?.success(`${window.$t('general.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
+  window.$message?.success(`${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
 }
 
 // 渲染图标函数，和项目右键菜单保持一致用法
@@ -91,16 +91,16 @@ const resetOptions = computed(() => [
     key: 'quick',
     icon: renderIcon(ICONS.save),
     label: () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px', padding: '2px 0' } }, [
-      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('general.quickReset')),
-      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('general.quickResetDesc')),
+      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('generalSetting.quickReset')),
+      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('generalSetting.quickResetDesc')),
     ]),
   },
   {
     key: 'full',
     icon: renderIcon(ICONS.clearOutlined),
     label: () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px', padding: '2px 0' } }, [
-      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('general.fullReset')),
-      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('general.fullResetDesc')),
+      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('generalSetting.fullReset')),
+      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('generalSetting.fullResetDesc')),
     ]),
   },
 ])
@@ -170,7 +170,7 @@ const handleResetSelect = (key: string) => {
             :icon="ICONS.restoreTwotone"
             class="reset-btn__icon"
           />
-          <span class="reset-btn__label">{{ $t('general.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
+          <span class="reset-btn__label">{{ $t('generalSetting.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
         </div>
       </NDropdown>
       <!-- 没有需要保留的字段：只显示单个重置按钮，点击直接执行完全重置 -->
@@ -186,10 +186,10 @@ const handleResetSelect = (key: string) => {
               :icon="ICONS.restoreTwotone"
               class="reset-btn__icon"
             />
-            <span class="reset-btn__label">{{ $t('general.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
+            <span class="reset-btn__label">{{ $t('generalSetting.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
           </div>
         </template>
-        <span>{{ `${$t('general.confirmReset')}` }}</span>
+        <span>{{ `${$t('generalSetting.confirmReset')}` }}</span>
       </NPopconfirm>
     </div>
   </NForm>

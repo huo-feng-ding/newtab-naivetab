@@ -59,18 +59,21 @@ export const sharedConfig: UserConfig = {
     }),
     Icons(), // https://github.com/antfu/unplugin-icons
 
-    // visualizer(), // 打包分析工具，需要时启用
+    /**
+     * Firefox 构建时需要注入 favicon link，否则标签页上没有图标
+     * Chrome 构建时不注入，避免与 manifest.json 中的 icons 冲突导致Edge不展示图标的问题
+     */
+    {
+      name: 'firefox-favicon-inject',
+      transformIndexHtml(html) {
+        if (process.env.BROWSER === 'firefox') {
+          return html.replace('</head>', '  <link rel="icon" href="/assets/img/icon/icon.svg" />\n</head>')
+        }
+        return html
+      },
+    },
 
-    // html内引用的资源直接存储在/{BROWSER_DIR}/assets, 无需转换
-    // rewrite assets to use relative path
-    // {
-    //   name: 'assets-rewrite',
-    //   enforce: 'post',
-    //   apply: 'build',
-    //   transformIndexHtml(html, { path }) {
-    //     return html.replace(/"\/assets\//g, `"${relative(dirname(path), '/assets')}/`)
-    //   },
-    // },
+    // visualizer(), // 打包分析工具，需要时启用
   ],
   optimizeDeps: {
     include: ['vue', '@vueuse/core', 'webextension-polyfill', 'naive-ui', 'vue-i18n'],

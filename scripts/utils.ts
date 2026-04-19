@@ -10,7 +10,7 @@ const browserMap: Record<string, string> = {
   chrome: 'extension-chrome',
   firefox: 'extension-firefox',
 }
-export const BROWSER_DIR = browserMap[process.env.BROWSER || 'chrome'] || 'extension-chrome'
+export const BROWSER_DIR = browserMap[process.env.BROWSER || 'chrome']
 
 // temp  __dirname is not defined in ES module scope
 const __filename = fileURLToPath(import.meta.url)

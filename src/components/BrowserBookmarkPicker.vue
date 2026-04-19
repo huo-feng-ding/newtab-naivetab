@@ -105,7 +105,7 @@ watch(
     @update:show="handleUpdateShow"
   >
     <NDrawerContent
-      :title="$t('popup.browserBookmark')"
+      :title="$t('generalSetting.browserBookmark')"
       closable
       :header-style="{ padding: '11px', fontSize: '14px' }"
       :body-style="{ padding: '10px 20px' }"

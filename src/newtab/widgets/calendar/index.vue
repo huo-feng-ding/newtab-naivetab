@@ -150,30 +150,30 @@ const festivalList = (() => {
 })()
 
 const monthsList = computed(() => [
-  { label: window.$t('calendar.january'), value: 1 },
-  { label: window.$t('calendar.february'), value: 2 },
-  { label: window.$t('calendar.march'), value: 3 },
-  { label: window.$t('calendar.april'), value: 4 },
-  { label: window.$t('calendar.may'), value: 5 },
-  { label: window.$t('calendar.june'), value: 6 },
-  { label: window.$t('calendar.july'), value: 7 },
-  { label: window.$t('calendar.august'), value: 8 },
-  { label: window.$t('calendar.september'), value: 9 },
-  { label: window.$t('calendar.october'), value: 10 },
-  { label: window.$t('calendar.november'), value: 11 },
-  { label: window.$t('calendar.december'), value: 12 },
+  { label: window.$t('calendar.month.january'), value: 1 },
+  { label: window.$t('calendar.month.february'), value: 2 },
+  { label: window.$t('calendar.month.march'), value: 3 },
+  { label: window.$t('calendar.month.april'), value: 4 },
+  { label: window.$t('calendar.month.may'), value: 5 },
+  { label: window.$t('calendar.month.june'), value: 6 },
+  { label: window.$t('calendar.month.july'), value: 7 },
+  { label: window.$t('calendar.month.august'), value: 8 },
+  { label: window.$t('calendar.month.september'), value: 9 },
+  { label: window.$t('calendar.month.october'), value: 10 },
+  { label: window.$t('calendar.month.november'), value: 11 },
+  { label: window.$t('calendar.month.december'), value: 12 },
 ])
 
-const sundayOption = { label: window.$t('calendar.sunday'), value: 7 }
+const sundayOption = { label: window.$t('calendar.weekday.sunday'), value: 7 }
 
 const weekList = computed(() => {
   const list = [
-    { label: window.$t('calendar.monday'), value: 1 },
-    { label: window.$t('calendar.tuesday'), value: 2 },
-    { label: window.$t('calendar.wednesday'), value: 3 },
-    { label: window.$t('calendar.thursday'), value: 4 },
-    { label: window.$t('calendar.friday'), value: 5 },
-    { label: window.$t('calendar.saturday'), value: 6 },
+    { label: window.$t('calendar.weekday.monday'), value: 1 },
+    { label: window.$t('calendar.weekday.tuesday'), value: 2 },
+    { label: window.$t('calendar.weekday.wednesday'), value: 3 },
+    { label: window.$t('calendar.weekday.thursday'), value: 4 },
+    { label: window.$t('calendar.weekday.friday'), value: 5 },
+    { label: window.$t('calendar.weekday.saturday'), value: 6 },
   ]
   if (localConfig.calendar.weekBeginsOn === 7) {
     list.unshift(sundayOption)

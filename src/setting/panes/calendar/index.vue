@@ -7,8 +7,8 @@ import { SliderField, SwitchField, ColorField, FontField, ToggleColorField } fro
 import { ICONS } from '@/logic/icons'
 
 const beginsList = computed(() => [
-  { label: window.$t('calendar.monday'), value: 1 },
-  { label: window.$t('calendar.sunday'), value: 7 },
+  { label: window.$t('calendar.weekday.monday'), value: 1 },
+  { label: window.$t('calendar.weekday.sunday'), value: 7 },
 ])
 </script>
 

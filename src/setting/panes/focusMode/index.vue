@@ -44,7 +44,7 @@ const cssVars = computed(() => ({
           v-model:value="localConfig.general.isFocusMode"
           size="small"
         />
-        <Tips :content="$t('general.focusModeTips')" />
+        <Tips :content="$t('generalSetting.focusModeTips')" />
       </NFormItem>
 
       <NDivider title-placement="left">

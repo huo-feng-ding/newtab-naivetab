@@ -57,6 +57,8 @@
     "drawerSite": "Drawer Position",
     "local": "Local",
     "network": "Network",
+    "loadMore": "Load More",
+    "loaded": "All Loaded",
     "uhd": "UHD source",
     "bing": "Bing",
     "pexels": "Pexels",
@@ -97,22 +99,16 @@
     "login": "Login",
     "behavior": "Behavior"
   },
-  "form": {
-    "applyToAppearance": "Apply to appearance",
-    "photoOfTheDay": "Daily Bing Wallpaper"
-  },
-  "permission": {
+  "browserPermission": {
     "bookmark": "Requires browser permissions to access your bookmarks"
-  },
-  "popup": {
-    "browserBookmark": "Browser Bookmark",
-    "commitBtnTips": "Drag to reorder bookmarks"
   },
   "prompts": {
     "linkTips": "Click the (?) icon for quick links",
     "pleaseWait": "In progress, Please wait",
     "imageTooLarge": "Image too large",
-    "favoriteLimt": "Favorites limit reached",
+    "imageLoadFailed": "Failed to load",
+    "noImageAvailable": "No image available",
+    "favoriteLimit": "Favorites limit reached",
     "widgetDrawerTips": "Drag widgets to workspace",
     "breakingChangeNotice": "Please pay attention to changes marked with `!` below"
   },
@@ -123,7 +119,8 @@
     "fullscreen": "Fullscreen",
     "focusMode": "Focus Mode",
     "editFocusMode": "Edit Focus Mode",
-    "downloadWallpaper": "Download Wallpaper"
+    "downloadWallpaper": "Download Wallpaper",
+    "changeWallpaper": "Change Wallpaper"
   },
   "sponsor": {
     "title": "🔥「Caffeinated Commit: Code Brewed with 200% ☕️ Power」",
@@ -140,7 +137,6 @@
   },
   "guide": {
     "prevStep": "Back",
-    "tipsTitle": "Tips",
     "nextStep": "Next",
     "doneStep": "Let's go",
     "stepTitle1": "Add Widgets 🧩",
@@ -168,7 +164,6 @@
     "bookmark": "Bookmark",
     "keyboard": "Bookmark Keyboard",
     "bookmarkFolder": "Folder Bookmark",
-    "bookmarkConfig": "Bookmark Config",
     "clockDate": "Clock/Date",
     "clock": "Clock",
     "clockDigital": "Digital Clock",
@@ -187,15 +182,13 @@
     "aboutSponsor": "Sponsor",
     "openInNewTab": "Full-page Settings"
   },
-  "general": {
+  "generalSetting": {
     "total": "Total",
-    "globalStyle": "Global style",
-    "generalLabel": "General",
     "pageTitle": "Page title",
     "followSystem": "Follow system",
     "defaultFocus": "Default focus",
     "defaultFocusTips": "Note: Non-default options may show extension URL in address bar",
-    "focusBrowserDefault": "Default(Browser address bar)",
+    "focusBrowserDefault": "Default (Browser address bar)",
     "focusRoot": "Root element",
     "loadPageAnimation": "Load animation",
     "fadeIn": "Fade in",
@@ -221,25 +214,25 @@
     "downloadFailed": "Failed to download wallpaper, please try again",
     "resetSettingLabel": "Reset setting",
     "resetSettingValue": "Reset",
-    "reset": "Reset",
     "resetAllSettingValue": "Reset All Settings",
     "resetSettingTips": "If you encounter an unsolvable problem, try resetting the settings and back up the current configuration",
     "quickReset": "Partial Reset",
     "quickResetDesc": "Keep user data, reset appearance and partial settings only",
     "fullReset": "Full Reset",
     "fullResetDesc": "Reset all settings to defaults",
-    "confirmReset": "Confirm reset this widget settings to defaults?",
+    "confirmReset": "Confirm resetting this widget's settings to defaults?",
     "overwriteUrlConfirm": "This key already has a URL. Overwrite with current tab URL?",
     "language": "Main Language",
     "timeLanguage": "Time Language",
-    "saveCurrendImage": "Save Wallpaper",
     "localBackgroundTips": "Local file will not be synchronized",
     "focusModeTips": "In Focus Mode, only selected widgets are visible",
     "parallax": "Parallax effect",
     "parallaxTips": "Background moves slightly with mouse cursor, adds depth and dynamic feel",
     "parallaxIntensity": "Parallax intensity",
     "urlBlacklistTips": "Shortcuts won't trigger on these domains. Input is auto-cleaned of protocol prefixes, paths, and casing.\n\nSupported domain formats:\n• google.com — matches google.com and all subdomains (e.g. docs.google.com)\n• *.google.com — matches subdomains only, not google.com itself\n\nNote: Port numbers are not supported. Special pages (chrome://, etc.) are always excluded.",
-    "urlBlacklistTooLong": "Domain cannot exceed __max__ characters"
+    "urlBlacklistTooLong": "Domain cannot exceed __max__ characters",
+    "photoOfTheDay": "Daily Bing Wallpaper",
+    "browserBookmark": "Browser Bookmark"
   },
   "clock": {
     "showColon": "Show Colon",
@@ -273,7 +266,6 @@
     "defaultDisplayFolderTitle": "Expand Folder",
     "rootDirectory": "Root directory",
     "listenBackgroundKeystrokes": "Global Hotkeys",
-    "configBookmark": "Config Bookmark",
     "keyboard": "Keyboard",
     "presetTheme": "Preset Theme",
     "shell": "Shell",
@@ -283,13 +275,8 @@
     "keycap": "Keycap",
     "keycapVisualType": "Keycap Profile",
     "tactileBumps": "Tactile Bumps",
-    "customKeys": "Custom keys",
-    "keyLabel": "Key",
     "urlLabel": "Url",
     "nameLabel": "Name",
-    "namePlaceholder": "Optional",
-    "shortcutLabel": "Shortcut",
-    "shortcutTip": "Follows global modifier setting",
     "themeGroup": {
       "classic": "Classic",
       "atmosphere": "Atmosphere",
@@ -304,25 +291,19 @@
     "emphasisKeyGroupReset": "Reset to Default",
     "globalModifier": "Global Modifier",
     "modifierConflict": "This modifier key matches command shortcut, which may cause conflict",
-    "urlBlacklist": "Domain blacklist",
-    "globalModifierTips": "Press modifier (e.g. __alt__) + keyboard key to trigger global shortcuts. Not supported on special pages (chrome:// etc.).",
+    "urlBlacklist": "Domain blocklist",
+    "globalModifierTips": "Press a modifier + letter key to trigger a global shortcut (e.g. __alt__ + A).\nDoes not trigger on special pages (chrome:// etc.).",
     "recordModifier": "Press modifier to record",
     "requireModifier": "Press at least one modifier key",
-    "noModifier": "No modifier set",
-    "notSupported": "Not supported for global shortcut",
-    "addShortcut": "Add Shortcut",
-    "noShortcutBound": "No shortcut assigned",
     "shortcutNote": "Shortcuts are disabled in input fields and special pages (chrome:// etc.).",
     "shortcutInInputElement": "Shortcuts in input",
     "shortcutInInputElementNote": "When enabled, bookmark shortcuts will also trigger while typing in input fields/textareas. Avoid combinations that conflict with common typing shortcuts",
     "recording": "Recording...",
-    "shortcutConflict": "This shortcut is already in use",
     "selectKeycapTip": "Click a key on the keyboard to edit"
   },
   "bookmarkFolder": {
     "defaultDisplayFolderTitle": "Expand Folder",
     "rootDirectory": "Root directory",
-    "layoutInline": "Layout (columns × rows)",
     "layoutColumns": "Columns",
     "hideIcon": "Hide icon",
     "hideName": "Hide name",
@@ -339,36 +320,40 @@
     "suggestion": "Search Suggestions"
   },
   "calendar": {
-    "january": "January",
-    "february": "February",
-    "march": "March",
-    "april": "April",
-    "may": "May",
-    "june": "June",
-    "july": "July",
-    "august": "August",
-    "september": "September",
-    "october": "October",
-    "november": "November",
-    "december": "December",
-    "monday": "Mon",
-    "tuesday": "Tue",
-    "wednesday": "Wed",
-    "thursday": "Thu",
-    "friday": "Fri",
-    "saturday": "Sat",
-    "sunday": "Sun",
+    "weekBeginsOn": "Week Begins",
+    "festivalCountdown": "Festival Countdown",
+    "day": "Day",
+    "desc": "Description",
+    "holiday": "Holiday",
     "today": "T",
     "work": "W",
     "rest": "R",
     "todayDesc": "Today",
     "restDesc": "Day off",
     "workDesc": "Workday",
-    "weekBeginsOn": "Week Begins",
-    "festivalCountdown": "Festival Countdown",
-    "day": "Day",
-    "desc": "Desc",
-    "holiday": "Holiday"
+    "month": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "weekday": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    }
   },
   "yearProgress": {
     "isRealtime": "Realtime",
@@ -377,11 +362,7 @@
     "block": "Block"
   },
   "weather": {
-    "warning": "Warning",
     "city": "City",
-    "temperatureUnit": "TEMP unit",
-    "speedUnit": "Wind Speed Unit",
-    "forecast": "Forecast",
     "icon": "Weather icon",
     "feelsLike": "Feels like",
     "windScaleUnit": "Bft"
@@ -397,11 +378,10 @@
     "zhihu": "Zhihu",
     "weibo": "Weibo",
     "kr36": "36kr",
-    "bilibili": "Bilibili",
     "v2ex": "V2EX"
   },
   "countdown": {
-    "clock": "Clock",
+    "clockStyle": "Clock Style",
     "defaultDuration": "Default duration",
     "showHours": "Show hours",
     "strokeWidth": "Ring width",
@@ -409,27 +389,12 @@
     "trackColor": "Track color",
     "notifyTitle": "Countdown finished",
     "notifyBody": "Your timer has ended",
-    "label": "Label text",
-    "labelFontSize": "Label font size",
-    "labelFontColor": "Label color"
+    "label": "Label text"
   },
   "commandShortcut": {
     "enabled": "Enable Quick Commands",
-    "modifier": "Modifier keys",
-    "modifierTip": "Press modifier + key to trigger a command",
     "modifierConflict": "This modifier key conflicts with bookmark shortcuts",
-    "shortcutInInputElement": "Trigger in input",
-    "urlBlacklist": "Domain blacklist",
-    "binding": "Key bindings",
-    "currentBindings": "Current bindings",
-    "selectCommand": "Select command",
-    "noBindings": "No bindings yet",
-    "key": "Key",
-    "command": "Command",
-    "actions": "Actions",
-    "pressKeyHint": "Press the key to bind",
     "confirmDelete": "Remove the command binding for \"__key__\"?",
-    "alreadyBound": "__key__ already has a binding",
     "bindingTip": "Click a key to bind or modify a command",
     "toast": {
       "copyPageUrl": "Page URL copied",
@@ -485,12 +450,12 @@
   "about": {
     "tagline": "Visual keyboard shortcuts for bookmarks and commands, one-tap access with muscle memory",
     "userHelp": "Help Center",
-    "userGuide": "User Guide",
     "userDocs": "User Docs",
+    "userGuide": "User Guide",
     "guideInNewtab": "User guide is only available in the new tab page",
     "changelog": "Changelog",
     "feedback": "Feedback",
     "goodReview": "Rate Us",
-    "cannedHope": "Canned Hope"
+    "cannedHope": "Cat Food Fund"
   }
 }

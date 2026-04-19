@@ -154,7 +154,7 @@ watch(
         v-else-if="state.isNoPermission"
         class="folder__permission"
       >
-        <div class="folder__permission-text">{{ $t('permission.bookmark') }}</div>
+        <div class="folder__permission-text">{{ $t('browserPermission.bookmark') }}</div>
         <button
           class="folder__permission-btn"
           @click="requestBookmarkAccess"

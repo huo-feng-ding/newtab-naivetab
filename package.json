@@ -2,7 +2,7 @@
   "name": "newtab-naivetab",
   "displayName": "NaiveTab - Visual Keyboard New Tab",
   "type": "module",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "private": true,
   "packageManager": "pnpm@10.13.1",
   "description": "Visual keyboard for bookmarks & browser commands — one-press access. Drag & drop layout, full customization, focus mode, and cloud sync.",
@@ -17,9 +17,10 @@
     "build:js": "vite build --config vite.config.content.ts",
     "build:background": "vite build --config vite.config.background.ts",
     "build": "run-p build:chrome build:firefox",
-    "build:chrome": "cross-env NODE_ENV=production BROWSER=chrome BROWSER_DIR=extension-chrome run-s clear:chrome build:web build:js build:prepare build:background pack:chrome",
-    "build:chrome:debug": "cross-env NODE_ENV=production BROWSER=chrome BROWSER_DIR=extension-chrome NO_MINIFY=true run-s clear:chrome build:web build:js build:prepare build:background pack:chrome",
-    "build:firefox": "cross-env NODE_ENV=production BROWSER=firefox BROWSER_DIR=extension-firefox run-s clear:firefox build:web build:js build:prepare build:background pack:firefox",
+    "build:debug": "cross-env NODE_ENV=production BROWSER=chrome NO_MINIFY=true run-s clear:chrome build:web build:js build:prepare build:background",
+    "build:chrome": "cross-env NODE_ENV=production BROWSER=chrome run-s clear:chrome build:web build:js build:prepare build:background",
+    "build:firefox": "cross-env NODE_ENV=production BROWSER=firefox run-s clear:firefox build:web build:js build:prepare build:background",
+    "pack": "run-p pack:chrome pack:firefox",
     "pack:chrome": "jszip-cli add extension-chrome/* -o ./dist/naivetab-chrome.zip --ignore '.DS_Store' -f",
     "pack:firefox": "jszip-cli add extension-firefox/* -o ./dist/naivetab-firefox.zip --ignore '.DS_Store' -f",
     "clear": "run-p clear:chrome clear:firefox",
@@ -40,7 +41,8 @@
     "lunar-typescript": "^1.8.6",
     "naive-ui": "^2.44.1",
     "uuid": "^13.0.0",
-    "vue": "^3.5.32"
+    "vue": "^3.5.32",
+    "vue-virtual-scroller": "2.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
