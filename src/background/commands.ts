@@ -180,11 +180,11 @@ export const mergeAllWindows = async (_currentTabId: number) => {
     const tabIds = win.tabs.map((t) => t.id!).filter(Boolean)
     if (tabIds.length === 0) continue
 
-    chrome.tabs.move(tabIds, { windowId: targetId, index: -1 }).catch(logLastError)
-    chrome.windows.remove(win.id!).catch(logLastError)
+    await chrome.tabs.move(tabIds, { windowId: targetId, index: -1 }).catch(logLastError)
+    await chrome.windows.remove(win.id!).catch(logLastError)
   }
 
-  chrome.windows.update(targetId, { focused: true }).catch(logLastError)
+  await chrome.windows.update(targetId, { focused: true }).catch(logLastError)
 }
 
 // ── 标签组操作 ──────────────────────────────────────────────────────────────

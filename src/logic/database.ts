@@ -72,12 +72,13 @@ export const databaseStore = async (storeName: DatabaseStore, type: DatabaseHand
       throw new Error('Database is not initialized')
     }
 
-    const store = DB.transaction([storeName], 'readwrite').objectStore(storeName)
+    // get 用 readonly 减少锁竞争，put/add/delete 用 readwrite
+    const mode = type === 'get' ? 'readonly' : 'readwrite'
+    const store = DB.transaction([storeName], mode).objectStore(storeName)
     let request: IDBRequest<any> | null = null
     if (type === 'add') {
       request = store.add(payload)
     } else if (type === 'put') {
-      // 更新，第一次使用add，后续修改使用put
       request = store.put(payload)
     } else if (type === 'get') {
       request = store.get(payload as number | string)

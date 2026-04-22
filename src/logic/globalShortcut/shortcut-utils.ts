@@ -216,9 +216,39 @@ export function matchShortcut(
  * 避免两个独立 Port 连接到 SW 时，portMap 中同一个 tabId 的 entry 被覆盖。
  *
  * SW 端在 background/main.ts 的 onConnect 中接收。
+ * 断开后指数退避自动重连。
+ *
+ * SW 就绪状态管理：
+ * - 监听 INIT_COMPLETE 标记 swReady = true（SW 配置加载完成）
+ * - Port 断开时重置 swReady = false
+ * - 两个 handler 通过 isSwReady() 统一查询
  */
 
+import { MSG_INIT_COMPLETE } from '@/types/messages'
+
 let port: chrome.runtime.Port | null = null
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+let reconnectDelay = 100
+const MAX_RECONNECT_DELAY = 1000
+
+/** SW 初始化就绪状态，由 Port 消息监听统一管理 */
+let swReady = false
+
+const scheduleReconnect = () => {
+  if (reconnectTimer) return
+  reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null
+    reconnectDelay = 100
+    getSharedPort()
+  }, reconnectDelay)
+}
+
+/**
+ * 检查 SW 是否已完成初始化
+ * 书签/命令快捷键共用此状态，SW 未就绪时应提示用户
+ */
+export const isSwReady = () => swReady
 
 /**
  * 获取或创建共享 Port 连接
@@ -226,9 +256,17 @@ let port: chrome.runtime.Port | null = null
 export const getSharedPort = (): chrome.runtime.Port => {
   if (!port) {
     port = chrome.runtime.connect({ name: 'naivetab-shortcut' })
+    reconnectDelay = 100
+    port.onMessage.addListener((msg: { type: string }) => {
+      if (msg.type === MSG_INIT_COMPLETE) {
+        swReady = true
+      }
+    })
     port.onDisconnect.addListener(() => {
       void chrome.runtime.lastError
+      swReady = false
       port = null
+      scheduleReconnect()
     })
   }
   return port

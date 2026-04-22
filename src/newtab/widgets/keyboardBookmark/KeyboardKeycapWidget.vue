@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { getFaviconFromUrl } from '@/logic/bookmark'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '@/newtab/widgets/keyboard/logic'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '@/newtab/widgets/keyboardBookmark/logic'
 import { localConfig } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
@@ -28,7 +28,7 @@ const keycapLabel = computed(() => getCustomLabel(props.keyCode))
 const keycapName = computed(() => getKeycapName(props.keyCode))
 const keycapBookmarkUrl = computed(() => getKeycapUrl(props.keyCode))
 const keycapBookmarkType = computed(() => getKeycapBookmarkType(props.keyCode))
-const keycapVisualType = computed(() => localConfig.keyboard.keycapType)
+const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
 
 // title 用于鼠标悬浮提示，名称为空时不展示 tooltip，避免空提示框
 const keycapTitle = computed(() => {
@@ -104,11 +104,11 @@ const keycapStyle = computed(() => getEmphasisStyle(props.keyCode))
     :icon-style="keycapIconStyle"
     :img-draggable="false"
     :is-loading="keyboardState.isLoadPageLoading && keyboardState.currSelectKeyCode === keyCode"
-    :is-border-enabled="localConfig.keyboard.isKeycapBorderEnabled"
-    :show-cap-key="localConfig.keyboard.isCapKeyVisible"
-    :show-name="localConfig.keyboard.isNameVisible"
-    :show-favicon="localConfig.keyboard.isFaviconVisible"
-    :show-tactile-bumps="localConfig.keyboard.isTactileBumpsVisible"
+    :is-border-enabled="localConfig.keyboardCommon.isKeycapBorderEnabled"
+    :show-cap-key="localConfig.keyboardCommon.isCapKeyVisible"
+    :show-name="localConfig.keyboardCommon.isNameVisible"
+    :show-favicon="localConfig.keyboardCommon.isFaviconVisible"
+    :show-tactile-bumps="localConfig.keyboardCommon.isTactileBumpsVisible"
     :is-back-icon-visible="keyboardState.selectedFolderTitleStack.length !== 0"
     :class="rowKeycapClassName"
     :style="[keycapCssVars, keycapStyle]"

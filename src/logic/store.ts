@@ -14,7 +14,8 @@ import { SETTING_KEYBOARD_BASE_SIZE } from '@/setting/registry'
 
 type LocalConfigRefs = {
   general: ReturnType<typeof useStorageLocal<typeof defaultConfig['general']>>
-  commandShortcut: ReturnType<typeof useStorageLocal<typeof defaultConfig['commandShortcut']>>
+  keyboardCommon: ReturnType<typeof useStorageLocal<typeof defaultConfig['keyboardCommon']>>
+  keyboardCommand: ReturnType<typeof useStorageLocal<typeof defaultConfig['keyboardCommand']>>
 } & {
   [K in keyof WidgetConfigByCode]: ReturnType<typeof useStorageLocal<WidgetConfigByCode[K]>>
 }
@@ -26,7 +27,8 @@ const useWidgetStorageLocal = <K extends keyof WidgetConfigByCode>(key: K) => {
 const createLocalConfig = (): LocalConfigRefs => {
   const res: any = {}
   res.general = useStorageLocal('c-general', defaultConfig.general)
-  res.commandShortcut = useStorageLocal('c-commandShortcut', defaultConfig.commandShortcut)
+  res.keyboardCommon = useStorageLocal('c-keyboardCommon', defaultConfig.keyboardCommon)
+  res.keyboardCommand = useStorageLocal('c-keyboardCommand', defaultConfig.keyboardCommand)
   const widgetNames = WIDGET_CODE_LIST
   for (const key of widgetNames) {
     res[key] = useWidgetStorageLocal(key)

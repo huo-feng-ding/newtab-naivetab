@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode } from '@/logic/moveable'
-import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET } from '@/logic/constants/keyboard'
-import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap } from '@/newtab/widgets/keyboard/logic'
+import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET } from '@/logic/keyboard/keyboard-constants'
+import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard/keyboard-layout'
+import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap } from '@/newtab/widgets/keyboardBookmark/logic'
 import { getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
-import KeyboardKeycapWidget from './components/KeyboardKeycapWidget.vue'
+import KeyboardKeycapWidget from './KeyboardKeycapWidget.vue'
 import { WIDGET_CODE } from './config'
 
 const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
@@ -57,8 +57,8 @@ watch(
 )
 
 const containerClass = computed(() => ({
-  'keyboard__container--drag': isDragMode.value,
-  'keyboard__container--hover': !isDragMode.value,
+  'keyboardBookmark__container--drag': isDragMode.value,
+  'keyboardBookmark__container--hover': !isDragMode.value,
 }))
 
 </script>
@@ -70,7 +70,7 @@ const containerClass = computed(() => ({
       :rows="currKeyboardConfig.list"
       :extra-class="containerClass"
       :style="keyboardStyle"
-      class="keyboard__container"
+      class="keyboardBookmark__container"
     >
       <template #keycap="{ code }">
         <KeyboardKeycapWidget :key-code="code" />
@@ -80,20 +80,20 @@ const containerClass = computed(() => ({
 </template>
 
 <style>
-#keyboard {
+#keyboardBookmark {
   user-select: none;
 
-  .keyboard__container {
+  .keyboardBookmark__container {
     z-index: 10;
     position: absolute;
     overflow: hidden;
   }
 
-  .keyboard__container--hover {
+  .keyboardBookmark__container--hover {
     cursor: pointer;
   }
 
-  .keyboard__container--drag {
+  .keyboardBookmark__container--drag {
     background-color: transparent !important;
     &:hover {
       background-color: var(--nt-k-bg-moveable-widget-main) !important;

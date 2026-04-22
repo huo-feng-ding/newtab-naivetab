@@ -4,6 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover" />
+  <!--
+    首屏背景色：JS 执行前立即生效，与默认配置一致（#e8ecf1 / #1a1a2e），
+    消除浏览器默认白/黑背景跳变。JS 加载后 --nt-bg-main 变量通过 global.css 覆盖此值。
+  -->
+  <style>body{background-color:#e8ecf1}@media(prefers-color-scheme:dark){body{background-color:#1a1a2e}}</style>
 </head>
 
 <body>

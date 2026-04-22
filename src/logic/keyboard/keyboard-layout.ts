@@ -403,7 +403,7 @@ export const currKeyboardConfig = computed(() => {
     customSpace3?: {
       [key: string]: KeyboardConfigItem
     }
-  } = KEYBOARD_TYPE_CONFIG[localConfig.keyboard.keyboardType]
+  } = KEYBOARD_TYPE_CONFIG[localConfig.keyboardCommon.keyboardType]
   // 使用key61兜底
   if (!target) {
     target = KEYBOARD_TYPE_CONFIG.key61
@@ -440,8 +440,8 @@ export const currKeyboardConfig = computed(() => {
     // split space
     const lastRowKeyList = target.list[target.list.length - 1]
     const spaceIndex = lastRowKeyList.findIndex((text) => text === 'Space')
-    const spaceConfig = SPLIT_SPACES_CONFIG_MAP[localConfig.keyboard.splitSpace]
-    if (spaceConfig && localConfig.keyboard.splitSpace !== 'space1' && spaceIndex !== -1) {
+    const spaceConfig = SPLIT_SPACES_CONFIG_MAP[localConfig.keyboardCommon.splitSpace]
+    if (spaceConfig && localConfig.keyboardCommon.splitSpace !== 'space1' && spaceIndex !== -1) {
       lastRowKeyList.splice(spaceIndex + 1, 0, ...spaceConfig.keyList)
       target.custom = {
         ...target.custom,

@@ -14,11 +14,11 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null
  * CS 环境没有 Vue i18n，通过 navigator.language 自行推导。
  */
 const MESSAGES = {
-  'commandShortcut.toast.copyPageUrl': {
+  'keyboardCommand.toast.copyPageUrl': {
     'zh-CN': '已复制-页面URL',
     'en-US': 'Page URL copied',
   },
-  'commandShortcut.toast.copyPageTitle': {
+  'keyboardCommand.toast.copyPageTitle': {
     'zh-CN': '已复制-页面标题',
     'en-US': 'Page title copied',
   },

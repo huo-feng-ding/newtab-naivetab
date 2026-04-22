@@ -43,7 +43,7 @@ const focusElementList = computed(() => [
   { label: window.$t('generalSetting.focusRoot'), value: 'root' },
   { label: window.$t('setting.search'), value: 'search' },
   { label: window.$t('setting.memo'), value: 'memo' },
-  { label: window.$t('setting.keyboard'), value: 'keyboard' },
+  { label: window.$t('setting.keyboardBookmark'), value: 'keyboardBookmark' },
 ])
 
 const loadPageAnimationTypeList = computed(() => [

@@ -14,7 +14,7 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
     <!-- 尺寸与形状 -->
     <NFormItem :label="`${$t('common.margin')}`">
       <SliderInput
-        v-model="localConfig.keyboard.keycapPadding"
+        v-model="localConfig.keyboardCommon.keycapPadding"
         :step="0.1"
         :min="0"
         :max="10"
@@ -23,7 +23,7 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 
     <NFormItem :label="`${$t('common.size')}`">
       <SliderInput
-        v-model="localConfig.keyboard.keycapSize"
+        v-model="localConfig.keyboardCommon.keycapSize"
         :step="1"
         :min="40"
         :max="150"
@@ -32,7 +32,7 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 
     <NFormItem :label="$t('common.borderRadius')">
       <SliderInput
-        v-model="localConfig.keyboard.keycapBorderRadius"
+        v-model="localConfig.keyboardCommon.keycapBorderRadius"
         :step="0.1"
         :min="0"
         :max="100"
@@ -41,7 +41,7 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 
     <NFormItem :label="$t('common.blur')">
       <SliderInput
-        v-model="localConfig.keyboard.keycapBackgroundBlur"
+        v-model="localConfig.keyboardCommon.keycapBackgroundBlur"
         :step="0.1"
         :min="0"
         :max="30"
@@ -53,15 +53,15 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
       class="n-form-item--color"
     >
       <NSwitch
-        v-model:value="localConfig.keyboard.isKeycapBorderEnabled"
+        v-model:value="localConfig.keyboardCommon.isKeycapBorderEnabled"
         size="small"
       />
       <CustomColorPicker
-        v-model:value="localConfig.keyboard.keycapBorderColor[localState.currAppearanceCode]"
+        v-model:value="localConfig.keyboardCommon.keycapBorderColor[localState.currAppearanceCode]"
         class="setting__item-ele setting__item-ml"
       />
       <NInputNumber
-        v-model:value="localConfig.keyboard.keycapBorderWidth"
+        v-model:value="localConfig.keyboardCommon.keycapBorderWidth"
         class="setting__item-ele setting__item-ml setting__input-number"
         size="small"
         :step="1"
@@ -72,24 +72,24 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 
     <!-- 键帽内容 -->
     <NDivider title-placement="left">
-      {{ $t('keyboard.keycap') }}
+      {{ $t('keyboardCommon.keycap') }}
     </NDivider>
 
-    <NFormItem :label="`${$t('keyboard.keycap')}${$t('common.font')}`">
+    <NFormItem :label="`${$t('keyboardCommon.keycap')}${$t('common.font')}`">
       <NSwitch
-        v-model:value="localConfig.keyboard.isCapKeyVisible"
+        v-model:value="localConfig.keyboardCommon.isCapKeyVisible"
         size="small"
       />
-      <template v-if="localConfig.keyboard.isCapKeyVisible">
+      <template v-if="localConfig.keyboardCommon.isCapKeyVisible">
         <NSelect
-          v-model:value="localConfig.keyboard.keycapKeyFontFamily"
+          v-model:value="localConfig.keyboardCommon.keycapKeyFontFamily"
           class="setting__item-ml"
           size="small"
           :options="availableFontOptions"
           :render-label="fontSelectRenderLabel"
         />
         <NInputNumber
-          v-model:value="localConfig.keyboard.keycapKeyFontSize"
+          v-model:value="localConfig.keyboardCommon.keycapKeyFontSize"
           class="setting__item-ele setting__item-ml setting__input-number"
           size="small"
           :step="1"
@@ -101,13 +101,13 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
 
     <NFormItem :label="`${$t('common.icon')}${$t('common.size')}`">
       <NSwitch
-        v-model:value="localConfig.keyboard.isFaviconVisible"
+        v-model:value="localConfig.keyboardCommon.isFaviconVisible"
         size="small"
       />
-      <template v-if="localConfig.keyboard.isFaviconVisible">
+      <template v-if="localConfig.keyboardCommon.isFaviconVisible">
         <div class="setting__item-ml setting__slider-wrap">
           <SliderInput
-            v-model="localConfig.keyboard.faviconSize"
+            v-model="localConfig.keyboardCommon.faviconSize"
             :step="0.01"
             :min="0"
             :max="1"
@@ -116,21 +116,21 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
       </template>
     </NFormItem>
 
-    <NFormItem :label="`${$t('keyboard.nameLabel')}${$t('common.font')}`">
+    <NFormItem :label="`${$t('keyboardCommon.nameLabel')}${$t('common.font')}`">
       <NSwitch
-        v-model:value="localConfig.keyboard.isNameVisible"
+        v-model:value="localConfig.keyboardCommon.isNameVisible"
         size="small"
       />
-      <template v-if="localConfig.keyboard.isNameVisible">
+      <template v-if="localConfig.keyboardCommon.isNameVisible">
         <NSelect
-          v-model:value="localConfig.keyboard.keycapBookmarkFontFamily"
+          v-model:value="localConfig.keyboardCommon.keycapBookmarkFontFamily"
           class="setting__item-ml"
           size="small"
           :options="availableFontOptions"
           :render-label="fontSelectRenderLabel"
         />
         <NInputNumber
-          v-model:value="localConfig.keyboard.keycapBookmarkFontSize"
+          v-model:value="localConfig.keyboardCommon.keycapBookmarkFontSize"
           class="setting__item-ele setting__item-ml setting__input-number"
           size="small"
           :step="1"
@@ -140,66 +140,66 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
       </template>
     </NFormItem>
 
-    <NFormItem :label="$t('keyboard.tactileBumps')">
+    <NFormItem :label="$t('keyboardCommon.tactileBumps')">
       <NSwitch
-        v-model:value="localConfig.keyboard.isTactileBumpsVisible"
+        v-model:value="localConfig.keyboardCommon.isTactileBumpsVisible"
         size="small"
       />
     </NFormItem>
 
     <!-- 颜色 -->
     <NDivider title-placement="left">
-      {{ `${$t('keyboard.keycap')}${$t('common.color')}` }}
+      {{ `${$t('keyboardCommon.keycap')}${$t('common.color')}` }}
     </NDivider>
 
-    <NFormItem :label="$t('keyboard.emphasisGroupNone')">
+    <NFormItem :label="$t('keyboardCommon.emphasisGroupNone')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.mainFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.mainFontColor[localState.currAppearanceCode]" />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.mainBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.mainBackgroundColor[localState.currAppearanceCode]" />
       </NFormItem>
     </NFormItem>
 
-    <NFormItem :label="$t('keyboard.emphasisGroupOne')">
+    <NFormItem :label="$t('keyboardCommon.emphasisGroupOne')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.emphasisOneFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisOneFontColor[localState.currAppearanceCode]" />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.emphasisOneBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisOneBackgroundColor[localState.currAppearanceCode]" />
       </NFormItem>
     </NFormItem>
 
-    <NFormItem :label="$t('keyboard.emphasisGroupTwo')">
+    <NFormItem :label="$t('keyboardCommon.emphasisGroupTwo')">
       <NFormItem
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.emphasisTwoFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisTwoFontColor[localState.currAppearanceCode]" />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboard.emphasisTwoBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisTwoBackgroundColor[localState.currAppearanceCode]" />
       </NFormItem>
     </NFormItem>
 
     <!-- 强调键分组 -->
     <NDivider title-placement="left">
-      {{ $t('keyboard.emphasisKeyGroup') }}
+      {{ $t('keyboardCommon.emphasisKeyGroup') }}
     </NDivider>
 
     <NFormItem :show-label="false">

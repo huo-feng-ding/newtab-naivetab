@@ -3,7 +3,7 @@ import { requestPermission } from '@/logic/storage'
 import { createTab, padUrlHttps } from '@/logic/util'
 import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
-import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard'
+import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard/keyboard-layout'
 import { localConfig } from '@/logic/store'
 
 export const state = reactive({
@@ -14,7 +14,7 @@ export const state = reactive({
 })
 
 export const getSystemBookmarkForKeyboard = async () => {
-  if (localConfig.keyboard.source !== 1) {
+  if (localConfig.keyboardBookmark.source !== 1) {
     return
   }
   try {
@@ -36,7 +36,7 @@ export const getSystemBookmarkForKeyboard = async () => {
         getSystemBookmarkForKeyboard()
       },
       onNegativeClick: () => {
-        localConfig.keyboard.source = 2
+        localConfig.keyboardBookmark.source = 2
       },
     })
   }
@@ -44,7 +44,7 @@ export const getSystemBookmarkForKeyboard = async () => {
 
 export const initKeyboardData = () => {
   getSystemBookmarkForKeyboard()
-  state.selectedFolderTitleStack = localConfig.keyboard.defaultExpandFolder ? [localConfig.keyboard.defaultExpandFolder] : []
+  state.selectedFolderTitleStack = localConfig.keyboardBookmark.defaultExpandFolder ? [localConfig.keyboardBookmark.defaultExpandFolder] : []
 }
 
 export const getDefaultBookmarkNameFromUrl = (url: string) => {
@@ -89,17 +89,17 @@ export const handleSpecialKeycapExec = (keyCode: string, keycapBookmarkType: Key
 }
 
 export const getBookmarkConfigName = (keyCode: string) => {
-  if (!localConfig.keyboard.keymap[keyCode]) {
+  if (!localConfig.keyboardBookmark.keymap[keyCode]) {
     return ''
   }
-  return (localConfig.keyboard.keymap[keyCode].name as string) || getDefaultBookmarkNameFromUrl(localConfig.keyboard.keymap[keyCode].url)
+  return (localConfig.keyboardBookmark.keymap[keyCode].name as string) || getDefaultBookmarkNameFromUrl(localConfig.keyboardBookmark.keymap[keyCode].url)
 }
 
 export const getBookmarkConfigUrl = (keyCode: string) => {
-  if (!localConfig.keyboard.keymap[keyCode]) {
+  if (!localConfig.keyboardBookmark.keymap[keyCode]) {
     return ''
   }
-  const url = localConfig.keyboard.keymap[keyCode].url
+  const url = localConfig.keyboardBookmark.keymap[keyCode].url
   if (url.length === 0) {
     return ''
   }
@@ -107,9 +107,9 @@ export const getBookmarkConfigUrl = (keyCode: string) => {
 }
 
 export const getKeycapBookmarkType = (keyCode: string): KeycapBookmarkType => {
-  if (localConfig.keyboard.source !== 1) {
-    if (!localConfig.keyboard.keymap[keyCode]) return 'none'
-    const url = localConfig.keyboard.keymap[keyCode].url
+  if (localConfig.keyboardBookmark.source !== 1) {
+    if (!localConfig.keyboardBookmark.keymap[keyCode]) return 'none'
+    const url = localConfig.keyboardBookmark.keymap[keyCode].url
     return url.length === 0 ? 'none' : 'mark'
   }
   const targetIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
@@ -122,7 +122,7 @@ export const getKeycapBookmarkType = (keyCode: string): KeycapBookmarkType => {
 }
 
 export const getKeycapName = (keyCode: string) => {
-  if (localConfig.keyboard.source === 1) {
+  if (localConfig.keyboardBookmark.source === 1) {
     const targetIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
     if (targetIndex === 0) {
       const folders = state.selectedFolderTitleStack.length
@@ -134,7 +134,7 @@ export const getKeycapName = (keyCode: string) => {
 }
 
 export const getKeycapUrl = (keyCode: string) => {
-  if (localConfig.keyboard.source === 1) {
+  if (localConfig.keyboardBookmark.source === 1) {
     const targetIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
     const bookmarkItem = currFolderBookmarks.value[targetIndex - 1] || {}
     const isFolder = Object.prototype.hasOwnProperty.call(bookmarkItem, 'children')
@@ -153,13 +153,13 @@ const delayResetPressKey = () => {
 
 export const openPage = (url: string, isBgOpen = false, isNewTabOpen = false) => {
   if (url.length === 0) return
-  gaProxy('click', ['keyboard', 'openPage'])
+  gaProxy('click', ['keyboardBookmark', 'openPage'])
   if (isBgOpen) {
     createTab(url, false)
     delayResetPressKey()
     return
   }
-  if (isNewTabOpen || localConfig.keyboard.isNewTabOpen || !/http/.test(url)) {
+  if (isNewTabOpen || localConfig.keyboardBookmark.isNewTabOpen || !/http/.test(url)) {
     createTab(url)
     delayResetPressKey()
     return
@@ -185,9 +185,9 @@ const refreshKeyboardData = () => {
   getSystemBookmarkForKeyboard()
 }
 
-addPageFocusTask('keyboard', refreshKeyboardData)
+addPageFocusTask('keyboardBookmark', refreshKeyboardData)
 
-addVisibilityTask('keyboard', (hidden) => {
+addVisibilityTask('keyboardBookmark', (hidden) => {
   if (hidden) return
   refreshKeyboardData()
 })

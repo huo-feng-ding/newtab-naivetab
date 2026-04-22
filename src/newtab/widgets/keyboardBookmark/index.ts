@@ -8,5 +8,5 @@ export default {
   config: WIDGET_CONFIG,
   iconName: WIDGET_ICON_META[WIDGET_CODE].iconName,
   iconSize: WIDGET_ICON_META[WIDGET_CODE].widgetSize,
-  widgetLabel: 'setting.keyboard',
+  widgetLabel: 'setting.keyboardBookmark',
 }

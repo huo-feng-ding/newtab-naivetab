@@ -31,7 +31,7 @@ const props = defineProps({
   },
 })
 
-const isHasImage = computed(() => (props.data.url && props.data.url.length !== 0) || (props.data.name && props.data.name.length !== 0))
+const hasImage = computed(() => (props.data.url && props.data.url.length !== 0) || (props.data.name && props.data.name.length !== 0))
 
 const isToolbarVisible = computed(() => props.data.name && props.data.name.length !== 0)
 
@@ -137,7 +137,7 @@ const cssVars = computed(() => ({
   >
     <NSpin :show="isCurrSelectedImage && isImageLoading">
       <div
-        v-if="!isHasImage || isImageError"
+        v-if="!hasImage || isImageError"
         class="image__empty"
       >
         <Icon :icon="ICONS.imageSquare" />

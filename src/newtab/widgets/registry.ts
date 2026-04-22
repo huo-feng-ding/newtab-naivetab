@@ -1,6 +1,6 @@
 import type { DefineComponent } from 'vue'
 import { WIDGET_CODE_LIST } from './codes'
-import type { TWidgetConfig as KeyboardConfig } from './keyboard/config'
+import type { TWidgetConfig as KeyboardBookmarkConfig } from './keyboardBookmark/config'
 import type { TWidgetConfig as BookmarkFolderConfig } from './bookmarkFolder/config'
 import type { TWidgetConfig as CalendarConfig } from './calendar/config'
 import type { TWidgetConfig as SearchConfig } from './search/config'
@@ -17,7 +17,7 @@ import type { TWidgetConfig as CountdownConfig } from './countdown/config'
 
 // @@@@ add widget registry
 export type WidgetConfigByCode = {
-  keyboard: KeyboardConfig
+  keyboardBookmark: KeyboardBookmarkConfig
   bookmarkFolder: BookmarkFolderConfig
   calendar: CalendarConfig
   search: SearchConfig

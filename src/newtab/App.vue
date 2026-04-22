@@ -13,7 +13,7 @@ import { getStyleField, localConfig, nativeUILang, currTheme, themeOverrides } f
 import { handleAppUpdate } from '@/logic/config-update'
 import { initBackgroundImage } from '@/logic/image'
 import { cleanupEvents, cleanupResizeObserver } from '@/logic/moveable'
-import { initKeyboardData } from '@/newtab/widgets/keyboard/logic'
+import { initKeyboardData } from '@/newtab/widgets/keyboardBookmark/logic'
 import { updatePoetry } from '@/logic/poetry'
 import Content from '@/newtab/Content.vue'
 
@@ -27,13 +27,17 @@ const appStyle = computed(() => {
   }
 })
 
-if (localConfig.general.openPageFocusElement !== 'default') {
-  if (location.search !== '?focus') {
-    location.search = '?focus'
-    // 设置 query 参数后中断组件初始化，页面将以 ?focus 参数重新加载
-    // 此 throw 是预期行为，非 bug
-    throw new Error('[NAIVETAB] Reloading page with ?focus query for focus element initialization')
-  }
+/**
+ * 焦点元素重载守卫
+ * 当用户配置了非默认的页面焦点元素时，通过 ?focus 参数触发页面重载。
+ * 新标签页打开时浏览器会先聚焦地址栏，直接调用 focus() 会被浏览器拦截或覆盖。
+ * 设置 location.search 后浏览器自动重载，页面以 ?focus 参数重新初始化，
+ * 此时 handleFocusPage 通过 setTimeout 延迟执行，确保浏览器完成地址栏聚焦后再转移焦点。
+ * 用 v-if 静默中断渲染，替代旧版 throw new Error 避免控制台报错。
+ */
+const shouldReloadForFocus = localConfig.general.openPageFocusElement !== 'default' && location.search !== '?focus'
+if (shouldReloadForFocus) {
+  location.search = '?focus'
 }
 
 const handleFocusPage = () => {
@@ -119,22 +123,42 @@ onUnmounted(() => {
   cleanupResizeObserver()
 })
 
+/**
+ * 页面入场动画控制：动画播放完毕后通过 animationend 事件移除 class。
+ *
+ * 根因：animation: ... forwards 会在动画结束后保留最终样式（如 transform: scale(1)）。
+ * 在 Chrome 扩展新标签页环境中，反复刷新页面时浏览器可能复用底层 DOM 树，
+ * 旧的 transform 残存状态与新的动画叠加，导致视觉上不断缩小。
+ *
+ * 修复：动画完成后移除动画 class，让元素回归无 transform 的自然状态，
+ * 避免 forwards 残存值与下一次动画叠加。
+ */
+const animationApplied = ref(false)
 const pageAnimationClass = computed(() => {
   if (!localConfig.general.isLoadPageAnimationEnabled) {
     return ''
   }
+  if (animationApplied.value) {
+    return ''
+  }
   return `animation--${localConfig.general.loadPageAnimationType}`
 })
+
+const onAnimationEnd = () => {
+  animationApplied.value = true
+}
 </script>
 
 <template>
   <NConfigProvider
+    v-if="!shouldReloadForFocus"
     id="container"
     :class="pageAnimationClass"
     :locale="nativeUILang"
     :theme="currTheme"
     :theme-overrides="themeOverrides"
     :style="appStyle"
+    @animationend="onAnimationEnd"
   >
     <NDialogProvider>
       <NNotificationProvider>

@@ -4,15 +4,54 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { LOCAL_BACKGROUND_IMAGE_MAX_SIZE_M, SECOND_MODAL_WIDTH } from '@/logic/constants/app'
-import { databaseStore } from '@/logic/database'
-import { compressedImageUrlToBase64 } from '@/logic/util'
 import { localConfig, localState } from '@/logic/store'
-import { BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
-import { previewImageListMap, imageLocalState, imageState, isImageLoading, isImageListLoading, updateBingImages, updatePexelsImages } from '@/logic/image'
+import { BACKGROUND_IMAGE_SOURCE, IMAGE_NETWORK_SOURCE } from '@/logic/constants/image'
+import { previewImageListMap, imageLocalState, imageState, isImageLoading, isImageGalleryLoading, updateBingImages, updatePexelsImages, getImageUrlFromName, storeLocalBackgroundImage } from '@/logic/image'
 import { getPexelsImagesData } from '@/api/image'
 import { log } from '@/logic/util'
 import Tips from '@/components/Tips.vue'
 import BackgroundDrawerImageElement from './BackgroundDrawerImageElement.vue'
+
+/**
+ * 当前背景图的实际预览 URL，根据来源类型动态计算：
+ * - LOCAL: 使用 imageState.previewImageUrl（base64 小图，上传时立即设置）
+ * - NETWORK + 自定义 URL: 使用用户配置的 URL
+ * - NETWORK / BING_PHOTO（非自定义）: 通过 networkSourceType + name 拼接网络 URL
+ * 避免来源切换时 previewImageUrl 显示过期图片。
+ */
+const currentBackgroundPreviewUrl = computed(() => {
+  const source = localConfig.general.backgroundImageSource
+
+  // 本地上传：previewImageUrl 由文件选择器直接设置
+  if (source === BACKGROUND_IMAGE_SOURCE.LOCAL) {
+    return imageState.previewImageUrl
+  }
+
+  // 网络来源
+  if (source === BACKGROUND_IMAGE_SOURCE.NETWORK) {
+    // 自定义 URL 优先
+    if (localConfig.general.isBackgroundImageCustomUrlEnabled) {
+      return localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode] || ''
+    }
+    // Bing/Pexels 图库：从配置的图片名拼接 URL
+    const name = localConfig.general.backgroundImageNames?.[localState.value.currAppearanceCode]
+    if (name) {
+      return getImageUrlFromName(localConfig.general.backgroundNetworkSourceType, name)
+    }
+    return ''
+  }
+
+  // 每日一图（Bing）：取今日图片 URL
+  if (source === BACKGROUND_IMAGE_SOURCE.BING_PHOTO) {
+    const todayImage = imageLocalState.value.bing.list[0]
+    if (todayImage?.name) {
+      return getImageUrlFromName(IMAGE_NETWORK_SOURCE.BING, todayImage.name)
+    }
+    return ''
+  }
+
+  return ''
+})
 
 type ImageRow = {
   items: Array<TImage.BaseImageItem>
@@ -89,39 +128,15 @@ const onBackgroundImageFileChange = async (e: Event) => {
     window.$message.error(window.$t('prompts.imageTooLarge'))
     return
   }
-  // 释放旧的 ObjectURL
-  if (imageState.currBackgroundImageFileObjectURL) {
-    URL.revokeObjectURL(imageState.currBackgroundImageFileObjectURL)
-  }
-  const imageUrl = URL.createObjectURL(file)
-  imageState.currBackgroundImageFileName = file.name
-  imageState.currBackgroundImageFileObjectURL = imageUrl
-  const smallBase64 = await compressedImageUrlToBase64(imageUrl)
-  localStorage.setItem('l-firstScreen', smallBase64)
-  // store DB
-  let handleType: DatabaseHandleType = 'add'
-  const currAppearanceImage = await databaseStore('localBackgroundImages', 'get', localState.value.currAppearanceCode)
-  if (currAppearanceImage) {
-    handleType = 'put' // 更新，第一次使用add，后续修改使用put
-  }
-  databaseStore('localBackgroundImages', handleType, {
-    appearanceCode: localState.value.currAppearanceCode,
-    file,
-    smallBase64,
-  })
-  // 当只单独设置了浅色or深色外观的背景时，默认同步另一外观为相同的背景
-  const oppositeAppearanceImage = await databaseStore('localBackgroundImages', 'get', +!localState.value.currAppearanceCode)
-  if (oppositeAppearanceImage) {
-    return
-  }
-  databaseStore('localBackgroundImages', 'add', {
-    appearanceCode: +!localState.value.currAppearanceCode,
-    file,
-    smallBase64,
-  })
+  await storeLocalBackgroundImage(file)
 }
 
-// 确保协议为https，否则会导致报错 Tainted canvases may not be exported
+/**
+ * 强制将自定义图片 URL 转为 https。
+ * 这是预期设计而非 BUG：背景图需经过 canvas 压缩处理，http 图片在 https 页面中
+ * 会触发 "Tainted canvases may not be exported" 跨域错误，导致压缩失败。
+ * 因此用户输入 http:// 时会被自动升级，不支持 http-only 的图床。
+ */
 const handleCustomUrlStartWithHttps = () => {
   let url = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode]
   // 去掉可能的协议前缀后补 https
@@ -290,7 +305,7 @@ const loadMorePexels = async () => {
                   <BackgroundDrawerImageElement
                     :lazy="false"
                     :data="{
-                      url: imageState.currBackgroundImageFileObjectURL,
+                      url: currentBackgroundPreviewUrl,
                     }"
                   />
                 </NSpin>
@@ -302,7 +317,7 @@ const loadMorePexels = async () => {
         <!-- list 仅来源为网络 且 非定制Url时展示 -->
         <NSpin
           v-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK && !localConfig.general.isBackgroundImageCustomUrlEnabled"
-          :show="isImageListLoading"
+          :show="isImageGalleryLoading"
           class="image-list__spin"
         >
           <NTabs

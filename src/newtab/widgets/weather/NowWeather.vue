@@ -5,7 +5,7 @@ import { WEATHER_TEMPERATURE_UNIT_MAP, WEATHER_SPEED_UNIT_MAP } from '@/logic/co
 import { URL_QWEATHER_HOME } from '@/logic/constants/urls'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
-import { localConfig, getStyleField, globalState } from '@/logic/store'
+import { localConfig, localState, getStyleField, globalState } from '@/logic/store'
 import { weatherState, weatherIndicesInfo, weatherWarningInfo } from '@/newtab/widgets/weather/logic'
 import { WIDGET_CODE } from './config'
 
@@ -42,7 +42,7 @@ onMounted(() => {
 const isWeatherWarning = computed(() => weatherState.value.warning.list.length > 0)
 
 const warningVisible = computed(() => {
-  if (isDragMode.value || localConfig.general.isFocusMode || globalState.isSettingDrawerVisible) {
+  if (isDragMode.value || localState.value.isFocusMode || globalState.isSettingDrawerVisible) {
     return false
   }
   return state.isWarningVisible || weatherState.value.state.isWarningVisible

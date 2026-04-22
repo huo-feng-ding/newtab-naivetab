@@ -1,6 +1,5 @@
 import { h } from 'vue'
 import { NButton } from 'naive-ui'
-import { useStorageLocal } from '@/composables/useStorageLocal'
 import { defaultConfig, defaultLocalState, defaultFocusVisibleWidgetMap } from '@/logic/config'
 import { log, compareLeftVersionLessThanRightVersions } from '@/logic/util'
 import { type WidgetCodes } from '@/newtab/widgets/codes'
@@ -111,9 +110,9 @@ export const handleAppUpdate = () => {
   log('Get new version', window.appVersion)
   // @@@@ 更新localConfig后需要手动处理新版本变更的本地数据结构
   if (compareLeftVersionLessThanRightVersions(version, '1.20.0')) {
-    const keymapLength = Object.keys(localConfig.keyboard.keymap).length
-    localConfig.keyboard.source = keymapLength === 0 ? 1 : 2
-    localConfig.keyboard.defaultExpandFolder = null
+    const keymapLength = Object.keys(localConfig.keyboardBookmark.keymap).length
+    localConfig.keyboardBookmark.source = keymapLength === 0 ? 1 : 2
+    localConfig.keyboardBookmark.defaultExpandFolder = null
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.21.0')) {
     localConfig.search.isNewTabOpen = false
@@ -136,32 +135,23 @@ export const handleAppUpdate = () => {
     localConfig.calendar.festivalCountdown = true
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.27.0')) {
-    localConfig.general.isFocusMode = false
+    localState.value.isFocusMode = false
     localConfig.general.focusVisibleWidgetMap = defaultFocusVisibleWidgetMap
     if ((localConfig.general.openPageFocusElement as any) === 'bookmarkKeyboard') {
-      localConfig.general.openPageFocusElement = 'keyboard'
+      localConfig.general.openPageFocusElement = 'keyboardBookmark'
     }
     localConfig.calendar.backgroundBlur = defaultConfig.calendar.backgroundBlur
     localConfig.memo.backgroundBlur = defaultConfig.memo.backgroundBlur
     localConfig.news.backgroundBlur = defaultConfig.news.backgroundBlur
     localConfig.search.backgroundBlur = defaultConfig.search.backgroundBlur
     localConfig.yearProgress.backgroundBlur = defaultConfig.yearProgress.backgroundBlur
-    localConfig.keyboard.shellBackgroundBlur = defaultConfig.keyboard.shellBackgroundBlur
-    localConfig.keyboard.plateBackgroundBlur = defaultConfig.keyboard.plateBackgroundBlur
-    localConfig.keyboard.keycapBackgroundBlur = defaultConfig.keyboard.keycapBackgroundBlur
-    const oldBookmark = useStorageLocal('c-bookmark', defaultConfig.keyboard)
-    for (const key of Object.keys(defaultConfig.keyboard)) {
-      if (oldBookmark.value[key]) {
-        localConfig.keyboard[key] = oldBookmark.value[key]
-      }
-    }
     localConfig.bookmarkFolder.enabled = false
   }
   if (compareLeftVersionLessThanRightVersions(version, '2.0.0')) {
     localConfig.clockFlip.enabled = false
   }
   if (compareLeftVersionLessThanRightVersions(version, '2.2.0')) {
-    localConfig.keyboard.isGlobalShortcutEnabled = (localConfig.keyboard as any).isListenBackgroundKeystrokes ?? true
+    localConfig.keyboardBookmark.isGlobalShortcutEnabled = (localConfig.keyboardBookmark as any).isListenBackgroundKeystrokes ?? true
     // 全局快捷键架构变更（浏览器原生 → 扩展内部控制），老用户需重新配置修饰键
     // 修饰键从字符串改为数组的迁移在 handleStateResetAndUpdate 中处理
     localConfig.general.showBreakingChangeNotice = true
@@ -179,6 +169,48 @@ export const handleAppUpdate = () => {
     }
     if (localConfig.calendar.descFontFamily === 'Arial') {
       localConfig.calendar.descFontFamily = 'system'
+    }
+  }
+  if (compareLeftVersionLessThanRightVersions(version, '2.2.2')) {
+    localConfig.general.focusVisibleWidgetMap = defaultFocusVisibleWidgetMap
+    // openPageFocusElement 修正
+    if ((localConfig.general.openPageFocusElement as any) === 'keyboard') {
+      localConfig.general.openPageFocusElement = 'keyboardBookmark'
+    }
+    // keyboard → keyboardBookmark
+    const localKeyboardData = localStorage.getItem('c-keyboard')
+    if (localKeyboardData) {
+      const localKeyboardConfig = JSON.parse(localKeyboardData)
+      const keyboardBookmarkFields = Object.keys(defaultConfig.keyboardBookmark)
+      for (const field of keyboardBookmarkFields) {
+        localConfig.keyboardBookmark[field] = localKeyboardConfig[field]
+      }
+
+      const keyboardCommonFields = Object.keys(defaultConfig.keyboardCommon)
+      for (const field of keyboardCommonFields) {
+        localConfig.keyboardCommon[field] = localKeyboardConfig[field]
+      }
+      localStorage.removeItem('c-keyboard')
+    }
+    // commandShortcut → keyboardCommand
+    const localCommandShortcutData = localStorage.getItem('c-commandShortcut')
+    if (localCommandShortcutData) {
+      const localCommandShortcutConfig = JSON.parse(localCommandShortcutData)
+      const keyboardCommandFields = Object.keys(defaultConfig.keyboardCommand)
+      for (const field of keyboardCommandFields) {
+        localConfig.keyboardCommand[field] = localCommandShortcutConfig[field]
+      }
+      localStorage.removeItem('c-commandShortcut')
+    }
+
+    /**
+     * isFocusMode 从 localConfig.general（云同步）迁移到 localState（仅本地）
+     * 保留用户当前的专注模式状态，不重置为 false
+     */
+    const oldFocusMode = (localConfig.general as any).isFocusMode
+    if (oldFocusMode !== undefined) {
+      localState.value.isFocusMode = oldFocusMode
+      delete (localConfig.general as any).isFocusMode
     }
   }
 

@@ -37,9 +37,9 @@ const {
 } = useKeyboardStyle(props.unit, props.baseSize)
 
 // ── 显示开关 ─────────────────────────────────────────────────────────────────
-const isShellVisible = computed(() => localConfig.keyboard.isShellVisible)
-const isShellShadowEnabled = computed(() => localConfig.keyboard.isShellShadowEnabled)
-const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
+const isShellVisible = computed(() => localConfig.keyboardCommon.isShellVisible)
+const isShellShadowEnabled = computed(() => localConfig.keyboardCommon.isShellShadowEnabled)
+const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
 </script>
 
 <template>
@@ -111,6 +111,8 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
         background: var(--nt-kb-plate-color);
         border-radius: var(--nt-kb-plate-radius);
         backdrop-filter: blur(var(--nt-kb-plate-blur));
+        /* 顶部内发光，模拟哑光金属/PCB 定位板的物理质感 */
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
       }
     }
   }
@@ -118,15 +120,40 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
 
 /* ── Shell 外壳（isShellVisible = true） ─────────────────────────────────── */
 .keyboard-layout--shell {
+  position: relative;
   padding: var(--nt-kb-shell-v-padding) var(--nt-kb-shell-h-padding);
   border-radius: var(--nt-kb-shell-radius);
   background-color: var(--nt-kb-shell-color) !important;
   backdrop-filter: blur(var(--nt-kb-shell-blur));
+  -webkit-backdrop-filter: blur(var(--nt-kb-shell-blur));
   /* 模拟玻璃质感的四边高光/阴影 */
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   border-left: 1px solid rgba(255, 255, 255, 0.10);
   border-right: 1px solid rgba(0, 0, 0, 0.10);
   border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+
+  /* 顶部内高光渐变（集中在中段1/3區域，模拟玻璃光泽自然的中心聚光） */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+
+  /* 表面光泽（径向渐变模拟环境光反射） */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
 }
 
 /* ── Shell 立体阴影（isShellShadowEnabled = true，叠加在 --shell 上） ─────── */
@@ -143,6 +170,8 @@ const isPlateVisible = computed(() => localConfig.keyboard.isPlateVisible)
     0px 8px 24px var(--nt-kb-shell-shadow),
     0px 3px 8px var(--nt-kb-shell-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 0 28px color-mix(in srgb, var(--nt-kb-primary-color) 25%, transparent),
+    0 0 56px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent);
 }
 </style>

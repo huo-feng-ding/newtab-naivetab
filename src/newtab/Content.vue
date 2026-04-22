@@ -2,8 +2,8 @@
 import { useMessage, useNotification, useDialog, useLoadingBar } from 'naive-ui'
 import ChangelogModal from '@/components/ChangelogModal.vue'
 
-import BackgroundImg from '@/newtab/content/BackgroundImg.vue'
-import RightClickMenu from '@/newtab/content/RightClickMenu.vue'
+import BackgroundImg from '@/newtab/layers/BackgroundImg.vue'
+import RightClickMenu from '@/newtab/layers/RightClickMenu.vue'
 
 import DraftGuideLine from '@/newtab/draft/DraftGuideLine.vue'
 import DraftDrawer from '@/newtab/draft/DraftDrawer.vue'

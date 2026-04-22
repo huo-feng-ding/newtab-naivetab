@@ -860,7 +860,7 @@ export type KeycapThemeKey = keyof typeof KEYCAP_PREINSTALL_MAP
 
 export interface KeycapThemeGroup {
   key: string
-  /** i18n 路径，如 'keyboard.themeGroup.classic' */
+  /** i18n 路径，如 'keyboardCommon.themeGroup.classic' */
   labelKey: string
   themes: typeof KEYCAP_CLASSIC_MAP | typeof KEYCAP_ATMOSPHERE_MAP | typeof KEYCAP_STUDIO_MAP | typeof KEYCAP_PREMIUM_MAP
 }
@@ -868,22 +868,22 @@ export interface KeycapThemeGroup {
 export const KEYCAP_PREINSTALL_GROUPS: KeycapThemeGroup[] = [
   {
     key: 'classic',
-    labelKey: 'keyboard.themeGroup.classic',
+    labelKey: 'keyboardCommon.themeGroup.classic',
     themes: KEYCAP_CLASSIC_MAP,
   },
   {
     key: 'atmosphere',
-    labelKey: 'keyboard.themeGroup.atmosphere',
+    labelKey: 'keyboardCommon.themeGroup.atmosphere',
     themes: KEYCAP_ATMOSPHERE_MAP,
   },
   {
     key: 'studio',
-    labelKey: 'keyboard.themeGroup.studio',
+    labelKey: 'keyboardCommon.themeGroup.studio',
     themes: KEYCAP_STUDIO_MAP,
   },
   {
     key: 'premium',
-    labelKey: 'keyboard.themeGroup.premium',
+    labelKey: 'keyboardCommon.themeGroup.premium',
     themes: KEYCAP_PREMIUM_MAP,
   },
 ]

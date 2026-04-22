@@ -67,19 +67,6 @@
   --gray-alpha-75: rgba(128, 128, 128, 0.75);
   --gray-alpha-85: rgba(128, 128, 128, 0.85);
 
-  /* --- Default system colors before JS loads (avoid flash on load) */
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg-main: #ffffff;
-      --text-color-main: #2c3e50;
-    }
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg-main: #35363a;
-      --text-color-main: #ffffff;
-    }
-  }
 }
 
 /* --- Neutral Gray Alpha Tokens (Dark Mode Override) ---

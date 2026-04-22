@@ -51,8 +51,9 @@ export const SETTING_GROUPS: SettingGroup[] = [
   {
     labelKey: 'widgetGroup.keyboardAndBookmark',
     items: [
-      { code: 'commandShortcut', labelKey: 'setting.commandShortcut' },
-      { code: 'keyboard', labelKey: 'setting.keyboard' },
+      { code: 'keyboardCommon', labelKey: 'setting.keyboardCommon' },
+      { code: 'keyboardCommand', labelKey: 'setting.keyboardCommand' },
+      { code: 'keyboardBookmark', labelKey: 'setting.keyboardBookmark' },
       { code: 'bookmarkFolder', labelKey: 'setting.bookmarkFolder' },
     ],
   },
@@ -85,10 +86,19 @@ export const SETTING_GROUPS: SettingGroup[] = [
 
 const SETTING_ORDER: settingPanes[] = SETTING_GROUPS.flatMap((g) => g.items.map((i) => i.code))
 
+/**
+ * 面板 code 与目录名的映射（当目录名与 code 不一致时使用）
+ */
+const PANE_DIR_MAP: Partial<Record<settingPanes, string>> = {
+  keyboardBookmark: 'keyboardBookmark',
+  keyboardCommand: 'keyboardCommand',
+}
+
 // 创建设置面板元数据
 const createSettingMeta = (item: SettingItem): SettingMeta => {
   const { code, labelKey } = item
   const iconMeta = SETTING_ICON_META[code]
+  const dirName = PANE_DIR_MAP[code] ?? code
   return {
     code,
     iconName: iconMeta.iconName,
@@ -98,7 +108,7 @@ const createSettingMeta = (item: SettingItem): SettingMeta => {
       loader: async () => {
         const label = `setting-pane-load-${code}`
         console.time(label)
-        const m = await import(`./panes/${code}/index.vue`)
+        const m = await import(`./panes/${dirName}/index.vue`)
         console.timeEnd(label)
         return m
       },

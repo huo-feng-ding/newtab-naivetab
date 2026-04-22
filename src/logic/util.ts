@@ -52,6 +52,12 @@ export const compareLeftVersionLessThanRightVersions = (leftVersion: string, rig
 export const downloadImageByUrl = async (url: string, filename = `${Date.now()}`) => {
   const image = await fetch(url)
   const imageBlog = await image.blob()
+  // 从 blob MIME 类型推导扩展名，确保下载文件可被系统识别
+  if (!filename.includes('.')) {
+    const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' }
+    const ext = extMap[imageBlog.type] || 'jpg'
+    filename = `${filename}.${ext}`
+  }
   const imageURL = window.URL.createObjectURL(imageBlog)
   const link = document.createElement('a')
   link.href = imageURL
@@ -75,6 +81,10 @@ export const urlToFile = (url: string, fileName: string): Promise<File> => {
     xhr.open('GET', url)
     xhr.setRequestHeader('Accept', 'image/jpeg')
     xhr.responseType = 'blob'
+    xhr.timeout = 30000
+    xhr.ontimeout = () => {
+      reject(new Error('Image download timeout'))
+    }
     xhr.onload = () => {
       const fileContent = xhr.response
       const targetFile = new File([fileContent], fileName, { type: 'image/jpeg' })
@@ -90,13 +100,13 @@ export const urlToFile = (url: string, fileName: string): Promise<File> => {
 export const urlToImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const imageEle = new Image()
+    imageEle.crossOrigin = 'anonymous'
     imageEle.onload = () => {
       resolve(imageEle)
     }
     imageEle.onerror = () => {
       reject(imageEle)
     }
-    imageEle.crossOrigin = 'anonymous'
     imageEle.src = url
   })
 }

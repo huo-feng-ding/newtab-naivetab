@@ -15,8 +15,11 @@ import type { TShortcutModifier } from './shortcut-utils'
 
 /**
  * 命令执行环境
+ * - 'sw'：Service Worker 直接执行（Chrome API 操作）
+ * - 'cs'：Content Script 执行（DOM 操作，由 SW 回传 EXECUTE_COMMAND）
+ * - 'newtab'：NaiveTab 页面本地执行（localConfig / globalState 操作，CS 侧忽略）
  */
-export type TCommandExecEnv = 'sw' | 'cs'
+export type TCommandExecEnv = 'sw' | 'cs' | 'newtab'
 
 /**
  * keymap 中的命令条目
@@ -28,7 +31,7 @@ export interface TCommandEntry {
 
 /**
  * 分类内命令条目
- * 默认 execEnv = 'sw'，只有 CS 命令需要显式标注
+ * 默认 execEnv = 'sw'，非 SW 命令需要显式标注 execEnv
  */
 export interface TCategoryCommand {
   command: TCommandName
@@ -37,9 +40,17 @@ export interface TCategoryCommand {
 
 /**
  * 命令分类（单一数据源，用于 Setting 面板分组展示）
- * 只有 CS 命令需要显式标注 execEnv: 'cs'，其余默认 'sw'
+ * 非 SW 命令需要显式标注 execEnv（'cs' 或 'newtab'），其余默认 'sw'
  */
 export const COMMAND_CATEGORIES = [
+  {
+    categoryKey: 'commandCategory.naiveTabControl',
+    commands: [
+      { command: 'toggleFocusMode', execEnv: 'newtab' },
+      { command: 'toggleDragMode', execEnv: 'newtab' },
+      { command: 'toggleSettingDrawer', execEnv: 'newtab' },
+    ] as const,
+  },
   {
     categoryKey: 'commandCategory.tabAction',
     commands: [
@@ -102,9 +113,16 @@ type TCsCommandName
     | 'reloadPage' | 'copyPageUrl' | 'copyPageTitle'
 
 /**
- * SW 命令名称（TCommandName 排除 CS 命令）
+ * NaiveTab 页面本地命令（与 COMMAND_CATEGORIES 中 execEnv: 'newtab' 的条目一致）
+ * 依赖 localConfig / globalState，只能在 newtab 页面执行；CS 侧静默忽略。
  */
-export type TSwCommandName = Exclude<TCommandName, TCsCommandName>
+export type TNewtabCommandName
+  = | 'toggleFocusMode' | 'toggleDragMode' | 'toggleSettingDrawer'
+
+/**
+ * SW 命令名称（TCommandName 排除 CS 命令和 newtab 命令）
+ */
+export type TSwCommandName = Exclude<TCommandName, TCsCommandName | TNewtabCommandName>
 
 /**
  * 从单一数据源派生 CS 命令列表（运行时值）
@@ -116,13 +134,23 @@ export const CS_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
 ) as unknown as readonly TCommandName[]
 
 /**
+ * NaiveTab 本地命令列表（运行时值）
+ */
+export const NEWTAB_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
+  c.commands
+    .filter((cmd) => typeof cmd === 'object' && 'execEnv' in cmd && cmd.execEnv === 'newtab')
+    .map((cmd) => (cmd as { command: string }).command),
+) as unknown as readonly TNewtabCommandName[]
+
+/**
  * 从 SW 命令列表派生运行时值
  */
 export const SW_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
   c.commands
     .filter((cmd) => {
       if (typeof cmd === 'string') return true
-      return !('execEnv' in cmd) || cmd.execEnv !== 'cs'
+      if (!('execEnv' in cmd)) return true
+      return cmd.execEnv !== 'cs' && cmd.execEnv !== 'newtab'
     })
     .map((cmd) => (typeof cmd === 'string' ? cmd : cmd.command)),
 ) as readonly TSwCommandName[]
@@ -133,6 +161,38 @@ export const SW_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
 const ALL_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
   c.commands.map((cmd) => (typeof cmd === 'string' ? cmd : cmd.command)),
 )
+
+/**
+ * 各执行环境命令实现说明
+ *
+ * CS 命令（execEnv: 'cs'）：
+ *   由 SW 通过 Port 回传 NAIVETAB_EXECUTE_COMMAND，CS 和 NewTab 各自在本地执行器中实现。
+ *
+ * | 命令            | CS 端实现 | NewTab 端实现 | 差异原因 |
+ * |-----------------|-----------|---------------|----------|
+ * | scrollUp        | ✅ 滚动容器 | ❌ 忽略       | NewTab 页面无可滚动内容 |
+ * | scrollDown      | ✅ 滚动容器 | ❌ 忽略       | 同上 |
+ * | scrollToTop     | ✅ 滚动容器 | ❌ 忽略       | 同上 |
+ * | scrollToBottom  | ✅ 滚动容器 | ❌ 忽略       | 同上 |
+ * | reloadPage      | ✅ location.reload() | ✅ location.reload() | 实现一致 |
+ * | copyPageUrl     | ✅ clipboard API + fallback textarea | ✅ clipboard API + $message | CS 端需 fallback 兼容旧环境 |
+ * | copyPageTitle   | ✅ clipboard API + fallback textarea | ✅ clipboard API + $message | 同上 |
+ *
+ * NaiveTab 本地命令（execEnv: 'newtab'）：
+ *   由 shortcut-executor.ts 中 newtabControlExecutors 直接执行，不经过 SW。
+ *   CS 侧收到此类命令时静默忽略（没有 localConfig，无法执行）。
+ *   SW 侧收到此类命令时也静默忽略（防御性保护）。
+ *
+ * | 命令                 | NewTab 端实现          | CS 端实现 |
+ * |----------------------|------------------------|-----------|
+ * | toggleFocusMode      | ✅ localConfig 切换    | ❌ 忽略   |
+ * | toggleDragMode       | ✅ toggleIsDragMode()  | ❌ 忽略   |
+ * | toggleSettingDrawer  | ✅ switchSettingDrawerVisible() | ❌ 忽略 |
+ *
+ * 新增 CS 命令时，必须在此表追加对应行并在 shortcut-executor.ts 的
+ * newtabCommandExecutors 中补充实现（或明确标注忽略）。
+ * 新增 newtab 命令时，必须同步更新 newtabControlExecutors 和 TNewtabCommandName。
+ */
 
 /**
  * 从命令标识推导执行环境
@@ -152,11 +212,11 @@ export function getCommandExecEnv(command: TCommandName): TCommandExecEnv {
   return 'sw'
 }
 
-export const COMMAND_SHORTCUT_CODE = 'commandShortcut'
+export const COMMAND_SHORTCUT_CODE = 'keyboardCommand'
 
 export const PRESERVE_FIELDS = ['isEnabled', 'modifiers', 'keymap']
 
-export const COMMAND_SHORTCUT_CONFIG = {
+export const KEYBOARD_COMMAND_CONFIG = {
   isEnabled: true,
   shortcutInInputElement: true,
   urlBlacklist: [] as string[],
@@ -171,6 +231,7 @@ export const COMMAND_SHORTCUT_CONFIG = {
     KeyD: { command: 'nextTab' },
     KeyF: { command: 'moveTabToNextWindow' },
     KeyG: { command: 'moveToNewWindow' },
+    KeyH: { command: 'mergeAllWindows' },
     KeyT: { command: 'newTabAfter' },
     // 页面滚动
     KeyW: { command: 'scrollToTop' },
@@ -190,7 +251,6 @@ export const COMMAND_SHORTCUT_CONFIG = {
     KeyL: { command: 'closeRightTabs' },
     KeyK: { command: 'closeOtherTabs' },
     KeyP: { command: 'closeDuplicateTabs' },
-    KeyH: { command: 'mergeAllWindows' },
     // 导航
     ArrowLeft: { command: 'goBack' },
     ArrowRight: { command: 'goForward' },
@@ -200,14 +260,14 @@ export const COMMAND_SHORTCUT_CONFIG = {
   } as Record<string, TCommandEntry>,
 }
 
-export type TCommandShortcutConfig = typeof COMMAND_SHORTCUT_CONFIG
+export type TCommandShortcutConfig = typeof KEYBOARD_COMMAND_CONFIG
 
 /**
  * 运行时断言：所有在 keymap 中使用的命令必须在 COMMAND_CATEGORIES 中声明
  */
 if (__DEV__) {
   const knownCommands = new Set(ALL_COMMANDS)
-  const missing = Object.values(COMMAND_SHORTCUT_CONFIG.keymap)
+  const missing = Object.values(KEYBOARD_COMMAND_CONFIG.keymap)
     .map((e) => e.command)
     .filter((cmd) => !knownCommands.has(cmd))
   if (missing.length > 0) {

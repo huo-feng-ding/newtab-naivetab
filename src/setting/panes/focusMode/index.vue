@@ -2,7 +2,7 @@
 import { Icon } from '@iconify/vue'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import Tips from '@/components/Tips.vue'
-import { localConfig, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
+import { localConfig, localState, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
 import { widgetsRegistry } from '@/newtab/widgets/registry'
 import { WIDGET_GROUPS } from '@/newtab/widgets/codes'
 
@@ -41,7 +41,7 @@ const cssVars = computed(() => ({
     >
       <NFormItem :label="$t('rightMenu.focusMode')">
         <NSwitch
-          v-model:value="localConfig.general.isFocusMode"
+          v-model:value="localState.isFocusMode"
           size="small"
         />
         <Tips :content="$t('generalSetting.focusModeTips')" />

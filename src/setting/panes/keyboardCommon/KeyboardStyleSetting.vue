@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { KEYBOARD_TYPE_OPTION, SPLIT_SPACE_OPTION, KEYCAP_TYPE_OPTION } from '@/logic/constants/keyboard'
+import { KEYBOARD_TYPE_OPTION, SPLIT_SPACE_OPTION, KEYCAP_TYPE_OPTION } from '@/logic/keyboard/keyboard-constants'
 import { localConfig } from '@/logic/store'
 </script>
 
@@ -9,9 +9,9 @@ import { localConfig } from '@/logic/store'
     :label-width="120"
     :show-feedback="false"
   >
-    <NFormItem :label="$t('keyboard.keycapVisualType')">
+    <NFormItem :label="$t('keyboardCommon.keycapVisualType')">
       <NRadioGroup
-        v-model:value="localConfig.keyboard.keycapType"
+        v-model:value="localConfig.keyboardCommon.keycapType"
         size="small"
       >
         <NRadioButton
@@ -24,9 +24,9 @@ import { localConfig } from '@/logic/store'
       </NRadioGroup>
     </NFormItem>
 
-    <NFormItem :label="$t('keyboard.splitSpace')">
+    <NFormItem :label="$t('keyboardCommon.splitSpace')">
       <NRadioGroup
-        v-model:value="localConfig.keyboard.splitSpace"
+        v-model:value="localConfig.keyboardCommon.splitSpace"
         size="small"
       >
         <NRadioButton
@@ -39,9 +39,9 @@ import { localConfig } from '@/logic/store'
       </NRadioGroup>
     </NFormItem>
 
-    <NFormItem :label="$t('keyboard.keyboardType')">
+    <NFormItem :label="$t('keyboardCommon.keyboardType')">
       <NRadioGroup
-        v-model:value="localConfig.keyboard.keyboardType"
+        v-model:value="localConfig.keyboardCommon.keyboardType"
         size="small"
         style="margin-top: 6px"
       >

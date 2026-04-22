@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SECOND_MODAL_WIDTH } from '@/logic/constants/app'
-import { KEYCAP_PREINSTALL_GROUPS, KEYCAP_PREINSTALL_MAP, type KeycapThemeKey } from '@/logic/constants/keycapThemes'
+import { KEYCAP_PREINSTALL_GROUPS, KEYCAP_PREINSTALL_MAP, type KeycapThemeKey } from '@/logic/keyboard/keycap-themes'
 import { localConfig, localState } from '@/logic/store'
 
 const props = defineProps({
@@ -17,13 +17,13 @@ const onCloseModal = () => {
 }
 
 const onSelectPresetTheme = (themeKey: KeycapThemeKey) => {
-  localConfig.keyboard.shellColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].shellColor
-  localConfig.keyboard.mainFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainFontColor
-  localConfig.keyboard.mainBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainBackgroundColor
-  localConfig.keyboard.emphasisOneFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneFontColor
-  localConfig.keyboard.emphasisOneBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneBackgroundColor
-  localConfig.keyboard.emphasisTwoFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoFontColor
-  localConfig.keyboard.emphasisTwoBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoBackgroundColor
+  localConfig.keyboardCommon.shellColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].shellColor
+  localConfig.keyboardCommon.mainFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainFontColor
+  localConfig.keyboardCommon.mainBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainBackgroundColor
+  localConfig.keyboardCommon.emphasisOneFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneFontColor
+  localConfig.keyboardCommon.emphasisOneBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneBackgroundColor
+  localConfig.keyboardCommon.emphasisTwoFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoFontColor
+  localConfig.keyboardCommon.emphasisTwoBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoBackgroundColor
 }
 
 const presetThemeGroups = KEYCAP_PREINSTALL_GROUPS
@@ -88,7 +88,7 @@ const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
     @update:show="onCloseModal()"
   >
     <NDrawerContent
-      :title="`${$t('common.select')}${$t('keyboard.presetTheme')}`"
+      :title="`${$t('common.select')}${$t('keyboardCommon.presetTheme')}`"
       closable
     >
       <div class="theme__sections">

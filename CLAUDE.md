@@ -2,13 +2,10 @@
 
 这是NaiveTab，一个浏览器新标签页扩展项目。本文档定义了项目的开发规范，所有 AI 辅助开发必须遵守。AI阅读此文档后在回复前输出 "(-.-)已阅读CLAUDE.md"。
 
-**强制必须遵循**：
+**强制必须遵循 MUST**：
 - 所有 AI 的输出要方便中文用户理解，例如：思考过程、与用户的沟通、代码注释、文档编写、等等，都**必须使用中文**，只有关键的技术名词保持英文。
-- 编程是一个严肃场景，遇到不清楚的点不要猜测，及时与用户确认。最终修改代码前要先给出具体的实施方案让用户审阅。
-- 每次修改代码后，必须审视本次改动是否涉及新的规律、约定、坑点或架构决策。若有，须在当次对话结束前将相关内容补充至本文件，不得遗留到下次。
-- 每次更新本文件后，必须检查全文是否存在内容重复、表述冲突或章节错位，及时合并或删除冗余内容，保持文件规范整洁。
-- 新增或修改内容时必须归入已有对应章节，禁止随意新建章节或错位放置。
-- 本文件是活跃文档，发现过时描述要及时修正或删除，避免误导后续对话。
+- 编程是一个严肃场景，遇到不清楚的点**不要猜测**，及时与用户确认。最终修改代码前要先给出具体的实施方案让用户审阅。
+- 本文件须持续维护：代码改动涉及的新规律/约定/坑点要及时补充；更新后须检查重复、冲突和错位，保持整洁；发现过时描述要及时修正或删除。
 
 ---
 
@@ -17,6 +14,30 @@
 在这个项目中，当你需要新增 Widget 组件时，直接使用 `/add-widget` 技能，它包含了完整的开发步骤指导，可防止遗漏关键步骤。
 
 ---
+
+# 设计文档
+
+项目架构和技术决策的详细文档存放在 `./docs` 目录下。做相关开发前应先查阅对应文档，避免重复造轮子或违背既有设计。有新增或修改要及时维护对应文档。
+
+| 文档 | 主题 |
+|------|------|
+| [config.md](docs/config.md) | 三层配置架构、配置迁移、主题系统、mergeState 合并 |
+| [storage.md](docs/storage.md) | 存储与同步：useStorageLocal、防抖写入、Gzip 压缩、版本感知同步、配额管理 |
+| [widget-dev.md](docs/widget-dev.md) | Widget 生命周期、WidgetWrap 解析、拖拽系统、定时任务、快速上手 |
+| [background-image.md](docs/background-image.md) | 背景图系统架构、文件索引、核心流程 |
+| [bookmark.md](docs/bookmark.md) | 书签系统架构、双模式运行、同步机制、权限处理 |
+| [global-shortcut.md](docs/global-shortcut.md) | 全局命令快捷键设计与实现 |
+| [keyboard.md](docs/keyboard.md) | 键盘布局系统、键帽渲染、拖拽定位、主题预设 |
+| [messaging.md](docs/messaging.md) | 背景脚本消息传递架构 |
+
+---
+
+**发布材料**（`docs/app-store/`）
+
+| 文档 | 主题 |
+|------|------|
+| [store-description-zh.txt](docs/app-store/store-description-zh.txt) | 应用商店中文描述 |
+| [store-description-en.txt](docs/app-store/store-description-en.txt) | 应用商店英文描述 |
 
 # 编码风格
 
@@ -235,209 +256,57 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 # Widget 开发
 
-## 扩展点标记
+详细架构见 [widget-dev.md](docs/widget-dev.md)，新增 Widget 使用 `/add-widget` 技能。
 
-项目用 `@@@@` 注释标记所有关键扩展点，新增 Widget 时全局搜索 `@@@@` 确认无遗漏：
+## 必须遵守的硬规则
 
-| 注释 | 文件 |
-|------|------|
-| `@@@@ add widget registry` | `src/newtab/widgets/registry.ts` |
-| `@@@@ 更新localConfig后需要手动处理新版本变更的本地数据结构` | `src/logic/store.ts` |
-
-新增 Widget 的完整步骤见 `.claude/skills/add-widget/SKILL.md`。
-
-## Widget 与 Setting Pane 映射
-
-部分 Widget 共用同一个 setting pane（如所有时钟类和 date 均指向 `clockDate`）。
-
-**新增 Widget 后，若其设置面板与其他 Widget 共用，必须维护 `src/newtab/widgets/codes.ts` 中的 `WIDGET_SETTING_PANE_MAP`：**
-
-```ts
-export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
-  clockDigital: 'clockDate',
-  clockAnalog: 'clockDate',
-  clockFlip: 'clockDate',   // ← 新增时钟类在此追加
-  clockNeon: 'clockDate',
-  date: 'clockDate',
-}
-```
-
-遗漏此步会导致右键菜单点击「设置」无法跳转到正确的 setting 面板。
-
-## Widget 分组
-
-`src/newtab/widgets/codes.ts` 中定义了 `WIDGET_GROUPS`，用于组件库抽屉和专注设置中按分类展示 Widget。**新增 Widget 必须添加到对应分组**：
-
-```ts
-export const WIDGET_GROUPS: Array<{
-  labelKey: string
-  codes: WidgetCodes[]
-}> = [
-  {
-    labelKey: 'widgetGroup.timeAndDate',
-    codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组
-  },
-]
-```
-
-分组：`time`（时间类）、`bookmark`（书签类）、`tool`（工具类）三选一。
-
-## 自动处理机制（无需手动修改）
-
-以下文件通过 glob / 遍历自动扫描，**不要**手动向其中添加 Widget 条目：
-
-| 文件 | 机制 |
-|------|------|
-| `src/logic/config.ts` | `import.meta.glob('**/config.ts')` 自动扫描 widget 配置 |
-| `src/logic/store.ts` | 遍历 `WIDGET_CODE_LIST` 动态创建 storage key |
-| `src/newtab/Content.vue` | 遍历 `widgetsList` 动态渲染所有 Widget |
-| `src/newtab/draft/DraftDrawer.vue` | 遍历 `widgetsList` 展示组件库列表 |
-
-## 快速重置保留字段
-
-当 widget 包含**用户自定义数据**（如键盘的按键映射、书签文件夹的选中列表），这些数据在"快速重置"时需要保留，不被默认值覆盖。需要在 `config.ts` 中导出 `PRESERVE_FIELDS` 声明需要保留的字段：
-
-```ts
-export const WIDGET_CODE = 'keyboard'
-export const PRESERVE_FIELDS = ['keymap']  // ← 声明需要保留的字段
-export const WIDGET_CONFIG = { /* ... */ }
-```
-
-- 系统会自动扫描所有 `config.ts` 收集保留字段，无需修改别处
-- `enabled` 和 `layout` 总是被保留，无需重复声明
-- 只有用户通过交互生成的自定义数据才需要保留，普通配置选项不需要
-
-## 定时任务生命周期管理
-
-Widget 中需要定时刷新数据时，必须使用 [src/logic/task.ts](src/logic/task.ts) 的统一任务管理系统，**不可自行 `setInterval`**。
-
-- 使用 `addTimerTask` / `removeTimerTask` 管理任务，`watch(isRender)` 控制添加/移除
-- 全局 timer 每 **1000ms** 触发一次，`addTimerTask` 会立即执行一次
-- 组件卸载无需手动移除，`WidgetWrap` 的 `isEnabled` watch 会自动处理
-
-## WidgetWrap 机制说明
-
-`WidgetWrap` 是所有 Widget 的根容器组件，提供：
-
-1. **拖拽功能**：自动注册 mousedown/mousemove/mouseup 事件到全局 `moveState`
-2. **启用控制**：通过 `localConfig[widgetCode].enabled` 控制渲染（`v-if`）
-3. **专注模式**：通过 `localConfig.general.focusVisibleWidgetMap` 控制可见性
-4. **ID 设置**：内层 div 的 `id` 自动设为 `widgetCode`，供 CSS selector 使用
-5. **拖拽辅助线**：拖拽模式下自动添加边框、高亮、删除动效
-
-Widget 根组件写法：
-```vue
-<WidgetWrap :widget-code="WIDGET_CODE">
-  <div class="myWidget__container">
-    <!-- 内容 -->
-  </div>
-</WidgetWrap>
-```
+- **扩展点标记**：新增 Widget 时全局搜索 `@@@@` 确认无遗漏（`registry.ts`、`store.ts`）
+- **共用 Setting 面板时**：必须维护 `codes.ts` 中的 `WIDGET_SETTING_PANE_MAP`，遗漏会导致右键「设置」无法跳转
+- **添加到分组**：必须在 `WIDGET_GROUPS` 的对应分组（`time`/`bookmark`/`tool`）中追加 code
+- **保留字段**：包含用户自定义数据时，在 `config.ts` 导出 `PRESERVE_FIELDS`
+- **定时任务**：必须使用 [task.ts](src/logic/task.ts) 的 `addTimerTask`/`removeTimerTask`，禁止自行 `setInterval`
+- **WidgetWrap**：根组件必须用 `<WidgetWrap :widget-code="WIDGET_CODE">` 包裹
 
 ---
 
 # 配置 & 数据持久化
 
-## 配置存储机制
+详细架构见 [config.md](docs/config.md)（三层架构、迁移、主题系统）和 [storage.md](docs/storage.md)（存储、同步、压缩、配额）。
 
-- 每个 Widget 配置独立存储于 `localStorage`，key 为 `c-{widgetCode}`（如 `c-clockFlip`）
-- 通用状态存储 key 为 `l-state`
-- `useStorageLocal` 写入有 **800ms 防抖延迟**，避免频繁写入
-- Chrome 云同步使用 `chrome.storage.sync`，key 为 `naive-tab-{field}`
-- **云同步限制**：单个配置不超过 8KB，总量约 100KB，每分钟最多写 120 次
-
-## 全局状态说明
+## 全局状态速查
 
 ```ts
 // src/logic/store.ts
 localConfig      // 各 Widget 配置（响应式，自动持久化）
 localState       // 本地状态（currAppearanceCode 等，持久化）
 globalState      // 运行时全局状态（不持久化）
-  .isSettingDrawerVisible  // 设置面板是否打开
-  .isGuideMode             // 引导模式
-  .isSearchFocused         // 搜索框是否聚焦
-  .isInputFocused          // 输入框是否聚焦
-  .currSettingTabCode      // 当前激活的 setting pane
+  .settingMode              // 'drawer' | 'options'，设置面板展示模式
+  .isSettingDrawerVisible   // 设置面板是否打开
+  .isGuideMode              // 引导模式
+  .isSearchFocused          // 搜索框是否聚焦
+  .isInputFocused           // 输入框是否聚焦
+  .currSettingTabCode       // 当前激活的 setting pane
 ```
 
 键盘事件在 `isSettingDrawerVisible || isSearchFocused || isInputFocused` 时会被屏蔽（仅 Escape 可用）。
 
-## 配置字段设计规范（兼容性）
+## 配置字段兼容性（必须遵守）
 
-**Widget 的 `config.ts` 以及任何需要持久化到 `localStorage` / `chrome.storage` 的配置，设计时必须保证向前兼容，不能破坏现存用户的数据。**
+**任何持久化到 `localStorage` / `chrome.storage` 的配置修改，都不能破坏老用户数据。**
 
-### 新增字段
-- 必须在 `config.ts` 的 `defaultConfig` 中提供合理默认值
-- `useStorageLocal` 初始化做**浅层合并**，顶层新增字段可自动补全；**嵌套对象中新增字段不会自动合并**，必须在 `handleAppUpdate` 中手动补充
-- 字段命名须清晰，不可与已有字段语义冲突
+| 操作 | 规则 |
+|------|------|
+| 新增字段 | `defaultConfig` 提供默认值；顶层字段自动补全，**嵌套对象必须在 `handleAppUpdate` 中手动补全** |
+| 修改/重命名 | 禁止直接改语义；必须：新增替代字段 → 迁移旧值 → delete 旧字段 |
+| 删除字段 | 先在 `handleAppUpdate` 中 `delete` 旧 key，再从 `defaultConfig` 移除 |
+| 嵌套对象 | 必须在 `handleAppUpdate` 中对整个结构做迁移，不能依赖浅合并 |
+| 数组字段 | 旧用户数组长度不足时，迁移中补齐缺失元素 |
 
-### 修改 / 重命名字段
-- **禁止直接修改已上线字段的语义或类型**，会导致老数据反序列化异常
-- 如需改变字段含义，必须：
-  1. 新增替代字段（带默认值）
-  2. 在 `handleAppUpdate` 中将旧字段的值迁移到新字段
-  3. 在同一迁移版本号中 `delete` 旧字段
+**每次改配置结构都必须同步升 `package.json` version，并在 `handleAppUpdate` 中新增迁移分支。**
 
-### 删除字段
-- **禁止直接从 `defaultConfig` 中删除字段**（删了之后老用户本地仍有旧 key，迁移时无法判断）
-- 删除字段必须先在 `handleAppUpdate` 中显式 `delete (localConfig.xxx as any).oldField`，再从 `defaultConfig` 中移除，并在同一 PR 中完成
+## 后台脚本与 keyboard 配置
 
-### 嵌套对象 / 数组配置
-- 嵌套对象配置修改时，必须在 `handleAppUpdate` 中对整个嵌套结构做迁移，不能依赖浅合并
-- 数组类型字段新增元素时，若旧用户数组长度不足，必须在迁移中补齐缺失元素
-
-### 版本号规范与迁移
-- 每次对持久化配置结构做任何变更，都必须同步升级 `package.json` 的 `version`，并在 `handleAppUpdate` 中新增对应版本号的迁移分支
-- 迁移分支使用 `compareLeftVersionLessThanRightVersions(version, 'x.y.z')` 判断，确保每个迁移只执行一次
-- 同一版本内的多处迁移合并写在同一个 `if` 块中，避免重复判断
-
-**迁移示例：**
-```ts
-if (compareLeftVersionLessThanRightVersions(version, 'x.y.z')) {
-  // 新增字段（嵌套对象需手动补全）
-  localConfig.myWidget.newField = defaultConfig.myWidget.newField
-  // 删除旧字段
-  delete (localConfig.myWidget as any).oldField
-}
-```
-
-### 禁止的危险操作
-
-| ❌ 危险操作 | ✅ 正确做法 |
-|------------|------------|
-| 直接修改字段类型 | 新增 + 迁移 + 删除旧字段 |
-| 直接重命名字段 | 新增 + 迁移 + 删除旧字段 |
-| 直接删除字段 | 先迁移 delete，再移除 defaultConfig |
-| 依赖浅合并补全嵌套字段 | 在 handleAppUpdate 中手动补全 |
-| 不升级版本号就改配置结构 | 必须同步升版本号并写迁移逻辑 |
-
-## 云同步架构与规范
-
-核心架构为**版本感知的 Last-Write-Wins**，详见 [src/logic/storage.ts](src/logic/storage.ts)。
-
-### 同步策略
-- `syncId` 相同 → 跳过
-- 本地 `dirty = false` → 使用版本感知合并策略
-- 本地 `dirty = true` 且 `localModifiedTime > syncTime` → 上传本地
-- 本地 `dirty = true` 且 `localModifiedTime <= syncTime` → 版本感知合并
-
-**版本感知合并**：版本较新的一方优先，保留该方新增字段。
-
-### Chrome 配额限制
-单 key 8KB、总量 ~100KB、120 次/分钟。代码已做 2 秒防抖写入 + gzip 自动压缩 + 超限拦截。
-
-### 新增 Widget
-无需手动修改同步代码，系统通过 glob 和遍历自动处理。
-
-### 故障恢复
-本地修改标记 `dirty`，上传成功才清除。压缩解析失败降级尝试原始 JSON（详见 [compress.ts](src/logic/compress.ts)）。
-
-### popup 书签同步机制
-通过 `setupKeyboardSyncListener` 实现 popup 修改书签后 newtab 实时感知。popup 必须在 `handleCommit` 中调用 `flushConfigSync` 强制同步（跳过 2 秒防抖），否则 popup 销毁后防抖回调不会执行。
-
-### 后台脚本与 keyboard 配置
-
-后台脚本 `src/background/main.ts` 以 Service Worker 运行，无法使用 Vue 响应式状态，采用**缓存 + 监听模式**。修改 keyboard 配置时：
+后台脚本 `src/background/main.ts` 以 Service Worker 运行，采用**缓存 + 监听模式**。修改 keyboard 配置时：
 
 | 修改类型 | 后台脚本影响 |
 |----------|--------------|
@@ -445,7 +314,11 @@ if (compareLeftVersionLessThanRightVersions(version, 'x.y.z')) {
 | 重命名/删除字段 | **必须同步修改** `main.ts` 中的字段引用 |
 | 修改 keymap 结构 | **必须同步修改** `main.ts` 中的访问逻辑 |
 
-**注意：** `onChanged` 监听器必须返回 `Promise`，否则 Service Worker 可能在异步 resolve 前休眠。
+`onChanged` 监听器必须返回 `Promise`，否则 Service Worker 可能在异步 resolve 前休眠。
+
+## 必须遵守的硬规则
+
+- **popup 书签同步**：popup 修改书签后必须调用 `flushConfigSync` 强制同步，否则 popup 销毁后防抖回调不会执行
 
 ---
 
@@ -540,6 +413,17 @@ NaiveTab 的 Widget 统一使用"玻璃光感"设计语言，已在 `bookmarkFol
 ---
 
 # Setting 面板
+
+## 双模式架构
+
+设置面板支持两种展示模式，共享同一套内容组件 `SettingPaneContent.vue`：
+
+| 模式 | 入口 | 容器 | 宽度 |
+|------|------|------|------|
+| **抽屉模式** | newtab 右键菜单 | `setting/index.vue`（NDrawer 包裹） | 750px |
+| **全屏模式** | `chrome://extensions` → 选项 | `options/Content.vue`（页面布局） | 居中自适应 |
+
+`globalState.settingMode` 区分当前模式（`'drawer'` / `'options'`）。
 
 ## 目录结构
 

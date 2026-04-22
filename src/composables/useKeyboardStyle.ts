@@ -13,8 +13,8 @@
  */
 
 import { TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP } from '@/logic/constants/app'
-import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, SPACE_KEYCODE_LIST } from '@/logic/constants/keyboard'
-import { currKeyboardConfig } from '@/logic/keyboard'
+import { KEYBOARD_CODE_TO_DEFAULT_CONFIG, SPACE_KEYCODE_LIST } from '@/logic/keyboard/keyboard-constants'
+import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
 import { localConfig, getStyleField, customPrimaryColor } from '@/logic/store'
 
 type Unit = 'vmin' | 'px'
@@ -35,43 +35,43 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   // ── base ──────────────────────────────────────────────────────────────────
   /**
    * 所有尺寸计算的基准值（响应式 computed）：
-   * - vmin 模式：读取 localConfig.keyboard.keycapSize，用户调整后所有依赖自动更新
+   * - vmin 模式：读取 localConfig.keyboardCommon.keycapSize，用户调整后所有依赖自动更新
    * - px  模式：使用 baseSizeOverride（默认 40px），固定不变
    */
   const base = computed(() =>
-    unit === 'px' ? (baseSizeOverride ?? 40) : localConfig.keyboard.keycapSize,
+    unit === 'px' ? (baseSizeOverride ?? 40) : localConfig.keyboardCommon.keycapSize,
   )
 
   // ── 颜色 ──────────────────────────────────────────────────────────────────
   // getStyleField 返回 computed ref，自动跟随外观模式（light/dark）切换
 
   // 键帽主色
-  const mainFontColor = getStyleField('keyboard', 'mainFontColor')
-  const mainBgColor = getStyleField('keyboard', 'mainBackgroundColor')
+  const mainFontColor = getStyleField('keyboardCommon', 'mainFontColor')
+  const mainBgColor = getStyleField('keyboardCommon', 'mainBackgroundColor')
 
   // 强调色 1 / 2
-  const emphasisOneFontColor = getStyleField('keyboard', 'emphasisOneFontColor')
-  const emphasisOneBgColor = getStyleField('keyboard', 'emphasisOneBackgroundColor')
-  const emphasisTwoFontColor = getStyleField('keyboard', 'emphasisTwoFontColor')
-  const emphasisTwoBgColor = getStyleField('keyboard', 'emphasisTwoBackgroundColor')
+  const emphasisOneFontColor = getStyleField('keyboardCommon', 'emphasisOneFontColor')
+  const emphasisOneBgColor = getStyleField('keyboardCommon', 'emphasisOneBackgroundColor')
+  const emphasisTwoFontColor = getStyleField('keyboardCommon', 'emphasisTwoFontColor')
+  const emphasisTwoBgColor = getStyleField('keyboardCommon', 'emphasisTwoBackgroundColor')
 
   // 键帽边框 / 模糊 / 字体
-  const keycapBorderColor = getStyleField('keyboard', 'keycapBorderColor')
-  const keycapBackgroundBlurPx = getStyleField('keyboard', 'keycapBackgroundBlur', 'px')
-  const keycapKeyFontFamily = getStyleField('keyboard', 'keycapKeyFontFamily')
-  const keycapBookmarkFontFamily = getStyleField('keyboard', 'keycapBookmarkFontFamily')
-  const faviconSize = getStyleField('keyboard', 'faviconSize')
+  const keycapBorderColor = getStyleField('keyboardCommon', 'keycapBorderColor')
+  const keycapBackgroundBlurPx = getStyleField('keyboardCommon', 'keycapBackgroundBlur', 'px')
+  const keycapKeyFontFamily = getStyleField('keyboardCommon', 'keycapKeyFontFamily')
+  const keycapBookmarkFontFamily = getStyleField('keyboardCommon', 'keycapBookmarkFontFamily')
+  const faviconSize = getStyleField('keyboardCommon', 'faviconSize')
 
   // Shell
-  const shellColor = getStyleField('keyboard', 'shellColor')
-  const shellShadowColor = getStyleField('keyboard', 'shellShadowColor')
-  const shellBorderRadiusPx = getStyleField('keyboard', 'shellBorderRadius', 'px')
-  const shellBackgroundBlurPx = getStyleField('keyboard', 'shellBackgroundBlur', 'px')
+  const shellColor = getStyleField('keyboardCommon', 'shellColor')
+  const shellShadowColor = getStyleField('keyboardCommon', 'shellShadowColor')
+  const shellBorderRadiusPx = getStyleField('keyboardCommon', 'shellBorderRadius', 'px')
+  const shellBackgroundBlurPx = getStyleField('keyboardCommon', 'shellBackgroundBlur', 'px')
 
   // Plate
-  const plateColor = getStyleField('keyboard', 'plateColor')
-  const plateBorderRadiusPx = getStyleField('keyboard', 'plateBorderRadius', 'px')
-  const plateBackgroundBlurPx = getStyleField('keyboard', 'plateBackgroundBlur', 'px')
+  const plateColor = getStyleField('keyboardCommon', 'plateColor')
+  const plateBorderRadiusPx = getStyleField('keyboardCommon', 'plateBorderRadius', 'px')
+  const plateBackgroundBlurPx = getStyleField('keyboardCommon', 'plateBackgroundBlur', 'px')
 
   // ── 键帽尺寸 ──────────────────────────────────────────────────────────────
 
@@ -80,29 +80,29 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
 
   const keycapBaseSizeCss = computed(() => toUnit(base.value, unit))
 
-  const keycapBorderWidthCss = computed(() => `${localConfig.keyboard.keycapBorderWidth}px`)
+  const keycapBorderWidthCss = computed(() => `${localConfig.keyboardCommon.keycapBorderWidth}px`)
 
   const borderRadiusCss = computed(() => {
-    const r = localConfig.keyboard.keycapBorderRadius
-    const s = localConfig.keyboard.keycapSize
+    const r = localConfig.keyboardCommon.keycapBorderRadius
+    const s = localConfig.keyboardCommon.keycapSize
     return toUnit((r / s) * base.value, unit)
   })
 
   const keycapPaddingCss = computed(() => {
-    const p = localConfig.keyboard.keycapPadding
-    const s = localConfig.keyboard.keycapSize
+    const p = localConfig.keyboardCommon.keycapPadding
+    const s = localConfig.keyboardCommon.keycapSize
     return toUnit((p / s) * base.value, unit)
   })
 
   const keycapKeyFontSizeCss = computed(() => {
-    const s = localConfig.keyboard.keycapSize
-    const fs = localConfig.keyboard.keycapKeyFontSize
+    const s = localConfig.keyboardCommon.keycapSize
+    const fs = localConfig.keyboardCommon.keycapKeyFontSize
     return toUnit((fs / s) * base.value, unit)
   })
 
   const keycapBookmarkFontSizeCss = computed(() => {
-    const s = localConfig.keyboard.keycapSize
-    const fs = localConfig.keyboard.keycapBookmarkFontSize
+    const s = localConfig.keyboardCommon.keycapSize
+    const fs = localConfig.keyboardCommon.keycapBookmarkFontSize
     return toUnit((fs / s) * base.value, unit)
   })
 
@@ -124,22 +124,26 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
 
   // ── Shell 尺寸 ────────────────────────────────────────────────────────────
   const shellVPaddingCss = computed(() => {
-    const p = localConfig.keyboard.shellVerticalPadding
-    const s = localConfig.keyboard.keycapSize
+    const p = localConfig.keyboardCommon.shellVerticalPadding
+    const s = localConfig.keyboardCommon.keycapSize
     return toUnit((p / s) * base.value, unit)
   })
   const shellHPaddingCss = computed(() => {
-    const p = localConfig.keyboard.shellHorizontalPadding
-    const s = localConfig.keyboard.keycapSize
+    const p = localConfig.keyboardCommon.shellHorizontalPadding
+    const s = localConfig.keyboardCommon.keycapSize
     return toUnit((p / s) * base.value, unit)
   })
 
   // ── Plate 尺寸 ────────────────────────────────────────────────────────────
   const platePaddingCss = computed(() => {
-    const p = localConfig.keyboard.platePadding
-    const s = localConfig.keyboard.keycapSize
+    const p = localConfig.keyboardCommon.platePadding
+    const s = localConfig.keyboardCommon.keycapSize
     return toUnit((p / s) * base.value, unit)
   })
+
+  // ── 触感凸起尺寸（随 base size 等比缩放，约 4% 基准高度） ──────────────────
+  const tactileBumpsHeightCss = computed(() => `${(0.04 * base.value).toFixed(2)}px`)
+  const tactileBumpsWidthCss = computed(() => `${(0.18 * base.value).toFixed(2)}px`)
 
   // ── 配置读取 helpers ──────────────────────────────────────────────────────
   // 读取自定义配置时，优先使用用户覆盖值，回退到默认配置
@@ -180,9 +184,9 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
    */
   const getFirstRowWidth = (): number => {
     let width = 0
-    if (localConfig.keyboard.isShellVisible) {
-      const s = localConfig.keyboard.keycapSize
-      width += (localConfig.keyboard.shellHorizontalPadding / s) * base.value * 2
+    if (localConfig.keyboardCommon.isShellVisible) {
+      const s = localConfig.keyboardCommon.keycapSize
+      width += (localConfig.keyboardCommon.shellHorizontalPadding / s) * base.value * 2
     }
     for (const code of currKeyboardConfig.value.list[0]) {
       width += getKeycapWidthValue(code)
@@ -207,7 +211,7 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
 
   /** keycap stage 顶面（GMK / DSA 型别的立体偏移） */
   const getKeycapStageStyle = (code: string): string => {
-    const keycapType = localConfig.keyboard.keycapType
+    const keycapType = localConfig.keyboardCommon.keycapType
     const isSpace = SPACE_KEYCODE_LIST.includes(code)
     const spaceGradient = 'background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 90%); background-color: inherit;'
     let style = ''
@@ -239,7 +243,7 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     const textAlign = getCustomTextAlign(code)
     const justifyContent = TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP[textAlign]
     let style = `justify-content: ${justifyContent};`
-    if (localConfig.keyboard.isNameVisible) {
+    if (localConfig.keyboardCommon.isNameVisible) {
       if (justifyContent !== 'center') style += `padding: 0 ${keycapInnerPaddingCss.value};`
     } else {
       style += `padding: ${keycapInnerPaddingCss.value};`
@@ -249,7 +253,7 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
 
   /** 获取某个键当前的强调色分组（0=普通 / 1=强调一 / 2=强调二） */
   const getEmphasisGroup = (code: string): 0 | 1 | 2 => {
-    const override = localConfig.keyboard.emphasisKeyOverrides?.[code]
+    const override = localConfig.keyboardCommon.emphasisKeyOverrides?.[code]
     if (override !== undefined) return override
     if (currKeyboardConfig.value.emphasisOneKeys.includes(code)) return 1
     if (currKeyboardConfig.value.emphasisTwoKeys.includes(code)) return 2
@@ -263,6 +267,9 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     if (group === 2) return `background-color:${emphasisTwoBgColor.value};color:${emphasisTwoFontColor.value};`
     return ''
   }
+
+  // ── 按压位移（随 base size 等比缩放，约 4.3% 基准） ─────────────────────
+  const activeTranslateYCss = computed(() => `${(0.043 * base.value).toFixed(2)}px`)
 
   // ── CSS 变量集合 ───────────────────────────────────────────────────────────
   // 汇总所有 keycap 相关 CSS 变量，通过 :style 注入到 KeyboardKeycapDisplay 根节点
@@ -284,6 +291,9 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     '--nt-kb-dsa-border': dsaBorderCss.value,
     '--nt-kb-border-width': keycapBorderWidthCss.value,
     '--nt-kb-border-color': keycapBorderColor.value,
+    '--nt-kb-tactile-height': tactileBumpsHeightCss.value,
+    '--nt-kb-tactile-width': tactileBumpsWidthCss.value,
+    '--nt-kb-active-translate-y': activeTranslateYCss.value,
   }))
 
   const layoutCssVars = computed(() => ({
@@ -300,6 +310,7 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     '--nt-kb-shell-color': shellColor.value,
     '--nt-kb-shell-blur': shellBackgroundBlurPx.value,
     '--nt-kb-shell-shadow': shellShadowColor.value,
+    '--nt-kb-primary-color': customPrimaryColor.value,
   }))
 
   // ── 返回值 ────────────────────────────────────────────────────────────────

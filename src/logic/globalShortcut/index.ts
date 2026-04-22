@@ -20,12 +20,13 @@ export {
 export {
   COMMAND_CATEGORIES,
   CS_COMMANDS,
+  NEWTAB_COMMANDS,
   getCommandExecEnv,
   COMMAND_SHORTCUT_CODE,
   PRESERVE_FIELDS,
-  COMMAND_SHORTCUT_CONFIG,
+  KEYBOARD_COMMAND_CONFIG,
 } from './shortcut-command'
-export type { TCommandExecEnv, TCommandEntry, TCategoryCommand, TCommandShortcutConfig } from './shortcut-command'
+export type { TCommandExecEnv, TCommandEntry, TCategoryCommand, TCommandShortcutConfig, TNewtabCommandName } from './shortcut-command'
 
 // 命令快捷键任务管理（newtab 页面）
 export {

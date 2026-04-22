@@ -5,6 +5,7 @@ import { ICONS } from '@/logic/icons'
 import { localConfig } from '@/logic/store'
 import { defaultConfig } from '@/logic/config'
 import { PRESERVE_FIELDS as COMMAND_PRESERVE_FIELDS, COMMAND_SHORTCUT_CODE } from '@/logic/globalShortcut/shortcut-command'
+import { PRESERVE_FIELDS as KEYBOARD_COMMON_PRESERVE_FIELDS } from '@/logic/keyboard/keyboard-config'
 
 const props = defineProps({
   widgetCode: {
@@ -30,9 +31,12 @@ const preserveFieldsMap = (() => {
       map[m.WIDGET_CODE] = m.PRESERVE_FIELDS
     }
   }
-  // 手动合并非 widget 目录的配置（如 commandShortcut）
-  if (Array.isArray(COMMAND_PRESERVE_FIELDS) && COMMAND_PRESERVE_FIELDS.length > 0) {
+  // 手动合并非 widget 目录的配置
+  if (COMMAND_PRESERVE_FIELDS.length > 0) {
     map[COMMAND_SHORTCUT_CODE] = COMMAND_PRESERVE_FIELDS
+  }
+  if (KEYBOARD_COMMON_PRESERVE_FIELDS.length > 0) {
+    map['keyboardCommon'] = KEYBOARD_COMMON_PRESERVE_FIELDS
   }
   return map
 })()

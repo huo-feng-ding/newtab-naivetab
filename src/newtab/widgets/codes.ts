@@ -3,7 +3,7 @@ export const WIDGET_CODE_LIST = [
   'weather',
   'calendar',
   'yearProgress',
-  'keyboard',
+  'keyboardBookmark',
   'clockDigital',
   'clockAnalog',
   'clockFlip',
@@ -48,7 +48,7 @@ export const WIDGET_GROUPS: Array<{
   },
   {
     labelKey: 'widgetGroup.bookmark',
-    codes: ['keyboard', 'bookmarkFolder'],
+    codes: ['keyboardBookmark', 'bookmarkFolder'],
   },
   {
     labelKey: 'widgetGroup.tool',

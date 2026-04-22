@@ -66,8 +66,9 @@
 import md5 from 'crypto-js/md5'
 import { useDebounceFn } from '@vueuse/core'
 import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY } from '@/logic/constants/app'
-import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/keyboard'
+import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/keyboard/keyboard-constants'
 import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
+import { KEYBOARD_COMMON_CONFIG } from '@/logic/keyboard/keyboard-config'
 import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
 import { localConfig, localState, globalState, switchSettingDrawerVisible } from '@/logic/store'
 import { mergeState } from '@/logic/config-merge'
@@ -133,11 +134,11 @@ const checkWriteRate = (field: ConfigField): { isNearLimit: boolean, count: numb
 }
 
 const getUploadConfigData = (field: ConfigField) => {
-  // 处理 keyboard 的bookmark配置：
+  // 处理 keyboardBookmark 的书签配置：
   //   1. 删除空 url 条目
   //   2. 兜底截断超长 url / name（防止极端情况写爆 8KB 限制）
-  if (field === 'keyboard') {
-    const src = localConfig.keyboard
+  if (field === 'keyboardBookmark') {
+    const src = localConfig.keyboardBookmark
     const newKeymap: Record<string, { url: string, name?: string }> = {}
     for (const code of Object.keys(src.keymap)) {
       const item = src.keymap[code] as { url?: string, name?: string }
@@ -342,7 +343,7 @@ export const handleWatchLocalConfigChange = () => {
  * 用于 popup 等可能立即关闭的场景，确保配置能同步到 Service Worker
  * 调用后会立即写入，不依赖防抖延迟
  *
- * @param field 配置字段名，如 'keyboard'
+ * @param field 配置字段名，如 'keyboardBookmark'
  * @returns Promise<boolean> 同步是否成功
  */
 export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
@@ -362,11 +363,11 @@ export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
 }
 
 /**
- * 设置 chrome.storage.onChanged 监听器，同步 popup 修改的 keyboard 配置
+ * 设置 chrome.storage.onChanged 监听器，同步 popup 修改的 keyboardBookmark 配置
  *
  * 【使用场景】
- * popup 修改书签后通过 flushConfigSync('keyboard') 立即写入 chrome.storage.sync
- * newtab 通过此监听器实时感知变化并更新 localConfig.keyboard
+ * popup 修改书签后通过 flushConfigSync('keyboardBookmark') 立即写入 chrome.storage.sync
+ * newtab 通过此监听器实时感知变化并更新 localConfig.keyboardBookmark
  *
  * 【数据格式】
  * parseStoredData 自动处理 gzip 压缩数据（>4000 字节时启用 gzip 压缩）
@@ -375,7 +376,7 @@ export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
  * 通过比较 syncId 判断是否需要更新，避免本地修改后又触发 onChanged 形成循环
  *
  * 【注意：直接赋值的副作用】
- * localConfig.keyboard = parsed.data 会触发 watchLocalConfigChange 中的 watcher，
+ * localConfig.keyboardBookmark = parsed.data 会触发 watchLocalConfigChange 中的 watcher，
  * 导致排队上传（debounce）。但由于 MD5 去重机制，上传时会发现 syncId 相同而跳过实际上传，
  * 因此不会造成真正的循环上传。
  *
@@ -384,7 +385,7 @@ export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
  */
 export const setupKeyboardSyncListener = () => {
   chrome.storage.onChanged.addListener((changes) => {
-    const key = 'naive-tab-keyboard'
+    const key = 'naive-tab-keyboardBookmark'
     if (!changes[key]) return
 
     const raw = changes[key].newValue as string
@@ -394,26 +395,26 @@ export const setupKeyboardSyncListener = () => {
     return parseStoredData(raw)
       .then((parsed: SyncPayload) => {
         const newSyncId = parsed.syncId
-        const currSyncId = localState.value.isUploadConfigStatusMap.keyboard?.syncId
+        const currSyncId = localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
 
         // syncId 相同说明内容未变化，跳过更新（防循环）
         if (newSyncId === currSyncId) {
-          log('Sync keyboard skipped (same syncId)')
+          log('Sync keyboardBookmark skipped (same syncId)')
           return
         }
 
         // 先更新同步状态，防止后续替换对象时触发防抖上传
         // uploadConfigFn 中的 MD5 去重会检测到 syncId 相同而跳过上传
-        localState.value.isUploadConfigStatusMap.keyboard.syncId = newSyncId
-        localState.value.isUploadConfigStatusMap.keyboard.syncTime = parsed.syncTime
-        localState.value.isUploadConfigStatusMap.keyboard.dirty = false
+        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncId = newSyncId
+        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime = parsed.syncTime
+        localState.value.isUploadConfigStatusMap.keyboardBookmark.dirty = false
 
-        // 整体替换 keyboard 配置对象
-        localConfig.keyboard = parsed.data
-        log('Sync keyboard updated from storage.onChanged')
+        // 整体替换 keyboardBookmark 配置对象
+        localConfig.keyboardBookmark = parsed.data
+        log('Sync keyboardBookmark updated from storage.onChanged')
       })
       .catch((e) => {
-        log('Sync keyboard parse error', e)
+        log('Sync keyboardBookmark parse error', e)
       })
   })
 }
@@ -743,12 +744,52 @@ export const importSetting = async (text: string) => {
   }
   log('FileContent', fileContent)
   try {
-    // handle old version 兼容小于1.27.0版本的旧bookmark结构
-    if (compareLeftVersionLessThanRightVersions(fileContent.general.version, '1.27.0')) {
-      if ((fileContent as any).bookmark) {
-        fileContent.keyboard = (fileContent as any).bookmark
+    // ── 旧数据结构兼容，统一转为最新 key ──
+    // bookmark → keyboardBookmark（v1.27.0 前）
+    if ((fileContent as any).bookmark) {
+      fileContent.keyboardBookmark = (fileContent as any).bookmark
+      delete (fileContent as any).bookmark
+    }
+    // keyboard → keyboardBookmark（code 重命名）
+    if ((fileContent as any).keyboard && !fileContent.keyboardBookmark) {
+      fileContent.keyboardBookmark = structuredClone((fileContent as any).keyboard)
+      delete (fileContent as any).keyboard
+    }
+    // commandShortcut → keyboardCommand（code 重命名）
+    if ((fileContent as any).commandShortcut && !fileContent.keyboardCommand) {
+      fileContent.keyboardCommand = structuredClone((fileContent as any).commandShortcut)
+      delete (fileContent as any).commandShortcut
+    }
+    // keyboardBookmark 外观字段拆分到 keyboardCommon
+    if (fileContent.keyboardBookmark && !fileContent.keyboardCommon) {
+      fileContent.keyboardCommon = structuredClone(KEYBOARD_COMMON_CONFIG)
+      const appearanceFields = Object.keys(KEYBOARD_COMMON_CONFIG)
+      for (const field of appearanceFields) {
+        if ((fileContent.keyboardBookmark as any)[field] !== undefined) {
+          (fileContent.keyboardCommon as any)[field] = (fileContent.keyboardBookmark as any)[field]
+        }
+      }
+      for (const field of appearanceFields) {
+        delete (fileContent.keyboardBookmark as any)[field]
       }
     }
+    // focusVisibleWidgetMap key 重命名
+    const fvm = (fileContent as any).general?.focusVisibleWidgetMap
+    if (fvm) {
+      if (fvm.keyboard !== undefined && fvm.keyboardBookmark === undefined) {
+        fvm.keyboardBookmark = fvm.keyboard
+        delete fvm.keyboard
+      }
+      if (fvm.commandShortcut !== undefined && fvm.keyboardCommand === undefined) {
+        fvm.keyboardCommand = fvm.commandShortcut
+        delete fvm.commandShortcut
+      }
+    }
+    // openPageFocusElement 修正
+    if ((fileContent as any).general?.openPageFocusElement === 'keyboard') {
+      fileContent.general.openPageFocusElement = 'keyboardBookmark'
+    }
+
     log('FileContentTransform', fileContent)
     fileContent.general.version = window.appVersion // 更新版本号
     await updateSetting(fileContent)
@@ -769,48 +810,48 @@ export const exportSetting = () => {
 }
 
 /**
- * 轻量级拉取云端 keyboard 配置（仅供 popup 等短生命周期上下文使用）
+ * 轻量级拉取云端 keyboardBookmark 配置（仅供 popup 等短生命周期上下文使用）
  *
  * 与 loadRemoteConfig 的区别：
- * - 只读取 keyboard 一个字段，不遍历所有 defaultConfig
+ * - 只在读取 keyboardBookmark 一个字段，不遍历所有 defaultConfig
  * - 不触发 uploadConfigFn，不产生任何写入
  * - 不调用 updateSetting，不触发全局配置更新
- * - 只在云端 syncId 与本地不同时才替换 localConfig.keyboard
+ * - 只在云端 syncId 与本地不同时才替换 localConfig.keyboardBookmark
  *
  * chrome.storage.sync.get 读的是本地缓存的同步数据，不依赖实时网络。
  */
 export const loadRemoteKeyboardConfig = async () => {
   try {
-    const data = await chrome.storage.sync.get('naive-tab-keyboard')
-    const raw = data['naive-tab-keyboard'] as string
+    const data = await chrome.storage.sync.get('naive-tab-keyboardBookmark')
+    const raw = data['naive-tab-keyboardBookmark'] as string
     if (!raw || raw.length === 0) {
-      log('Load remote keyboard config: empty')
+      log('Load remote keyboardBookmark config: empty')
       return false
     }
 
     const parsed = await parseStoredData(raw)
     const newSyncId = parsed.syncId
-    const currSyncId = localState.value.isUploadConfigStatusMap.keyboard?.syncId
+    const currSyncId = localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
 
     // syncId 相同说明本地已是最新，跳过
     if (newSyncId === currSyncId) {
-      log('Load remote keyboard config: same syncId, skip')
+      log('Load remote keyboardBookmark config: same syncId, skip')
       return false
     }
 
     // 更新同步状态并替换配置
-    if (!localState.value.isUploadConfigStatusMap.keyboard) {
-      localState.value.isUploadConfigStatusMap.keyboard = { ...defaultUploadStatusItem }
+    if (!localState.value.isUploadConfigStatusMap.keyboardBookmark) {
+      localState.value.isUploadConfigStatusMap.keyboardBookmark = { ...defaultUploadStatusItem }
     }
-    localState.value.isUploadConfigStatusMap.keyboard.syncId = newSyncId
-    localState.value.isUploadConfigStatusMap.keyboard.syncTime = parsed.syncTime
-    localState.value.isUploadConfigStatusMap.keyboard.dirty = false
-    localConfig.keyboard = parsed.data
+    localState.value.isUploadConfigStatusMap.keyboardBookmark.syncId = newSyncId
+    localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime = parsed.syncTime
+    localState.value.isUploadConfigStatusMap.keyboardBookmark.dirty = false
+    localConfig.keyboardBookmark = parsed.data
 
-    log('Load remote keyboard config: updated from cloud')
+    log('Load remote keyboardBookmark config: updated from cloud')
     return true
   } catch (e) {
-    log('Load remote keyboard config error', e)
+    log('Load remote keyboardBookmark config error', e)
     return false
   }
 }

@@ -1,44 +1,8 @@
-export const WIDGET_CODE = 'keyboard'
+export const PRESERVE_FIELDS = ['keyboardType', 'keycapType', 'emphasisKeyOverrides']
 
-import type { TShortcutModifier } from '@/logic/globalShortcut/shortcut-utils'
-
-export const PRESERVE_FIELDS = ['keymap']
-
-export const WIDGET_CONFIG = {
-  enabled: true,
-  source: 2, // 书签来源：1浏览器，2扩展本身
-  isGlobalShortcutEnabled: true, // 全局快捷键
-  shortcutInInputElement: true, // 输入元素中是否仍然触发全局快捷键
-  globalShortcutModifiers: ['alt'] as TShortcutModifier[], // 全局快捷键修饰键数组，如 ["alt"]、["ctrl", "shift"]
-  urlBlacklist: [] as string[], // URL 黑名单（在这些域名上不触发全局快捷键）
-  isNewTabOpen: false,
-  defaultExpandFolder: null as null | string,
-  keymap: {
-    KeyQ: {
-      url: 'www.baidu.com',
-    },
-    KeyW: {
-      url: 'www.google.com',
-    },
-    KeyE: {
-      url: 'www.bing.com',
-    },
-    KeyA: {
-      url: 'https://gxfg.github.io/naivetab-doc/',
-      name: 'welcome',
-    },
-  } as Record<string, TBookmarkEntry>,
-  layout: {
-    xOffsetKey: 'left',
-    xOffsetValue: 50,
-    xTranslateValue: -50,
-    yOffsetKey: 'top',
-    yOffsetValue: 1,
-    yTranslateValue: 0,
-  },
+export const KEYBOARD_COMMON_CONFIG = {
   keyboardType: 'key67',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
-  // keycap
   keycapType: 'gmk' as KeycapVisualType,
   keycapPadding: 1.5,
   keycapSize: 58,
@@ -47,7 +11,6 @@ export const WIDGET_CONFIG = {
   keycapBorderWidth: 1,
   keycapBorderColor: ['rgba(71, 85, 105, 1)', 'rgba(73, 73, 77, 1)'],
   keycapBackgroundBlur: 0,
-  // shell
   isShellVisible: true,
   shellVerticalPadding: 15,
   shellHorizontalPadding: 15,
@@ -56,33 +19,27 @@ export const WIDGET_CONFIG = {
   isShellShadowEnabled: true,
   shellShadowColor: ['rgba(0, 0, 0, 0.4)', 'rgba(0, 0, 0, 0.4)'],
   shellBackgroundBlur: 5,
-  // plate
   isPlateVisible: true,
   platePadding: 3,
   plateBorderRadius: 5,
   plateColor: ['rgba(80, 80, 80, 0.6)', 'rgba(119, 119, 119, 0.5)'],
   plateBackgroundBlur: 3,
-  // keycap key
   isCapKeyVisible: true,
   keycapKeyFontFamily: 'OpenCherry',
   keycapKeyFontSize: 12,
-  // url name
   isNameVisible: true,
   keycapBookmarkFontFamily: 'Arial',
   keycapBookmarkFontSize: 11,
-  // icon
   isFaviconVisible: true,
   faviconSize: 0.85,
   isTactileBumpsVisible: true,
-  // color
   mainFontColor: ['rgba(34, 34, 34, 1.0)', 'rgba(239,239,234,1.0)'],
   mainBackgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(34, 34, 34, 1.0)'],
   emphasisOneFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(239,239,234,1.0)'],
   emphasisOneBackgroundColor: ['rgba(55,54,52,1.0)', 'rgba(34, 34, 34, 1.0)'],
   emphasisTwoFontColor: ['rgba(255, 255, 255, 0.9)', 'rgba(239,239,234,1.0)'],
   emphasisTwoBackgroundColor: ['rgba(34, 34, 34, 1)', 'rgba(34, 34, 34, 1.0)'],
-  // 强调色分组用户自定义覆盖: keyCode → 0(普通) | 1(强调一) | 2(强调二)
   emphasisKeyOverrides: {} as Record<string, 0 | 1 | 2>,
 }
 
-export type TWidgetConfig = typeof WIDGET_CONFIG
+export type TKeyboardCommonConfig = typeof KEYBOARD_COMMON_CONFIG
