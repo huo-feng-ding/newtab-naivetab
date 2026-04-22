@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref, computed, nextTick } from 'vue'
 import { flushConfigSync } from '@/logic/storage'
-import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/constants/keyboard'
-import { currKeyboardConfig } from '@/logic/keyboard'
+import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/keyboard/keyboard-constants'
+import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
 import { localConfig, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import { requestPermission } from '@/logic/storage'
-import { getBookmarkConfigName, getBookmarkConfigUrl, getDefaultBookmarkNameFromUrl } from '@/newtab/widgets/keyboard/logic'
+import { getBookmarkConfigName, getBookmarkConfigUrl, getDefaultBookmarkNameFromUrl } from '@/newtab/widgets/keyboardBookmark/logic'
 import { getFaviconFromUrl } from '@/logic/bookmark'
 import BrowserBookmarkPicker from '@/components/BrowserBookmarkPicker.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
@@ -40,12 +40,12 @@ const keyboardStyle = useKeyboardStyle('px', props.baseSize)
 const { getCustomLabel, getKeycapStageStyle, getKeycapTextStyle, getKeycapIconStyle, getEmphasisStyle, keycapCssVars } = keyboardStyle
 
 // ── 键帽可见性配置 ────────────────────────────────────────────────────────
-const keycapVisualType = computed(() => localConfig.keyboard.keycapType)
-const isKeycapBorderEnabled = computed(() => localConfig.keyboard.isKeycapBorderEnabled)
-const isCapKeyVisible = computed(() => localConfig.keyboard.isCapKeyVisible)
-const isNameVisible = computed(() => localConfig.keyboard.isNameVisible)
-const isFaviconVisible = computed(() => localConfig.keyboard.isFaviconVisible)
-const isTactileBumpsVisible = computed(() => localConfig.keyboard.isTactileBumpsVisible)
+const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
+const isKeycapBorderEnabled = computed(() => localConfig.keyboardCommon.isKeycapBorderEnabled)
+const isCapKeyVisible = computed(() => localConfig.keyboardCommon.isCapKeyVisible)
+const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
+const isFaviconVisible = computed(() => localConfig.keyboardCommon.isFaviconVisible)
+const isTactileBumpsVisible = computed(() => localConfig.keyboardCommon.isTactileBumpsVisible)
 
 // ── 当前标签页 URL ────────────────────────────────────────────────────────
 const pendingUrl = ref('')
@@ -71,8 +71,8 @@ const bookmarkState = reactive({
 // ── 延迟创建 keymap entry ───────────────────────────────────────────────
 // 仅在用户真正修改 URL 或名称时才创建 entry，避免点击键帽即产生空 entry 污染数据
 const ensureKeymapEntry = (code: string) => {
-  if (!localConfig.keyboard.keymap[code]) {
-    localConfig.keyboard.keymap[code] = { url: '', name: '' }
+  if (!localConfig.keyboardBookmark.keymap[code]) {
+    localConfig.keyboardBookmark.keymap[code] = { url: '', name: '' }
   }
 }
 
@@ -86,7 +86,7 @@ const selectKey = (code: string) => {
 const currKeymapEntry = computed(() => {
   const code = bookmarkState.keyCode
   if (!code) return null
-  return localConfig.keyboard.keymap[code] ?? null
+  return localConfig.keyboardBookmark.keymap[code] ?? null
 })
 
 // 表单是否可见：有选中的键帽就渲染表单（即使尚未配置）
@@ -97,7 +97,7 @@ const getCurrKeymapUrl = () => currKeymapEntry.value?.url ?? ''
 const setCurrKeymapUrl = (v: string) => {
   if (bookmarkState.keyCode) {
     ensureKeymapEntry(bookmarkState.keyCode)
-    const entry = localConfig.keyboard.keymap[bookmarkState.keyCode]
+    const entry = localConfig.keyboardBookmark.keymap[bookmarkState.keyCode]
     entry.url = v.replaceAll(' ', '')
   }
 }
@@ -105,7 +105,7 @@ const getCurrKeymapName = () => currKeymapEntry.value?.name ?? ''
 const setCurrKeymapName = (v: string) => {
   if (bookmarkState.keyCode) {
     ensureKeymapEntry(bookmarkState.keyCode)
-    const entry = localConfig.keyboard.keymap[bookmarkState.keyCode]
+    const entry = localConfig.keyboardBookmark.keymap[bookmarkState.keyCode]
     entry.name = (v ?? '').trim()
   }
 }
@@ -133,7 +133,7 @@ const onOpenBookmarkPicker = async () => {
 const onSelectBookmark = (payload: { title: string, url?: string }) => {
   if (!bookmarkState.keyCode) return
   ensureKeymapEntry(bookmarkState.keyCode)
-  const entry = localConfig.keyboard.keymap[bookmarkState.keyCode]
+  const entry = localConfig.keyboardBookmark.keymap[bookmarkState.keyCode]
   entry.url = (payload.url || '').slice(0, KEYBOARD_URL_MAX_LENGTH)
   entry.name = (payload.title || '').slice(0, KEYBOARD_NAME_MAX_LENGTH)
   bookmarkState.isBookmarkModalVisible = false
@@ -142,7 +142,7 @@ const onSelectBookmark = (payload: { title: string, url?: string }) => {
 // ── 删除书签 ─────────────────────────────────────────────────────────────
 const onDeleteBookmark = () => {
   if (bookmarkState.keyCode.length === 0) return
-  delete localConfig.keyboard.keymap[bookmarkState.keyCode]
+  delete localConfig.keyboardBookmark.keymap[bookmarkState.keyCode]
   // bookmarkState.keyCode = ''  // 删除后保持选中状态，用户可以继续为该键帽选择新的书签
 }
 
@@ -162,19 +162,19 @@ const handleDragEnd = () => {
     bookmarkState.targetDragKeyCode = ''
     return
   }
-  if (!localConfig.keyboard.keymap[bookmarkState.currDragKeyCode]) {
+  if (!localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]) {
     bookmarkState.currDragKeyCode = ''
     bookmarkState.targetDragKeyCode = ''
     return
   }
 
-  const targetData = localConfig.keyboard.keymap[bookmarkState.targetDragKeyCode]
-  localConfig.keyboard.keymap[bookmarkState.targetDragKeyCode] = localConfig.keyboard.keymap[bookmarkState.currDragKeyCode]
+  const targetData = localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode]
+  localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode] = localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]
 
   if (targetData) {
-    localConfig.keyboard.keymap[bookmarkState.currDragKeyCode] = targetData
+    localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode] = targetData
   } else {
-    delete localConfig.keyboard.keymap[bookmarkState.currDragKeyCode]
+    delete localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]
   }
 
   bookmarkState.keyCode = bookmarkState.targetDragKeyCode
@@ -189,7 +189,7 @@ const handleCommit = async () => {
   if (!bookmarkState.keyCode) return
   isCommitLoading.value = true
   try {
-    await flushConfigSync('keyboard')
+    await flushConfigSync('keyboardBookmark')
   } catch (e) {
     console.error('[BookmarkManager] flushConfigSync failed:', e)
   } finally {
@@ -324,7 +324,7 @@ const onHandleInputBlur = () => {
             <NInput
               size="small"
               :value="getCurrKeymapUrl()"
-              :placeholder="$t('keyboard.urlLabel')"
+              :placeholder="$t('keyboardCommon.urlLabel')"
               :maxlength="KEYBOARD_URL_MAX_LENGTH"
               show-count
               clearable
@@ -337,7 +337,7 @@ const onHandleInputBlur = () => {
             <NInput
               size="small"
               :value="getCurrKeymapName()"
-              :placeholder="getDefaultBookmarkNameFromUrl(getCurrKeymapUrl()) || $t('keyboard.nameLabel')"
+              :placeholder="getDefaultBookmarkNameFromUrl(getCurrKeymapUrl()) || $t('keyboardCommon.nameLabel')"
               :maxlength="KEYBOARD_NAME_MAX_LENGTH"
               show-count
               clearable
@@ -415,7 +415,7 @@ const onHandleInputBlur = () => {
         v-else
         class="form__placeholder"
       >
-        {{ $t('keyboard.selectKeycapTip') }}
+        {{ $t('keyboardBookmark.selectKeycapTip') }}
       </div>
     </div>
   </div>

@@ -1,6 +1,7 @@
 export const ICONS = {
   // widget icons
-  keyboard: 'ic:outline-keyboard-alt',
+  keyboardCommon: 'ic:outline-keyboard-alt',
+  bookmarkKeyboard: 'ic:twotone-bookmarks',
   bookmarkFolder: 'akar-icons:grid',
   clockDigital: 'fluent-emoji-high-contrast:input-numbers',
   clockAnalog: 'grommet-icons:clock',
@@ -21,7 +22,7 @@ export const ICONS = {
   countdownSpinDown: 'mdi:chevron-down',
   // setting__label
   calendarHoliday: 'mdi:calendar-star',
-  commandShortcut: 'ic:twotone-keyboard-command-key',
+  keyboardCommand: 'ic:twotone-keyboard-command-key',
   calendarToday: 'mdi:calendar-today',
   calendarRest: 'mdi:bed',
   calendarWork: 'mdi:briefcase-outline',
@@ -122,7 +123,7 @@ export type SettingIconMeta = {
 }
 
 export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
-  keyboard: { iconName: ICONS.keyboard, widgetSize: 33 },
+  keyboardBookmark: { iconName: ICONS.bookmarkKeyboard, widgetSize: 33 },
   bookmarkFolder: { iconName: ICONS.bookmarkFolder, widgetSize: 30 },
   clockDigital: { iconName: ICONS.clockDigital, widgetSize: 32 },
   clockAnalog: { iconName: ICONS.clockAnalog, widgetSize: 30 },
@@ -141,8 +142,9 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
 export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   general: { iconName: ICONS.settings, settingSize: 18 },
   focusMode: { iconName: ICONS.focus, settingSize: 18 },
-  commandShortcut: { iconName: ICONS.commandShortcut, settingSize: 18 },
-  keyboard: { iconName: ICONS.keyboard, settingSize: 18 },
+  keyboardCommon: { iconName: ICONS.keyboardCommon, settingSize: 18 },
+  keyboardCommand: { iconName: ICONS.keyboardCommand, settingSize: 18 },
+  keyboardBookmark: { iconName: ICONS.bookmarkKeyboard, settingSize: 18 },
   bookmarkFolder: { iconName: ICONS.bookmarkFolder, settingSize: 18 },
   clockDate: { iconName: ICONS.clockAnalog, settingSize: 17 },
   calendar: { iconName: ICONS.calendar, settingSize: 16 },

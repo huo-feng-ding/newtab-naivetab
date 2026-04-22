@@ -39,7 +39,7 @@ const isDownloadVisible = computed(() => !isDragMode.value && localConfig.genera
 
 // 与 NDropdown 版本相同：用 ref + watch 避免点击后状态变化导致列表重算
 const buildMenuList = (): MenuItem[] => {
-  const isFocusMode = localConfig.general.isFocusMode
+  const isFocusMode = localState.value.isFocusMode
   const isHoverWidget = state.currTargetCode !== ''
   const targetLabel = isHoverWidget ? window.$t(`setting.${state.currTargetCode}`) : window.$t('setting.general')
   const list: MenuItem[] = [
@@ -103,7 +103,7 @@ const menuActionMap: Record<string, () => void | Promise<void>> = {
     gaProxy('click', ['rightMenu', 'fullscreen'])
   },
   focusMode: () => {
-    localConfig.general.isFocusMode = !localConfig.general.isFocusMode
+    localState.value.isFocusMode = !localState.value.isFocusMode
     gaProxy('click', ['rightMenu', 'focusMode'])
   },
   editFocusMode: () => {
@@ -169,6 +169,8 @@ const openMenu = (e: MouseEvent) => {
   state.posY = e.clientY
   const targetData = getTargetDataFromEvent(e)
   state.currTargetCode = targetData.code
+  // 无论菜单是否已打开，都重建菜单列表（已打开时目标可能从空白变为 widget）
+  menuList.value = buildMenuList()
   state.isMenuVisible = true
 
   nextTick(() => {

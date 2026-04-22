@@ -1,8 +1,9 @@
 import type { WidgetConfigByCode } from '@/newtab/widgets/registry'
 import { WIDGET_CODE_LIST } from '@/newtab/widgets/codes'
 import pkg from '../../package.json'
-import { COMMAND_SHORTCUT_CONFIG } from '@/logic/globalShortcut/shortcut-command'
+import { KEYBOARD_COMMAND_CONFIG } from '@/logic/globalShortcut/shortcut-command'
 import { IMAGE_NETWORK_SOURCE, BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
+import { KEYBOARD_COMMON_CONFIG } from '@/logic/keyboard/keyboard-config'
 
 const UI_LANGUAGE = chrome.i18n.getUILanguage()
 const CURR_LANG = UI_LANGUAGE || 'en-US'
@@ -20,7 +21,7 @@ export const defaultFocusVisibleWidgetMap = {
 const generalConfig = {
   isFirstOpen: true,
   version: pkg.version,
-  showBreakingChangeNotice: false, // 破坏性变更通知
+  showBreakingChangeNotice: false,
   appearance: 'auto' as 'light' | 'dark' | 'auto',
   pageTitle: CURR_LANG === 'zh-CN' ? '新标签页' : 'NaiveTab',
   lang: CURR_LANG,
@@ -29,7 +30,6 @@ const generalConfig = {
   openPageFocusElement: 'default' as TPageFocusElement,
   isLoadPageAnimationEnabled: true,
   loadPageAnimationType: 'fade-in' as 'fade-in' | 'zoom-in',
-  isFocusMode: false,
   focusVisibleWidgetMap: defaultFocusVisibleWidgetMap,
   isBackgroundImageEnabled: true,
   backgroundImageSource: BACKGROUND_IMAGE_SOURCE.NETWORK as (typeof BACKGROUND_IMAGE_SOURCE)[keyof typeof BACKGROUND_IMAGE_SOURCE],
@@ -67,7 +67,7 @@ const generalConfig = {
   fontSize: 14,
   fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
   primaryColor: ['rgba(92, 150, 220, 1)', 'rgba(92, 150, 220, 1)'],
-  backgroundColor: ['rgba(255, 255, 255, 1)', 'rgba(53, 54, 58, 1)'],
+  backgroundColor: ['rgba(232, 236, 241, 1)', 'rgba(26, 26, 46, 1)'],
   bgOpacity: 1,
   bgBlur: 0,
   isParallaxEnabled: true,
@@ -95,16 +95,17 @@ const widgetsDefaultConfig = (() => {
 
 export const defaultConfig = {
   general: generalConfig,
-  commandShortcut: COMMAND_SHORTCUT_CONFIG,
+  keyboardCommon: KEYBOARD_COMMON_CONFIG,
+  keyboardCommand: KEYBOARD_COMMAND_CONFIG,
   ...widgetsDefaultConfig,
 }
 
 export const defaultUploadStatusItem = {
   loading: false,
   syncTime: 0,
-  syncId: '', // MD5
-  localModifiedTime: 0, // 本地最后修改时间
-  dirty: false, // 本地是否有未同步的修改
+  syncId: '',
+  localModifiedTime: 0,
+  dirty: false,
 }
 
 const genUploadConfigStatusMap = () => {
@@ -125,6 +126,7 @@ const genUploadConfigStatusMap = () => {
 
 export const defaultLocalState = {
   currAppearanceLabel: 'light' as 'light' | 'dark',
-  currAppearanceCode: 0 as 0 | 1, // 0:light | 1:dark
+  currAppearanceCode: 0 as 0 | 1,
   isUploadConfigStatusMap: genUploadConfigStatusMap(),
+  isFocusMode: false, // 专注模式开关：频繁切换、仅本地生效，无需云同步
 }

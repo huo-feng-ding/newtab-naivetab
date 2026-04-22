@@ -3,12 +3,12 @@
  * UrlBlacklistInput
  *
  * 通用域名黑名单输入组件，通过 v-model 双向绑定域名数组。
- * 可在 keyboard、commandShortcut 等设置面板中复用。
+ * 可在 keyboardBookmark、keyboardCommand 等设置面板中复用。
  *
  * 使用示例：
  * ```vue
- * <UrlBlacklistInput v-model="localConfig.keyboard.urlBlacklist" />
- * <UrlBlacklistInput v-model="localConfig.commandShortcut.urlBlacklist" />
+ * <UrlBlacklistInput v-model="localConfig.keyboardBookmark.urlBlacklist" />
+ * <UrlBlacklistInput v-model="localConfig.keyboardCommand.urlBlacklist" />
  * ```
  */
 

@@ -33,7 +33,7 @@ const formattedModifier = computed(() => {
 
 const globalModifierTips = computed(() => {
   const altLabel = isMacOS ? 'Opt' : 'Alt'
-  const tips = window.$t('keyboard.globalModifierTips')
+  const tips = window.$t('keyboardBookmark.globalModifierTips')
   return tips.replace('__alt__', altLabel)
 })
 
@@ -73,7 +73,7 @@ const cancelRecording = () => {
 const saveModifier = () => {
   const modifiers = lastModifierSnapshot.length > 0 ? lastModifierSnapshot : modifierFromSet()
   if (modifiers.length === 0) {
-    window.$message.warning(window.$t('keyboard.requireModifier'))
+    window.$message.warning(window.$t('keyboardBookmark.requireModifier'))
     return
   }
   modifier.value = modifiers
@@ -169,13 +169,13 @@ onUnmounted(() => {
       class="recorder__capture recorder__capture--recording"
       @click.stop
     >
-      {{ $t('keyboard.recording') }}
+      {{ $t('keyboardBookmark.recording') }}
     </div>
     <div
       v-else
       class="recorder__capture"
     >
-      <span>{{ formattedModifier || $t('keyboard.recordModifier') }}</span>
+      <span>{{ formattedModifier || $t('keyboardBookmark.recordModifier') }}</span>
     </div>
 
     <NButton

@@ -7,16 +7,44 @@ description: NaiveTab 浏览器扩展的 Widget 开发指南。当用户要在 n
 
 新增 Widget 需按顺序完成以下步骤。完整模板参考见 [reference.md](reference.md)。
 
-## 必须修改的 8 个文件
+## 必须修改的 7 个文件
 
-### Step 1 — `src/types/global.d.ts` ⚠️ 最容易遗漏
+### Step 1 — `src/newtab/widgets/codes.ts` ⚠️ 类型由 `WIDGET_CODE_LIST` 自动推导
 
-将新 code 加入 `WidgetCodes` 联合类型。**遗漏此步会导致全项目类型报错。**
+**`WidgetCodes` 不再手动维护联合类型，而是从 `WIDGET_CODE_LIST` 用 `typeof` 自动推导。** 只需在列表数组中追加 code 即可。
 
+三件事都在同一个文件：
+
+**1-A：添加到 `WIDGET_CODE_LIST`**
 ```ts
-// @@@@ add widget type
-type WidgetCodes = '...' | 'myWidget'
+export const WIDGET_CODE_LIST = [
+  // ...
+  'myWidget',   // 顺序决定组件库抽屉中的排列顺序
+] as const
 ```
+
+**1-B：（可选）若新 Widget 与其他 Widget 共用同一个 setting pane，需维护 `WIDGET_SETTING_PANE_MAP`**
+```ts
+export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
+  // ...
+  myWidget: 'clockDate',   // ← 指向对应的 pane code
+}
+```
+> 未在此 Map 中的 Widget，右键菜单会默认用自身 code 查找 pane（`myWidget` → pane `myWidget`）。
+
+**1-C：添加到 `WIDGET_GROUPS` 对应分组**（用于组件库抽屉和专注设置按分类展示）
+```ts
+export const WIDGET_GROUPS: Array<{
+  labelKey: string
+  codes: WidgetCodes[]
+}> = [
+  {
+    labelKey: 'widgetGroup.timeAndDate',
+    codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组（time/bookmark/tool 三选一）
+  },
+]
+```
+**必须添加**否则不会显示在组件库列表中。
 
 ### Step 2 — 新建 `src/newtab/widgets/myWidget/config.ts`
 
@@ -79,7 +107,7 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
 
 > ❌ 错误示范：`iconName: 'mdi:some-icon'`（硬编码字符串绕过了 `ICONS` 常量，难以统一维护）
 
-**设置面板中引用图标也必须使用 `ICONS.xxx`。**
+**设置面板中引用图标也必须使用 `ICONS.xxx`，新增专属 setting 面板时还需在 `SETTING_ICON_META` 中注册。**
 
 ### Step 6 — `src/newtab/widgets/registry.ts`
 
@@ -91,42 +119,7 @@ import type { TWidgetConfig as MyWidgetConfig } from './myWidget/config'
 myWidget: MyWidgetConfig
 ```
 
-### Step 7 — `src/newtab/widgets/codes.ts`
-
-三件事都在同一个文件：
-
-**7-A：添加到 `WIDGET_CODE_LIST`**
-```ts
-export const WIDGET_CODE_LIST = [
-  // ...
-  'myWidget',   // 顺序决定组件库抽屉中的排列顺序
-] as WidgetCodes[]
-```
-
-**7-B：（可选）若新 Widget 与其他 Widget 共用同一个 setting pane，需维护 `WIDGET_SETTING_PANE_MAP`**
-```ts
-export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
-  // ...
-  myWidget: 'clockDate',   // ← 指向对应的 pane code
-}
-```
-> 未在此 Map 中的 Widget，右键菜单会默认用自身 code 查找 pane（`myWidget` → pane `myWidget`）。
-
-**7-C：添加到 `WIDGET_GROUPS` 对应分组**（用于组件库抽屉和专注设置按分类展示）
-```ts
-export const WIDGET_GROUPS: Array<{
-  labelKey: string
-  codes: WidgetCodes[]
-}> = [
-  {
-    labelKey: 'widgetGroup.timeAndDate',
-    codes: ['clockDigital', ... , 'myWidget'], // ← 追加到对应分组（time/bookmark/tool 三选一）
-  },
-]
-```
-**必须添加**否则不会显示在组件库列表中。
-
-### Step 8 — i18n：`src/locales/zh-CN.json` 和 `en-US.json`
+### Step 7 — i18n：`src/locales/zh-CN.json` 和 `en-US.json`
 
 ```json
 "setting": {
@@ -142,7 +135,7 @@ export const WIDGET_GROUPS: Array<{
 
 ### 步骤 1 — 新建面板文件
 
-新建目录 `src/setting/panes/MyWidgetSetting/`，并创建 `index.vue`：
+新建目录 `src/setting/panes/myWidget/`，并创建 `index.vue`：
 
 ```vue
 <template>
@@ -150,7 +143,6 @@ export const WIDGET_GROUPS: Array<{
     <!-- 在这里使用原子组件（ColorField, FontField, SliderField, etc.）构建表单 -->
     <SwitchField
       v-model="localConfig.myWidget.enabled"
-      :label="$t('common.enabled')"
     />
     <ColorField
       v-model="localConfig.myWidget.fontColor"
@@ -180,23 +172,16 @@ import { localConfig } from '@/logic/store'
 
 ### 步骤 3 — 添加设置图标元数据
 
-在 `src/logic/icons.ts` 中添加：
+在 `src/logic/icons.ts` 的 `SETTING_ICON_META` 中注册：
 
-**1-A：已有图标可复用则跳过此步 — 在 `ICONS` 中新增图标常量：**
 ```ts
-export const ICONS = {
-  // ...
-  myWidget: 'mdi:some-icon',
-}
-```
-
-**1-B：在 `SETTING_ICON_META` 中注册：**
-```ts
-export const SETTING_ICON_META: Record<settingPanes, { iconName: string; settingSize: number }> = {
+export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   // ...
   myWidget: { iconName: ICONS.myWidget, settingSize: 20 },
 }
 ```
+
+**所有图标必须通过 `ICONS` 常量引用，禁止硬编码字符串。**
 
 ### 步骤 4 — 建立 Widget 与 Setting Pane 的映射
 

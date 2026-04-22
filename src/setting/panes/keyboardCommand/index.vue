@@ -2,7 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { computed, ref } from 'vue'
 import { localConfig, getSettingKeyboardSize } from '@/logic/store'
-import { currKeyboardConfig } from '@/logic/keyboard'
+import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
 import { formatModifierKeys, toModifierMask } from '@/logic/globalShortcut/shortcut-utils'
 import { COMMAND_CATEGORIES, type TCommandName } from '@/logic/globalShortcut/shortcut-command'
 import { ICONS } from '@/logic/icons'
@@ -27,9 +27,9 @@ const { keycapCssVars, getEmphasisStyle, getCustomLabel, getKeycapStageStyle, ge
 /**
  * 键帽视觉配置（跟随 keyboard widget 偏好，保持一致性）
  */
-const keycapVisualType = computed(() => localConfig.keyboard.keycapType)
-const isCapKeyVisible = computed(() => localConfig.keyboard.isCapKeyVisible)
-const isNameVisible = computed(() => localConfig.keyboard.isNameVisible)
+const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
+const isCapKeyVisible = computed(() => localConfig.keyboardCommon.isCapKeyVisible)
+const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
 
 /**
  * 命令分类数据（用于 Setting 面板分组展示）
@@ -55,7 +55,7 @@ const commandCategories = computed(() => {
  * 格式化修饰键 + 主键为可读形式
  */
 const formatBinding = (code: string): string => {
-  const modifier = formatModifierKeys(localConfig.commandShortcut.modifiers)
+  const modifier = formatModifierKeys(localConfig.keyboardCommand.modifiers)
   const key = getCustomLabel(code)
   return `${modifier} + ${key}`
 }
@@ -64,7 +64,7 @@ const formatBinding = (code: string): string => {
  * 已绑定的按键集合（用于高亮显示）
  */
 const boundKeySet = computed(() => {
-  const keymap = localConfig.commandShortcut.keymap || {}
+  const keymap = localConfig.keyboardCommand.keymap || {}
   return new Set(Object.keys(keymap).filter((code) => keymap[code]?.command))
 })
 
@@ -72,7 +72,7 @@ const boundKeySet = computed(() => {
  * 获取按键已绑定的命令
  */
 const getBoundCommand = (code: string): string => {
-  return localConfig.commandShortcut.keymap?.[code]?.command || ''
+  return localConfig.keyboardCommand.keymap?.[code]?.command || ''
 }
 
 /**
@@ -92,11 +92,11 @@ const selectedKeyCode = ref<string | null>(null)
  * 修饰键冲突警告：当命令快捷键和书签快捷键使用相同修饰键时提示
  */
 const modifierConflictWarning = computed(() => {
-  const cmdModifiers = localConfig.commandShortcut.modifiers
-  const bookmarkModifiers = localConfig.keyboard.globalShortcutModifiers
+  const cmdModifiers = localConfig.keyboardCommand.modifiers
+  const bookmarkModifiers = localConfig.keyboardBookmark.globalShortcutModifiers
   if (cmdModifiers.length > 0 && bookmarkModifiers.length > 0
     && toModifierMask(cmdModifiers) === toModifierMask(bookmarkModifiers)) {
-    return window.$t('commandShortcut.modifierConflict')
+    return window.$t('keyboardCommand.modifierConflict')
   }
   return ''
 })
@@ -113,7 +113,7 @@ const toggleSelectKey = (code: string) => {
  */
 const handleDeleteBinding = () => {
   if (!selectedKeyCode.value) return
-  delete localConfig.commandShortcut.keymap[selectedKeyCode.value]
+  delete localConfig.keyboardCommand.keymap[selectedKeyCode.value]
   const keyLabel = getCustomLabel(selectedKeyCode.value)
   window.$message?.success(`${keyLabel} → ${window.$t('common.none')}`)
   selectedKeyCode.value = null
@@ -125,9 +125,9 @@ const handleDeleteBinding = () => {
 const handleCommandSelect = (cmd: TCommandName) => {
   if (!selectedKeyCode.value) return
   if (!cmd) {
-    delete localConfig.commandShortcut.keymap[selectedKeyCode.value]
+    delete localConfig.keyboardCommand.keymap[selectedKeyCode.value]
   } else {
-    localConfig.commandShortcut.keymap[selectedKeyCode.value] = { command: cmd }
+    localConfig.keyboardCommand.keymap[selectedKeyCode.value] = { command: cmd }
   }
   // 不关闭选择面板，让用户看到绑定结果并可以继续选择
   const keyLabel = getCustomLabel(selectedKeyCode.value)
@@ -138,29 +138,29 @@ const handleCommandSelect = (cmd: TCommandName) => {
 
 <template>
   <SettingHeaderBar
-    :title="$t('setting.commandShortcut')"
-    widget-code="commandShortcut"
+    :title="$t('setting.keyboardCommand')"
+    widget-code="keyboardCommand"
   />
 
-  <SettingFormWrap widget-code="commandShortcut">
+  <SettingFormWrap widget-code="keyboardCommand">
     <!-- 基础设置 -->
     <template #behavior>
       <SwitchField
-        v-model="localConfig.commandShortcut.isEnabled"
-        :label="$t('commandShortcut.enabled')"
+        v-model="localConfig.keyboardCommand.isEnabled"
+        :label="$t('keyboardCommand.enabled')"
       />
 
       <SwitchField
-        v-model="localConfig.commandShortcut.shortcutInInputElement"
-        :label="$t('keyboard.shortcutInInputElement')"
+        v-model="localConfig.keyboardCommand.shortcutInInputElement"
+        :label="$t('keyboardCommand.shortcutInInputElement')"
       />
 
-      <NFormItem :label="$t('keyboard.urlBlacklist')">
-        <UrlBlacklistInput v-model="localConfig.commandShortcut.urlBlacklist" />
+      <NFormItem :label="$t('keyboardCommand.urlBlacklist')">
+        <UrlBlacklistInput v-model="localConfig.keyboardCommand.urlBlacklist" />
       </NFormItem>
 
-      <NFormItem :label="$t('keyboard.globalModifier')">
-        <GlobalShortcutRecorder v-model="localConfig.commandShortcut.modifiers" />
+      <NFormItem :label="$t('keyboardCommand.globalModifier')">
+        <GlobalShortcutRecorder v-model="localConfig.keyboardCommand.modifiers" />
       </NFormItem>
 
       <NFormItem
@@ -209,7 +209,7 @@ const handleCommandSelect = (cmd: TCommandName) => {
             v-if="!selectedKeyCode"
             class="command-binding__tip"
           >
-            {{ $t('commandShortcut.bindingTip') }}
+            {{ $t('keyboardCommand.bindingTip') }}
           </div>
 
           <!-- 命令选择面板 -->
@@ -233,7 +233,7 @@ const handleCommandSelect = (cmd: TCommandName) => {
                     />
                   </NButton>
                 </template>
-                {{ $t('commandShortcut.confirmDelete').replace('__key__', getCustomLabel(selectedKeyCode)) }}
+                {{ $t('keyboardCommand.confirmDelete').replace('__key__', getCustomLabel(selectedKeyCode)) }}
               </NPopconfirm>
             </div>
 
@@ -345,6 +345,28 @@ const handleCommandSelect = (cmd: TCommandName) => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
+}
+
+/* 增强选中命令的视觉反馈 */
+:deep(.category-group__options .n-radio.n-radio--checked) {
+  position: relative;
+  background: var(--gray-alpha-08);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--n-primary-color);
+  padding-left: 5px;
+  font-weight: 600;
+  color: var(--n-text-color);
+  transition: all var(--transition-fast);
+}
+
+:deep(.category-group__options .n-radio.n-radio--checked .n-radio__label) {
+  font-weight: 600;
+  color: var(--n-text-color);
+}
+
+:deep(.category-group__options .n-radio.n-radio--checked .n-radio__dot) {
+  border-color: var(--n-primary-color);
+  background-color: var(--n-primary-color);
 }
 
 .selector__key {

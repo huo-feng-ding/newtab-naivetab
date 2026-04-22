@@ -7,24 +7,58 @@
  *
  * 同时监听 SW 回传的 NAIVETAB_EXECUTE_COMMAND（CS 命令在 newtab 中的执行器），
  * 保持与 Content Script 端的能力一致。
+ *
+ * 架构约束：
+ * - newtab 本地命令（execEnv: 'newtab'）在 postMessage 前直接本地执行，不走 SW
+ * - SW 命令 / CS 命令走现有 Port 逻辑
+ * - SW 未就绪时弹出 toast 提示，与书签快捷键行为一致
+ * - 详见 docs/messaging.md
  */
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
-import { matchShortcut } from '@/logic/globalShortcut/shortcut-utils'
-import { localConfig } from '@/logic/store'
+import { matchShortcut, isSwReady } from '@/logic/globalShortcut/shortcut-utils'
+import { localConfig, localState, globalState, switchSettingDrawerVisible } from '@/logic/store'
+import { toggleIsDragMode } from '@/logic/moveable'
 import { getSharedPort } from '@/logic/globalShortcut/shortcut-utils'
+import { getCommandExecEnv } from '@/logic/globalShortcut/shortcut-command'
+import { MSG_KEYDOWN, MSG_EXECUTE_COMMAND } from '@/types/messages'
+
+/**
+ * NaiveTab 本地控制命令执行器（execEnv: 'newtab'）
+ *
+ * 直接操作 localConfig / globalState，不经过 SW。
+ * 只在 newtab 页面中注册，CS 侧不会收到这些命令。
+ */
+const newtabControlExecutors: Record<string, () => void> = {
+  toggleFocusMode: () => {
+    const next = !localState.value.isFocusMode
+    localState.value.isFocusMode = next
+    const label = next
+      ? window.$t('rightMenu.focusMode')
+      : `${window.$t('common.exit')} ${window.$t('rightMenu.focusMode')}`
+    window.$message?.info(label)
+  },
+  toggleDragMode: () => {
+    switchSettingDrawerVisible(false)
+    toggleIsDragMode()
+  },
+  toggleSettingDrawer: () => {
+    switchSettingDrawerVisible(!globalState.isSettingDrawerVisible)
+  },
+}
 
 /**
  * 全局命令快捷键 keydown 处理
  *
- * 匹配修饰键后将按键事件通过共享 Port 发送到 SW，由 SW 查 command keymap 并分发执行。
- * 前置校验复用 matchShortcut（输入元素过滤、URL 黑名单、修饰键匹配、白名单）。
+ * 匹配修饰键后，先判断命令执行环境：
+ * - execEnv: 'newtab' → newtab 本地直接执行，不走 SW
+ * - execEnv: 'sw'/'cs' → 通过共享 Port 发送到 SW，由 SW 查 keymap 并分发执行
  *
  * 双重输入元素保护：
  * - 第一层：globalState.isInputFocused（Vue 响应式，task.ts startKeydown 上游屏蔽）
  * - 第二层：isInInputElement()（直接检测 activeElement，防止 Vue 状态遗漏）
  */
 const globalShortcutForCommandTask = (e: KeyboardEvent) => {
-  const config = localConfig.commandShortcut
+  const config = localConfig.keyboardCommand
   const code = matchShortcut(
     e,
     config.isEnabled,
@@ -35,9 +69,33 @@ const globalShortcutForCommandTask = (e: KeyboardEvent) => {
   )
   if (!code) return
 
+  // 查询当前按键绑定的命令，判断执行环境
+  const entry = config.keymap?.[code]
+  if (entry?.command) {
+    const execEnv = getCommandExecEnv(entry.command)
+
+    // newtab 本地命令：直接执行，不走 SW，不受 SW 就绪状态影响
+    if (execEnv === 'newtab') {
+      const executor = newtabControlExecutors[entry.command]
+      if (executor) {
+        executor()
+        e.preventDefault()
+        e.stopPropagation()
+        return true
+      }
+      return
+    }
+  }
+
+  // sw / cs 命令：走 Port 发送到 SW
+  if (!isSwReady()) {
+    window.$message?.warning(window.$t('common.swInitializing'))
+    return false
+  }
+
   try {
     getSharedPort().postMessage({
-      type: 'NAIVETAB_KEYDOWN',
+      type: MSG_KEYDOWN,
       key: code,
       source: 'command',
     })
@@ -63,12 +121,12 @@ const newtabCommandExecutors: Record<string, () => void> = {
   reloadPage: () => location.reload(),
   copyPageUrl: () => {
     navigator.clipboard.writeText(location.href).then(() => {
-      window.$message.success(window.$t('commandShortcut.toast.copyPageUrl'))
+      window.$message.success(window.$t('keyboardCommand.toast.copyPageUrl'))
     }).catch(() => {})
   },
   copyPageTitle: () => {
     navigator.clipboard.writeText(document.title).then(() => {
-      window.$message.success(window.$t('commandShortcut.toast.copyPageTitle'))
+      window.$message.success(window.$t('keyboardCommand.toast.copyPageTitle'))
     }).catch(() => {})
   },
 }
@@ -81,8 +139,8 @@ const newtabCommandExecutors: Record<string, () => void> = {
  */
 const setupPortCommandListener = () => {
   const port = getSharedPort()
-  port.onMessage.addListener((msg: GlobalShortcutCommandMessage) => {
-    if (msg.type === 'NAIVETAB_EXECUTE_COMMAND') {
+  port.onMessage.addListener((msg: { type: string, command: string }) => {
+    if (msg.type === MSG_EXECUTE_COMMAND) {
       const executor = newtabCommandExecutors[msg.command]
       if (executor) {
         executor()

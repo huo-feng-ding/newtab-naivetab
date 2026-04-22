@@ -1,8 +1,20 @@
 <script setup lang="ts">
-import { localConfig, localState } from '@/logic/store'
+/**
+ * 背景图渲染组件 - 双层渲染架构
+ *
+ * 背景色由 body 的 --nt-bg-main 变量提供（用户配置），#background 容器本身透明。
+ * 第一层 #background__container：显示 previewImageUrl（base64 小图）
+ *   → 立即渲染，避免首屏白屏
+ * 第二层 #background__blob：显示 fullImageUrl（高清大图 blob URL）
+ *   → 初始 opacity: 0，decode 完成后 opacity: 1 触发 CSS 0.6s 淡入过渡
+ *   → 覆盖在小图之上，实现无闪烁的图片替换效果
+ *
+ * 附加功能：
+ * - 鼠标视差效果（parallax）：mousemove 时背景轻微偏移，容器扩展 parallaxIntensity * 2 px
+ * - Loading 指示器：大图加载超过 500ms 时显示三个脉冲圆点
+ */
+import { localConfig } from '@/logic/store'
 import { imageState, isImageLoading } from '@/logic/image'
-
-const currAppearanceCode = localState.value.currAppearanceCode
 
 // 视差效果：鼠标移动时背景轻微偏移
 const parallaxX = ref(0)
@@ -13,18 +25,39 @@ const parallaxExpansion = computed(() => {
   return localConfig.general.parallaxIntensity * 2
 })
 
+// 构建视差相关的 CSS 变量
+const buildParallaxVars = () => ({
+  '--nt-parallax-x': `${parallaxX.value}px`,
+  '--nt-parallax-y': `${parallaxY.value}px`,
+  '--nt-parallax-expansion': `${parallaxExpansion.value}px`,
+})
+
 const containerStyle = computed(() => {
   const style: Record<string, string> = {}
   if (localConfig.general.isBackgroundImageEnabled) {
-    style.backgroundImage = `url(${imageState.currBackgroundImageFileObjectURL})`
+    style.backgroundImage = `url(${imageState.previewImageUrl})`
+    style.filter = `blur(${localConfig.general.bgBlur}px)`
+    style.opacity = `${localConfig.general.bgOpacity}`
+    Object.assign(style, buildParallaxVars())
   }
-  style['--nt-parallax-x'] = `${parallaxX.value}px`
-  style['--nt-parallax-y'] = `${parallaxY.value}px`
-  style['--nt-parallax-expansion'] = `${parallaxExpansion.value}px`
-  style.filter = `blur(${localConfig.general.bgBlur}px)`
-  style.opacity = `${localConfig.general.bgOpacity}`
   return style
 })
+
+const blobContainerStyle = computed(() => {
+  const style: Record<string, string> = {}
+  if (localConfig.general.isBackgroundImageEnabled && imageState.fullImageUrl) {
+    style.backgroundImage = `url(${imageState.fullImageUrl})`
+    style.filter = `blur(${localConfig.general.bgBlur}px)`
+    style.opacity = `${localConfig.general.bgOpacity}`
+    Object.assign(style, buildParallaxVars())
+  }
+  return style
+})
+
+const blobContainerClass = computed(() => ({
+  'background__container--parallax': localConfig.general.isParallaxEnabled,
+  'background__container--blob': !!imageState.fullImageUrl,
+}))
 
 let rafId: number | null = null
 
@@ -68,6 +101,13 @@ const updateEventListeners = (enable: boolean) => {
   }
 }
 
+watch(
+  () => localConfig.general.isParallaxEnabled && localConfig.general.isBackgroundImageEnabled,
+  (enabled) => {
+    updateEventListeners(enabled)
+  },
+)
+
 onMounted(() => {
   updateEventListeners(localConfig.general.isParallaxEnabled && localConfig.general.isBackgroundImageEnabled)
 })
@@ -79,28 +119,20 @@ onUnmounted(() => {
   }
 })
 
-// 渐变占位背景
-const gradientBg = computed(() => {
-  if (currAppearanceCode === 1) {
-    return 'radial-gradient(ellipse at 50% 40%, #1a1a2e 0%, #0f0f1a 100%)'
-  }
-  return 'radial-gradient(ellipse at 50% 40%, #e8ecf1 0%, #d0d5dc 100%)'
-})
-
+// 大图 blob URL，等预加载完成后再赋值，避免替换时闪烁
 const isShowLoadingSpinner = ref(false)
 
 let loadingTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(isImageLoading, (value) => {
   if (value) {
-    const hasBase64Fallback = imageState.currBackgroundImageFileObjectURL.startsWith('data:')
-    if (hasBase64Fallback) {
-      return
-    }
+    // 开始加载大图
     loadingTimer = setTimeout(() => {
       isShowLoadingSpinner.value = true
     }, 500)
   } else {
+    // 大图 decode 完成，由 CSS opacity 过渡实现淡入（imageState.fullImageUrl 已在 image.ts 中赋值）
+
     if (loadingTimer) {
       clearTimeout(loadingTimer)
       loadingTimer = null
@@ -115,13 +147,19 @@ watch(isImageLoading, (value) => {
   <!-- 存储 css 变量 -->
   <div
     id="background"
-    :style="{ background: gradientBg }"
   >
-    <!-- 视差效果容器 -->
+    <!-- 视差效果容器：base64 小图 -->
     <div
       id="background__container"
       :style="containerStyle"
       :class="{ 'background__container--parallax': localConfig.general.isParallaxEnabled }"
+    />
+    <!-- 视差效果容器：大图 blob，通过 opacity 淡入覆盖 -->
+    <div
+      v-if="localConfig.general.isBackgroundImageEnabled"
+      id="background__blob"
+      :style="blobContainerStyle"
+      :class="blobContainerClass"
     />
     <!-- loading 指示器 -->
     <div
@@ -159,6 +197,35 @@ watch(isImageLoading, (value) => {
       height: calc(100vh + calc(2 * var(--nt-parallax-expansion, 40px)));
       transform: translate(var(--nt-parallax-x, 0), var(--nt-parallax-y, 0));
       transition: transform 100ms ease-out;
+    }
+  }
+
+  #background__blob {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.6s ease-in;
+    will-change: opacity, transform;
+    pointer-events: none;
+
+    &.background__container--parallax {
+      top: calc(-1 * var(--nt-parallax-expansion, 40px));
+      left: calc(-1 * var(--nt-parallax-expansion, 40px));
+      width: calc(100vw + calc(2 * var(--nt-parallax-expansion, 40px)));
+      height: calc(100vh + calc(2 * var(--nt-parallax-expansion, 40px)));
+      transform: translate(var(--nt-parallax-x, 0), var(--nt-parallax-y, 0));
+      transition: opacity 0.6s ease-in, transform 100ms ease-out;
+    }
+
+    &.background__container--blob {
+      opacity: 1;
     }
   }
 

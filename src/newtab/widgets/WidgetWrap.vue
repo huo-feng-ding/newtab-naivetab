@@ -333,7 +333,7 @@ const isEnabled = computed(() => localConfig[props.widgetCode].enabled)
 const isCurrentActive = computed(() => props.widgetCode === moveState.currDragTarget.code)
 
 const isFocusVisible = computed(() => {
-  if (!localConfig.general.isFocusMode) {
+  if (!localState.value.isFocusMode) {
     return true
   }
   return !!localConfig.general.focusVisibleWidgetMap[props.widgetCode]

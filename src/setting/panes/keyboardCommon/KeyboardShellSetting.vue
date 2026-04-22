@@ -11,22 +11,22 @@ import SliderInput from '@/components/SliderInput.vue'
     :show-feedback="false"
   >
     <!-- Shell -->
-    <NFormItem :label="$t('keyboard.shell')">
+    <NFormItem :label="$t('keyboardCommon.shell')">
       <NSwitch
-        v-model:value="localConfig.keyboard.isShellVisible"
+        v-model:value="localConfig.keyboardCommon.isShellVisible"
         size="small"
       />
       <CustomColorPicker
-        v-if="localConfig.keyboard.isShellVisible"
-        v-model:value="localConfig.keyboard.shellColor[localState.currAppearanceCode]"
+        v-if="localConfig.keyboardCommon.isShellVisible"
+        v-model:value="localConfig.keyboardCommon.shellColor[localState.currAppearanceCode]"
         class="setting__item-ele setting__item-ml"
       />
     </NFormItem>
 
-    <template v-if="localConfig.keyboard.isShellVisible">
+    <template v-if="localConfig.keyboardCommon.isShellVisible">
       <NFormItem :label="`${$t('common.vertical')}${$t('common.margin')}`">
         <SliderInput
-          v-model="localConfig.keyboard.shellVerticalPadding"
+          v-model="localConfig.keyboardCommon.shellVerticalPadding"
           :step="1"
           :min="0"
           :max="100"
@@ -35,7 +35,7 @@ import SliderInput from '@/components/SliderInput.vue'
 
       <NFormItem :label="`${$t('common.horizontal')}${$t('common.margin')}`">
         <SliderInput
-          v-model="localConfig.keyboard.shellHorizontalPadding"
+          v-model="localConfig.keyboardCommon.shellHorizontalPadding"
           :step="1"
           :min="0"
           :max="100"
@@ -44,7 +44,7 @@ import SliderInput from '@/components/SliderInput.vue'
 
       <NFormItem :label="$t('common.borderRadius')">
         <SliderInput
-          v-model="localConfig.keyboard.shellBorderRadius"
+          v-model="localConfig.keyboardCommon.shellBorderRadius"
           :step="0.1"
           :min="0"
           :max="30"
@@ -53,7 +53,7 @@ import SliderInput from '@/components/SliderInput.vue'
 
       <NFormItem :label="$t('common.blur')">
         <SliderInput
-          v-model="localConfig.keyboard.shellBackgroundBlur"
+          v-model="localConfig.keyboardCommon.shellBackgroundBlur"
           :step="0.1"
           :min="0"
           :max="30"
@@ -65,11 +65,11 @@ import SliderInput from '@/components/SliderInput.vue'
         class="n-form-item--color"
       >
         <NSwitch
-          v-model:value="localConfig.keyboard.isShellShadowEnabled"
+          v-model:value="localConfig.keyboardCommon.isShellShadowEnabled"
           size="small"
         />
         <CustomColorPicker
-          v-model:value="localConfig.keyboard.shellShadowColor[localState.currAppearanceCode]"
+          v-model:value="localConfig.keyboardCommon.shellShadowColor[localState.currAppearanceCode]"
           class="setting__item-ele setting__item-ml"
         />
       </NFormItem>
@@ -77,25 +77,25 @@ import SliderInput from '@/components/SliderInput.vue'
 
     <!-- Plate -->
     <NDivider title-placement="left">
-      {{ $t('keyboard.plate') }}
+      {{ $t('keyboardCommon.plate') }}
     </NDivider>
 
-    <NFormItem :label="$t('keyboard.plate')">
+    <NFormItem :label="$t('keyboardCommon.plate')">
       <NSwitch
-        v-model:value="localConfig.keyboard.isPlateVisible"
+        v-model:value="localConfig.keyboardCommon.isPlateVisible"
         size="small"
       />
       <CustomColorPicker
-        v-if="localConfig.keyboard.isPlateVisible"
-        v-model:value="localConfig.keyboard.plateColor[localState.currAppearanceCode]"
+        v-if="localConfig.keyboardCommon.isPlateVisible"
+        v-model:value="localConfig.keyboardCommon.plateColor[localState.currAppearanceCode]"
         class="setting__item-ele setting__item-ml"
       />
     </NFormItem>
 
-    <template v-if="localConfig.keyboard.isPlateVisible">
+    <template v-if="localConfig.keyboardCommon.isPlateVisible">
       <NFormItem :label="`${$t('common.margin')}`">
         <SliderInput
-          v-model="localConfig.keyboard.platePadding"
+          v-model="localConfig.keyboardCommon.platePadding"
           :step="0.1"
           :min="0"
           :max="10"
@@ -104,7 +104,7 @@ import SliderInput from '@/components/SliderInput.vue'
 
       <NFormItem :label="$t('common.borderRadius')">
         <SliderInput
-          v-model="localConfig.keyboard.plateBorderRadius"
+          v-model="localConfig.keyboardCommon.plateBorderRadius"
           :step="0.1"
           :min="0"
           :max="10"
@@ -113,7 +113,7 @@ import SliderInput from '@/components/SliderInput.vue'
 
       <NFormItem :label="$t('common.blur')">
         <SliderInput
-          v-model="localConfig.keyboard.plateBackgroundBlur"
+          v-model="localConfig.keyboardCommon.plateBackgroundBlur"
           :step="0.1"
           :min="0"
           :max="30"

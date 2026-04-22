@@ -13,14 +13,23 @@
 // - chrome.storage.onChanged 监听配置变化，更新本地修饰键和启用状态
 // - 首次加载直接从 chrome.storage.sync 读取初始配置（~5-20ms）
 //
+// 模块拆分：
+// - index.ts：初始化入口、配置加载/监听、Port 连接、按键分发、命令执行器
+// - scroll.ts：滚动容器查找、缓存失效、平滑滚动
+// - toast.ts：轻量提示组件
+//
 // 生命周期：
 // - 无 onUnmounted 清理，页面导航/关闭时整个 JS 环境自动销毁
-// - Port 断开后 1s 自动重连
+// - Port 断开后指数退避重连（100ms 起步，上限 1000ms）
+// - 检测到 "Extension context invalidated" 时停止重连，不可恢复
 //
 import { matchShortcut, toModifierMask, type TShortcutModifier } from '@/logic/globalShortcut/shortcut-utils'
 import { parseStoredData } from '@/logic/compress'
+import { padUrlHttps } from '@/logic/util'
 import type { TCommandEntry } from '@/logic/globalShortcut/shortcut-command'
 import { showToast, t } from './toast'
+import { getScrollContainer, fastSmoothScrollTo } from './scroll'
+import { MSG_KEYDOWN, MSG_INIT_COMPLETE, MSG_HELLO, MSG_EXECUTE_COMMAND, type SwToCsMessage } from '@/types/messages'
 
 // -- 调试日志 --
 const debug = (...args: any[]) => {
@@ -53,7 +62,7 @@ const initMain = () => {
   let commandKeymap: Record<string, TCommandEntry> = {}
   let commandIsEnabled = false
   let commandModifiers: TShortcutModifier[] = []
-  let commandShortcutInInputElement = false
+  let keyboardCommandInInputElement = false
   let commandUrlBlacklist: string[] = []
 
   /**
@@ -86,7 +95,7 @@ const initMain = () => {
   }) => {
     if (cfg.isEnabled !== undefined) commandIsEnabled = cfg.isEnabled
     if (cfg.modifiers !== undefined) commandModifiers = cfg.modifiers
-    if (cfg.shortcutInInputElement !== undefined) commandShortcutInInputElement = cfg.shortcutInInputElement
+    if (cfg.shortcutInInputElement !== undefined) keyboardCommandInInputElement = cfg.shortcutInInputElement
     if (cfg.keymap !== undefined) commandKeymap = cfg.keymap
     if (cfg.urlBlacklist !== undefined) commandUrlBlacklist = cfg.urlBlacklist
     debug('command config updated', { isEnabled: commandIsEnabled, modifiers: commandModifiers, keymapCount: Object.keys(commandKeymap).length })
@@ -102,8 +111,8 @@ const initMain = () => {
   const loadConfig = async () => {
     // 加载书签快捷键配置
     try {
-      const keyboardData = await chrome.storage.sync.get('naive-tab-keyboard')
-      const raw = keyboardData['naive-tab-keyboard'] as string | undefined
+      const keyboardData = await chrome.storage.sync.get('naive-tab-keyboardBookmark')
+      const raw = keyboardData['naive-tab-keyboardBookmark'] as string | undefined
       if (raw) {
         const parsed = await parseStoredData(raw)
         updateConfig({
@@ -123,8 +132,8 @@ const initMain = () => {
 
     // 加载命令快捷键配置
     try {
-      const commandData = await chrome.storage.sync.get('naive-tab-commandShortcut')
-      const raw = commandData['naive-tab-commandShortcut'] as string | undefined
+      const commandData = await chrome.storage.sync.get('naive-tab-keyboardCommand')
+      const raw = commandData['naive-tab-keyboardCommand'] as string | undefined
       if (raw) {
         const parsed = await parseStoredData(raw)
         updateCommandConfig({
@@ -136,10 +145,10 @@ const initMain = () => {
         })
         debug('command config loaded from storage', { isEnabled: commandIsEnabled, modifiers: commandModifiers, keymapCount: Object.keys(commandKeymap).length })
       } else {
-        debug('No commandShortcut config in storage, keeping command shortcuts disabled')
+        debug('No keyboardCommand config in storage, keeping command shortcuts disabled')
       }
     } catch (e) {
-      debug('read/parse commandShortcut storage error', e)
+      debug('read/parse keyboardCommand storage error', e)
     }
   }
 
@@ -154,7 +163,7 @@ const initMain = () => {
     if (areaName !== 'sync') return
 
     // 书签快捷键配置变化
-    const keyboardRaw = changes['naive-tab-keyboard']?.newValue as string | undefined
+    const keyboardRaw = changes['naive-tab-keyboardBookmark']?.newValue as string | undefined
     if (keyboardRaw) {
       parseStoredData(keyboardRaw).then((parsed) => {
         updateConfig({
@@ -167,7 +176,7 @@ const initMain = () => {
       }).catch((e) => {
         debug('parse keyboard storage error', e)
       })
-    } else if (changes['naive-tab-keyboard']) {
+    } else if (changes['naive-tab-keyboardBookmark']) {
       // 配置被删除，重置为默认状态
       updateConfig({
         isEnabled: false,
@@ -180,7 +189,7 @@ const initMain = () => {
     }
 
     // 命令快捷键配置变化
-    const commandRaw = changes['naive-tab-commandShortcut']?.newValue as string | undefined
+    const commandRaw = changes['naive-tab-keyboardCommand']?.newValue as string | undefined
     if (commandRaw) {
       parseStoredData(commandRaw).then((parsed) => {
         updateCommandConfig({
@@ -193,7 +202,7 @@ const initMain = () => {
       }).catch((e) => {
         debug('parse command storage error', e)
       })
-    } else if (changes['naive-tab-commandShortcut']) {
+    } else if (changes['naive-tab-keyboardCommand']) {
       // 配置被删除，重置为默认状态
       updateCommandConfig({
         isEnabled: false,
@@ -209,8 +218,6 @@ const initMain = () => {
   // -- Port 长连接 --
   /**
    * Port 连接到 SW，用于发送按键事件。
-   * Port 保持 SW 活跃，消除快捷键冷启动延迟。
-   * 断连后 1s 自动重连。
    *
    * 双向通信：
    * - CS → SW：发送按键事件（NAIVETAB_KEYDOWN）
@@ -218,133 +225,19 @@ const initMain = () => {
    */
   let port: chrome.runtime.Port | null = null
 
-  /**
-   * 查找页面上真正的滚动容器
-   * 算法灵感来自 Vimium C (github.com/gdh1995/vimium-c) 的 findScrollable，
-   * 优先返回 document.scrollingElement，如果它不可滚动则遍历 DOM 查找
-   */
-  const findScrollContainer = (): Element => {
-    const scrollingEl = document.scrollingElement ?? document.documentElement
-    // 如果 scrollingElement 本身有滚动空间，直接返回
-    if (scrollingEl.scrollHeight > scrollingEl.clientHeight + 1) {
-      return scrollingEl
-    }
+  // -- SW 初始化状态 --
+  let swReady = false
 
-    // 从视口中心元素出发，向上查找有 overflow 且可滚动的祖先
-    const centerEl = document.elementFromPoint(
-      window.innerWidth / 2,
-      window.innerHeight / 2,
-    )
-    if (centerEl) {
-      let cur: Element | null = centerEl
-      while (cur) {
-        const style = window.getComputedStyle(cur)
-        const overflowY = style.overflowY
-        if (
-          (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay')
-          && cur.scrollHeight > cur.clientHeight + 1
-        ) {
-          return cur
-        }
-        cur = cur.parentElement
-      }
-    }
-
-    // 兜底：遍历所有子元素，找面积最大的可见可滚动容器
-    let best: Element | null = null
-    let bestArea = 0
-    const walk = (el: Element) => {
-      try {
-        const style = window.getComputedStyle(el)
-        const overflowY = style.overflowY
-        if (
-          (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay')
-          && el.scrollHeight > el.clientHeight + 1
-        ) {
-          const rect = el.getBoundingClientRect()
-          const area = rect.width * rect.height
-          if (area > bestArea && rect.width > 100 && rect.height > 100) {
-            bestArea = area
-            best = el
-          }
-        }
-      } catch { /* cross-origin 等异常情况 */ }
-      for (const child of el.children) {
-        walk(child)
-      }
-    }
-    // 只遍历 body 下的直接子树，避免全 DOM 遍历太慢
-    if (document.body) {
-      for (const child of document.body.children) {
-        walk(child)
-      }
-    }
-    return best ?? scrollingEl
-  }
-
-  /** 缓存上次找到的滚动容器，提升后续调用性能 */
-  let cachedScrollContainer: Element | null = null
-
-  /**
-   * 获取当前滚动容器（优先返回缓存，失效时重新查找）
-   */
-  const getScrollContainer = (): Element => {
-    return cachedScrollContainer ?? (cachedScrollContainer = findScrollContainer())
-  }
-
-  /**
-   * 使滚动容器缓存失效（在 DOM 结构变化或用户手动滚动后调用）
-   */
-  const invalidateScrollCache = () => {
-    cachedScrollContainer = null
-  }
-
-  // 滚动结束后自动失效缓存，下次滚动时重新查找容器
-  // scrollend 事件：Chrome 77+ / Firefox 115+ / Safari 16+
-  document.addEventListener('scrollend', invalidateScrollCache, { capture: true, passive: true })
-
-  // 监听 DOM 变化：当页面结构变化（SPA 导航、动态加载）时使缓存失效
-  // 只关注 body 的子树增减和 class/style 属性变化
-  const scrollCacheObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      if (m.type === 'childList' || m.attributeName === 'class' || m.attributeName === 'style') {
-        invalidateScrollCache()
-        break
-      }
-    }
-  })
-  if (document.body) {
-    scrollCacheObserver.observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['class', 'style'] })
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    if (document.body) {
-      scrollCacheObserver.observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['class', 'style'] })
-    }
-  }, { once: true })
-
-  /**
-   * 快速平滑滚动辅助函数（200ms，ease-out）
-   * 智能查找实际滚动容器，兼容 SPA / 内部滚动容器的页面
-   */
-  const fastSmoothScrollTo = (targetY: number) => {
-    const el = getScrollContainer()
-    const startY = el.scrollTop
-    const maxScroll = el.scrollHeight - el.clientHeight
-    const clampedTarget = Math.max(0, Math.min(targetY, maxScroll))
-    const delta = clampedTarget - startY
-    if (delta === 0) return
-    const duration = 200
-    const startTime = performance.now()
-    const step = (now: number) => {
-      const elapsed = now - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      // ease-out: 先快后慢
-      const ease = 1 - (1 - progress) ** 3
-      el.scrollTop = startY + delta * ease
-      if (progress < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }
+  // -- 重连延迟策略 --
+  // 初始 100ms：chrome.runtime.connect() 是同步返回的，即使 SW 不在运行也会
+  // 立即返回 Port 对象并触发后台唤醒。所以 delay 不需要"等 SW 启动"，而是用于
+  // 防止 SW 启动后立即断开的重试循环（如配置加载失败主动 disconnect）。
+  // 初始值越小，正常断连后的用户感知延迟越低。
+  let reconnectDelay = 100
+  // 上限 1000ms：足够避免异常场景下的频繁重试，同时不会让慢启动 SW 场景下
+  // 的连接尝试偏离实际就绪时间超过 1 秒。不需要提高到 3-5 秒——connect() 本身
+  // 会触发 SW 唤醒，更大的 delay 只是让用户多干等。
+  const MAX_RECONNECT_DELAY = 1000
 
   /**
    * CS 端命令执行器
@@ -366,18 +259,18 @@ const initMain = () => {
     reloadPage: () => location.reload(),
     copyPageUrl: () => {
       navigator.clipboard.writeText(location.href).then(() => {
-        showToast(t('commandShortcut.toast.copyPageUrl'))
+        showToast(t('keyboardCommand.toast.copyPageUrl'))
       }).catch(() => {
         fallbackCopyText(location.href)
-        showToast(t('commandShortcut.toast.copyPageUrl'))
+        showToast(t('keyboardCommand.toast.copyPageUrl'))
       })
     },
     copyPageTitle: () => {
       navigator.clipboard.writeText(document.title).then(() => {
-        showToast(t('commandShortcut.toast.copyPageTitle'))
+        showToast(t('keyboardCommand.toast.copyPageTitle'))
       }).catch(() => {
         fallbackCopyText(document.title)
-        showToast(t('commandShortcut.toast.copyPageTitle'))
+        showToast(t('keyboardCommand.toast.copyPageTitle'))
       })
     },
   }
@@ -402,28 +295,49 @@ const initMain = () => {
 
   const connectPort = () => {
     try {
+      // connect() 同步返回 Port，同时 Chrome 在后台唤醒 SW（如果休眠）。
+      // 即使 SW 当前不在运行也不会抛异常，真正的断连通过 onDisconnect 感知。
+      // catch 分支仅在扩展卸载、网络异常等极端场景下触发。
       port = chrome.runtime.connect({ name: 'naivetab-shortcut' })
-      port.onMessage.addListener((msg: GlobalShortcutCommandMessage) => {
-        if (msg.type === 'NAIVETAB_EXECUTE_COMMAND') {
+      reconnectDelay = 100
+      port.onMessage.addListener((msg: SwToCsMessage) => {
+        if (msg.type === MSG_EXECUTE_COMMAND) {
           const executor = commandExecutors[msg.command]
           if (executor) {
             debug('executing CS command:', msg.command)
             executor()
           }
+        } else if (msg.type === MSG_INIT_COMPLETE) {
+          swReady = true
+          debug('SW initialization complete')
         }
       })
+      // 首次连接和重连后主动发握手消息，确认 SW 就绪状态
+      port.postMessage({ type: MSG_HELLO })
       port.onDisconnect.addListener(() => {
-        // Chrome 后退/前进缓存或 Service Worker 休眠会导致 port 异常关闭，
-        // chrome.runtime.lastError 此时可能有值，需显式消费避免 "Unchecked runtime.lastError"
-        void chrome.runtime.lastError
+        const disconnectError = chrome.runtime.lastError
         port = null
-        debug('Port disconnected, scheduling reconnect')
-        setTimeout(connectPort, 1000)
+        swReady = false
+        // 扩展上下文失效（扩展重载/更新），不再重连
+        if (disconnectError?.message?.includes('Extension context invalidated')) {
+          debug('Extension context invalidated on disconnect, stopping')
+          return
+        }
+        reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
+        debug(`Port disconnected, reconnect in ${reconnectDelay}ms`)
+        setTimeout(connectPort, reconnectDelay)
       })
       debug('Port connected')
     } catch (e) {
-      debug('Port connect failed, retrying in 1s', e)
-      setTimeout(connectPort, 1000)
+      const err = e as Error
+      // 扩展上下文已失效（扩展重载/更新），无法恢复，停止重连
+      if (err?.message?.includes('Extension context invalidated')) {
+        debug('Extension context invalidated, stopping port reconnect')
+        return
+      }
+      reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY)
+      debug(`Port connect failed, retrying in ${reconnectDelay}ms`, err)
+      setTimeout(connectPort, reconnectDelay)
     }
   }
 
@@ -446,7 +360,7 @@ const initMain = () => {
 
     // 使用 matchShortcut 复用匹配逻辑（内置输入元素 + urlBlacklist 检查）
     const bookmarkCode = matchShortcut(e, isEnabled, globalShortcutModifiers, shortcutInInputElement, urlBlacklist, hostname)
-    const commandCode = matchShortcut(e, commandIsEnabled, commandModifiers, commandShortcutInInputElement, commandUrlBlacklist, hostname)
+    const commandCode = matchShortcut(e, commandIsEnabled, commandModifiers, keyboardCommandInInputElement, commandUrlBlacklist, hostname)
 
     if (!bookmarkCode && !commandCode) return
 
@@ -457,19 +371,42 @@ const initMain = () => {
     const hasModifierConflict = bookmarkCode && commandCode && bmMask === cmdMask
 
     // 通过 Port 发送按键事件到 SW
+    //
+    // sent 变量的关键作用：只有在至少一条消息成功发出时才拦截按键（preventDefault + stopPropagation）。
+    // 避免 Port 断开窗口期内用户按键被吞却无任何响应——此时 Port 异常走 catch，sent 保持 false，
+    // 事件继续传递给浏览器默认行为，用户不会感到"按键丢失"。
+    //
+    // SW 未就绪时的本地 fallback 不会导致重复执行：
+    //   - 书签快捷键：swReady && port 为 false 时，直接使用本地 keymap 打开 URL，sent = true
+    //   - 此时 port?.postMessage 仍会调用（因为 sent 判断在 postMessage 之前），
+    //     但 SW 冷启动队列机制保证：配置加载前消息暂存，加载完成后才执行
+    //     而 CS 端本地 fallback 已经执行过了，SW 队列处理时会再次执行
+    //     实际上 swReady 为 false 时 port 可能仍不存在（Port 未连接），postMessage 会抛异常进 catch
+    //     此时 sent 不会被设为 true，所以不会拦截按键，本地 fallback 是唯一执行路径
     let sent = false
     try {
       if (bookmarkCode) {
-        port?.postMessage({
-          type: 'NAIVETAB_KEYDOWN',
-          key: e.code,
-          source: 'bookmark',
-        })
-        sent = true
+        if (swReady && port) {
+          port.postMessage({
+            type: MSG_KEYDOWN,
+            key: e.code,
+            source: 'bookmark',
+          })
+          sent = true
+        } else {
+          // SW 未就绪，使用本地配置直接处理（仅书签快捷键）
+          const entry = keymap[e.code]
+          if (entry?.url) {
+            e.preventDefault()
+            e.stopPropagation()
+            chrome.tabs.create({ url: padUrlHttps(entry.url) })
+            sent = true
+          }
+        }
       }
       if (commandCode && !hasModifierConflict) {
         port?.postMessage({
-          type: 'NAIVETAB_KEYDOWN',
+          type: MSG_KEYDOWN,
           key: e.code,
           source: 'command',
         })

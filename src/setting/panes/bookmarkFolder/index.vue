@@ -132,12 +132,12 @@ const onResetFolder = () => {
 
       <SwitchField
         v-model="localConfig.bookmarkFolder.isIconVisible"
-        :label="$t('bookmarkFolder.hideIcon')"
+        :label="$t('bookmarkFolder.showIcon')"
       />
 
       <SwitchField
         v-model="localConfig.bookmarkFolder.isNameVisible"
-        :label="$t('bookmarkFolder.hideName')"
+        :label="$t('bookmarkFolder.showName')"
       />
     </template>
 

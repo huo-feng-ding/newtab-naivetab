@@ -73,7 +73,7 @@ export const parseStoredData = async (rawData: string): Promise<SyncPayload> => 
  * @returns 是否需要压缩
  */
 export const shouldCompress = (field: string, payloadBytes: number): boolean => {
-  // 目前只有 keyboard 配置需要压缩
-  if (field !== 'keyboard') return false
+  // 目前只有 keyboardBookmark 配置需要压缩
+  if (field !== 'keyboardBookmark') return false
   return payloadBytes > AUTO_COMPRESS_THRESHOLD
 }

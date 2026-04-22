@@ -83,12 +83,15 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     class="row__keycap"
     :class="rowClassName"
   >
-    <!-- 选中遮罩（popup 书签选择态） -->
+    <!-- 选中遮罩（选择态） -->
     <div
       v-if="isSelected"
       class="keycap__select"
     >
-      <Icon :icon="ICONS.checkCircle" />
+      <Icon
+        class="select__icon"
+        :icon="ICONS.checkCircle"
+      />
     </div>
 
     <!-- 键帽顶面（三种型别 flat / gmk / dsa，stageStyle 传入几何偏移） -->
@@ -184,9 +187,9 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   box-sizing: border-box;
   cursor: pointer;
   transition:
-    transform 80ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    box-shadow 80ms ease,
-    filter 80ms ease;
+    transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 100ms ease,
+    filter 100ms ease;
 
   /* ── 选中遮罩 ── */
   .keycap__select {
@@ -198,14 +201,50 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
-    background: color-mix(in srgb, var(--nt-kb-primary-color) 20%, transparent);
-    color: var(--nt-kb-primary-color);
-    font-size: 14px;
+    z-index: 10;
     border-radius: calc(var(--nt-kb-border-radius) - 1px);
+    overflow: hidden;
+    pointer-events: none;
+    animation: selectFadeIn 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* 底部半透明渐变，保留键帽内容的可见性 */
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--nt-kb-primary-color) 8%, transparent) 0%,
+      color-mix(in srgb, var(--nt-kb-primary-color) 22%, transparent) 100%
+    );
+
+    /* 玻璃模糊 + 饱和度增强 */
+    backdrop-filter: blur(2px) saturate(1.3);
+    -webkit-backdrop-filter: blur(2px) saturate(1.3);
+
+    /* 顶部高光线（与键帽顶面高光呼应） */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--nt-kb-primary-color) 60%, white), transparent);
+      border-radius: 1px;
+    }
+
+    /* 多层边框 + 扩散光晕 */
     box-shadow:
-      inset 0 0 0 1.5px var(--nt-kb-primary-color),
-      0 0 8px color-mix(in srgb, var(--nt-kb-primary-color) 28%, transparent);
+      inset 0 0 0 1px color-mix(in srgb, var(--nt-kb-primary-color) 50%, transparent),
+      inset 0 0 12px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent),
+      0 0 10px color-mix(in srgb, var(--nt-kb-primary-color) 25%, transparent),
+      0 0 20px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent);
+
+    /* 选中图标 */
+    .select__icon {
+      width: 60%;
+      height: 60%;
+      color: var(--nt-kb-primary-color);
+      filter: drop-shadow(0 1px 4px color-mix(in srgb, var(--nt-kb-primary-color) 45%, transparent));
+      animation: selectPopIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
   }
 
   /* ── 键帽顶面（纵向三段式：label / img / name） ── */
@@ -286,25 +325,49 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       text-overflow: ellipsis;
     }
 
-    /* 触感凸起（F / J 键底部横条，模拟实体键盘盲打定位凸起） */
+    /* 触感凸起（F / J 键底部横杠，模拟实体键盘盲打定位内凹标记） */
     .keycap__tactile-bumps {
       position: absolute;
       left: 50%;
-      bottom: 6%;
+      bottom: 8%;
       transform: translate(-50%, 0);
-      width: 22%;
-      height: 3px;
-      border-radius: 2px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55) 0%, var(--nt-kb-main-font-color) 40%, rgba(0, 0, 0, 0.25) 100%);
-      opacity: 0.7;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      /* 宽高随 base size 等比缩放，由 CSS 变量驱动 */
+      width: var(--nt-kb-tactile-width);
+      height: var(--nt-kb-tactile-height);
+      border-radius: 99px;
+      background: var(--nt-kb-main-font-color);
+      opacity: 0.45;
+      box-shadow:
+        inset 0 1px 1px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.15);
     }
   }
 }
 
-/* ── flat 型别（无立体感，内嵌渐变模拟微光泽） ──────────────────────────── */
+/* ── 选中动画关键帧 ── */
+@keyframes selectFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes selectPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── flat 型别（微立体内嵌渐变 + 顶面高光线模拟光泽） ─────────────────────── */
 .row__keycap-flat {
-  box-shadow: none;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 
   .keycap__stage-flat {
     padding: var(--nt-kb-stage-flat-padding);
@@ -313,8 +376,8 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.06) 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.25),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -357,7 +420,8 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   .keycap__stage-dsa {
     overflow: hidden;
     border-width: 0px;
-    border-radius: 8px;
+    /* 随用户设置的 border-radius 变量响应，略加 2px 模拟 DSA 圆润球面 */
+    border-radius: calc(var(--nt-kb-border-radius) + 2px);
     background: radial-gradient(ellipse at 38% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 35%, rgba(0, 0, 0, 0.06) 65%, rgba(0, 0, 0, 0.14) 100%);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -384,8 +448,13 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* 按下态（popup 点击书签 / widget 键盘按下） */
 .row__keycap--active {
-  transform: translate(0px, 3px);
-  filter: brightness(0.94);
+  /* 按压位移随 base size 等比缩放 */
+  transform: translate(0px, var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
+  transition:
+    transform 60ms cubic-bezier(0.3, 0.8, 0.4, 0.6),
+    filter 60ms ease,
+    box-shadow 60ms ease;
 
   &.row__keycap-gmk {
     box-shadow:
@@ -400,14 +469,22 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       0 0px 1px rgba(0, 0, 0, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
+
+  &.row__keycap-flat {
+    box-shadow:
+      0 0px 1px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
 }
 
 /* 悬停态（--hover 是外层显式加的，gmk/dsa 自身也有 hover 增强） */
 .row__keycap--hover:hover,
 .row__keycap-gmk:hover,
-.row__keycap-dsa:hover {
+.row__keycap-dsa:hover,
+.row__keycap-flat:hover {
   transform: translate(0px, -1px);
-  filter: brightness(1.06);
+  /* 同时提升亮度和对比度，在深色键帽上也能获得明显的 hover 感知 */
+  filter: brightness(1.06) contrast(1.05);
 }
 
 .row__keycap--hover:hover.row__keycap-gmk,
@@ -426,10 +503,18 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
+.row__keycap--hover:hover.row__keycap-flat,
+.row__keycap-flat:hover {
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
 /* 原生 :active（无需外层控制的默认点击反馈） */
 .row__keycap-gmk:active {
-  transform: translateY(2px);
-  filter: brightness(0.94);
+  transform: translateY(var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.4),
     0 0px 1px rgba(0, 0, 0, 0.25),
@@ -437,11 +522,19 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 }
 
 .row__keycap-dsa:active {
-  transform: translateY(2px);
-  filter: brightness(0.94);
+  transform: translateY(var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.36),
     0 0px 1px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.row__keycap-flat:active {
+  transform: translateY(calc(var(--nt-kb-active-translate-y) * 0.6));
+  filter: brightness(0.94);
+  box-shadow:
+    0 0px 1px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 </style>

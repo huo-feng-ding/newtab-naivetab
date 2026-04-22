@@ -31,7 +31,7 @@ export const FOCUS_ELEMENT_SELECTOR_MAP = {
   root: '#app',
   search: '#search .n-input__input-el',
   memo: '#memo .n-input__textarea-el',
-  keyboard: '#keyboard',
+  keyboardBookmark: '#keyboardBookmark',
 }
 
 export const PEXELS_API = 'Ao3fG3suWGpoXTKYLycwrSLHSITran9E3MoHxxsTVT5z1aHjCDxZcr3m'
