@@ -15,7 +15,9 @@ export const AUTO_COMPRESS_THRESHOLD = 4000
  */
 export const compressString = async (str: string): Promise<string> => {
   try {
-    const stream = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))
+    const stream = new Blob([str])
+      .stream()
+      .pipeThrough(new CompressionStream('gzip'))
     const compressed = await new Response(stream).arrayBuffer()
     // base64 编码
     const bytes = new Uint8Array(compressed)
@@ -42,7 +44,9 @@ export const decompressString = async (base64Str: string): Promise<string> => {
       bytes[i] = binary.charCodeAt(i)
     }
     // gzip 解压
-    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
+    const stream = new Blob([bytes])
+      .stream()
+      .pipeThrough(new DecompressionStream('gzip'))
     const decompressed = await new Response(stream).arrayBuffer()
     return new TextDecoder().decode(decompressed)
   } catch (e) {
@@ -56,7 +60,9 @@ export const decompressString = async (base64Str: string): Promise<string> => {
  * @param rawData chrome.storage 中存储的原始字符串
  * @returns 解析后的 JSON 对象
  */
-export const parseStoredData = async (rawData: string): Promise<SyncPayload> => {
+export const parseStoredData = async (
+  rawData: string,
+): Promise<SyncPayload> => {
   let jsonStr = rawData
   // 检查是否压缩格式
   if (rawData.startsWith(COMPRESS_PREFIX)) {
@@ -72,7 +78,10 @@ export const parseStoredData = async (rawData: string): Promise<SyncPayload> => 
  * @param payloadBytes 数据字节数
  * @returns 是否需要压缩
  */
-export const shouldCompress = (field: string, payloadBytes: number): boolean => {
+export const shouldCompress = (
+  field: string,
+  payloadBytes: number,
+): boolean => {
   // 目前只有 keyboardBookmark 配置需要压缩
   if (field !== 'keyboardBookmark') return false
   return payloadBytes > AUTO_COMPRESS_THRESHOLD

@@ -20,7 +20,9 @@ export const requestNotificationsPermission = (): Promise<boolean> => {
 }
 
 export const sendNotification = (options: NotificationOptions): void => {
-  const iconUrl = chrome.runtime.getURL(options.icon ?? '/assets/img/icon/icon-128x128.png')
+  const iconUrl = chrome.runtime.getURL(
+    options.icon ?? '/assets/img/icon/icon-128x128.png',
+  )
   chrome.notifications.create({
     type: 'basic',
     iconUrl,

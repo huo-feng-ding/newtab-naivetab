@@ -22,7 +22,8 @@ export const SEARCH_ENGINE_LIST: TSearchEngine[] = [
     label: 'Google',
     value: 'https://www.google.com/search?q={query}',
     faviconUrl: 'https://www.google.com/favicon.ico',
-    suggestUrl: 'https://suggestqueries.google.com/complete/search?client=chrome&q={query}',
+    suggestUrl:
+      'https://suggestqueries.google.com/complete/search?client=chrome&q={query}',
   },
   {
     label: 'Github',
@@ -32,7 +33,8 @@ export const SEARCH_ENGINE_LIST: TSearchEngine[] = [
   {
     label: 'Qwant',
     value: 'https://www.qwant.com/?q={query}',
-    faviconUrl: 'https://www.qwant.com/public/favicon.066f5ee2ab77b590bb5846c32c57cb84.ico',
+    faviconUrl:
+      'https://www.qwant.com/public/favicon.066f5ee2ab77b590bb5846c32c57cb84.ico',
   },
   {
     label: 'Duckduckgo',
@@ -61,6 +63,7 @@ export const SEARCH_ENGINE_LIST: TSearchEngine[] = [
     label: '360',
     value: 'https://www.so.com/s?q={query}',
     faviconUrl: 'https://www.so.com/favicon.ico',
-    suggestUrl: 'https://sug.so.360.cn/suggest?word={query}&encodein=utf-8&encodeout=utf-8',
+    suggestUrl:
+      'https://sug.so.360.cn/suggest?word={query}&encodein=utf-8&encodeout=utf-8',
   },
 ]

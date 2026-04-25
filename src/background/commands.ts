@@ -19,7 +19,8 @@ export const switchTab = async (currentTabId: number, offset: 1 | -1) => {
   const tab = await chrome.tabs.get(currentTabId).catch(logLastError)
   if (!tab?.windowId) return
 
-  const tabs = await chrome.tabs.query({ windowId: tab.windowId })
+  const tabs = await chrome.tabs
+    .query({ windowId: tab.windowId })
     .then((ts) => ts.filter((t) => !t.pinned))
   if (tabs.length <= 1) return
 
@@ -27,14 +28,20 @@ export const switchTab = async (currentTabId: number, offset: 1 | -1) => {
   if (currentIndex < 0) return
 
   const targetIndex = (currentIndex + offset + tabs.length) % tabs.length
-  chrome.tabs.update(tabs[targetIndex].id!, { active: true }).catch(logLastError)
+  chrome.tabs
+    .update(tabs[targetIndex].id!, { active: true })
+    .catch(logLastError)
 }
 
-export const switchToEdgeTab = async (currentTabId: number, edge: 'first' | 'last') => {
+export const switchToEdgeTab = async (
+  currentTabId: number,
+  edge: 'first' | 'last',
+) => {
   const tab = await chrome.tabs.get(currentTabId).catch(logLastError)
   if (!tab?.windowId) return
 
-  const tabs = await chrome.tabs.query({ windowId: tab.windowId })
+  const tabs = await chrome.tabs
+    .query({ windowId: tab.windowId })
     .then((ts) => ts.filter((t) => !t.pinned))
   if (tabs.length <= 1) return
 
@@ -44,7 +51,10 @@ export const switchToEdgeTab = async (currentTabId: number, edge: 'first' | 'las
 
 // ── 标签页关闭 ──────────────────────────────────────────────────────────────
 
-export const closeTabsAround = async (currentTabId: number, mode: 'others' | 'left' | 'right') => {
+export const closeTabsAround = async (
+  currentTabId: number,
+  mode: 'others' | 'left' | 'right',
+) => {
   const tab = await chrome.tabs.get(currentTabId)
   if (!tab.windowId || !tab.index) return
 
@@ -53,7 +63,8 @@ export const closeTabsAround = async (currentTabId: number, mode: 'others' | 'le
     .filter((t) => t.id !== currentTabId && !t.pinned)
     .filter((t) => {
       if (mode === 'others') return true
-      if (mode === 'left') return t.index !== undefined && t.index < (tab.index ?? 0)
+      if (mode === 'left')
+        return t.index !== undefined && t.index < (tab.index ?? 0)
       return t.index !== undefined && t.index > (tab.index ?? 0)
     })
     .map((t) => t.id) as number[]
@@ -102,7 +113,12 @@ const reloadTabs = async (windowId: number | undefined) => {
     Promise.allSettled(reloadPromises).then((results) => {
       const failed = results.filter((r) => r.status === 'rejected')
       if (failed.length > 0) {
-        log('reloadTabs: some tabs failed to reload', failed.length, 'of', reloadPromises.length)
+        log(
+          'reloadTabs: some tabs failed to reload',
+          failed.length,
+          'of',
+          reloadPromises.length,
+        )
       }
     })
   }
@@ -130,7 +146,9 @@ export const moveTab = async (currentTabId: number, offset: 1 | -1) => {
   const targetIndex = currentIndex + offset
   if (targetIndex < 0 || targetIndex >= unpinned.length) return
 
-  chrome.tabs.move(currentTabId, { index: unpinned[targetIndex].index }).catch(logLastError)
+  chrome.tabs
+    .move(currentTabId, { index: unpinned[targetIndex].index })
+    .catch(logLastError)
 }
 
 // ── 窗口操作 ────────────────────────────────────────────────────────────────
@@ -144,11 +162,15 @@ export const moveTabToNextWindow = async (tabId: number) => {
   if (!currentTab?.windowId) return
 
   const windows = await chrome.windows.getAll().catch(() => [])
-  const otherWindows = windows.filter((w) => w.id !== currentTab.windowId && w.type === 'normal')
+  const otherWindows = windows.filter(
+    (w) => w.id !== currentTab.windowId && w.type === 'normal',
+  )
 
   if (otherWindows.length === 0) return
 
-  const currentIndex = windows.findIndex((w) => w.id === currentTab.windowId && w.type === 'normal')
+  const currentIndex = windows.findIndex(
+    (w) => w.id === currentTab.windowId && w.type === 'normal',
+  )
   let targetWindow = otherWindows[0]
   if (currentIndex >= 0) {
     for (let i = 1; i <= windows.length; i++) {
@@ -160,15 +182,24 @@ export const moveTabToNextWindow = async (tabId: number) => {
     }
   }
 
-  chrome.tabs.move(tabId, { windowId: targetWindow.id!, index: -1 }).then(() => {
-    chrome.tabs.update(tabId, { active: true }).catch(logLastError)
-    chrome.windows.update(targetWindow.id!, { focused: true }).catch(logLastError)
-  }).catch(logLastError)
+  chrome.tabs
+    .move(tabId, { windowId: targetWindow.id!, index: -1 })
+    .then(() => {
+      chrome.tabs.update(tabId, { active: true }).catch(logLastError)
+      chrome.windows
+        .update(targetWindow.id!, { focused: true })
+        .catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 export const mergeAllWindows = async (_currentTabId: number) => {
-  const windows = await chrome.windows.getAll({ populate: true }).catch(() => [])
-  const normalWindows = windows.filter((w) => w.type === 'normal' && w.tabs && w.tabs.length > 0)
+  const windows = await chrome.windows
+    .getAll({ populate: true })
+    .catch(() => [])
+  const normalWindows = windows.filter(
+    (w) => w.type === 'normal' && w.tabs && w.tabs.length > 0,
+  )
 
   if (normalWindows.length <= 1) return
 
@@ -180,7 +211,9 @@ export const mergeAllWindows = async (_currentTabId: number) => {
     const tabIds = win.tabs.map((t) => t.id!).filter(Boolean)
     if (tabIds.length === 0) continue
 
-    await chrome.tabs.move(tabIds, { windowId: targetId, index: -1 }).catch(logLastError)
+    await chrome.tabs
+      .move(tabIds, { windowId: targetId, index: -1 })
+      .catch(logLastError)
     await chrome.windows.remove(win.id!).catch(logLastError)
   }
 
@@ -199,20 +232,30 @@ export const groupCurrentTab = async (tabId: number) => {
   // 已在组中：尝试加入同窗口内另一个组
   if (tab.groupId !== -1) {
     const tabs = await chrome.tabs.query({ windowId: tab.windowId })
-    const otherGroupTabs = tabs.filter((t) => t.groupId !== -1 && t.groupId !== tab.groupId)
+    const otherGroupTabs = tabs.filter(
+      (t) => t.groupId !== -1 && t.groupId !== tab.groupId,
+    )
     if (otherGroupTabs.length > 0) {
       const targetGroupId = otherGroupTabs[0].groupId!
-      chrome.tabs.group({ tabIds: [tabId] }).then((newGroupId) => {
-        chrome.tabGroups.move(newGroupId, { index: targetGroupId }).catch(logLastError)
-      }).catch(logLastError)
+      chrome.tabs
+        .group({ tabIds: [tabId] })
+        .then((newGroupId) => {
+          chrome.tabGroups
+            .move(newGroupId, { index: targetGroupId })
+            .catch(logLastError)
+        })
+        .catch(logLastError)
     }
     return
   }
 
   // 不在组中：创建新组
-  chrome.tabs.group({ tabIds: [tabId], createProperties: { windowId: tab.windowId } }).then((groupId) => {
-    chrome.tabGroups.update(groupId, { collapsed: false }).catch(logLastError)
-  }).catch(logLastError)
+  chrome.tabs
+    .group({ tabIds: [tabId], createProperties: { windowId: tab.windowId } })
+    .then((groupId) => {
+      chrome.tabGroups.update(groupId, { collapsed: false }).catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 /**
@@ -235,7 +278,9 @@ export const toggleGroupCollapse = async (tabId: number) => {
   const group = await chrome.tabGroups.get(tab.groupId).catch(logLastError)
   if (!group) return
 
-  chrome.tabGroups.update(group.id, { collapsed: !group.collapsed }).catch(logLastError)
+  chrome.tabGroups
+    .update(group.id, { collapsed: !group.collapsed })
+    .catch(logLastError)
 }
 
 /**

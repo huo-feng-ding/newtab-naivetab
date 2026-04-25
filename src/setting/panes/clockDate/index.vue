@@ -9,7 +9,13 @@ import FlipSetting from './FlipSetting.vue'
 import NeonSetting from './NeonSetting.vue'
 import DateSetting from './DateSetting.vue'
 
-const ALL_SECTIONS = ['clockDigital', 'clockAnalog', 'clockFlip', 'clockNeon', 'date']
+const ALL_SECTIONS = [
+  'clockDigital',
+  'clockAnalog',
+  'clockFlip',
+  'clockNeon',
+  'date',
+]
 const expandedNames = ref<string[]>([])
 
 watch(

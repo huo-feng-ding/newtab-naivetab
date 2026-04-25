@@ -6,7 +6,13 @@ import { localConfig } from '@/logic/store'
 import Tips from '@/components/Tips.vue'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, SwitchField, ColorField, FontField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  ColorField,
+  FontField,
+  ToggleColorField,
+} from '@/setting/fields'
 import SliderInput from '@/components/SliderInput.vue'
 </script>
 
@@ -99,7 +105,9 @@ import SliderInput from '@/components/SliderInput.vue'
           :icon="ICONS.yearProgressRightBlock"
           class="label__icon"
         />
-        {{ `${$t('common.right')}-${$t('yearProgress.block')}${$t('common.config')}` }}
+        {{
+          `${$t('common.right')}-${$t('yearProgress.block')}${$t('common.config')}`
+        }}
       </p>
 
       <NFormItem :label="`${$t('yearProgress.block')}${$t('common.margin')}`">
@@ -118,7 +126,9 @@ import SliderInput from '@/components/SliderInput.vue'
           :max="10"
         />
       </NFormItem>
-      <NFormItem :label="`${$t('yearProgress.block')}${$t('common.borderRadius')}`">
+      <NFormItem
+        :label="`${$t('yearProgress.block')}${$t('common.borderRadius')}`"
+      >
         <SliderInput
           v-model="localConfig.yearProgress.blockRadius"
           :step="0.1"

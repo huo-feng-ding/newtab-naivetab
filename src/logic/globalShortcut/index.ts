@@ -26,7 +26,13 @@ export {
   PRESERVE_FIELDS,
   KEYBOARD_COMMAND_CONFIG,
 } from './shortcut-command'
-export type { TCommandExecEnv, TCommandEntry, TCategoryCommand, TCommandShortcutConfig, TNewtabCommandName } from './shortcut-command'
+export type {
+  TCommandExecEnv,
+  TCommandEntry,
+  TCategoryCommand,
+  TCommandShortcutConfig,
+  TNewtabCommandName,
+} from './shortcut-command'
 
 // 命令快捷键任务管理（newtab 页面）
 export {

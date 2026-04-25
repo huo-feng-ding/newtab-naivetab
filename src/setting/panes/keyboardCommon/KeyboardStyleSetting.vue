@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { KEYBOARD_TYPE_OPTION, SPLIT_SPACE_OPTION, KEYCAP_TYPE_OPTION } from '@/logic/keyboard/keyboard-constants'
+import {
+  KEYBOARD_TYPE_OPTION,
+  SPLIT_SPACE_OPTION,
+  KEYCAP_TYPE_OPTION,
+} from '@/logic/keyboard/keyboard-constants'
 import { localConfig } from '@/logic/store'
 </script>
 

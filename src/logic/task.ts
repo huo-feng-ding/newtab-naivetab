@@ -1,6 +1,9 @@
 import { globalState, switchSettingDrawerVisible } from '@/logic/store'
 
-const keydownTaskMap = new Map<KeydownTaskKey, (e: KeyboardEvent) => boolean | void>()
+const keydownTaskMap = new Map<
+  KeydownTaskKey,
+  (e: KeyboardEvent) => boolean | void
+>()
 
 /**
  * 注册 keydown 任务
@@ -18,7 +21,10 @@ const keydownTaskMap = new Map<KeydownTaskKey, (e: KeyboardEvent) => boolean | v
  * 返回值短路：task 返回 true 表示已处理此事件，后续 task 不再执行。
  * 这样可以避免同一按键被多个 handler 重复处理。
  */
-export const addKeydownTask = (key: KeydownTaskKey, task: (e: KeyboardEvent) => boolean | void) => {
+export const addKeydownTask = (
+  key: KeydownTaskKey,
+  task: (e: KeyboardEvent) => boolean | void,
+) => {
   keydownTaskMap.set(key, task)
 }
 
@@ -32,7 +38,11 @@ export const startKeydown = () => {
       return
     }
     // 在'搜索框'、'输入框'、'设置抽屉'内时忽略按键事件
-    if (globalState.isSettingDrawerVisible || globalState.isSearchFocused || globalState.isInputFocused) {
+    if (
+      globalState.isSettingDrawerVisible ||
+      globalState.isSearchFocused ||
+      globalState.isInputFocused
+    ) {
       if (e.code === 'Escape') {
         nextTick(() => {
           switchSettingDrawerVisible(false)
@@ -80,7 +90,10 @@ export const stopTimer = () => {
 
 const visibilityTasks = new Map()
 
-export const addVisibilityTask = (key: string, task: (isHidden: boolean) => void) => {
+export const addVisibilityTask = (
+  key: string,
+  task: (isHidden: boolean) => void,
+) => {
   visibilityTasks.set(key, task)
 }
 
@@ -96,7 +109,10 @@ document.addEventListener('visibilitychange', () => {
 
 const pageFocusTasks = new Map()
 
-export const addPageFocusTask = (key: string, task: (isHidden: boolean) => void) => {
+export const addPageFocusTask = (
+  key: string,
+  task: (isHidden: boolean) => void,
+) => {
   pageFocusTasks.set(key, task)
 }
 

@@ -29,12 +29,19 @@ export const mergeState = (state: unknown, acceptState: unknown): unknown => {
 
   // 规则2: 类型不同时，使用默认值（处理新增字段的情况）
   // 例如：旧版本某字段是 string，新版本改为 object
-  if (Object.prototype.toString.call(state) !== Object.prototype.toString.call(acceptState)) {
+  if (
+    Object.prototype.toString.call(state) !==
+    Object.prototype.toString.call(acceptState)
+  ) {
     return state
   }
 
   // 规则3: 基础类型，直接使用 acceptState 的值
-  if (typeof acceptState === 'string' || typeof acceptState === 'number' || typeof acceptState === 'boolean') {
+  if (
+    typeof acceptState === 'string' ||
+    typeof acceptState === 'number' ||
+    typeof acceptState === 'boolean'
+  ) {
     return acceptState
   }
 
@@ -49,8 +56,11 @@ export const mergeState = (state: unknown, acceptState: unknown): unknown => {
   // 检测逻辑：如果存在键盘码格式的 key，认为是 keymap
   const acceptObj = acceptState as Record<string, unknown>
   const stateObj = state as Record<string, unknown>
-  const hasKeymapPattern = Object.keys(acceptObj).some((key) =>
-    key.startsWith('Key') || key.startsWith('Digit') || key.startsWith('Numpad'),
+  const hasKeymapPattern = Object.keys(acceptObj).some(
+    (key) =>
+      key.startsWith('Key') ||
+      key.startsWith('Digit') ||
+      key.startsWith('Numpad'),
   )
   if (hasKeymapPattern) {
     return acceptState

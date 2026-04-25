@@ -62,7 +62,10 @@ const blobContainerClass = computed(() => ({
 let rafId: number | null = null
 
 const handleMouseMove = (e: MouseEvent) => {
-  if (!localConfig.general.isParallaxEnabled || !localConfig.general.isBackgroundImageEnabled) {
+  if (
+    !localConfig.general.isParallaxEnabled ||
+    !localConfig.general.isBackgroundImageEnabled
+  ) {
     return
   }
 
@@ -71,15 +74,24 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 
   rafId = requestAnimationFrame(() => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 2 * localConfig.general.parallaxIntensity
-    const y = (e.clientY / window.innerHeight - 0.5) * 2 * localConfig.general.parallaxIntensity
+    const x =
+      (e.clientX / window.innerWidth - 0.5) *
+      2 *
+      localConfig.general.parallaxIntensity
+    const y =
+      (e.clientY / window.innerHeight - 0.5) *
+      2 *
+      localConfig.general.parallaxIntensity
     parallaxX.value = x
     parallaxY.value = y
   })
 }
 
 const handleMouseLeave = () => {
-  if (!localConfig.general.isParallaxEnabled || !localConfig.general.isBackgroundImageEnabled) {
+  if (
+    !localConfig.general.isParallaxEnabled ||
+    !localConfig.general.isBackgroundImageEnabled
+  ) {
     return
   }
   parallaxX.value = 0
@@ -102,14 +114,19 @@ const updateEventListeners = (enable: boolean) => {
 }
 
 watch(
-  () => localConfig.general.isParallaxEnabled && localConfig.general.isBackgroundImageEnabled,
+  () =>
+    localConfig.general.isParallaxEnabled &&
+    localConfig.general.isBackgroundImageEnabled,
   (enabled) => {
     updateEventListeners(enabled)
   },
 )
 
 onMounted(() => {
-  updateEventListeners(localConfig.general.isParallaxEnabled && localConfig.general.isBackgroundImageEnabled)
+  updateEventListeners(
+    localConfig.general.isParallaxEnabled &&
+      localConfig.general.isBackgroundImageEnabled,
+  )
 })
 
 onUnmounted(() => {
@@ -124,35 +141,39 @@ const isShowLoadingSpinner = ref(false)
 
 let loadingTimer: ReturnType<typeof setTimeout> | null = null
 
-watch(isImageLoading, (value) => {
-  if (value) {
-    // 开始加载大图
-    loadingTimer = setTimeout(() => {
-      isShowLoadingSpinner.value = true
-    }, 500)
-  } else {
-    // 大图 decode 完成，由 CSS opacity 过渡实现淡入（imageState.fullImageUrl 已在 image.ts 中赋值）
+watch(
+  isImageLoading,
+  (value) => {
+    if (value) {
+      // 开始加载大图
+      loadingTimer = setTimeout(() => {
+        isShowLoadingSpinner.value = true
+      }, 500)
+    } else {
+      // 大图 decode 完成，由 CSS opacity 过渡实现淡入（imageState.fullImageUrl 已在 image.ts 中赋值）
 
-    if (loadingTimer) {
-      clearTimeout(loadingTimer)
-      loadingTimer = null
+      if (loadingTimer) {
+        clearTimeout(loadingTimer)
+        loadingTimer = null
+      }
+      isShowLoadingSpinner.value = false
     }
-    isShowLoadingSpinner.value = false
-  }
-}, { immediate: true })
-
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <!-- 存储 css 变量 -->
-  <div
-    id="background"
-  >
+  <div id="background">
     <!-- 视差效果容器：base64 小图 -->
     <div
       id="background__container"
       :style="containerStyle"
-      :class="{ 'background__container--parallax': localConfig.general.isParallaxEnabled }"
+      :class="{
+        'background__container--parallax':
+          localConfig.general.isParallaxEnabled,
+      }"
     />
     <!-- 视差效果容器：大图 blob，通过 opacity 淡入覆盖 -->
     <div
@@ -221,7 +242,9 @@ watch(isImageLoading, (value) => {
       width: calc(100vw + calc(2 * var(--nt-parallax-expansion, 40px)));
       height: calc(100vh + calc(2 * var(--nt-parallax-expansion, 40px)));
       transform: translate(var(--nt-parallax-x, 0), var(--nt-parallax-y, 0));
-      transition: opacity 0.6s ease-in, transform 100ms ease-out;
+      transition:
+        opacity 0.6s ease-in,
+        transform 100ms ease-out;
     }
 
     &.background__container--blob {
@@ -273,11 +296,12 @@ watch(isImageLoading, (value) => {
       animation-delay: 0.3s;
     }
   }
-
 }
 
 @keyframes loading-pulse {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.5);
     opacity: 0.5;
   }

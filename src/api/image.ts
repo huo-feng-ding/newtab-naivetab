@@ -43,7 +43,9 @@ export const getPexelsImagesData = (params?: {
   })
 }
 
-export const getPexelsImageById = (id: string): Promise<TImage.PexelsImageItem> => {
+export const getPexelsImageById = (
+  id: string,
+): Promise<TImage.PexelsImageItem> => {
   return request({
     method: 'get',
     url: `https://api.pexels.com/v1/photos/${id}`,

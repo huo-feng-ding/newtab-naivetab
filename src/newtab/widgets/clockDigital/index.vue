@@ -9,7 +9,12 @@ const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
 const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
 const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customUnitMargin = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin', 0.2)
+const customUnitMargin = getStyleField(
+  WIDGET_CODE,
+  'unit.fontSize',
+  'vmin',
+  0.2,
+)
 const customUnitFontSize = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin')
 const customDigitTextWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
 const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
@@ -66,7 +71,6 @@ watch(
   },
   { immediate: true },
 )
-
 </script>
 
 <template>
@@ -74,7 +78,10 @@ watch(
     <div
       class="clockDigital__container"
       :style="cdStyle"
-      :class="{ 'clockDigital__container--shadow': localConfig.clockDigital.isShadowEnabled }"
+      :class="{
+        'clockDigital__container--shadow':
+          localConfig.clockDigital.isShadowEnabled,
+      }"
     >
       <div class="clock__time">
         <p class="time__text">
@@ -86,19 +93,24 @@ watch(
               v-if="Number.isNaN(+item)"
               class="text__divide"
               :class="{
-                'text__divide--dim': localConfig.clockDigital.colonBlinkEnabled && !state.colonVisible,
+                'text__divide--dim':
+                  localConfig.clockDigital.colonBlinkEnabled &&
+                  !state.colonVisible,
               }"
-            >{{ item }}</span>
+              >{{ item }}</span
+            >
             <span
               v-else
               class="text__digit"
-            >{{ item }}</span>
+              >{{ item }}</span
+            >
           </template>
         </p>
         <span
           v-if="localConfig.clockDigital.unitEnabled"
           class="time__unit"
-        >{{ state.unit }}</span>
+          >{{ state.unit }}</span
+        >
       </div>
     </div>
   </WidgetWrap>

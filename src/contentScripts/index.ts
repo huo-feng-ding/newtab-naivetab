@@ -30,17 +30,30 @@
 // - Port 断开后指数退避重连（100ms 起步，上限 1000ms）
 // - 检测到 "Extension context invalidated" 时停止重连，不可恢复
 //
-import { matchShortcut, toModifierMask, type TShortcutModifier } from '@/logic/globalShortcut/shortcut-utils'
+import {
+  matchShortcut,
+  toModifierMask,
+  type TShortcutModifier,
+} from '@/logic/globalShortcut/shortcut-utils'
 import { parseStoredData } from '@/logic/compress'
 import { padUrlHttps } from '@/logic/util'
 import type { TCommandEntry } from '@/logic/globalShortcut/shortcut-command'
 import { showToast, t } from './toast'
 import { getScrollContainer, fastSmoothScrollTo } from './scroll'
-import { MSG_KEYDOWN, MSG_INIT_COMPLETE, MSG_HELLO, MSG_EXECUTE_COMMAND, type SwToCsMessage } from '@/types/messages'
+import {
+  MSG_KEYDOWN,
+  MSG_INIT_COMPLETE,
+  MSG_HELLO,
+  MSG_EXECUTE_COMMAND,
+  type SwToCsMessage,
+} from '@/types/messages'
 
 // -- 调试日志 --
 const debug = (...args: any[]) => {
-  if (__DEV__ || (typeof window !== 'undefined' && (window as any).__naivetabDebug)) {
+  if (
+    __DEV__ ||
+    (typeof window !== 'undefined' && (window as any).__naivetabDebug)
+  ) {
     console.log('[NaiveTab-cs]', ...args)
   }
 }
@@ -82,11 +95,17 @@ const initMain = () => {
     urlBlacklist?: string[]
   }) => {
     if (cfg.isEnabled !== undefined) isEnabled = cfg.isEnabled
-    if (cfg.globalShortcutModifiers !== undefined) globalShortcutModifiers = cfg.globalShortcutModifiers
-    if (cfg.shortcutInInputElement !== undefined) shortcutInInputElement = cfg.shortcutInInputElement
+    if (cfg.globalShortcutModifiers !== undefined)
+      globalShortcutModifiers = cfg.globalShortcutModifiers
+    if (cfg.shortcutInInputElement !== undefined)
+      shortcutInInputElement = cfg.shortcutInInputElement
     if (cfg.keymap !== undefined) keymap = cfg.keymap
     if (cfg.urlBlacklist !== undefined) urlBlacklist = cfg.urlBlacklist
-    debug('bookmark config updated', { isEnabled, globalShortcutModifiers, keymapCount: Object.keys(keymap).length })
+    debug('bookmark config updated', {
+      isEnabled,
+      globalShortcutModifiers,
+      keymapCount: Object.keys(keymap).length,
+    })
   }
 
   /**
@@ -101,10 +120,15 @@ const initMain = () => {
   }) => {
     if (cfg.isEnabled !== undefined) commandIsEnabled = cfg.isEnabled
     if (cfg.modifiers !== undefined) commandModifiers = cfg.modifiers
-    if (cfg.shortcutInInputElement !== undefined) keyboardCommandInInputElement = cfg.shortcutInInputElement
+    if (cfg.shortcutInInputElement !== undefined)
+      keyboardCommandInInputElement = cfg.shortcutInInputElement
     if (cfg.keymap !== undefined) commandKeymap = cfg.keymap
     if (cfg.urlBlacklist !== undefined) commandUrlBlacklist = cfg.urlBlacklist
-    debug('command config updated', { isEnabled: commandIsEnabled, modifiers: commandModifiers, keymapCount: Object.keys(commandKeymap).length })
+    debug('command config updated', {
+      isEnabled: commandIsEnabled,
+      modifiers: commandModifiers,
+      keymapCount: Object.keys(commandKeymap).length,
+    })
   }
 
   /**
@@ -117,8 +141,12 @@ const initMain = () => {
   const loadConfig = async () => {
     // 加载书签快捷键配置
     try {
-      const keyboardData = await chrome.storage.sync.get('naive-tab-keyboardBookmark')
-      const raw = keyboardData['naive-tab-keyboardBookmark'] as string | undefined
+      const keyboardData = await chrome.storage.sync.get(
+        'naive-tab-keyboardBookmark',
+      )
+      const raw = keyboardData['naive-tab-keyboardBookmark'] as
+        | string
+        | undefined
       if (raw) {
         const parsed = await parseStoredData(raw)
         updateConfig({
@@ -128,7 +156,11 @@ const initMain = () => {
           keymap: parsed.data.keymap ?? {},
           urlBlacklist: parsed.data.urlBlacklist ?? [],
         })
-        debug('bookmark config loaded from storage', { isEnabled, globalShortcutModifiers, keymapCount: Object.keys(keymap).length })
+        debug('bookmark config loaded from storage', {
+          isEnabled,
+          globalShortcutModifiers,
+          keymapCount: Object.keys(keymap).length,
+        })
       } else {
         debug('No keyboard config in storage, keeping shortcuts disabled')
       }
@@ -138,7 +170,9 @@ const initMain = () => {
 
     // 加载命令快捷键配置
     try {
-      const commandData = await chrome.storage.sync.get('naive-tab-keyboardCommand')
+      const commandData = await chrome.storage.sync.get(
+        'naive-tab-keyboardCommand',
+      )
       const raw = commandData['naive-tab-keyboardCommand'] as string | undefined
       if (raw) {
         const parsed = await parseStoredData(raw)
@@ -149,9 +183,15 @@ const initMain = () => {
           keymap: parsed.data.keymap ?? {},
           urlBlacklist: parsed.data.urlBlacklist ?? [],
         })
-        debug('command config loaded from storage', { isEnabled: commandIsEnabled, modifiers: commandModifiers, keymapCount: Object.keys(commandKeymap).length })
+        debug('command config loaded from storage', {
+          isEnabled: commandIsEnabled,
+          modifiers: commandModifiers,
+          keymapCount: Object.keys(commandKeymap).length,
+        })
       } else {
-        debug('No keyboardCommand config in storage, keeping command shortcuts disabled')
+        debug(
+          'No keyboardCommand config in storage, keeping command shortcuts disabled',
+        )
       }
     } catch (e) {
       debug('read/parse keyboardCommand storage error', e)
@@ -172,19 +212,23 @@ const initMain = () => {
     if (areaName !== 'sync') return
 
     // 书签快捷键配置变化
-    const keyboardRaw = changes['naive-tab-keyboardBookmark']?.newValue as string | undefined
+    const keyboardRaw = changes['naive-tab-keyboardBookmark']?.newValue as
+      | string
+      | undefined
     if (keyboardRaw) {
-      parseStoredData(keyboardRaw).then((parsed) => {
-        updateConfig({
-          isEnabled: parsed.data.isGlobalShortcutEnabled ?? false,
-          globalShortcutModifiers: parsed.data.globalShortcutModifiers ?? [],
-          shortcutInInputElement: parsed.data.shortcutInInputElement ?? false,
-          keymap: parsed.data.keymap ?? {},
-          urlBlacklist: parsed.data.urlBlacklist ?? [],
+      parseStoredData(keyboardRaw)
+        .then((parsed) => {
+          updateConfig({
+            isEnabled: parsed.data.isGlobalShortcutEnabled ?? false,
+            globalShortcutModifiers: parsed.data.globalShortcutModifiers ?? [],
+            shortcutInInputElement: parsed.data.shortcutInInputElement ?? false,
+            keymap: parsed.data.keymap ?? {},
+            urlBlacklist: parsed.data.urlBlacklist ?? [],
+          })
         })
-      }).catch((e) => {
-        debug('parse keyboard storage error', e)
-      })
+        .catch((e) => {
+          debug('parse keyboard storage error', e)
+        })
     } else if (changes['naive-tab-keyboardBookmark']) {
       // 配置被删除，重置为默认状态
       updateConfig({
@@ -198,19 +242,23 @@ const initMain = () => {
     }
 
     // 命令快捷键配置变化
-    const commandRaw = changes['naive-tab-keyboardCommand']?.newValue as string | undefined
+    const commandRaw = changes['naive-tab-keyboardCommand']?.newValue as
+      | string
+      | undefined
     if (commandRaw) {
-      parseStoredData(commandRaw).then((parsed) => {
-        updateCommandConfig({
-          isEnabled: parsed.data.isEnabled ?? false,
-          modifiers: parsed.data.modifiers ?? [],
-          shortcutInInputElement: parsed.data.shortcutInInputElement ?? false,
-          keymap: parsed.data.keymap ?? {},
-          urlBlacklist: parsed.data.urlBlacklist ?? [],
+      parseStoredData(commandRaw)
+        .then((parsed) => {
+          updateCommandConfig({
+            isEnabled: parsed.data.isEnabled ?? false,
+            modifiers: parsed.data.modifiers ?? [],
+            shortcutInInputElement: parsed.data.shortcutInInputElement ?? false,
+            keymap: parsed.data.keymap ?? {},
+            urlBlacklist: parsed.data.urlBlacklist ?? [],
+          })
         })
-      }).catch((e) => {
-        debug('parse command storage error', e)
-      })
+        .catch((e) => {
+          debug('parse command storage error', e)
+        })
     } else if (changes['naive-tab-keyboardCommand']) {
       // 配置被删除，重置为默认状态
       updateCommandConfig({
@@ -267,20 +315,26 @@ const initMain = () => {
     },
     reloadPage: () => location.reload(),
     copyPageUrl: () => {
-      navigator.clipboard.writeText(location.href).then(() => {
-        showToast(t('keyboardCommand.toast.copyPageUrl'))
-      }).catch(() => {
-        fallbackCopyText(location.href)
-        showToast(t('keyboardCommand.toast.copyPageUrl'))
-      })
+      navigator.clipboard
+        .writeText(location.href)
+        .then(() => {
+          showToast(t('keyboardCommand.toast.copyPageUrl'))
+        })
+        .catch(() => {
+          fallbackCopyText(location.href)
+          showToast(t('keyboardCommand.toast.copyPageUrl'))
+        })
     },
     copyPageTitle: () => {
-      navigator.clipboard.writeText(document.title).then(() => {
-        showToast(t('keyboardCommand.toast.copyPageTitle'))
-      }).catch(() => {
-        fallbackCopyText(document.title)
-        showToast(t('keyboardCommand.toast.copyPageTitle'))
-      })
+      navigator.clipboard
+        .writeText(document.title)
+        .then(() => {
+          showToast(t('keyboardCommand.toast.copyPageTitle'))
+        })
+        .catch(() => {
+          fallbackCopyText(document.title)
+          showToast(t('keyboardCommand.toast.copyPageTitle'))
+        })
     },
   }
 
@@ -328,7 +382,9 @@ const initMain = () => {
         port = null
         swReady = false
         // 扩展上下文失效（扩展重载/更新），不再重连
-        if (disconnectError?.message?.includes('Extension context invalidated')) {
+        if (
+          disconnectError?.message?.includes('Extension context invalidated')
+        ) {
           debug('Extension context invalidated on disconnect, stopping')
           return
         }
@@ -369,8 +425,22 @@ const initMain = () => {
     const hostname = location.hostname
 
     // 使用 matchShortcut 复用匹配逻辑（内置输入元素 + urlBlacklist 检查）
-    const bookmarkCode = matchShortcut(e, isEnabled, globalShortcutModifiers, shortcutInInputElement, urlBlacklist, hostname)
-    const commandCode = matchShortcut(e, commandIsEnabled, commandModifiers, keyboardCommandInInputElement, commandUrlBlacklist, hostname)
+    const bookmarkCode = matchShortcut(
+      e,
+      isEnabled,
+      globalShortcutModifiers,
+      shortcutInInputElement,
+      urlBlacklist,
+      hostname,
+    )
+    const commandCode = matchShortcut(
+      e,
+      commandIsEnabled,
+      commandModifiers,
+      keyboardCommandInInputElement,
+      commandUrlBlacklist,
+      hostname,
+    )
 
     if (!bookmarkCode && !commandCode) return
 
@@ -378,7 +448,8 @@ const initMain = () => {
     // （书签是老功能，优先保留；用户看到 Setting 面板的冲突警告后可自行调整）
     const bmMask = toModifierMask(globalShortcutModifiers)
     const cmdMask = toModifierMask(commandModifiers)
-    const hasModifierConflict = bookmarkCode && commandCode && bmMask === cmdMask
+    const hasModifierConflict =
+      bookmarkCode && commandCode && bmMask === cmdMask
 
     // 通过 Port 发送按键事件到 SW，Port 不可用时降级为 sendMessage 兜底。
     //

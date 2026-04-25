@@ -3,8 +3,15 @@ import { Icon } from '@iconify/vue'
 import { computed, ref } from 'vue'
 import { localConfig, getSettingKeyboardSize } from '@/logic/store'
 import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
-import { ALLOWED_SET, formatModifierKeys, toModifierMask } from '@/logic/globalShortcut/shortcut-utils'
-import { COMMAND_CATEGORIES, type TCommandName } from '@/logic/globalShortcut/shortcut-command'
+import {
+  ALLOWED_SET,
+  formatModifierKeys,
+  toModifierMask,
+} from '@/logic/globalShortcut/shortcut-utils'
+import {
+  COMMAND_CATEGORIES,
+  type TCommandName,
+} from '@/logic/globalShortcut/shortcut-command'
 import { ICONS } from '@/logic/icons'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
@@ -22,13 +29,21 @@ const keyboardBaseSize = computed(() => getSettingKeyboardSize())
  * 键盘样式 composable（与 BookmarkManager 共享同一套样式计算）
  */
 const commandKeyboardStyle = useKeyboardStyle('px', keyboardBaseSize.value)
-const { keycapCssVars, getEmphasisStyle, getCustomLabel, getKeycapStageStyle, getKeycapTextStyle } = commandKeyboardStyle
+const {
+  keycapCssVars,
+  getEmphasisStyle,
+  getCustomLabel,
+  getKeycapStageStyle,
+  getKeycapTextStyle,
+} = commandKeyboardStyle
 
 /**
  * 键帽视觉配置（跟随 keyboard widget 偏好，保持一致性）
  */
 const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
-const isCapKeyVisible = computed(() => localConfig.keyboardCommon.isCapKeyVisible)
+const isCapKeyVisible = computed(
+  () => localConfig.keyboardCommon.isCapKeyVisible,
+)
 const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
 
 /**
@@ -83,7 +98,9 @@ const getBoundLabel = (code: string): string => {
 const getBoundCommandIcon = (code: string): string => {
   const cmd = getBoundCommand(code)
   if (!cmd) return ''
-  const cat = commandCategories.value.find((c) => c.commands.some((c2) => c2.value === cmd))
+  const cat = commandCategories.value.find((c) =>
+    c.commands.some((c2) => c2.value === cmd),
+  )
   if (!cat) return ''
   return cat.commands.find((c2) => c2.value === cmd)?.icon || ''
 }
@@ -99,7 +116,11 @@ const selectedKeyCode = ref<string | null>(null)
 const modifierConflictWarning = computed(() => {
   const cmdModifiers = localConfig.keyboardCommand.modifiers
   const bookmarkModifiers = localConfig.keyboardBookmark.globalShortcutModifiers
-  if (cmdModifiers.length > 0 && bookmarkModifiers.length > 0 && toModifierMask(cmdModifiers) === toModifierMask(bookmarkModifiers)) {
+  if (
+    cmdModifiers.length > 0 &&
+    bookmarkModifiers.length > 0 &&
+    toModifierMask(cmdModifiers) === toModifierMask(bookmarkModifiers)
+  ) {
     return window.$t('keyboardCommand.modifierConflict')
   }
   return ''
@@ -165,14 +186,18 @@ const handleCommandSelect = (cmd: TCommandName) => {
       </NFormItem>
 
       <NFormItem :label="$t('keyboardCommand.globalModifier')">
-        <GlobalShortcutRecorder v-model="localConfig.keyboardCommand.modifiers" />
+        <GlobalShortcutRecorder
+          v-model="localConfig.keyboardCommand.modifiers"
+        />
       </NFormItem>
 
       <NFormItem
         v-if="modifierConflictWarning"
         :show-label="false"
       >
-        <span class="modifier-conflict-warning">⚠️ {{ modifierConflictWarning }}</span>
+        <span class="modifier-conflict-warning"
+          >⚠️ {{ modifierConflictWarning }}</span
+        >
       </NFormItem>
 
       <!-- 可视化键盘绑定区域 -->
@@ -224,8 +249,12 @@ const handleCommandSelect = (cmd: TCommandName) => {
             class="command-binding__selector"
           >
             <div class="selector__header">
-              <span class="selector__key">{{ getCustomLabel(selectedKeyCode) }}</span>
-              <span class="selector__binding">{{ formatBinding(selectedKeyCode) }}</span>
+              <span class="selector__key">{{
+                getCustomLabel(selectedKeyCode)
+              }}</span>
+              <span class="selector__binding">{{
+                formatBinding(selectedKeyCode)
+              }}</span>
               <NPopconfirm @positive-click="handleDeleteBinding">
                 <template #trigger>
                   <NButton
@@ -239,7 +268,12 @@ const handleCommandSelect = (cmd: TCommandName) => {
                     />
                   </NButton>
                 </template>
-                {{ $t('keyboardCommand.confirmDelete').replace('__key__', getCustomLabel(selectedKeyCode)) }}
+                {{
+                  $t('keyboardCommand.confirmDelete').replace(
+                    '__key__',
+                    getCustomLabel(selectedKeyCode),
+                  )
+                }}
               </NPopconfirm>
             </div>
 
@@ -249,7 +283,9 @@ const handleCommandSelect = (cmd: TCommandName) => {
                 :key="cat.categoryKey"
                 class="category-group"
               >
-                <div class="category-group__label">{{ $t(cat.categoryKey) }}</div>
+                <div class="category-group__label">
+                  {{ $t(cat.categoryKey) }}
+                </div>
                 <NRadioGroup
                   :value="getBoundCommand(selectedKeyCode)"
                   class="category-group__options"

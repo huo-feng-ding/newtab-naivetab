@@ -3,7 +3,13 @@ import { ICONS } from '@/logic/icons'
 import { localConfig } from '@/logic/store'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
 import SettingIconGroup from '@/setting/components/SettingIconGroup.vue'
-import { SliderField, SwitchField, FontField, ToggleColorField, ColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  FontField,
+  ToggleColorField,
+  ColorField,
+} from '@/setting/fields'
 </script>
 
 <template>

@@ -34,7 +34,10 @@ const state = reactive({
   nodeProps: ({ option }: { option: TreeOption }) => {
     return {
       onClick() {
-        const isFolder = Object.prototype.hasOwnProperty.call(option, 'children')
+        const isFolder = Object.prototype.hasOwnProperty.call(
+          option,
+          'children',
+        )
         if (props.selectType === 'bookmark') {
           if (isFolder) {
             return
@@ -68,11 +71,20 @@ const formatBookmark = (root: BookmarkNode[]) => {
     const isFolder = Object.prototype.hasOwnProperty.call(item, 'children')
     const curr = {
       ...item,
-      prefix: () => h('img', { style: 'width: 14px; height: 14px', src: getFaviconFromUrl(item.url || '') }), // favicon
+      prefix: () =>
+        h('img', {
+          style: 'width: 14px; height: 14px',
+          src: getFaviconFromUrl(item.url || ''),
+        }), // favicon
     }
     if (isFolder) {
       curr.children = formatBookmark(item.children as BookmarkNode[])
-      curr.prefix = () => h('div', { style: 'margin-top: 3px;font-size: 16px;' }, h(Icon, { icon: ICONS.folderOutline })) // folder
+      curr.prefix = () =>
+        h(
+          'div',
+          { style: 'margin-top: 3px;font-size: 16px;' },
+          h(Icon, { icon: ICONS.folderOutline }),
+        ) // folder
     }
     res.push(curr)
   }

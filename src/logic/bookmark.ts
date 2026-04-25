@@ -4,7 +4,11 @@ const getChromeBookmark = (): Promise<chrome.bookmarks.BookmarkTreeNode[]> => {
   return new Promise((resolve, reject) => {
     try {
       if (!chrome.bookmarks) {
-        reject(new Error('chrome.bookmarks API not available. Permission not granted.'))
+        reject(
+          new Error(
+            'chrome.bookmarks API not available. Permission not granted.',
+          ),
+        )
         return
       }
       chrome.bookmarks.getTree((bookmarks) => resolve(bookmarks))

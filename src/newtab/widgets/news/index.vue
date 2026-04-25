@@ -2,7 +2,13 @@
 import { gaProxy } from '@/logic/gtag'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
-import { state, newsLocalState, updateNews, onRetryNews, handleWatchNewsConfigChange } from '@/newtab/widgets/news/logic'
+import {
+  state,
+  newsLocalState,
+  updateNews,
+  onRetryNews,
+  handleWatchNewsConfigChange,
+} from '@/newtab/widgets/news/logic'
 import { localConfig, getIsWidgetRender, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
@@ -17,7 +23,10 @@ const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
 const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
 const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
 const customUrlActiveColor = getStyleField(WIDGET_CODE, 'urlActiveColor')
-const customTabActiveBackgroundColor = getStyleField(WIDGET_CODE, 'tabActiveBackgroundColor')
+const customTabActiveBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'tabActiveBackgroundColor',
+)
 const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
@@ -40,7 +49,10 @@ const newsStyle = computed(() => ({
 }))
 
 // NPopover 是 teleport 组件，不继承父级 CSS 变量，需显式传宽度
-const newsPopoverStyle = computed(() => ({ width: customWidth.value, lineHeight: '1.5' }))
+const newsPopoverStyle = computed(() => ({
+  width: customWidth.value,
+  lineHeight: '1.5',
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -80,7 +92,9 @@ const onMouseDownKey = (event: MouseEvent, url: string) => {
   createTab(url, false)
 }
 
-let newsConfigChangeHandle: ReturnType<typeof handleWatchNewsConfigChange> | null = null
+let newsConfigChangeHandle: ReturnType<
+  typeof handleWatchNewsConfigChange
+> | null = null
 
 onMounted(() => {
   updateNews()
@@ -100,7 +114,6 @@ watch(isRender, (value) => {
   }
   updateNews()
 })
-
 </script>
 
 <template>
@@ -134,9 +147,15 @@ watch(isRender, (value) => {
                 'news__content--hover': !isDragMode,
               }"
             >
-              <template v-if="newsLocalState[source.value] && newsLocalState[source.value].list.length !== 0">
+              <template
+                v-if="
+                  newsLocalState[source.value] &&
+                  newsLocalState[source.value].list.length !== 0
+                "
+              >
                 <div
-                  v-for="(item, index) in newsLocalState[source.value] && newsLocalState[source.value].list"
+                  v-for="(item, index) in newsLocalState[source.value] &&
+                  newsLocalState[source.value].list"
                   :key="item.desc"
                   class="content__item"
                   :class="{
@@ -223,7 +242,9 @@ watch(isRender, (value) => {
           background-color: transparent !important;
           border-radius: 8px !important;
           .n-tabs-capsule {
-            background-color: var(--nt-n-tab-active-background-color) !important;
+            background-color: var(
+              --nt-n-tab-active-background-color
+            ) !important;
             border-radius: 6px !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
             /* 提前升为独立合成层，消除 translateX 动画在父合成层边缘产生的竖向闪烁 */
@@ -260,7 +281,9 @@ watch(isRender, (value) => {
           padding: var(--nt-n-margin) 4px;
           width: 100%;
           border-radius: 6px;
-          transition: background-color 0.15s ease, color 0.15s ease;
+          transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
           box-sizing: border-box;
           .row__index {
             width: 28px;

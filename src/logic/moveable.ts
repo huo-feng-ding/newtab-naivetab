@@ -3,14 +3,18 @@ import { gaProxy } from '@/logic/gtag'
 import { globalState, localConfig } from '@/logic/store'
 
 export const [isDragMode, toggleIsDragMode] = useToggle(false)
-export const [isDraftDrawerVisible, toggleIsDraftDrawerVisible] = useToggle(true)
+export const [isDraftDrawerVisible, toggleIsDraftDrawerVisible] =
+  useToggle(true)
 
 export const moveState = reactive({
   width: window.innerWidth,
   height: window.innerHeight,
   // 鼠标事件回调函数map
   // mouseDownTask 可能是 async 函数（如 startDrag），使用 Promise<void> | void 确保 await 可正确等待
-  mouseDownTaskMap: new Map() as Map<string, (e: MouseEvent, resite?: boolean) => Promise<void> | void>,
+  mouseDownTaskMap: new Map() as Map<
+    string,
+    (e: MouseEvent, resite?: boolean) => Promise<void> | void
+  >,
   mouseMoveTaskMap: new Map() as Map<string, (e: MouseEvent) => void>,
   mouseUpTaskMap: new Map() as Map<string, (e: MouseEvent) => void>,
   isWidgetStartDrag: false, // 是否开始拖动组件，拖动组件时动态悬浮删除icon
@@ -50,7 +54,9 @@ export const handleToggleIsDraftDrawerVisible = () => {
   lastIsDraftDrawerVisible = null
 }
 
-export const getTargetDataFromEvent = (e: MouseEvent): {
+export const getTargetDataFromEvent = (
+  e: MouseEvent,
+): {
   type: EleTargetType | ''
   code: EleTargetCode | ''
 } => {
@@ -101,7 +107,12 @@ const handleMousedown = async (e: MouseEvent) => {
 }
 
 const handleMousemove = (e: MouseEvent) => {
-  if (globalState.isGuideMode || !isDragMode.value || e.buttons === 0 || !moveState.currDragTarget.type) {
+  if (
+    globalState.isGuideMode ||
+    !isDragMode.value ||
+    e.buttons === 0 ||
+    !moveState.currDragTarget.type
+  ) {
     return
   }
 
@@ -142,17 +153,24 @@ const handleMouseup = (e: MouseEvent) => {
     lastFrameId = null
   }
 
-  if (globalState.isGuideMode || !isDragMode.value || !moveState.currDragTarget.type) {
+  if (
+    globalState.isGuideMode ||
+    !isDragMode.value ||
+    !moveState.currDragTarget.type
+  ) {
     return
   }
 
   // 检查鼠标是否在删除区域内（防止鼠标移出后 delete icon 缩回导致 isDeleteHover 丢失）
-  const isInDeleteZone = moveState.isWidgetStartDrag
-    && e.clientX > moveState.width - 100
-    && e.clientY < 100
+  const isInDeleteZone =
+    moveState.isWidgetStartDrag &&
+    e.clientX > moveState.width - 100 &&
+    e.clientY < 100
   if (isInDeleteZone && moveState.currDragTarget.type === 'widget') {
     animateDeleteWidget(moveState.currDragTarget.code as WidgetCodes)
-    gaProxy('delete', ['widget', moveState.currDragTarget.code], { enabled: false })
+    gaProxy('delete', ['widget', moveState.currDragTarget.code], {
+      enabled: false,
+    })
     moveState.isWidgetStartDrag = false
     moveState.currDragTarget.type = ''
     moveState.currDragTarget.code = ''
@@ -222,11 +240,16 @@ export const cleanupEvents = () => {
  * 删除 widget 时的消失动画：缩小 + 淡出，动画结束后设置 enabled = false
  */
 export const animateDeleteWidget = (code: WidgetCodes) => {
-  const container = document.querySelector(`.${code}__container`) as HTMLElement | null
+  const container = document.querySelector(
+    `.${code}__container`,
+  ) as HTMLElement | null
   if (container) {
     const currentTransform = container.style.transform || ''
-    container.style.transition = 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease'
-    container.style.transform = currentTransform ? `${currentTransform} scale(0.3)` : 'scale(0.3)'
+    container.style.transition =
+      'transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease'
+    container.style.transform = currentTransform
+      ? `${currentTransform} scale(0.3)`
+      : 'scale(0.3)'
     container.style.opacity = '0'
   }
   setTimeout(() => {

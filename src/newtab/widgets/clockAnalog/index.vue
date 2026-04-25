@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import { addVisibilityTask, addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
 const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const numberScaleFontFamily = computed(() => localConfig.clockAnalog.numberScaleFontFamily)
-const numberScaleFontSize = computed(() => `${localConfig.clockAnalog.numberScaleFontSize}px`)
+const numberScaleFontFamily = computed(
+  () => localConfig.clockAnalog.numberScaleFontFamily,
+)
+const numberScaleFontSize = computed(
+  () => `${localConfig.clockAnalog.numberScaleFontSize}px`,
+)
 const numberScaleFontColor = computed(() => {
   const colors = localConfig.clockAnalog.numberScaleFontColor
-  return Array.isArray(colors) ? colors[localState.value.currAppearanceCode] : colors
+  return Array.isArray(colors)
+    ? colors[localState.value.currAppearanceCode]
+    : colors
 })
 const hourDeg = computed(() => `${state.hourDeg}deg`)
 const minuteDeg = computed(() => `${state.minuteDeg}deg`)
@@ -54,7 +65,9 @@ const imageLoadComplete = (url: string) => {
   })
 }
 
-const getClockImageUrl = (type: 'background' | 'marker' | 'hour' | 'minute' | 'second') => {
+const getClockImageUrl = (
+  type: 'background' | 'marker' | 'hour' | 'minute' | 'second',
+) => {
   return `/assets/img/clock/${currTheme.value}/${type}.png`
 }
 
@@ -135,7 +148,7 @@ const handleFullRotation = (m: number) => {
 }
 
 const getNumberPosition = (num: number) => {
-  const angle = (num * 30) * (Math.PI / 180) // 转弧度
+  const angle = num * 30 * (Math.PI / 180) // 转弧度
   const radiusPercent = localConfig.clockAnalog.numberScaleRadius
   const center = 50 // 圆心在 50%, 50%
   const r = (radiusPercent / 100) * 50
@@ -169,7 +182,6 @@ addVisibilityTask(WIDGET_CODE, (hidden) => {
     }, ENABLE_ANIMATION_DELAY_TIME)
   }
 })
-
 </script>
 
 <template>
@@ -189,17 +201,26 @@ addVisibilityTask(WIDGET_CODE, (hidden) => {
         />
         <div
           class="clock__base clock__hour"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isHourAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isHourAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/hour.png);`"
         />
         <div
           class="clock__base clock__minute"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isMinuteAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isMinuteAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/minute.png);`"
         />
         <div
           class="clock__base clock__second"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isSecondAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isSecondAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/second.png);`"
         />
 

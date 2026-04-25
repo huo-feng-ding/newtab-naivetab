@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { getFaviconFromUrl } from '@/logic/bookmark'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '@/newtab/widgets/keyboardBookmark/logic'
+import {
+  state as keyboardState,
+  openPage,
+  handleSpecialKeycapExec,
+  getKeycapBookmarkType,
+  getKeycapName,
+  getKeycapUrl,
+} from '@/newtab/widgets/keyboardBookmark/logic'
 import { localConfig } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
@@ -103,7 +110,10 @@ const keycapStyle = computed(() => getEmphasisStyle(props.keyCode))
     :text-style="keycapTextStyle"
     :icon-style="keycapIconStyle"
     :img-draggable="false"
-    :is-loading="keyboardState.isLoadPageLoading && keyboardState.currSelectKeyCode === keyCode"
+    :is-loading="
+      keyboardState.isLoadPageLoading &&
+      keyboardState.currSelectKeyCode === keyCode
+    "
     :is-border-enabled="localConfig.keyboardCommon.isKeycapBorderEnabled"
     :show-cap-key="localConfig.keyboardCommon.isCapKeyVisible"
     :show-name="localConfig.keyboardCommon.isNameVisible"

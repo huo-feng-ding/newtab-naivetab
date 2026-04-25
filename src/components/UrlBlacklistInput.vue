@@ -38,7 +38,10 @@ const handleUpdate = (value: string[]) => {
   const cleaned = value.map(cleanUrl).filter(Boolean)
   // 去重并保持原有顺序
   const deduped = [...new Set(cleaned)]
-  if (deduped.length === value.length && deduped.every((v, i) => v === value[i])) {
+  if (
+    deduped.length === value.length &&
+    deduped.every((v, i) => v === value[i])
+  ) {
     model.value = value
     return
   }
@@ -54,7 +57,10 @@ const handleUpdate = (value: string[]) => {
       :check-str="
         (tag: string) => {
           if (tag.length > MAX_TAG_LENGTH) {
-            return $t('generalSetting.urlBlacklistTooLong').replace('__max__', String(MAX_TAG_LENGTH))
+            return $t('generalSetting.urlBlacklistTooLong').replace(
+              '__max__',
+              String(MAX_TAG_LENGTH),
+            )
           }
           return ''
         }

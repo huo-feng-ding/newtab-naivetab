@@ -6,7 +6,10 @@
  * 标记 `isInitialized = true`，防止冷启动期间读到空 keymap。
  */
 
-import { loadAndCacheKeyboardBookmarkConfig, loadAndCacheKeyboardCommandConfig } from './config-cache'
+import {
+  loadAndCacheKeyboardBookmarkConfig,
+  loadAndCacheKeyboardCommandConfig,
+} from './config-cache'
 
 const INIT_TIMEOUT_MS = 10000
 
@@ -19,14 +22,16 @@ export const waitInitialized = (): Promise<void> => {
   initPromise = Promise.all([
     loadAndCacheKeyboardBookmarkConfig(),
     loadAndCacheKeyboardCommandConfig(),
-  ]).then(() => {
-    isInitialized = true
-    initPromise = null
-  }).catch(() => {
-    // 超时或解析异常也标记为完成，避免永久阻塞快捷键
-    isInitialized = true
-    initPromise = null
-  })
+  ])
+    .then(() => {
+      isInitialized = true
+      initPromise = null
+    })
+    .catch(() => {
+      // 超时或解析异常也标记为完成，避免永久阻塞快捷键
+      isInitialized = true
+      initPromise = null
+    })
 
   // 超时兜底
   setTimeout(() => {

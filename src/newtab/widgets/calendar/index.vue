@@ -28,23 +28,68 @@ const customItemWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
 const customBodyWrapHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 6)
 const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
 const customTodayDayFontColor = getStyleField(WIDGET_CODE, 'todayDayFontColor')
-const customTodayDescFontColor = getStyleField(WIDGET_CODE, 'todayDescFontColor')
-const customTodayLabelBackgroundColor = getStyleField(WIDGET_CODE, 'todayLabelBackgroundColor')
-const customTodayLabelFontColor = getStyleField(WIDGET_CODE, 'todayLabelFontColor')
-const customTodayItemBackgroundColor = getStyleField(WIDGET_CODE, 'todayItemBackgroundColor')
+const customTodayDescFontColor = getStyleField(
+  WIDGET_CODE,
+  'todayDescFontColor',
+)
+const customTodayLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'todayLabelBackgroundColor',
+)
+const customTodayLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'todayLabelFontColor',
+)
+const customTodayItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'todayItemBackgroundColor',
+)
 const customRestDayFontColor = getStyleField(WIDGET_CODE, 'restDayFontColor')
 const customRestDescFontColor = getStyleField(WIDGET_CODE, 'restDescFontColor')
-const customRestLabelBackgroundColor = getStyleField(WIDGET_CODE, 'restLabelBackgroundColor')
-const customRestLabelFontColor = getStyleField(WIDGET_CODE, 'restLabelFontColor')
-const customRestItemBackgroundColor = getStyleField(WIDGET_CODE, 'restItemBackgroundColor')
+const customRestLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'restLabelBackgroundColor',
+)
+const customRestLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'restLabelFontColor',
+)
+const customRestItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'restItemBackgroundColor',
+)
 const customWorkDayFontColor = getStyleField(WIDGET_CODE, 'workDayFontColor')
 const customWorkDescFontColor = getStyleField(WIDGET_CODE, 'workDescFontColor')
-const customWorkLabelBackgroundColor = getStyleField(WIDGET_CODE, 'workLabelBackgroundColor')
-const customWorkLabelFontColor = getStyleField(WIDGET_CODE, 'workLabelFontColor')
-const customWorkItemBackgroundColor = getStyleField(WIDGET_CODE, 'workItemBackgroundColor')
-const customDestivalCountdownItemHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 1.4)
-const customDestivalCountdownFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.95)
-const customDestivalCountdownRestFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.65)
+const customWorkLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'workLabelBackgroundColor',
+)
+const customWorkLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'workLabelFontColor',
+)
+const customWorkItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'workItemBackgroundColor',
+)
+const customDestivalCountdownItemHeight = getStyleField(
+  WIDGET_CODE,
+  'width',
+  'vmin',
+  1.4,
+)
+const customDestivalCountdownFontSize = getStyleField(
+  WIDGET_CODE,
+  'fontSize',
+  'vmin',
+  0.95,
+)
+const customDestivalCountdownRestFontSize = getStyleField(
+  WIDGET_CODE,
+  'fontSize',
+  'vmin',
+  0.65,
+)
 const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 
 const calendarStyle = computed(() => ({
@@ -68,25 +113,31 @@ const calendarStyle = computed(() => ({
   '--nt-cal-customDescFontFamily': customDescFontFamily.value,
   '--nt-cal-customWorkItemBackgroundColor': customWorkItemBackgroundColor.value,
   '--nt-cal-customWorkLabelFontColor': customWorkLabelFontColor.value,
-  '--nt-cal-customWorkLabelBackgroundColor': customWorkLabelBackgroundColor.value,
+  '--nt-cal-customWorkLabelBackgroundColor':
+    customWorkLabelBackgroundColor.value,
   '--nt-cal-customWorkDayFontColor': customWorkDayFontColor.value,
   '--nt-cal-customWorkDescFontColor': customWorkDescFontColor.value,
   '--nt-cal-customRestItemBackgroundColor': customRestItemBackgroundColor.value,
   '--nt-cal-customRestLabelFontColor': customRestLabelFontColor.value,
-  '--nt-cal-customRestLabelBackgroundColor': customRestLabelBackgroundColor.value,
+  '--nt-cal-customRestLabelBackgroundColor':
+    customRestLabelBackgroundColor.value,
   '--nt-cal-customRestDayFontColor': customRestDayFontColor.value,
   '--nt-cal-customRestDescFontColor': customRestDescFontColor.value,
-  '--nt-cal-customTodayItemBackgroundColor': customTodayItemBackgroundColor.value,
+  '--nt-cal-customTodayItemBackgroundColor':
+    customTodayItemBackgroundColor.value,
   '--nt-cal-customTodayLabelFontColor': customTodayLabelFontColor.value,
-  '--nt-cal-customTodayLabelBackgroundColor': customTodayLabelBackgroundColor.value,
+  '--nt-cal-customTodayLabelBackgroundColor':
+    customTodayLabelBackgroundColor.value,
   '--nt-cal-customTodayDayFontColor': customTodayDayFontColor.value,
   '--nt-cal-customTodayDescFontColor': customTodayDescFontColor.value,
   '--nt-cal-customBorderWidth': customBorderWidth.value,
   '--nt-cal-customBorderColor': customBorderColor.value,
   '--nt-cal-customShadowColor': customShadowColor.value,
   '--nt-cal-bgMoveableWidgetMain': bgMoveableWidgetMain.value,
-  '--nt-cal-customDestivalCountdownItemHeight': customDestivalCountdownItemHeight.value,
-  '--nt-cal-customDestivalCountdownFontSize': customDestivalCountdownFontSize.value,
+  '--nt-cal-customDestivalCountdownItemHeight':
+    customDestivalCountdownItemHeight.value,
+  '--nt-cal-customDestivalCountdownFontSize':
+    customDestivalCountdownFontSize.value,
   '--nt-cal-customRestLabelFontSize': customDestivalCountdownRestFontSize.value,
 }))
 
@@ -99,7 +150,10 @@ const state = reactive({
   currYear: todayDayjs.get('year'),
   currMonth: todayDayjs.get('month') + 1,
   currDay: todayDayjs.get('date'),
-  yearList: Array.from(Array(101), (v, i) => ({ label: `${2000 + i}`, value: 2000 + i })),
+  yearList: Array.from(Array(101), (v, i) => ({
+    label: `${2000 + i}`,
+    value: 2000 + i,
+  })),
   dateList: [] as {
     date: string // YYYY-MM-DD
     shortDate: string // MM.DD
@@ -131,8 +185,16 @@ const festivalList = (() => {
     const targetDateEle = new Date(formatDate)
     const solarEle = Solar.fromDate(targetDateEle)
     const lunarEle = Lunar.fromDate(targetDateEle)
-    const holidayEle = HolidayUtil.getHoliday(dateEle.get('year'), dateEle.get('month') + 1, dateEle.get('date'))
-    const desc = lunarEle.getFestivals()[0] || solarEle.getFestivals()[0] || lunarEle.getJieQi() || ''
+    const holidayEle = HolidayUtil.getHoliday(
+      dateEle.get('year'),
+      dateEle.get('month') + 1,
+      dateEle.get('date'),
+    )
+    const desc =
+      lunarEle.getFestivals()[0] ||
+      solarEle.getFestivals()[0] ||
+      lunarEle.getJieQi() ||
+      ''
     if (!desc) continue
     let dayType = 0
     if (holidayEle && holidayEle.isWork()) {
@@ -140,7 +202,13 @@ const festivalList = (() => {
     } else if (holidayEle && holidayEle.getName()) {
       dayType = 1
     }
-    list.push({ date: formatDate, shortDate, desc, type: dayType, festivalCountdownDay: i })
+    list.push({
+      date: formatDate,
+      shortDate,
+      desc,
+      type: dayType,
+      festivalCountdownDay: i,
+    })
   }
   return list
 })()
@@ -193,15 +261,26 @@ const genDateList = (type: 'start' | 'main' | 'end', dateEle: typeof dayjs) => {
   const targetDateEle = new Date(formatDate)
   const solarEle = Solar.fromDate(targetDateEle)
   const lunarEle = Lunar.fromDate(targetDateEle)
-  const holidayEle = HolidayUtil.getHoliday(dateEle.get('year'), dateEle.get('month') + 1, dateEle.get('date'))
+  const holidayEle = HolidayUtil.getHoliday(
+    dateEle.get('year'),
+    dateEle.get('month') + 1,
+    dateEle.get('date'),
+  )
 
   // desc展示优先级：阴历节日, 阳历节日, 节气, 阴历月份, 阴历日期
-  let desc = lunarEle.getFestivals()[0] || solarEle.getFestivals()[0] || lunarEle.getJieQi() || ''
+  let desc =
+    lunarEle.getFestivals()[0] ||
+    solarEle.getFestivals()[0] ||
+    lunarEle.getJieQi() ||
+    ''
   let isFestival = true
   let festivalCountdownDay = 0
   if (desc.length === 0) {
     isFestival = false
-    desc = lunarEle.getDay() === 1 ? `${lunarEle.getMonthInChinese()}月` : lunarEle.getDayInChinese()
+    desc =
+      lunarEle.getDay() === 1
+        ? `${lunarEle.getMonthInChinese()}月`
+        : lunarEle.getDayInChinese()
   } else {
     festivalCountdownDay = dateEle.diff(todayDayjs, 'day')
   }
@@ -237,7 +316,8 @@ const onRender = () => {
 
   const currMonthFirstDate = `${state.currYear}-${state.currMonth}-01`
   let currMonthFirstDateWeek = dayjs(currMonthFirstDate).day()
-  currMonthFirstDateWeek = currMonthFirstDateWeek === 0 ? 7 : currMonthFirstDateWeek // 1234567
+  currMonthFirstDateWeek =
+    currMonthFirstDateWeek === 0 ? 7 : currMonthFirstDateWeek // 1234567
 
   // padStart
   let padStartCount = currMonthFirstDateWeek - 1
@@ -257,7 +337,8 @@ const onRender = () => {
     .subtract(1, 'day')
     .get('date')
   let currMonthLastDateWeek = dayjs(currMonthLastDate).day()
-  currMonthLastDateWeek = currMonthLastDateWeek === 0 ? 7 : currMonthLastDateWeek
+  currMonthLastDateWeek =
+    currMonthLastDateWeek === 0 ? 7 : currMonthLastDateWeek
   // add main
   for (let index = 0; index < currMonthLastDay; index += 1) {
     const dateEle = dayjs(`${state.currYear}-${state.currMonth}-${index + 1}`)
@@ -317,17 +398,25 @@ const onNextMonth = () => {
 
 const onDateChange = (type: 'year' | 'month', newVal: number) => {
   const oldYearMonth = state.currYear * 12 + state.currMonth
-  const newYearMonth = type === 'year' ? newVal * 12 + state.currMonth : state.currYear * 12 + newVal
+  const newYearMonth =
+    type === 'year'
+      ? newVal * 12 + state.currMonth
+      : state.currYear * 12 + newVal
   slideDirection.value = newYearMonth >= oldYearMonth ? 'left' : 'right'
   gaProxy('click', ['calendar', 'dateChange', type])
   onRender()
 }
 
-const isResetBtnVisible = computed(() => state.currYear !== todayDayjs.get('year') || state.currMonth !== todayDayjs.get('month') + 1)
+const isResetBtnVisible = computed(
+  () =>
+    state.currYear !== todayDayjs.get('year') ||
+    state.currMonth !== todayDayjs.get('month') + 1,
+)
 
 const onReset = () => {
   const currYearMonth = state.currYear * 12 + state.currMonth
-  const todayYearMonth = todayDayjs.get('year') * 12 + todayDayjs.get('month') + 1
+  const todayYearMonth =
+    todayDayjs.get('year') * 12 + todayDayjs.get('month') + 1
   slideDirection.value = currYearMonth > todayYearMonth ? 'right' : 'left'
   state.currYear = todayDayjs.get('year')
   state.currMonth = todayDayjs.get('month') + 1
@@ -373,7 +462,6 @@ const onToggleDetailPopover = (date?: string) => {
   state.currDetailDate = date
   gaProxy('click', ['calendar', 'detail'])
 }
-
 </script>
 
 <template>
@@ -499,11 +587,13 @@ const onToggleDetailPopover = (date?: string) => {
                     <span
                       v-if="item.type"
                       class="item__label"
-                    >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span>
+                      >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span
+                    >
                     <span
                       v-if="item.isToday"
                       class="item__label item__label--today"
-                    >{{ $t('calendar.today') }}</span>
+                      >{{ $t('calendar.today') }}</span
+                    >
                     <!-- 日期 -->
                     <span class="item__day">{{ item.day }}</span>
                     <!-- 描述 -->
@@ -512,7 +602,8 @@ const onToggleDetailPopover = (date?: string) => {
                       :class="{
                         'item__desc--highlight': item.isFestival,
                       }"
-                    >{{ item.desc }}</span>
+                      >{{ item.desc }}</span
+                    >
                   </div>
                 </template>
 
@@ -526,7 +617,9 @@ const onToggleDetailPopover = (date?: string) => {
                     {{ detailInfo.lunar }}
                   </p>
                   <p class="detail__festival">
-                    {{ `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}` }}
+                    {{
+                      `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}`
+                    }}
                   </p>
                   <div class="detail__row">
                     <p class="row__tag row__tag--yi">易</p>
@@ -707,14 +800,14 @@ const onToggleDetailPopover = (date?: string) => {
       opacity: 0.65;
       padding-bottom: 0.3vmin;
       .header__item {
-          flex: 1;
-          height: 2.4vmin;
-          line-height: 2.4vmin;
-          text-align: center;
-          color: var(--nt-cal-customFontColor);
-          font-size: var(--nt-cal-customFontSize);
-          letter-spacing: 0.02em;
-        }
+        flex: 1;
+        height: 2.4vmin;
+        line-height: 2.4vmin;
+        text-align: center;
+        color: var(--nt-cal-customFontColor);
+        font-size: var(--nt-cal-customFontSize);
+        letter-spacing: 0.02em;
+      }
       .header__item--weekend {
         color: var(--nt-cal-customHolidayFontColor);
       }
@@ -743,7 +836,9 @@ const onToggleDetailPopover = (date?: string) => {
         text-align: center;
         border-radius: 6px;
         overflow: hidden;
-        transition: background-color 150ms ease-in-out, opacity 150ms ease-in-out;
+        transition:
+          background-color 150ms ease-in-out,
+          opacity 150ms ease-in-out;
         .item__day {
           color: var(--nt-cal-customDayFontColor);
           font-size: var(--nt-cal-customDayFontSize);
@@ -847,7 +942,8 @@ const onToggleDetailPopover = (date?: string) => {
     }
   }
   .calendar__container--border {
-    outline: var(--nt-cal-customBorderWidth) solid var(--nt-cal-customBorderColor);
+    outline: var(--nt-cal-customBorderWidth) solid
+      var(--nt-cal-customBorderColor);
   }
   .calendar__container--shadow {
     box-shadow:
@@ -998,7 +1094,9 @@ const onToggleDetailPopover = (date?: string) => {
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   top: 0;
   left: 0;

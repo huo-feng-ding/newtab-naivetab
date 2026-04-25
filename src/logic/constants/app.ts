@@ -34,4 +34,5 @@ export const FOCUS_ELEMENT_SELECTOR_MAP = {
   keyboardBookmark: '#keyboardBookmark',
 }
 
-export const PEXELS_API = 'Ao3fG3suWGpoXTKYLycwrSLHSITran9E3MoHxxsTVT5z1aHjCDxZcr3m'
+export const PEXELS_API =
+  'Ao3fG3suWGpoXTKYLycwrSLHSITran9E3MoHxxsTVT5z1aHjCDxZcr3m'

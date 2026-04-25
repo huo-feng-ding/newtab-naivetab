@@ -1,15 +1,41 @@
 <script setup lang="ts">
-import { NConfigProvider, NMessageProvider, NNotificationProvider, NLoadingBarProvider } from 'naive-ui'
+import {
+  NConfigProvider,
+  NMessageProvider,
+  NNotificationProvider,
+  NLoadingBarProvider,
+} from 'naive-ui'
 import { log } from '@/logic/util'
 import { gaProxy } from '@/logic/gtag'
 import { FOCUS_ELEMENT_SELECTOR_MAP } from '@/logic/constants/app'
 import { SYSTEM_FONT_STACK } from '@/logic/constants/fonts'
-import { startKeydown, startTimer, stopTimer, onPageFocus, stopKeydown } from '@/logic/task'
-import { setupNewtabGlobalShortcutForBookmark, cleanupNewtabGlobalShortcutForBookmark } from '@/logic/globalShortcut/shortcut-bookmark'
-import { setupNewtabGlobalShortcutForCommand, cleanupNewtabGlobalShortcutForCommand } from '@/logic/globalShortcut/shortcut-executor'
-import { setupPageConfigSync, setupLocalStorageSyncListener } from '@/logic/storage'
+import {
+  startKeydown,
+  startTimer,
+  stopTimer,
+  onPageFocus,
+  stopKeydown,
+} from '@/logic/task'
+import {
+  setupNewtabGlobalShortcutForBookmark,
+  cleanupNewtabGlobalShortcutForBookmark,
+} from '@/logic/globalShortcut/shortcut-bookmark'
+import {
+  setupNewtabGlobalShortcutForCommand,
+  cleanupNewtabGlobalShortcutForCommand,
+} from '@/logic/globalShortcut/shortcut-executor'
+import {
+  setupPageConfigSync,
+  setupLocalStorageSyncListener,
+} from '@/logic/storage'
 import { handleFirstOpen } from '@/logic/guide'
-import { getStyleField, localConfig, nativeUILang, currTheme, themeOverrides } from '@/logic/store'
+import {
+  getStyleField,
+  localConfig,
+  nativeUILang,
+  currTheme,
+  themeOverrides,
+} from '@/logic/store'
 import { handleAppUpdate } from '@/logic/config-update'
 import { initBackgroundImage } from '@/logic/image'
 import { cleanupEvents, cleanupResizeObserver } from '@/logic/moveable'
@@ -22,7 +48,8 @@ const WIDGET_CODE = 'general'
 const appStyle = computed(() => {
   const fontFamilyValue = getStyleField(WIDGET_CODE, 'fontFamily').value
   return {
-    '--nt-app-font-family': fontFamilyValue === 'system' ? SYSTEM_FONT_STACK : fontFamilyValue,
+    '--nt-app-font-family':
+      fontFamilyValue === 'system' ? SYSTEM_FONT_STACK : fontFamilyValue,
     '--nt-app-font-size': getStyleField(WIDGET_CODE, 'fontSize', 'px').value,
   }
 })
@@ -35,7 +62,9 @@ const appStyle = computed(() => {
  * 此时 handleFocusPage 通过 setTimeout 延迟执行，确保浏览器完成地址栏聚焦后再转移焦点。
  * 用 v-if 静默中断渲染，替代旧版 throw new Error 避免控制台报错。
  */
-const shouldReloadForFocus = localConfig.general.openPageFocusElement !== 'default' && location.search !== '?focus'
+const shouldReloadForFocus =
+  localConfig.general.openPageFocusElement !== 'default' &&
+  location.search !== '?focus'
 if (shouldReloadForFocus) {
   location.search = '?focus'
 }
@@ -46,7 +75,8 @@ const handleFocusPage = () => {
     if (localConfig.general.openPageFocusElement === 'default') {
       return
     }
-    const selector = FOCUS_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
+    const selector =
+      FOCUS_ELEMENT_SELECTOR_MAP[localConfig.general.openPageFocusElement]
     const focusEle = document.querySelector(selector) as HTMLElement | null
     if (focusEle && focusEle.focus) {
       focusEle.focus()
@@ -55,7 +85,8 @@ const handleFocusPage = () => {
 }
 
 const onDot = () => {
-  const browserPlatform = navigator.userAgentData?.platform || navigator.platform || 'unknown'
+  const browserPlatform =
+    navigator.userAgentData?.platform || navigator.platform || 'unknown'
   let browserBrand = 'unknown'
   let browserVersion = 'unknown'
   if (navigator.userAgentData?.brands?.length) {

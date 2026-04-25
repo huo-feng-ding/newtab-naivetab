@@ -5,7 +5,9 @@ import { defineAsyncComponent, computed } from 'vue'
 import { globalState, localConfig } from '@/logic/store'
 
 const modules = import.meta.glob('../../CHANGELOG.md')
-const ChangeLogMd = modules['../../CHANGELOG.md'] ? defineAsyncComponent(modules['../../CHANGELOG.md'] as any) : null
+const ChangeLogMd = modules['../../CHANGELOG.md']
+  ? defineAsyncComponent(modules['../../CHANGELOG.md'] as any)
+  : null
 
 const showBreakingChangeNotice = computed(() => {
   return localConfig.general.showBreakingChangeNotice
@@ -43,7 +45,7 @@ const onConfirm = () => {
 
       <div class="modal__content changelog__content">
         <ChangeLogMd v-if="ChangeLogMd" />
-        <p v-else> - </p>
+        <p v-else>-</p>
       </div>
 
       <div class="card__footer">

@@ -75,7 +75,10 @@ export const COMMAND_CATEGORIES = [
     commands: [
       { command: 'newWindow', iconName: COMMAND_ICONS.newWindow },
       { command: 'newIncognito', iconName: COMMAND_ICONS.newIncognito },
-      { command: 'moveTabToNextWindow', iconName: COMMAND_ICONS.moveTabToNextWindow },
+      {
+        command: 'moveTabToNextWindow',
+        iconName: COMMAND_ICONS.moveTabToNextWindow,
+      },
       { command: 'moveToNewWindow', iconName: COMMAND_ICONS.moveToNewWindow },
       { command: 'closeWindow', iconName: COMMAND_ICONS.closeWindow },
     ],
@@ -85,7 +88,10 @@ export const COMMAND_CATEGORIES = [
     commands: [
       { command: 'closeLeftTabs', iconName: COMMAND_ICONS.closeLeftTabs },
       { command: 'closeRightTabs', iconName: COMMAND_ICONS.closeRightTabs },
-      { command: 'closeDuplicateTabs', iconName: COMMAND_ICONS.closeDuplicateTabs },
+      {
+        command: 'closeDuplicateTabs',
+        iconName: COMMAND_ICONS.closeDuplicateTabs,
+      },
       { command: 'closeOtherTabs', iconName: COMMAND_ICONS.closeOtherTabs },
       { command: 'mergeAllWindows', iconName: COMMAND_ICONS.mergeAllWindows },
     ],
@@ -94,36 +100,85 @@ export const COMMAND_CATEGORIES = [
     categoryKey: 'commandCategory.tabGroup',
     commands: [
       { command: 'groupCurrentTab', iconName: COMMAND_ICONS.groupCurrentTab },
-      { command: 'ungroupCurrentTab', iconName: COMMAND_ICONS.ungroupCurrentTab },
-      { command: 'toggleGroupCollapse', iconName: COMMAND_ICONS.toggleGroupCollapse },
+      {
+        command: 'ungroupCurrentTab',
+        iconName: COMMAND_ICONS.ungroupCurrentTab,
+      },
+      {
+        command: 'toggleGroupCollapse',
+        iconName: COMMAND_ICONS.toggleGroupCollapse,
+      },
       { command: 'closeGroupTabs', iconName: COMMAND_ICONS.closeGroupTabs },
     ],
   },
   {
     categoryKey: 'commandCategory.pageAction',
     commands: [
-      { command: 'copyPageUrl', execEnv: 'cs' as const, iconName: COMMAND_ICONS.copyPageUrl },
-      { command: 'copyPageTitle', execEnv: 'cs' as const, iconName: COMMAND_ICONS.copyPageTitle },
-      { command: 'reloadPage', execEnv: 'cs' as const, iconName: COMMAND_ICONS.reloadPage },
+      {
+        command: 'copyPageUrl',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.copyPageUrl,
+      },
+      {
+        command: 'copyPageTitle',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.copyPageTitle,
+      },
+      {
+        command: 'reloadPage',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.reloadPage,
+      },
       { command: 'reloadAllTabs', iconName: COMMAND_ICONS.reloadAllTabs },
-      { command: 'reloadAllTabsAllWindows', iconName: COMMAND_ICONS.reloadAllTabsAllWindows },
+      {
+        command: 'reloadAllTabsAllWindows',
+        iconName: COMMAND_ICONS.reloadAllTabsAllWindows,
+      },
     ],
   },
   {
     categoryKey: 'commandCategory.pageScroll',
     commands: [
-      { command: 'scrollUp', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollUp },
-      { command: 'scrollDown', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollDown },
-      { command: 'scrollToTop', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollToTop },
-      { command: 'scrollToBottom', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollToBottom },
+      {
+        command: 'scrollUp',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.scrollUp,
+      },
+      {
+        command: 'scrollDown',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.scrollDown,
+      },
+      {
+        command: 'scrollToTop',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.scrollToTop,
+      },
+      {
+        command: 'scrollToBottom',
+        execEnv: 'cs' as const,
+        iconName: COMMAND_ICONS.scrollToBottom,
+      },
     ],
   },
   {
     categoryKey: 'commandCategory.naiveTabControl',
     commands: [
-      { command: 'toggleFocusMode', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleFocusMode },
-      { command: 'toggleDragMode', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleDragMode },
-      { command: 'toggleSettingDrawer', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleSettingDrawer },
+      {
+        command: 'toggleFocusMode',
+        execEnv: 'newtab' as const,
+        iconName: COMMAND_ICONS.toggleFocusMode,
+      },
+      {
+        command: 'toggleDragMode',
+        execEnv: 'newtab' as const,
+        iconName: COMMAND_ICONS.toggleDragMode,
+      },
+      {
+        command: 'toggleSettingDrawer',
+        execEnv: 'newtab' as const,
+        iconName: COMMAND_ICONS.toggleSettingDrawer,
+      },
     ],
   },
 ] as const
@@ -132,27 +187,38 @@ export const COMMAND_CATEGORIES = [
  * 从 COMMAND_CATEGORIES 派生的命令名称联合类型。
  * 覆盖所有字符串命令和对象命令的 command 字段。
  */
-export type TCommandName = (typeof COMMAND_CATEGORIES)[number]['commands'][number]['command']
+export type TCommandName =
+  (typeof COMMAND_CATEGORIES)[number]['commands'][number]['command']
 
 /**
  * CS 命令名称（与 COMMAND_CATEGORIES 中 execEnv: 'cs' 的条目一致）
  * scroll 系列和 copy 系列只能在 content script 中执行。
  */
-type TCsCommandName
-  = | 'scrollUp' | 'scrollDown' | 'scrollToTop' | 'scrollToBottom'
-    | 'reloadPage' | 'copyPageUrl' | 'copyPageTitle'
+type TCsCommandName =
+  | 'scrollUp'
+  | 'scrollDown'
+  | 'scrollToTop'
+  | 'scrollToBottom'
+  | 'reloadPage'
+  | 'copyPageUrl'
+  | 'copyPageTitle'
 
 /**
  * NaiveTab 页面本地命令（与 COMMAND_CATEGORIES 中 execEnv: 'newtab' 的条目一致）
  * 依赖 localConfig / globalState，只能在 newtab 页面执行；CS 侧静默忽略。
  */
-export type TNewtabCommandName
-  = | 'toggleFocusMode' | 'toggleDragMode' | 'toggleSettingDrawer'
+export type TNewtabCommandName =
+  | 'toggleFocusMode'
+  | 'toggleDragMode'
+  | 'toggleSettingDrawer'
 
 /**
  * SW 命令名称（TCommandName 排除 CS 命令和 newtab 命令）
  */
-export type TSwCommandName = Exclude<TCommandName, TCsCommandName | TNewtabCommandName>
+export type TSwCommandName = Exclude<
+  TCommandName,
+  TCsCommandName | TNewtabCommandName
+>
 
 /**
  * 从单一数据源派生 CS 命令列表（运行时值）
@@ -297,6 +363,9 @@ if (__DEV__) {
     .map((e) => e.command)
     .filter((cmd) => !knownCommands.has(cmd))
   if (missing.length > 0) {
-    console.error('[NaiveTab] Commands used in keymap but missing from COMMAND_CATEGORIES:', missing)
+    console.error(
+      '[NaiveTab] Commands used in keymap but missing from COMMAND_CATEGORIES:',
+      missing,
+    )
   }
 }

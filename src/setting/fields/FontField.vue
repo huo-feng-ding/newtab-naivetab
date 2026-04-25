@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { NFormItem, NSelect, NInputNumber } from 'naive-ui'
 import CustomColorPicker from '@/components/CustomColorPicker.vue'
-import { localState, availableFontOptions, fontSelectRenderLabel } from '@/logic/store'
+import {
+  localState,
+  availableFontOptions,
+  fontSelectRenderLabel,
+} from '@/logic/store'
 
 const props = defineProps<{
   fontFamily: string

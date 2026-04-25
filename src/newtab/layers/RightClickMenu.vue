@@ -2,8 +2,19 @@
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { gaProxy } from '@/logic/gtag'
-import { isDragMode, toggleIsDragMode, getTargetDataFromEvent, animateDeleteWidget } from '@/logic/moveable'
-import { toggleFullscreen, switchSettingDrawerVisible, globalState, localConfig, localState } from '@/logic/store'
+import {
+  isDragMode,
+  toggleIsDragMode,
+  getTargetDataFromEvent,
+  animateDeleteWidget,
+} from '@/logic/moveable'
+import {
+  toggleFullscreen,
+  switchSettingDrawerVisible,
+  globalState,
+  localConfig,
+  localState,
+} from '@/logic/store'
 import { downloadCurrentWallpaper } from '@/logic/image'
 import { WIDGET_CODE_LIST, getWidgetSettingPane } from '@/newtab/widgets/codes'
 import { styleConst } from '@/styles/const'
@@ -18,10 +29,11 @@ const state = reactive({
 // ── 主题颜色：通过 CSS 变量注入到菜单容器 ──
 const c = styleConst.value
 const isDark = computed(() => localState.value.currAppearanceLabel === 'dark')
-const themeVar = (key: keyof typeof c) => computed(() => {
-  const val = c[key]
-  return isDark.value ? val[1] || val[0] : val[0]
-})
+const themeVar = (key: keyof typeof c) =>
+  computed(() => {
+    const val = c[key]
+    return isDark.value ? val[1] || val[0] : val[0]
+  })
 
 // ── 菜单项数据结构 ──
 interface MenuItem {
@@ -35,27 +47,60 @@ interface MenuItem {
 
 // ── 菜单列表冻结机制 ──
 // 下载壁纸可见性：开启背景图且非拖拽模式时显示
-const isDownloadVisible = computed(() => !isDragMode.value && localConfig.general.isBackgroundImageEnabled)
+const isDownloadVisible = computed(
+  () => !isDragMode.value && localConfig.general.isBackgroundImageEnabled,
+)
 
 // 与 NDropdown 版本相同：用 ref + watch 避免点击后状态变化导致列表重算
 const buildMenuList = (): MenuItem[] => {
   const isFocusMode = localState.value.isFocusMode
   const isHoverWidget = state.currTargetCode !== ''
-  const targetLabel = isHoverWidget ? window.$t(`setting.${state.currTargetCode}`) : window.$t('setting.general')
+  const targetLabel = isHoverWidget
+    ? window.$t(`setting.${state.currTargetCode}`)
+    : window.$t('setting.general')
   const list: MenuItem[] = [
-    { label: targetLabel + window.$t('common.setting'), key: 'setting', icon: ICONS.settings, disabled: isDragMode.value },
-    { label: isDragMode.value ? window.$t('rightMenu.doneEdit') : window.$t('rightMenu.editLayout'), key: 'editLayout', icon: ICONS.dragDrop },
+    {
+      label: targetLabel + window.$t('common.setting'),
+      key: 'setting',
+      icon: ICONS.settings,
+      disabled: isDragMode.value,
+    },
+    {
+      label: isDragMode.value
+        ? window.$t('rightMenu.doneEdit')
+        : window.$t('rightMenu.editLayout'),
+      key: 'editLayout',
+      icon: ICONS.dragDrop,
+    },
     { type: 'divider', key: 'd1' },
-    { label: `${isFocusMode ? window.$t('common.exit') : ''}${window.$t('rightMenu.focusMode')}`, key: 'focusMode', icon: ICONS.focus },
+    {
+      label: `${isFocusMode ? window.$t('common.exit') : ''}${window.$t('rightMenu.focusMode')}`,
+      key: 'focusMode',
+      icon: ICONS.focus,
+    },
   ]
   if (isFocusMode) {
-    list.push({ label: window.$t('rightMenu.editFocusMode'), key: 'editFocusMode', icon: 'mdi:tune', disabled: isDragMode.value })
+    list.push({
+      label: window.$t('rightMenu.editFocusMode'),
+      key: 'editFocusMode',
+      icon: 'mdi:tune',
+      disabled: isDragMode.value,
+    })
   }
-  list.push({ label: `${globalState.isFullScreen ? window.$t('common.exit') : ''}${window.$t('rightMenu.fullscreen')}`, key: 'fullscreen', icon: ICONS.fullscreen })
+  list.push({
+    label: `${globalState.isFullScreen ? window.$t('common.exit') : ''}${window.$t('rightMenu.fullscreen')}`,
+    key: 'fullscreen',
+    icon: ICONS.fullscreen,
+  })
   if (!isFocusMode) {
     if (isHoverWidget) {
       list.push({ type: 'divider', key: 'd2' })
-      list.push({ label: window.$t('rightMenu.deleteWidget'), key: 'deleteWidget', icon: ICONS.deleteBin, danger: true })
+      list.push({
+        label: window.$t('rightMenu.deleteWidget'),
+        key: 'deleteWidget',
+        icon: ICONS.deleteBin,
+        danger: true,
+      })
     }
     // 买杯咖啡和关于图标统一放在底部 footer，不在此处追加
   }
@@ -153,15 +198,18 @@ const handleOutsideClick = (e: MouseEvent) => {
   state.isMenuVisible = false
 }
 
-watch(() => state.isMenuVisible, (visible) => {
-  if (visible) {
-    // 使用 capture: true 确保在事件冒泡前拦截，
-    // 配合 contains 检查来区分菜单内外点击
-    document.addEventListener('mousedown', handleOutsideClick, true)
-  } else {
-    document.removeEventListener('mousedown', handleOutsideClick, true)
-  }
-})
+watch(
+  () => state.isMenuVisible,
+  (visible) => {
+    if (visible) {
+      // 使用 capture: true 确保在事件冒泡前拦截，
+      // 配合 contains 检查来区分菜单内外点击
+      document.addEventListener('mousedown', handleOutsideClick, true)
+    } else {
+      document.removeEventListener('mousedown', handleOutsideClick, true)
+    }
+  },
+)
 
 // ── 打开菜单（含边界检测） ──
 const openMenu = (e: MouseEvent) => {
@@ -457,7 +505,9 @@ onUnmounted(() => {
   margin-right: 5px;
   font-size: 16px;
   color: var(--nt-cm-icon);
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .ctx-menu__item:hover .ctx-menu__item-icon {

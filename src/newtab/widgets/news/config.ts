@@ -26,7 +26,10 @@ export const WIDGET_CONFIG = {
   backgroundBlur: 10,
   isShadowEnabled: true,
   shadowColor: ['rgba(14, 30, 37, 0.12)', 'rgba(14, 30, 37, 0.12)'],
-  tabActiveBackgroundColor: ['rgba(239, 239, 245, 0.8)', 'rgba(73, 73, 77, 0.8)'],
+  tabActiveBackgroundColor: [
+    'rgba(239, 239, 245, 0.8)',
+    'rgba(73, 73, 77, 0.8)',
+  ],
   urlActiveColor: ['rgba(36, 64, 179, 1)', 'rgba(155, 177, 254, 1)'],
 }
 

@@ -3,7 +3,12 @@ import { URL_DAYJS_FORMAT } from '@/logic/constants/urls'
 import { localConfig } from '@/logic/store'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
 import Tips from '@/components/Tips.vue'
-import { SliderField, SwitchField, FontField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  FontField,
+  ToggleColorField,
+} from '@/setting/fields'
 </script>
 
 <template>

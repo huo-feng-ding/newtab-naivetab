@@ -75,7 +75,10 @@ const props = withDefaults(
 // 型别 class 由组件自身管理；hover / active / move 等附加状态由外层传入
 
 /** 键帽底座 class：型别 + 可选边框 */
-const rowClassName = computed(() => [`row__keycap-${props.visualType}`, props.isBorderEnabled && 'row__keycap--border'])
+const rowClassName = computed(() => [
+  `row__keycap-${props.visualType}`,
+  props.isBorderEnabled && 'row__keycap--border',
+])
 
 /** stage 顶面 class：随型别切换 */
 const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
@@ -235,14 +238,21 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       left: 10%;
       right: 10%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--nt-kb-primary-color) 60%, white), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--nt-kb-primary-color) 60%, white),
+        transparent
+      );
       border-radius: 1px;
     }
 
     /* 多层边框 + 扩散光晕 */
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--nt-kb-primary-color) 50%, transparent),
-      inset 0 0 12px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent),
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--nt-kb-primary-color) 50%, transparent),
+      inset 0 0 12px
+        color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent),
       0 0 10px color-mix(in srgb, var(--nt-kb-primary-color) 25%, transparent),
       0 0 20px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent);
 
@@ -251,7 +261,10 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       width: 60%;
       height: 60%;
       color: var(--nt-kb-primary-color);
-      filter: drop-shadow(0 1px 4px color-mix(in srgb, var(--nt-kb-primary-color) 45%, transparent));
+      filter: drop-shadow(
+        0 1px 4px
+          color-mix(in srgb, var(--nt-kb-primary-color) 45%, transparent)
+      );
       animation: selectPopIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
     }
   }
@@ -359,8 +372,12 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* ── 选中动画关键帧 ── */
 @keyframes selectFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes selectPopIn {
@@ -386,8 +403,14 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     padding: var(--nt-kb-stage-flat-padding);
     border-radius: var(--nt-kb-border-radius);
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.06) 100%);
+    border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08)
+      rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(0, 0, 0, 0.06) 100%
+    );
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.35),
       inset 0 -1px 0 rgba(0, 0, 0, 0.15);
@@ -396,8 +419,10 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
 /* ── GMK 型别（仿 Cherry 高度，顶厚底薄三层边框 + 外阴影） ─────────────── */
 .row__keycap-gmk {
-  border-width: var(--nt-kb-gmk-top-border) var(--nt-kb-gmk-h-border) var(--nt-kb-gmk-bot-border);
-  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.08);
+  border-width: var(--nt-kb-gmk-top-border) var(--nt-kb-gmk-h-border)
+    var(--nt-kb-gmk-bot-border);
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.3)
+    rgba(0, 0, 0, 0.08);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.45),
     0 1px 2px rgba(0, 0, 0, 0.3),
@@ -411,7 +436,13 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     border-top-right-radius: 4px;
     border-bottom-right-radius: 8px 4px;
     border-bottom-left-radius: 8px 4px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.1) 18%, rgba(0, 0, 0, 0.04) 55%, rgba(0, 0, 0, 0.1) 100%);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.1) 18%,
+      rgba(0, 0, 0, 0.04) 55%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.35),
       inset 0 -1px 0 rgba(0, 0, 0, 0.12),
@@ -424,7 +455,8 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 /* ── DSA 型别（球面均等高度，四边等宽 + 辐射渐变顶面） ──────────────────── */
 .row__keycap-dsa {
   border-width: var(--nt-kb-dsa-border);
-  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.06);
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.24)
+    rgba(0, 0, 0, 0.06);
   box-shadow:
     0 3px 7px rgba(0, 0, 0, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.28),
@@ -435,7 +467,13 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     border-width: 0px;
     /* 随用户设置的 border-radius 变量响应，略加 2px 模拟 DSA 圆润球面 */
     border-radius: calc(var(--nt-kb-border-radius) + 2px);
-    background: radial-gradient(ellipse at 38% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 35%, rgba(0, 0, 0, 0.06) 65%, rgba(0, 0, 0, 0.14) 100%);
+    background: radial-gradient(
+      ellipse at 38% 30%,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.1) 35%,
+      rgba(0, 0, 0, 0.06) 65%,
+      rgba(0, 0, 0, 0.14) 100%
+    );
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.3),
       inset 0 -1px 0 rgba(0, 0, 0, 0.14),

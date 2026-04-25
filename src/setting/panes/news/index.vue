@@ -3,7 +3,12 @@ import { Icon } from '@iconify/vue'
 import { localConfig } from '@/logic/store'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, ColorField, FontField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  ColorField,
+  FontField,
+  ToggleColorField,
+} from '@/setting/fields'
 import { state } from '@/newtab/widgets/news/logic'
 
 type NewsSourceItem = {
@@ -21,7 +26,8 @@ const allNewsSources = computed<NewsSourceItem[]>(() => [
 ])
 
 // 判断某个 source 是否已选中
-const isSourceSelected = (value: string) => (localConfig.news.sourceList as string[]).includes(value)
+const isSourceSelected = (value: string) =>
+  (localConfig.news.sourceList as string[]).includes(value)
 
 // 切换选中状态
 const toggleSource = (value: NewsSources) => {
@@ -52,10 +58,17 @@ const moveDown = (value: string) => {
 }
 
 // 选中列表（按 sourceList 顺序）
-const selectedSources = computed<NewsSourceItem[]>(() => (localConfig.news.sourceList as string[]).map((v) => allNewsSources.value.find((s) => s.value === v)).filter(Boolean) as NewsSourceItem[])
+const selectedSources = computed<NewsSourceItem[]>(
+  () =>
+    (localConfig.news.sourceList as string[])
+      .map((v) => allNewsSources.value.find((s) => s.value === v))
+      .filter(Boolean) as NewsSourceItem[],
+)
 
 // 未选中列表（按默认顺序排列）
-const unselectedSources = computed<NewsSourceItem[]>(() => allNewsSources.value.filter((s) => !isSourceSelected(s.value)))
+const unselectedSources = computed<NewsSourceItem[]>(() =>
+  allNewsSources.value.filter((s) => !isSourceSelected(s.value)),
+)
 </script>
 
 <template>
@@ -108,7 +121,9 @@ const unselectedSources = computed<NewsSourceItem[]>(() => allNewsSources.value.
           </div>
 
           <!-- 分割线 -->
-          <NDivider v-if="selectedSources.length > 0 && unselectedSources.length > 0" />
+          <NDivider
+            v-if="selectedSources.length > 0 && unselectedSources.length > 0"
+          />
 
           <!-- 未选列表 -->
           <div
@@ -121,7 +136,9 @@ const unselectedSources = computed<NewsSourceItem[]>(() => allNewsSources.value.
               size="small"
               @update:checked="toggleSource(item.value)"
             />
-            <span class="item__label item__label--dimmed">{{ item.label }}</span>
+            <span class="item__label item__label--dimmed">{{
+              item.label
+            }}</span>
           </div>
         </div>
       </NFormItem>

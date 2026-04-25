@@ -3,10 +3,26 @@ import { RecycleScroller } from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { LOCAL_BACKGROUND_IMAGE_MAX_SIZE_M, SECOND_MODAL_WIDTH } from '@/logic/constants/app'
+import {
+  LOCAL_BACKGROUND_IMAGE_MAX_SIZE_M,
+  SECOND_MODAL_WIDTH,
+} from '@/logic/constants/app'
 import { localConfig, localState } from '@/logic/store'
-import { BACKGROUND_IMAGE_SOURCE, IMAGE_NETWORK_SOURCE } from '@/logic/constants/image'
-import { previewImageListMap, imageLocalState, imageState, isImageLoading, isImageGalleryLoading, updateBingImages, updatePexelsImages, getImageUrlFromName, storeLocalBackgroundImage } from '@/logic/image'
+import {
+  BACKGROUND_IMAGE_SOURCE,
+  IMAGE_NETWORK_SOURCE,
+} from '@/logic/constants/image'
+import {
+  previewImageListMap,
+  imageLocalState,
+  imageState,
+  isImageLoading,
+  isImageGalleryLoading,
+  updateBingImages,
+  updatePexelsImages,
+  getImageUrlFromName,
+  storeLocalBackgroundImage,
+} from '@/logic/image'
 import { getPexelsImagesData } from '@/api/image'
 import { log } from '@/logic/util'
 import Tips from '@/components/Tips.vue'
@@ -31,12 +47,22 @@ const currentBackgroundPreviewUrl = computed(() => {
   if (source === BACKGROUND_IMAGE_SOURCE.NETWORK) {
     // 自定义 URL 优先
     if (localConfig.general.isBackgroundImageCustomUrlEnabled) {
-      return localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode] || ''
+      return (
+        localConfig.general.backgroundImageCustomUrls[
+          localState.value.currAppearanceCode
+        ] || ''
+      )
     }
     // Bing/Pexels 图库：从配置的图片名拼接 URL
-    const name = localConfig.general.backgroundImageNames?.[localState.value.currAppearanceCode]
+    const name =
+      localConfig.general.backgroundImageNames?.[
+        localState.value.currAppearanceCode
+      ]
     if (name) {
-      return getImageUrlFromName(localConfig.general.backgroundNetworkSourceType, name)
+      return getImageUrlFromName(
+        localConfig.general.backgroundNetworkSourceType,
+        name,
+      )
     }
     return ''
   }
@@ -59,7 +85,11 @@ type ImageRow = {
   isLoadMore?: boolean
 }
 
-const chunkArray = (arr: Array<TImage.BaseImageItem>, size: number, appendLoadMore = false): Array<ImageRow> => {
+const chunkArray = (
+  arr: Array<TImage.BaseImageItem>,
+  size: number,
+  appendLoadMore = false,
+): Array<ImageRow> => {
   const result: Array<ImageRow> = []
   for (let i = 0; i < arr.length; i += size) {
     result.push({ items: arr.slice(i, i + size), key: `row-${i}` })
@@ -74,7 +104,11 @@ const chunkedPreviewMap = computed((): Record<string, Array<ImageRow>> => {
   const map: Record<string, Array<ImageRow>> = {}
   for (const source of Object.keys(previewImageListMap.value)) {
     const shouldAppendLoadMore = source === 'pexels'
-    map[source] = chunkArray(previewImageListMap.value[source], 3, shouldAppendLoadMore)
+    map[source] = chunkArray(
+      previewImageListMap.value[source],
+      3,
+      shouldAppendLoadMore,
+    )
   }
   return map
 })
@@ -94,8 +128,14 @@ const onCloseModal = () => {
 
 const backgroundImageSourceList = computed(() => [
   { label: window.$t('common.local'), value: BACKGROUND_IMAGE_SOURCE.LOCAL },
-  { label: window.$t('common.network'), value: BACKGROUND_IMAGE_SOURCE.NETWORK },
-  { label: window.$t('generalSetting.photoOfTheDay'), value: BACKGROUND_IMAGE_SOURCE.BING_PHOTO },
+  {
+    label: window.$t('common.network'),
+    value: BACKGROUND_IMAGE_SOURCE.NETWORK,
+  },
+  {
+    label: window.$t('generalSetting.photoOfTheDay'),
+    value: BACKGROUND_IMAGE_SOURCE.BING_PHOTO,
+  },
 ])
 
 watch(
@@ -138,14 +178,23 @@ const onBackgroundImageFileChange = async (e: Event) => {
  * 因此用户输入 http:// 时会被自动升级，不支持 http-only 的图床。
  */
 const handleCustomUrlStartWithHttps = () => {
-  let url = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode]
+  let url =
+    localConfig.general.backgroundImageCustomUrls[
+      localState.value.currAppearanceCode
+    ]
   // 去掉可能的协议前缀后补 https
   url = url.replace(/^https?:\/\//, 'https://')
   // 没有协议前缀时自动补 https://
-  if (url.length > 0 && !url.startsWith('https://') && !url.startsWith('http://')) {
+  if (
+    url.length > 0 &&
+    !url.startsWith('https://') &&
+    !url.startsWith('http://')
+  ) {
     url = 'https://' + url
   }
-  localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode] = url
+  localConfig.general.backgroundImageCustomUrls[
+    localState.value.currAppearanceCode
+  ] = url
 }
 
 const handleCustomUrlUpdate = () => {
@@ -155,8 +204,17 @@ const handleCustomUrlUpdate = () => {
 const handleBackgroundImageCustomUrlBlur = () => {
   handleCustomUrlStartWithHttps()
   // 当只单独设置了浅色or深色外观的背景时，默认同步另一外观为相同的背景
-  if (localConfig.general.backgroundImageCustomUrls[+!localState.value.currAppearanceCode].length === 0) {
-    localConfig.general.backgroundImageCustomUrls[+!localState.value.currAppearanceCode] = localConfig.general.backgroundImageCustomUrls[localState.value.currAppearanceCode]
+  if (
+    localConfig.general.backgroundImageCustomUrls[
+      +!localState.value.currAppearanceCode
+    ].length === 0
+  ) {
+    localConfig.general.backgroundImageCustomUrls[
+      +!localState.value.currAppearanceCode
+    ] =
+      localConfig.general.backgroundImageCustomUrls[
+        localState.value.currAppearanceCode
+      ]
   }
 }
 
@@ -226,7 +284,10 @@ const loadMorePexels = async () => {
 
             <!-- local -->
             <NFormItem
-              v-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.LOCAL"
+              v-if="
+                localConfig.general.backgroundImageSource ===
+                BACKGROUND_IMAGE_SOURCE.LOCAL
+              "
               :label="$t('common.select')"
             >
               <div class="form__local">
@@ -266,10 +327,17 @@ const loadMorePexels = async () => {
             </NFormItem>
 
             <!-- network -->
-            <template v-else-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK">
+            <template
+              v-else-if="
+                localConfig.general.backgroundImageSource ===
+                BACKGROUND_IMAGE_SOURCE.NETWORK
+              "
+            >
               <NFormItem :label="`${$t('common.custom')}`">
                 <NSwitch
-                  v-model:value="localConfig.general.isBackgroundImageCustomUrlEnabled"
+                  v-model:value="
+                    localConfig.general.isBackgroundImageCustomUrlEnabled
+                  "
                   size="small"
                   @update:value="handleCustomUrlUpdate"
                 />
@@ -279,7 +347,11 @@ const loadMorePexels = async () => {
                 label="URL"
               >
                 <NInput
-                  v-model:value="localConfig.general.backgroundImageCustomUrls[localState.currAppearanceCode]"
+                  v-model:value="
+                    localConfig.general.backgroundImageCustomUrls[
+                      localState.currAppearanceCode
+                    ]
+                  "
                   class="setting__item-ele setting__item-ml"
                   type="text"
                   placeholder="https://"
@@ -289,7 +361,11 @@ const loadMorePexels = async () => {
             </template>
             <!-- 网络（未开启自定义），每日一图时展示 -->
             <NFormItem
-              v-if="localConfig.general.backgroundImageSource !== BACKGROUND_IMAGE_SOURCE.LOCAL && !localConfig.general.isBackgroundImageCustomUrlEnabled"
+              v-if="
+                localConfig.general.backgroundImageSource !==
+                  BACKGROUND_IMAGE_SOURCE.LOCAL &&
+                !localConfig.general.isBackgroundImageCustomUrlEnabled
+              "
               :label="$t('common.uhd')"
             >
               <NSwitch
@@ -299,7 +375,9 @@ const loadMorePexels = async () => {
             </NFormItem>
 
             <!-- 当前背景图 -->
-            <NFormItem :label="`${$t('common.current')}${$t('common.backgroundImage')}`">
+            <NFormItem
+              :label="`${$t('common.current')}${$t('common.backgroundImage')}`"
+            >
               <div class="current__image">
                 <NSpin :show="isImageLoading">
                   <BackgroundDrawerImageElement
@@ -316,7 +394,11 @@ const loadMorePexels = async () => {
 
         <!-- list 仅来源为网络 且 非定制Url时展示 -->
         <NSpin
-          v-if="localConfig.general.backgroundImageSource === BACKGROUND_IMAGE_SOURCE.NETWORK && !localConfig.general.isBackgroundImageCustomUrlEnabled"
+          v-if="
+            localConfig.general.backgroundImageSource ===
+              BACKGROUND_IMAGE_SOURCE.NETWORK &&
+            !localConfig.general.isBackgroundImageCustomUrlEnabled
+          "
           :show="isImageGalleryLoading"
           class="image-list__spin"
         >
@@ -345,10 +427,16 @@ const loadMorePexels = async () => {
                     <NButton
                       size="small"
                       :loading="isPexelsLoadingMore"
-                      :disabled="(imageLocalState.pexels.currentPage || 1) > 100"
+                      :disabled="
+                        (imageLocalState.pexels.currentPage || 1) > 100
+                      "
                       @click="loadMorePexels"
                     >
-                      {{ (imageLocalState.pexels.currentPage || 1) > 100 ? $t('common.loaded') : $t('common.loadMore') }}
+                      {{
+                        (imageLocalState.pexels.currentPage || 1) > 100
+                          ? $t('common.loaded')
+                          : $t('common.loadMore')
+                      }}
                     </NButton>
                   </div>
                   <div

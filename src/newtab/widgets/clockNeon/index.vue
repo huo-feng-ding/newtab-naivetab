@@ -1,11 +1,24 @@
 <script setup lang="ts">
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
-const customPaddingVertical = getStyleField(WIDGET_CODE, 'paddingVertical', 'px')
-const customPaddingHorizontal = getStyleField(WIDGET_CODE, 'paddingHorizontal', 'px')
+const customPaddingVertical = getStyleField(
+  WIDGET_CODE,
+  'paddingVertical',
+  'px',
+)
+const customPaddingHorizontal = getStyleField(
+  WIDGET_CODE,
+  'paddingHorizontal',
+  'px',
+)
 const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
 const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
 const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
@@ -90,7 +103,10 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
     <div class="clockNeon__container">
       <div
         class="neon__frame"
-        :class="{ 'neon__frame--border': isBorderEnabled, 'neon__frame--visible': showFrame }"
+        :class="{
+          'neon__frame--border': isBorderEnabled,
+          'neon__frame--visible': showFrame,
+        }"
         :style="clockNeonStyle"
       >
         <!-- 扫描线遮罩 -->
@@ -109,7 +125,9 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
               :style="{ animationDelay: digitDelays[idx] }"
             >
               <span class="neon__digit-ghost">{{ digit }}</span>
-              <span class="neon__digit-lit neon__digit-lit--primary">{{ digit }}</span>
+              <span class="neon__digit-lit neon__digit-lit--primary">{{
+                digit
+              }}</span>
             </span>
           </div>
 
@@ -132,8 +150,12 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
               class="neon__digit"
               :style="{ animationDelay: digitDelays[idx + 2] }"
             >
-              <span class="neon__digit-ghost neon__digit-ghost--secondary">{{ digit }}</span>
-              <span class="neon__digit-lit neon__digit-lit--secondary">{{ digit }}</span>
+              <span class="neon__digit-ghost neon__digit-ghost--secondary">{{
+                digit
+              }}</span>
+              <span class="neon__digit-lit neon__digit-lit--secondary">{{
+                digit
+              }}</span>
             </span>
           </div>
 
@@ -157,8 +179,12 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
                 class="neon__digit neon__digit--small"
                 :style="{ animationDelay: digitDelays[idx + 4] }"
               >
-                <span class="neon__digit-ghost neon__digit-ghost--accent">{{ digit }}</span>
-                <span class="neon__digit-lit neon__digit-lit--accent">{{ digit }}</span>
+                <span class="neon__digit-ghost neon__digit-ghost--accent">{{
+                  digit
+                }}</span>
+                <span class="neon__digit-lit neon__digit-lit--accent">{{
+                  digit
+                }}</span>
               </span>
             </div>
           </template>
@@ -191,10 +217,14 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
 
     .neon__frame {
       position: relative;
-      padding: var(--nt-cn-customPaddingVertical) var(--nt-cn-customPaddingHorizontal);
+      padding: var(--nt-cn-customPaddingVertical)
+        var(--nt-cn-customPaddingHorizontal);
       background: var(--nt-cn-customBackgroundColor);
       border-radius: var(--nt-cn-customBorderRadius);
-      transition: opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      transition:
+        opacity 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
       backdrop-filter: blur(12px);
       overflow: hidden;
 
@@ -216,12 +246,14 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
       }
 
       &.neon__frame--border {
-        border: var(--nt-cn-customBorderWidth) solid var(--nt-cn-customBorderColor);
+        border: var(--nt-cn-customBorderWidth) solid
+          var(--nt-cn-customBorderColor);
         box-shadow:
           0 0 6px var(--nt-cn-customBorderColor),
           0 0 14px var(--nt-cn-customBorderColor),
           0 0 var(--nt-cn-customGlowIntensity) var(--nt-cn-customBorderColor),
-          0 0 calc(var(--nt-cn-customGlowIntensity) * 2) var(--nt-cn-customBorderColor),
+          0 0 calc(var(--nt-cn-customGlowIntensity) * 2)
+            var(--nt-cn-customBorderColor),
           inset 0 0 16px rgba(0, 0, 0, 0.6),
           inset 0 1px 0 rgba(255, 255, 255, 0.06);
       }
@@ -353,9 +385,10 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
                 0 0 10px var(--nt-cn-customFontColor),
                 0 0 20px var(--nt-cn-customPrimaryColor),
                 0 0 35px var(--nt-cn-customPrimaryColor),
-                0 0 var(--nt-cn-customGlowIntensity) var(--nt-cn-customPrimaryColor),
-                /* 赛博朋克特征：互补色边缘光晕（品红渗透） */
-                2px 0 8px var(--nt-cn-customSecondaryColor),
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customPrimaryColor),
+                /* 赛博朋克特征：互补色边缘光晕（品红渗透） */ 2px 0 8px
+                  var(--nt-cn-customSecondaryColor),
                 -1px 0 4px var(--nt-cn-customSecondaryColor);
             }
 
@@ -368,9 +401,10 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
                 0 0 10px var(--nt-cn-customSecondaryColor),
                 0 0 20px var(--nt-cn-customSecondaryColor),
                 0 0 35px var(--nt-cn-customSecondaryColor),
-                0 0 var(--nt-cn-customGlowIntensity) var(--nt-cn-customSecondaryColor),
-                /* 互补色边缘光晕（青色渗透） */
-                -2px 0 8px var(--nt-cn-customPrimaryColor),
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customSecondaryColor),
+                /* 互补色边缘光晕（青色渗透） */ -2px 0 8px
+                  var(--nt-cn-customPrimaryColor),
                 1px 0 4px var(--nt-cn-customPrimaryColor);
             }
 
@@ -382,7 +416,8 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
                 0 0 6px var(--nt-cn-customAccentColor),
                 0 0 14px var(--nt-cn-customAccentColor),
                 0 0 24px var(--nt-cn-customAccentColor),
-                0 0 var(--nt-cn-customGlowIntensity) var(--nt-cn-customAccentColor);
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customAccentColor);
             }
           }
 
@@ -414,7 +449,9 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
             min-width: 4px;
             min-height: 4px;
             border-radius: 50%;
-            transition: opacity 0.2s ease, box-shadow 0.2s ease;
+            transition:
+              opacity 0.2s ease,
+              box-shadow 0.2s ease;
             flex-shrink: 0;
 
             &.neon__dot--primary {
@@ -486,16 +523,35 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
 }
 
 @keyframes neonFlicker {
-  0%, 100% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 1;
+  }
   /* 偶发短闪 */
-  88% { opacity: 1; }
-  88.5% { opacity: 0.88; }
-  89% { opacity: 1; }
+  88% {
+    opacity: 1;
+  }
+  88.5% {
+    opacity: 0.88;
+  }
+  89% {
+    opacity: 1;
+  }
   /* 偶发强闪 */
-  95% { opacity: 1; }
-  95.2% { opacity: 0.55; }
-  95.5% { opacity: 1; }
-  95.7% { opacity: 0.8; }
-  96% { opacity: 1; }
+  95% {
+    opacity: 1;
+  }
+  95.2% {
+    opacity: 0.55;
+  }
+  95.5% {
+    opacity: 1;
+  }
+  95.7% {
+    opacity: 0.8;
+  }
+  96% {
+    opacity: 1;
+  }
 }
 </style>

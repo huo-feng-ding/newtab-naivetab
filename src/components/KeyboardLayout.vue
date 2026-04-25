@@ -20,25 +20,30 @@
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import { localConfig } from '@/logic/store'
 
-const props = withDefaults(defineProps<{
-  unit: 'vmin' | 'px'
-  baseSize?: number
-  rows: string[][]
-  extraClass?: string | string[] | Record<string, boolean>
-}>(), {
-  baseSize: 40,
-  extraClass: undefined,
-})
+const props = withDefaults(
+  defineProps<{
+    unit: 'vmin' | 'px'
+    baseSize?: number
+    rows: string[][]
+    extraClass?: string | string[] | Record<string, boolean>
+  }>(),
+  {
+    baseSize: 40,
+    extraClass: undefined,
+  },
+)
 
 // ── 样式 composable ──────────────────────────────────────────────────────────
-const {
-  getKeycapWrapStyle,
-  layoutCssVars,
-} = useKeyboardStyle(props.unit, props.baseSize)
+const { getKeycapWrapStyle, layoutCssVars } = useKeyboardStyle(
+  props.unit,
+  props.baseSize,
+)
 
 // ── 显示开关 ─────────────────────────────────────────────────────────────────
 const isShellVisible = computed(() => localConfig.keyboardCommon.isShellVisible)
-const isShellShadowEnabled = computed(() => localConfig.keyboardCommon.isShellShadowEnabled)
+const isShellShadowEnabled = computed(
+  () => localConfig.keyboardCommon.isShellShadowEnabled,
+)
 const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
 </script>
 
@@ -127,8 +132,8 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
   backdrop-filter: blur(var(--nt-kb-shell-blur));
   /* 模拟玻璃质感的四边高光/阴影 */
   border-top: 1px solid rgba(255, 255, 255, 0.18);
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  border-right: 1px solid rgba(0, 0, 0, 0.10);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(0, 0, 0, 0.18);
 
   /* 顶部内高光渐变（集中在中段1/3區域，模拟玻璃光泽自然的中心聚光） */
@@ -139,7 +144,12 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
     left: 25%;
     right: 25%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
     border-radius: 1px;
     pointer-events: none;
   }
@@ -150,16 +160,21 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      rgba(255, 255, 255, 0.06) 0%,
+      transparent 60%
+    );
     pointer-events: none;
   }
 }
 
 /* ── Shell 立体阴影（isShellShadowEnabled = true，叠加在 --shell 上） ─────── */
 .keyboard-layout--shell-shadow {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.03) 35%,
       rgba(0, 0, 0, 0.06) 65%,
       rgba(0, 0, 0, 0.12) 100%

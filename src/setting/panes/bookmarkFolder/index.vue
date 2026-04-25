@@ -8,7 +8,13 @@ import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
 import BrowserBookmarkPicker from '@/components/BrowserBookmarkPicker.vue'
 import { refreshSelectedFolderTitles } from '@/newtab/widgets/bookmarkFolder/logic'
-import { SliderField, SwitchField, ColorField, FontField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  ColorField,
+  FontField,
+  ToggleColorField,
+} from '@/setting/fields'
 
 const state = reactive({
   showPicker: false,
@@ -17,7 +23,9 @@ const state = reactive({
 
 const folderCrumb = computed(() => {
   const stack = localConfig.bookmarkFolder.selectedFolderTitles || []
-  return stack.length === 0 ? (window.$t('bookmarkFolder.rootDirectory') as string) : stack.join(' / ')
+  return stack.length === 0
+    ? (window.$t('bookmarkFolder.rootDirectory') as string)
+    : stack.join(' / ')
 })
 
 const findPathById = (root: BookmarkNode[], id: string): string[] => {
@@ -108,7 +116,9 @@ const onResetFolder = () => {
               class="setting__item-ele setting__item-ml action-btn action-btn--default"
               @click="onResetFolder"
             >
-              <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{ $t('generalSetting.resetSettingValue') }}
+              <Icon :icon="ICONS.restoreTwotone" />&nbsp;{{
+                $t('generalSetting.resetSettingValue')
+              }}
             </NButton>
           </div>
         </div>

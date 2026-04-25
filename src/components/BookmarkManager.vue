@@ -1,20 +1,35 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref, computed, nextTick } from 'vue'
 import { flushConfigSync } from '@/logic/storage'
-import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/keyboard/keyboard-constants'
+import {
+  KEYBOARD_URL_MAX_LENGTH,
+  KEYBOARD_NAME_MAX_LENGTH,
+} from '@/logic/keyboard/keyboard-constants'
 import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
-import { localConfig, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
+import {
+  localConfig,
+  customPrimaryColor,
+  colorMixWithAlpha,
+} from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import { requestPermission } from '@/logic/storage'
-import { getBookmarkConfigName, getBookmarkConfigUrl, getDefaultBookmarkNameFromUrl } from '@/newtab/widgets/keyboardBookmark/logic'
+import {
+  getBookmarkConfigName,
+  getBookmarkConfigUrl,
+  getDefaultBookmarkNameFromUrl,
+} from '@/newtab/widgets/keyboardBookmark/logic'
 import { getFaviconFromUrl } from '@/logic/bookmark'
 import BrowserBookmarkPicker from '@/components/BrowserBookmarkPicker.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 
-const primaryBorder = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.55))
-const dragHighlightBg = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.12))
+const primaryBorder = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.55),
+)
+const dragHighlightBg = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.12),
+)
 
 const cssVars = computed(() => ({
   '--nt-bookmark-primary-border': primaryBorder.value,
@@ -37,15 +52,30 @@ const props = withDefaults(
 
 // ── 键帽样式 ──────────────────────────────────────────────────────────────
 const keyboardStyle = useKeyboardStyle('px', props.baseSize)
-const { getCustomLabel, getKeycapStageStyle, getKeycapTextStyle, getKeycapIconStyle, getEmphasisStyle, keycapCssVars } = keyboardStyle
+const {
+  getCustomLabel,
+  getKeycapStageStyle,
+  getKeycapTextStyle,
+  getKeycapIconStyle,
+  getEmphasisStyle,
+  keycapCssVars,
+} = keyboardStyle
 
 // ── 键帽可见性配置 ────────────────────────────────────────────────────────
 const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
-const isKeycapBorderEnabled = computed(() => localConfig.keyboardCommon.isKeycapBorderEnabled)
-const isCapKeyVisible = computed(() => localConfig.keyboardCommon.isCapKeyVisible)
+const isKeycapBorderEnabled = computed(
+  () => localConfig.keyboardCommon.isKeycapBorderEnabled,
+)
+const isCapKeyVisible = computed(
+  () => localConfig.keyboardCommon.isCapKeyVisible,
+)
 const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
-const isFaviconVisible = computed(() => localConfig.keyboardCommon.isFaviconVisible)
-const isTactileBumpsVisible = computed(() => localConfig.keyboardCommon.isTactileBumpsVisible)
+const isFaviconVisible = computed(
+  () => localConfig.keyboardCommon.isFaviconVisible,
+)
+const isTactileBumpsVisible = computed(
+  () => localConfig.keyboardCommon.isTactileBumpsVisible,
+)
 
 // ── 当前标签页 URL ────────────────────────────────────────────────────────
 const pendingUrl = ref('')
@@ -130,7 +160,7 @@ const onOpenBookmarkPicker = async () => {
   bookmarkState.isBookmarkModalVisible = true
 }
 
-const onSelectBookmark = (payload: { title: string, url?: string }) => {
+const onSelectBookmark = (payload: { title: string; url?: string }) => {
   if (!bookmarkState.keyCode) return
   ensureKeymapEntry(bookmarkState.keyCode)
   const entry = localConfig.keyboardBookmark.keymap[bookmarkState.keyCode]
@@ -168,11 +198,14 @@ const handleDragEnd = () => {
     return
   }
 
-  const targetData = localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode]
-  localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode] = localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]
+  const targetData =
+    localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode]
+  localConfig.keyboardBookmark.keymap[bookmarkState.targetDragKeyCode] =
+    localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]
 
   if (targetData) {
-    localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode] = targetData
+    localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode] =
+      targetData
   } else {
     delete localConfig.keyboardBookmark.keymap[bookmarkState.currDragKeyCode]
   }
@@ -233,8 +266,10 @@ const wrapSync = async (fn: () => void) => {
   }
 }
 
-const onHandleApplyCurrentTabUrl = () => wrapSync(() => setCurrKeymapUrl(pendingUrl.value))
-const onHandleSelectBookmark = (payload: { title: string, url?: string }) => wrapSync(() => onSelectBookmark(payload))
+const onHandleApplyCurrentTabUrl = () =>
+  wrapSync(() => setCurrKeymapUrl(pendingUrl.value))
+const onHandleSelectBookmark = (payload: { title: string; url?: string }) =>
+  wrapSync(() => onSelectBookmark(payload))
 const onHandleDragEnd = () => wrapSync(() => handleDragEnd())
 const onHandleDeleteKey = () => wrapSync(() => onDeleteBookmark())
 
@@ -283,7 +318,9 @@ const onHandleInputBlur = () => {
           <div
             class="manager__keycap-drag-wrap"
             :class="{
-              'manager__keycap-drag-wrap--drag-target': bookmarkState.targetDragKeyCode === code && bookmarkState.currDragKeyCode !== code
+              'manager__keycap-drag-wrap--drag-target':
+                bookmarkState.targetDragKeyCode === code &&
+                bookmarkState.currDragKeyCode !== code,
             }"
             :draggable="bookmarkState.isBookmarkDragEnabled"
             @dragstart="handleDragStart(code)"
@@ -337,7 +374,10 @@ const onHandleInputBlur = () => {
             <NInput
               size="small"
               :value="getCurrKeymapName()"
-              :placeholder="getDefaultBookmarkNameFromUrl(getCurrKeymapUrl()) || $t('keyboardCommon.nameLabel')"
+              :placeholder="
+                getDefaultBookmarkNameFromUrl(getCurrKeymapUrl()) ||
+                $t('keyboardCommon.nameLabel')
+              "
               :maxlength="KEYBOARD_NAME_MAX_LENGTH"
               show-count
               clearable
@@ -400,12 +440,16 @@ const onHandleInputBlur = () => {
                   quaternary
                   size="small"
                   class="action-btn"
-                  :disabled="!bookmarkState.keyCode || !getBookmarkConfigUrl(bookmarkState.keyCode)"
+                  :disabled="
+                    !bookmarkState.keyCode ||
+                    !getBookmarkConfigUrl(bookmarkState.keyCode)
+                  "
                 >
                   <Icon :icon="ICONS.deleteBin" />
                 </NButton>
               </template>
-              {{ $t('common.delete') }} {{ getCustomLabel(bookmarkState.keyCode) }}？
+              {{ $t('common.delete') }}
+              {{ getCustomLabel(bookmarkState.keyCode) }}？
             </NPopconfirm>
           </div>
         </div>

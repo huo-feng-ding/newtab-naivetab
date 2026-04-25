@@ -20,7 +20,10 @@ import { isMacOS } from '@/env'
  * @param hostname 当前页面 hostname（如 'docs.google.com'）
  * @param blacklist 黑名单数组
  */
-export function isUrlInBlacklist(hostname: string, blacklist: string[]): boolean {
+export function isUrlInBlacklist(
+  hostname: string,
+  blacklist: string[],
+): boolean {
   if (!blacklist || blacklist.length === 0) return false
 
   for (const pattern of blacklist) {
@@ -43,37 +46,114 @@ export function isUrlInBlacklist(hostname: string, blacklist: string[]): boolean
  */
 export const ALLOWED_MAIN_KEYS = [
   // 字母
-  'KeyA', 'KeyB', 'KeyC', 'KeyD', 'KeyE', 'KeyF', 'KeyG', 'KeyH', 'KeyI', 'KeyJ',
-  'KeyK', 'KeyL', 'KeyM', 'KeyN', 'KeyO', 'KeyP', 'KeyQ', 'KeyR', 'KeyS', 'KeyT',
-  'KeyU', 'KeyV', 'KeyW', 'KeyX', 'KeyY', 'KeyZ',
+  'KeyA',
+  'KeyB',
+  'KeyC',
+  'KeyD',
+  'KeyE',
+  'KeyF',
+  'KeyG',
+  'KeyH',
+  'KeyI',
+  'KeyJ',
+  'KeyK',
+  'KeyL',
+  'KeyM',
+  'KeyN',
+  'KeyO',
+  'KeyP',
+  'KeyQ',
+  'KeyR',
+  'KeyS',
+  'KeyT',
+  'KeyU',
+  'KeyV',
+  'KeyW',
+  'KeyX',
+  'KeyY',
+  'KeyZ',
   // 数字
-  'Digit0', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9',
+  'Digit0',
+  'Digit1',
+  'Digit2',
+  'Digit3',
+  'Digit4',
+  'Digit5',
+  'Digit6',
+  'Digit7',
+  'Digit8',
+  'Digit9',
   // 符号
-  'Comma', 'Period', 'Slash', 'Minus', 'Equal',
-  'BracketLeft', 'BracketRight', 'Semicolon', 'Quote', 'Backquote', 'Backslash', 'IntlBackslash',
+  'Comma',
+  'Period',
+  'Slash',
+  'Minus',
+  'Equal',
+  'BracketLeft',
+  'BracketRight',
+  'Semicolon',
+  'Quote',
+  'Backquote',
+  'Backslash',
+  'IntlBackslash',
   // 数字小键盘
-  'Numpad0', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4', 'Numpad5',
-  'Numpad6', 'Numpad7', 'Numpad8', 'Numpad9',
-  'NumpadDecimal', 'NumpadEnter',
-  'NumpadAdd', 'NumpadSubtract', 'NumpadMultiply', 'NumpadDivide',
+  'Numpad0',
+  'Numpad1',
+  'Numpad2',
+  'Numpad3',
+  'Numpad4',
+  'Numpad5',
+  'Numpad6',
+  'Numpad7',
+  'Numpad8',
+  'Numpad9',
+  'NumpadDecimal',
+  'NumpadEnter',
+  'NumpadAdd',
+  'NumpadSubtract',
+  'NumpadMultiply',
+  'NumpadDivide',
   // 功能键
-  'F1', 'F2', 'F3', 'F4', 'F5', 'F6',
-  'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+  'F1',
+  'F2',
+  'F3',
+  'F4',
+  'F5',
+  'F6',
+  'F7',
+  'F8',
+  'F9',
+  'F10',
+  'F11',
+  'F12',
   // 导航键
-  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-  'Home', 'End', 'PageUp', 'PageDown', 'Insert', 'Delete',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+  'Insert',
+  'Delete',
 ]
 
 export const ALLOWED_SET = new Set(ALLOWED_MAIN_KEYS)
 
 export const VALID_MODIFIERS = ['ctrl', 'shift', 'alt', 'meta'] as const
-export type TShortcutModifier = typeof VALID_MODIFIERS[number]
+export type TShortcutModifier = (typeof VALID_MODIFIERS)[number]
 
 /**
  * 修饰键位掩码映射
  * 用于快速判断修饰键集合是否匹配，O(1) 整数比较
  */
-export const MODIFIER_BIT: Record<TShortcutModifier, number> = { ctrl: 1, shift: 2, alt: 4, meta: 8 }
+export const MODIFIER_BIT: Record<TShortcutModifier, number> = {
+  ctrl: 1,
+  shift: 2,
+  alt: 4,
+  meta: 8,
+}
 
 /**
  * 将修饰键数组转为位掩码整数
@@ -136,11 +216,16 @@ export function isInInputElement(): boolean {
 
   const tag = active.tagName
   if (tag === 'INPUT' || tag === 'TEXTAREA') return true
-  if (active.getAttribute('contenteditable') === 'true' || active.getAttribute('contenteditable') === '') return true
+  if (
+    active.getAttribute('contenteditable') === 'true' ||
+    active.getAttribute('contenteditable') === ''
+  )
+    return true
 
   // ARIA 输入角色
   const role = active.getAttribute('role')
-  if (role === 'textbox' || role === 'searchbox' || role === 'combobox') return true
+  if (role === 'textbox' || role === 'searchbox' || role === 'combobox')
+    return true
 
   // designMode：整个文档处于编辑模式（Notion、Google Docs 等）
   if (document.designMode === 'on') return true
@@ -175,17 +260,29 @@ export function matchShortcut(
   if (!shortcutInInputElement && isInInputElement()) return null
 
   // URL 黑名单
-  if (hostname && urlBlacklist && urlBlacklist.length > 0 && isUrlInBlacklist(hostname, urlBlacklist)) return null
+  if (
+    hostname &&
+    urlBlacklist &&
+    urlBlacklist.length > 0 &&
+    isUrlInBlacklist(hostname, urlBlacklist)
+  )
+    return null
 
   // 配置修饰键为空或未配置时不匹配
   if (!globalShortcutModifiers || globalShortcutModifiers.length === 0) {
-    console.warn('[NaiveTab] global shortcut enabled but modifiers is empty, shortcuts will not fire')
+    console.warn(
+      '[NaiveTab] global shortcut enabled but modifiers is empty, shortcuts will not fire',
+    )
     return null
   }
 
   // 位掩码比较：修饰键映射为 4-bit 整数，一次整数判断完成集合匹配，零分配
   const configMask = toModifierMask(globalShortcutModifiers)
-  const eventMask = (e.ctrlKey ? 1 : 0) | (e.shiftKey ? 2 : 0) | (e.altKey ? 4 : 0) | (e.metaKey ? 8 : 0)
+  const eventMask =
+    (e.ctrlKey ? 1 : 0) |
+    (e.shiftKey ? 2 : 0) |
+    (e.altKey ? 4 : 0) |
+    (e.metaKey ? 8 : 0)
   if (eventMask !== configMask) return null
 
   /**

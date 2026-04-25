@@ -2,7 +2,13 @@
 import { localConfig, localState } from '@/logic/store'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, ColorField, FontField, SwitchField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  ColorField,
+  FontField,
+  SwitchField,
+  ToggleColorField,
+} from '@/setting/fields'
 
 // 将总秒数拆为 h/m/s 供分项输入
 const durationHours = computed({
@@ -58,9 +64,7 @@ const durationSeconds = computed({
             :max="99"
             :step="1"
           >
-            <template #suffix>
-              h
-            </template>
+            <template #suffix> h </template>
           </NInputNumber>
           <NInputNumber
             v-model:value="durationMinutes"
@@ -70,9 +74,7 @@ const durationSeconds = computed({
             :max="59"
             :step="1"
           >
-            <template #suffix>
-              m
-            </template>
+            <template #suffix> m </template>
           </NInputNumber>
           <NInputNumber
             v-model:value="durationSeconds"
@@ -82,9 +84,7 @@ const durationSeconds = computed({
             :max="59"
             :step="1"
           >
-            <template #suffix>
-              s
-            </template>
+            <template #suffix> s </template>
           </NInputNumber>
         </div>
       </NFormItem>

@@ -42,7 +42,10 @@ export type WidgetMeta = {
   widgetLabel: string // i18n key
 }
 
-const modules = import.meta.glob('./**/index.ts', { eager: true }) as Record<string, { default: WidgetMeta }>
+const modules = import.meta.glob('./**/index.ts', { eager: true }) as Record<
+  string,
+  { default: WidgetMeta }
+>
 
 const registry: Record<WidgetCodes, WidgetMeta> = {} as any
 
@@ -52,4 +55,6 @@ for (const path in modules) {
 }
 
 export const widgetsRegistry = registry
-export const widgetsList = WIDGET_CODE_LIST.map((widgetCode) => registry[widgetCode])
+export const widgetsList = WIDGET_CODE_LIST.map(
+  (widgetCode) => registry[widgetCode],
+)

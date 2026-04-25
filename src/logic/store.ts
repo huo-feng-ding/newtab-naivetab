@@ -3,7 +3,11 @@ import { enUS, zhCN, darkTheme, useOsTheme } from 'naive-ui'
 import { useStorageLocal } from '@/composables/useStorageLocal'
 import { isEdge, isFirefox } from '@/env'
 import { styleConst } from '@/styles/const'
-import { URL_CHROME_STORE, URL_EDGE_STORE, URL_FIREFOX_STORE } from '@/logic/constants/urls'
+import {
+  URL_CHROME_STORE,
+  URL_EDGE_STORE,
+  URL_FIREFOX_STORE,
+} from '@/logic/constants/urls'
 import { APPEARANCE_TO_CODE_MAP, DAYJS_LANG_MAP } from '@/logic/constants/app'
 import { FONT_LIST } from '@/logic/constants/fonts'
 import { defaultConfig, defaultLocalState } from '@/logic/config'
@@ -13,11 +17,17 @@ import { WIDGET_CODE_LIST } from '@/newtab/widgets/codes'
 import { SETTING_KEYBOARD_BASE_SIZE } from '@/setting/registry'
 
 type LocalConfigRefs = {
-  general: ReturnType<typeof useStorageLocal<typeof defaultConfig['general']>>
-  keyboardCommon: ReturnType<typeof useStorageLocal<typeof defaultConfig['keyboardCommon']>>
-  keyboardCommand: ReturnType<typeof useStorageLocal<typeof defaultConfig['keyboardCommand']>>
+  general: ReturnType<typeof useStorageLocal<(typeof defaultConfig)['general']>>
+  keyboardCommon: ReturnType<
+    typeof useStorageLocal<(typeof defaultConfig)['keyboardCommon']>
+  >
+  keyboardCommand: ReturnType<
+    typeof useStorageLocal<(typeof defaultConfig)['keyboardCommand']>
+  >
 } & {
-  [K in keyof WidgetConfigByCode]: ReturnType<typeof useStorageLocal<WidgetConfigByCode[K]>>
+  [K in keyof WidgetConfigByCode]: ReturnType<
+    typeof useStorageLocal<WidgetConfigByCode[K]>
+  >
 }
 
 const useWidgetStorageLocal = <K extends keyof WidgetConfigByCode>(key: K) => {
@@ -27,8 +37,14 @@ const useWidgetStorageLocal = <K extends keyof WidgetConfigByCode>(key: K) => {
 const createLocalConfig = (): LocalConfigRefs => {
   const res: any = {}
   res.general = useStorageLocal('c-general', defaultConfig.general)
-  res.keyboardCommon = useStorageLocal('c-keyboardCommon', defaultConfig.keyboardCommon)
-  res.keyboardCommand = useStorageLocal('c-keyboardCommand', defaultConfig.keyboardCommand)
+  res.keyboardCommon = useStorageLocal(
+    'c-keyboardCommon',
+    defaultConfig.keyboardCommon,
+  )
+  res.keyboardCommand = useStorageLocal(
+    'c-keyboardCommand',
+    defaultConfig.keyboardCommand,
+  )
   const widgetNames = WIDGET_CODE_LIST
   for (const key of widgetNames) {
     res[key] = useWidgetStorageLocal(key)
@@ -61,7 +77,9 @@ export const globalState = reactive({
  * 设置面板中键盘组件的基准尺寸：options 页面更宽，放大 40%
  */
 export const getSettingKeyboardSize = (): number => {
-  return globalState.settingMode === 'options' ? Math.round(SETTING_KEYBOARD_BASE_SIZE * 1.4) : SETTING_KEYBOARD_BASE_SIZE
+  return globalState.settingMode === 'options'
+    ? Math.round(SETTING_KEYBOARD_BASE_SIZE * 1.4)
+    : SETTING_KEYBOARD_BASE_SIZE
 }
 
 document.addEventListener('fullscreenchange', () => {
@@ -82,7 +100,9 @@ const NATIVE_UI_LOCALE_MAP = {
   'en-US': enUS,
 }
 
-export const nativeUILang = ref(NATIVE_UI_LOCALE_MAP[localConfig.general.lang] || enUS)
+export const nativeUILang = ref(
+  NATIVE_UI_LOCALE_MAP[localConfig.general.lang] || enUS,
+)
 
 watch(
   () => localConfig.general.lang,
@@ -100,14 +120,21 @@ watch(
   [() => osTheme.value, () => localConfig.general.appearance],
   () => {
     if (localConfig.general.appearance === 'auto') {
-      localState.value.currAppearanceCode = APPEARANCE_TO_CODE_MAP[osTheme.value as keyof typeof APPEARANCE_TO_CODE_MAP] as 0 | 1
+      localState.value.currAppearanceCode = APPEARANCE_TO_CODE_MAP[
+        osTheme.value as keyof typeof APPEARANCE_TO_CODE_MAP
+      ] as 0 | 1
       localState.value.currAppearanceLabel = osTheme.value || 'light'
       currTheme.value = osTheme.value === 'dark' ? darkTheme : null
       return
     }
-    localState.value.currAppearanceCode = APPEARANCE_TO_CODE_MAP[localConfig.general.appearance] as 0 | 1
-    localState.value.currAppearanceLabel = localConfig.general.appearance as 'light' | 'dark'
-    currTheme.value = localConfig.general.appearance === 'dark' ? darkTheme : null
+    localState.value.currAppearanceCode = APPEARANCE_TO_CODE_MAP[
+      localConfig.general.appearance
+    ] as 0 | 1
+    localState.value.currAppearanceLabel = localConfig.general.appearance as
+      | 'light'
+      | 'dark'
+    currTheme.value =
+      localConfig.general.appearance === 'dark' ? darkTheme : null
   },
   {
     immediate: true,
@@ -144,11 +171,16 @@ const initAvailableFontList = async () => {
 }
 
 export const availableFontOptions = computed(() => {
-  const otherFonts = globalState.availableFontList.filter((font) => font !== 'system')
-  return [{ label: 'System Default', value: 'system' }, ...otherFonts.map((font: string) => ({
-    label: font,
-    value: font,
-  }))]
+  const otherFonts = globalState.availableFontList.filter(
+    (font) => font !== 'system',
+  )
+  return [
+    { label: 'System Default', value: 'system' },
+    ...otherFonts.map((font: string) => ({
+      label: font,
+      value: font,
+    })),
+  ]
 })
 
 export const fontSelectRenderLabel = (option: SelectStringItem) => {
@@ -166,13 +198,17 @@ export const fontSelectRenderLabel = (option: SelectStringItem) => {
         },
       },
       [
-        h('span', {
-          style: {
-            'overflow': 'hidden',
-            'whiteSpace': 'nowrap',
-            'textOverflow': 'ellipsis',
+        h(
+          'span',
+          {
+            style: {
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            },
           },
-        }, option.label),
+          option.label,
+        ),
         h(
           'span',
           {
@@ -198,13 +234,19 @@ export const openChangelogModal = () => {
   globalState.isChangelogModalVisible = true
 }
 
-export const currDayjsLang = computed(() => DAYJS_LANG_MAP[localConfig.general.timeLang] || 'en')
+export const currDayjsLang = computed(
+  () => DAYJS_LANG_MAP[localConfig.general.timeLang] || 'en',
+)
 
-export const getIsWidgetRender = (widgetCode: WidgetCodes) => computed(() => localConfig[widgetCode].enabled)
+export const getIsWidgetRender = (widgetCode: WidgetCodes) =>
+  computed(() => localConfig[widgetCode].enabled)
 
 export const getStyleConst = (field: string) => {
   return computed(() => {
-    return styleConst.value[field][localState.value.currAppearanceCode] || styleConst.value[field][0]
+    return (
+      styleConst.value[field][localState.value.currAppearanceCode] ||
+      styleConst.value[field][0]
+    )
   })
 }
 
@@ -212,10 +254,18 @@ export const getStyleConst = (field: string) => {
  * e.g. getStyleField('date', 'unit.fontSize', 'px', 1.2)
  * 当unit为vmin时会自动将 ratio * 0.1
  */
-export const getStyleField = (configCode: ConfigField, field: string, unit?: string, ratio?: number) => {
+export const getStyleField = (
+  configCode: ConfigField,
+  field: string,
+  unit?: string,
+  ratio?: number,
+) => {
   return computed(() => {
     const fieldList = field.split('.')
-    let targetValue: any = fieldList.reduce((r, c) => r[c], localConfig[configCode])
+    let targetValue: any = fieldList.reduce(
+      (r, c) => r[c],
+      localConfig[configCode],
+    )
 
     if (Array.isArray(targetValue)) {
       // color
@@ -287,10 +337,20 @@ watch(
 )
 
 watch(
-  [() => localConfig.general.backgroundColor, () => localConfig.general.fontColor, () => localState.value.currAppearanceCode],
+  [
+    () => localConfig.general.backgroundColor,
+    () => localConfig.general.fontColor,
+    () => localState.value.currAppearanceCode,
+  ],
   () => {
-    document.body.style.setProperty('--nt-bg-main', getStyleField('general', 'backgroundColor').value)
-    document.body.style.setProperty('--nt-text-color-main', getStyleField('general', 'fontColor').value)
+    document.body.style.setProperty(
+      '--nt-bg-main',
+      getStyleField('general', 'backgroundColor').value,
+    )
+    document.body.style.setProperty(
+      '--nt-text-color-main',
+      getStyleField('general', 'fontColor').value,
+    )
   },
   {
     immediate: true,

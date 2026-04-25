@@ -9,7 +9,7 @@ const paymentList = ['wechat', 'alipay']
 const groupList = ['wechat', 'qq']
 
 const catCounter = useStorage('naivetab-cat-counter', 0)
-const toasts = ref<{ id: string, message: string }[]>([])
+const toasts = ref<{ id: string; message: string }[]>([])
 
 const catEmojis = ['🐱', '😸', '😹', '😺', '😻', '😼', '😽']
 const randomCat = () => catEmojis[Math.floor(Math.random() * catEmojis.length)]

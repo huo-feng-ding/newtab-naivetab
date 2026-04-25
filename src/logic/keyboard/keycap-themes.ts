@@ -862,7 +862,11 @@ export interface KeycapThemeGroup {
   key: string
   /** i18n 路径，如 'keyboardCommon.themeGroup.classic' */
   labelKey: string
-  themes: typeof KEYCAP_CLASSIC_MAP | typeof KEYCAP_ATMOSPHERE_MAP | typeof KEYCAP_STUDIO_MAP | typeof KEYCAP_PREMIUM_MAP
+  themes:
+    | typeof KEYCAP_CLASSIC_MAP
+    | typeof KEYCAP_ATMOSPHERE_MAP
+    | typeof KEYCAP_STUDIO_MAP
+    | typeof KEYCAP_PREMIUM_MAP
 }
 
 export const KEYCAP_PREINSTALL_GROUPS: KeycapThemeGroup[] = [

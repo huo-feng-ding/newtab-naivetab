@@ -19,14 +19,18 @@ const CONFIG_LOAD_TIMEOUT_MS = 5000
 
 // ── KeyboardBookmark 配置缓存 ─────────────────────────────────────────────
 
-let cachedKeyboardBookmarkConfig = JSON.parse(JSON.stringify(WIDGET_CONFIG)) as typeof WIDGET_CONFIG
+let cachedKeyboardBookmarkConfig = JSON.parse(
+  JSON.stringify(WIDGET_CONFIG),
+) as typeof WIDGET_CONFIG
 cachedKeyboardBookmarkConfig.keymap = {}
 
 let bookmarkConfigLoadingPromise: Promise<void> | null = null
 
 // ── KeyboardCommand 配置缓存 ──────────────────────────────────────────────
 
-let cachedKeyboardCommandConfig = JSON.parse(JSON.stringify(KEYBOARD_COMMAND_CONFIG)) as typeof KEYBOARD_COMMAND_CONFIG
+let cachedKeyboardCommandConfig = JSON.parse(
+  JSON.stringify(KEYBOARD_COMMAND_CONFIG),
+) as typeof KEYBOARD_COMMAND_CONFIG
 cachedKeyboardCommandConfig.keymap = {}
 
 let commandConfigLoadingPromise: Promise<void> | null = null
@@ -39,12 +43,14 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes['naive-tab-keyboardBookmark']) {
     const raw = changes['naive-tab-keyboardBookmark'].newValue as string
     if (raw && raw.length > 0) {
-      const p = parseStoredData(raw).then((parsed) => {
-        cachedKeyboardBookmarkConfig = parsed.data
-        log('KeyboardBookmark config updated')
-      }).catch((e) => {
-        log('Update keyboardBookmark cache error', e)
-      })
+      const p = parseStoredData(raw)
+        .then((parsed) => {
+          cachedKeyboardBookmarkConfig = parsed.data
+          log('KeyboardBookmark config updated')
+        })
+        .catch((e) => {
+          log('Update keyboardBookmark cache error', e)
+        })
       promises.push(p)
     } else {
       cachedKeyboardBookmarkConfig = JSON.parse(JSON.stringify(WIDGET_CONFIG))
@@ -56,15 +62,19 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes['naive-tab-keyboardCommand']) {
     const raw = changes['naive-tab-keyboardCommand'].newValue as string
     if (raw && raw.length > 0) {
-      const p = parseStoredData(raw).then((parsed) => {
-        cachedKeyboardCommandConfig = parsed.data
-        log('KeyboardCommand config updated')
-      }).catch((e) => {
-        log('Update keyboardCommand cache error', e)
-      })
+      const p = parseStoredData(raw)
+        .then((parsed) => {
+          cachedKeyboardCommandConfig = parsed.data
+          log('KeyboardCommand config updated')
+        })
+        .catch((e) => {
+          log('Update keyboardCommand cache error', e)
+        })
       promises.push(p)
     } else {
-      cachedKeyboardCommandConfig = JSON.parse(JSON.stringify(KEYBOARD_COMMAND_CONFIG))
+      cachedKeyboardCommandConfig = JSON.parse(
+        JSON.stringify(KEYBOARD_COMMAND_CONFIG),
+      )
       cachedKeyboardCommandConfig.keymap = {}
       log('KeyboardCommand config removed, reset to defaults')
     }
@@ -84,21 +94,26 @@ export const loadAndCacheKeyboardBookmarkConfig = (): Promise<void> => {
   bookmarkConfigLoadingPromise = (async () => {
     let timeoutTimer: ReturnType<typeof setTimeout>
     const timeoutPromise = new Promise<void>((_, reject) => {
-      timeoutTimer = setTimeout(() => reject(new Error('Load keyboardBookmark config timeout')), CONFIG_LOAD_TIMEOUT_MS)
+      timeoutTimer = setTimeout(
+        () => reject(new Error('Load keyboardBookmark config timeout')),
+        CONFIG_LOAD_TIMEOUT_MS,
+      )
     })
 
     try {
       await Promise.race([
-        chrome.storage.sync.get('naive-tab-keyboardBookmark').then(async (data) => {
-          const raw = data['naive-tab-keyboardBookmark'] as string
-          if (raw && raw.length > 0) {
-            const parsed = await parseStoredData(raw)
-            cachedKeyboardBookmarkConfig = parsed.data
-            log('KeyboardBookmark config cached')
-          } else {
-            log('No keyboardBookmark config in storage, using defaults')
-          }
-        }),
+        chrome.storage.sync
+          .get('naive-tab-keyboardBookmark')
+          .then(async (data) => {
+            const raw = data['naive-tab-keyboardBookmark'] as string
+            if (raw && raw.length > 0) {
+              const parsed = await parseStoredData(raw)
+              cachedKeyboardBookmarkConfig = parsed.data
+              log('KeyboardBookmark config cached')
+            } else {
+              log('No keyboardBookmark config in storage, using defaults')
+            }
+          }),
         timeoutPromise,
       ])
     } catch (e) {
@@ -120,21 +135,26 @@ export const loadAndCacheKeyboardCommandConfig = (): Promise<void> => {
   commandConfigLoadingPromise = (async () => {
     let timeoutTimer: ReturnType<typeof setTimeout>
     const timeoutPromise = new Promise<void>((_, reject) => {
-      timeoutTimer = setTimeout(() => reject(new Error('Load keyboardCommand config timeout')), CONFIG_LOAD_TIMEOUT_MS)
+      timeoutTimer = setTimeout(
+        () => reject(new Error('Load keyboardCommand config timeout')),
+        CONFIG_LOAD_TIMEOUT_MS,
+      )
     })
 
     try {
       await Promise.race([
-        chrome.storage.sync.get('naive-tab-keyboardCommand').then(async (data) => {
-          const raw = data['naive-tab-keyboardCommand'] as string
-          if (raw && raw.length > 0) {
-            const parsed = await parseStoredData(raw)
-            cachedKeyboardCommandConfig = parsed.data
-            log('KeyboardCommand config cached')
-          } else {
-            log('No keyboardCommand config in storage, using defaults')
-          }
-        }),
+        chrome.storage.sync
+          .get('naive-tab-keyboardCommand')
+          .then(async (data) => {
+            const raw = data['naive-tab-keyboardCommand'] as string
+            if (raw && raw.length > 0) {
+              const parsed = await parseStoredData(raw)
+              cachedKeyboardCommandConfig = parsed.data
+              log('KeyboardCommand config cached')
+            } else {
+              log('No keyboardCommand config in storage, using defaults')
+            }
+          }),
         timeoutPromise,
       ])
     } catch (e) {
@@ -149,5 +169,6 @@ export const loadAndCacheKeyboardCommandConfig = (): Promise<void> => {
 
 // ── 读取缓存（供外部调用） ─────────────────────────────────────────────────
 
-export const getCachedKeyboardBookmarkConfig = () => cachedKeyboardBookmarkConfig
+export const getCachedKeyboardBookmarkConfig = () =>
+  cachedKeyboardBookmarkConfig
 export const getCachedKeyboardCommandConfig = () => cachedKeyboardCommandConfig

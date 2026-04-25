@@ -3,17 +3,22 @@ import { Icon } from '@iconify/vue'
 import { globalState } from '@/logic/store'
 import { settingsList, SETTING_GROUPS } from './registry'
 
-const props = withDefaults(defineProps<{
-  /** 'drawer': NDrawer 容器内，需同步 nav 高度；'page': 全屏页面，自然流动 */
-  layout?: 'drawer' | 'page'
-  /** drawer 模式下由父组件传入的内容区高度 */
-  settingContentHeight?: number
-}>(), {
-  layout: 'drawer',
-  settingContentHeight: 0,
-})
+const props = withDefaults(
+  defineProps<{
+    /** 'drawer': NDrawer 容器内，需同步 nav 高度；'page': 全屏页面，自然流动 */
+    layout?: 'drawer' | 'page'
+    /** drawer 模式下由父组件传入的内容区高度 */
+    settingContentHeight?: number
+  }>(),
+  {
+    layout: 'drawer',
+    settingContentHeight: 0,
+  },
+)
 
-const settingContentHeightStyle = computed(() => `${props.settingContentHeight}px`)
+const settingContentHeightStyle = computed(
+  () => `${props.settingContentHeight}px`,
+)
 
 const cssVars = computed(() => ({
   '--nt-setting-content-height': settingContentHeightStyle.value,
@@ -29,7 +34,7 @@ const onTabsChange = (tabCode: string) => {
 
 // ── 分组逻辑 ──
 const groupsWithFirstItem = computed(() => {
-  const result: Array<{ firstCode: settingPanes, labelKey: string }> = []
+  const result: Array<{ firstCode: settingPanes; labelKey: string }> = []
   SETTING_GROUPS.forEach((group, index) => {
     if (index > 0 && group.items.length > 0) {
       result.push({
@@ -48,7 +53,10 @@ const groupStartSet = computed(() => {
 })
 
 const getGroupLabel = (code: settingPanes): string => {
-  return groupsWithFirstItem.value.find((item) => item.firstCode === code)?.labelKey || ''
+  return (
+    groupsWithFirstItem.value.find((item) => item.firstCode === code)
+      ?.labelKey || ''
+  )
 }
 </script>
 
@@ -78,7 +86,9 @@ const getGroupLabel = (code: settingPanes): string => {
           >
             <template v-if="groupStartSet.has(item.code)">
               <div class="group-divider">
-                <span class="group-divider__text">{{ $t(getGroupLabel(item.code)) }}</span>
+                <span class="group-divider__text">{{
+                  $t(getGroupLabel(item.code))
+                }}</span>
               </div>
             </template>
             <div
@@ -171,7 +181,9 @@ const getGroupLabel = (code: settingPanes): string => {
    NDrawer 渲染为 #setting 的子元素，.n-tab-pane 在 NDrawer 内部
    ============================================================ */
 #setting {
-  .n-drawer .n-drawer-content.n-drawer-content--native-scrollbar .n-drawer-body-content-wrapper {
+  .n-drawer
+    .n-drawer-content.n-drawer-content--native-scrollbar
+    .n-drawer-body-content-wrapper {
     padding: 0 !important;
   }
   .drawer-wrap {
@@ -216,7 +228,13 @@ const getGroupLabel = (code: settingPanes): string => {
           left: 8px;
           right: 8px;
           height: 1px;
-          background: linear-gradient(90deg, transparent, var(--n-tab-border-color) 20%, var(--n-tab-border-color) 80%, transparent);
+          background: linear-gradient(
+            90deg,
+            transparent,
+            var(--n-tab-border-color) 20%,
+            var(--n-tab-border-color) 80%,
+            transparent
+          );
           opacity: 1;
           z-index: 0;
         }
@@ -294,7 +312,13 @@ const getGroupLabel = (code: settingPanes): string => {
           left: 8px;
           right: 8px;
           height: 1px;
-          background: linear-gradient(90deg, transparent, var(--n-tab-border-color) 20%, var(--n-tab-border-color) 80%, transparent);
+          background: linear-gradient(
+            90deg,
+            transparent,
+            var(--n-tab-border-color) 20%,
+            var(--n-tab-border-color) 80%,
+            transparent
+          );
           opacity: 1;
           z-index: 0;
         }

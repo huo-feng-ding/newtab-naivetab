@@ -16,20 +16,28 @@ import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
 // 固定 24px 基准，纯展示用
 const BASE = 24
 
-const {
-  getCustomLabel,
-  getEmphasisGroup,
-  getEmphasisStyle,
-  keycapCssVars,
-} = useKeyboardStyle('px', BASE)
+const { getCustomLabel, getEmphasisGroup, getEmphasisStyle, keycapCssVars } =
+  useKeyboardStyle('px', BASE)
 
 // 颜色（跟随外观模式，图例用）
 const mainBgColor = getStyleField('keyboardCommon', 'mainBackgroundColor')
 const mainFontColor = getStyleField('keyboardCommon', 'mainFontColor')
-const emphasisOneBgColor = getStyleField('keyboardCommon', 'emphasisOneBackgroundColor')
-const emphasisOneFontColor = getStyleField('keyboardCommon', 'emphasisOneFontColor')
-const emphasisTwoBgColor = getStyleField('keyboardCommon', 'emphasisTwoBackgroundColor')
-const emphasisTwoFontColor = getStyleField('keyboardCommon', 'emphasisTwoFontColor')
+const emphasisOneBgColor = getStyleField(
+  'keyboardCommon',
+  'emphasisOneBackgroundColor',
+)
+const emphasisOneFontColor = getStyleField(
+  'keyboardCommon',
+  'emphasisOneFontColor',
+)
+const emphasisTwoBgColor = getStyleField(
+  'keyboardCommon',
+  'emphasisTwoBackgroundColor',
+)
+const emphasisTwoFontColor = getStyleField(
+  'keyboardCommon',
+  'emphasisTwoFontColor',
+)
 
 // ── 点击循环切换 ──────────────────────────────────────────────────────────────
 const toggleGroup = (code: string) => {
@@ -47,8 +55,10 @@ const handleReset = () => {
 }
 
 // ── 是否有自定义覆盖 ──────────────────────────────────────────────────────────
-const hasOverrides = computed(() =>
-  Object.keys(localConfig.keyboardCommon.emphasisKeyOverrides ?? {}).length > 0,
+const hasOverrides = computed(
+  () =>
+    Object.keys(localConfig.keyboardCommon.emphasisKeyOverrides ?? {}).length >
+    0,
 )
 </script>
 
@@ -56,7 +66,9 @@ const hasOverrides = computed(() =>
   <div class="emphasis-key-setting">
     <!-- 标题 + 重置按钮 -->
     <div class="emphasis-key-setting__header">
-      <span class="emphasis-key-setting__tips">{{ $t('keyboardCommon.emphasisKeyGroupTips') }}</span>
+      <span class="emphasis-key-setting__tips">{{
+        $t('keyboardCommon.emphasisKeyGroupTips')
+      }}</span>
       <NButton
         v-if="hasOverrides"
         size="tiny"
@@ -72,15 +84,18 @@ const hasOverrides = computed(() =>
       <span
         class="legend__item"
         :style="`background-color:${mainBgColor};color:${mainFontColor};`"
-      >{{ $t('keyboardCommon.emphasisGroupNone') }}</span>
+        >{{ $t('keyboardCommon.emphasisGroupNone') }}</span
+      >
       <span
         class="legend__item"
         :style="`background-color:${emphasisOneBgColor};color:${emphasisOneFontColor};`"
-      >{{ $t('keyboardCommon.emphasisGroupOne') }}</span>
+        >{{ $t('keyboardCommon.emphasisGroupOne') }}</span
+      >
       <span
         class="legend__item"
         :style="`background-color:${emphasisTwoBgColor};color:${emphasisTwoFontColor};`"
-      >{{ $t('keyboardCommon.emphasisGroupTwo') }}</span>
+        >{{ $t('keyboardCommon.emphasisGroupTwo') }}</span
+      >
     </div>
 
     <!-- 键盘缩略图（复用通用组件） -->

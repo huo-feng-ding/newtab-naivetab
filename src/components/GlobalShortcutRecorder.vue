@@ -14,7 +14,10 @@
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { isMacOS } from '@/env'
-import { formatModifierKeys, type TShortcutModifier } from '@/logic/globalShortcut/shortcut-utils'
+import {
+  formatModifierKeys,
+  type TShortcutModifier,
+} from '@/logic/globalShortcut/shortcut-utils'
 import { NButton } from 'naive-ui'
 import Tips from '@/components/Tips.vue'
 import { onUnmounted } from 'vue'
@@ -71,7 +74,8 @@ const cancelRecording = () => {
 }
 
 const saveModifier = () => {
-  const modifiers = lastModifierSnapshot.length > 0 ? lastModifierSnapshot : modifierFromSet()
+  const modifiers =
+    lastModifierSnapshot.length > 0 ? lastModifierSnapshot : modifierFromSet()
   if (modifiers.length === 0) {
     window.$message.warning(window.$t('keyboardBookmark.requireModifier'))
     return
@@ -119,10 +123,14 @@ const handleKeyup = (e: KeyboardEvent) => {
     e.preventDefault()
   }
 
-  if (e.code === 'ControlLeft' || e.code === 'ControlRight') pressedModifiers.delete('ctrl')
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') pressedModifiers.delete('shift')
-  if (e.code === 'AltLeft' || e.code === 'AltRight') pressedModifiers.delete('alt')
-  if (e.code === 'MetaLeft' || e.code === 'MetaRight') pressedModifiers.delete('meta')
+  if (e.code === 'ControlLeft' || e.code === 'ControlRight')
+    pressedModifiers.delete('ctrl')
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight')
+    pressedModifiers.delete('shift')
+  if (e.code === 'AltLeft' || e.code === 'AltRight')
+    pressedModifiers.delete('alt')
+  if (e.code === 'MetaLeft' || e.code === 'MetaRight')
+    pressedModifiers.delete('meta')
 
   if (pressedModifiers.size === 0 && debounceTimer) {
     clearTimeout(debounceTimer)
@@ -175,13 +183,18 @@ onUnmounted(() => {
       v-else
       class="recorder__capture"
     >
-      <span>{{ formattedModifier || $t('keyboardBookmark.recordModifier') }}</span>
+      <span>{{
+        formattedModifier || $t('keyboardBookmark.recordModifier')
+      }}</span>
     </div>
 
     <NButton
       quaternary
       size="tiny"
-      :class="['recorder__toggle-btn', { 'recorder__toggle-btn--active': isRecording }]"
+      :class="[
+        'recorder__toggle-btn',
+        { 'recorder__toggle-btn--active': isRecording },
+      ]"
       @click="toggleRecording"
     >
       <Icon
@@ -265,7 +278,12 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 </style>

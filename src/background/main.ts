@@ -11,7 +11,11 @@
  * - command-registry.ts：SW 命令注册表（30+ 命令的实现 + 分发）
  * - commands.ts：40+ tab 操作命令的具体实现
  */
-import { type TCommandEntry, type TSwCommandName, getCommandExecEnv } from '@/logic/globalShortcut/shortcut-command'
+import {
+  type TCommandEntry,
+  type TSwCommandName,
+  getCommandExecEnv,
+} from '@/logic/globalShortcut/shortcut-command'
 import { log, padUrlHttps } from '@/logic/util'
 import { gaProxy } from '@/logic/gtag'
 import {
@@ -147,7 +151,11 @@ const pendingMessages = new Map<number, PendingKeydown[]>()
 /**
  * 处理单个按键消息（统一入口，供 onMessage 和积压队列共用）
  */
-const processKeydown = (key: string, source: 'bookmark' | 'command', tabId: number) => {
+const processKeydown = (
+  key: string,
+  source: 'bookmark' | 'command',
+  tabId: number,
+) => {
   if (source === 'bookmark') {
     handleBookmarkShortcutKeydown(key, tabId)
   } else if (source === 'command') {

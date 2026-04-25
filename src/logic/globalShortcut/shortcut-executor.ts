@@ -16,7 +16,12 @@
  */
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { matchShortcut, isSwReady } from '@/logic/globalShortcut/shortcut-utils'
-import { localConfig, localState, globalState, switchSettingDrawerVisible } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  globalState,
+  switchSettingDrawerVisible,
+} from '@/logic/store'
 import { toggleIsDragMode } from '@/logic/moveable'
 import { getSharedPort } from '@/logic/globalShortcut/shortcut-utils'
 import { getCommandExecEnv } from '@/logic/globalShortcut/shortcut-command'
@@ -120,14 +125,22 @@ const globalShortcutForCommandTask = (e: KeyboardEvent) => {
 const newtabCommandExecutors: Record<string, () => void> = {
   reloadPage: () => location.reload(),
   copyPageUrl: () => {
-    navigator.clipboard.writeText(location.href).then(() => {
-      window.$message.success(window.$t('keyboardCommand.toast.copyPageUrl'))
-    }).catch(() => {})
+    navigator.clipboard
+      .writeText(location.href)
+      .then(() => {
+        window.$message.success(window.$t('keyboardCommand.toast.copyPageUrl'))
+      })
+      .catch(() => {})
   },
   copyPageTitle: () => {
-    navigator.clipboard.writeText(document.title).then(() => {
-      window.$message.success(window.$t('keyboardCommand.toast.copyPageTitle'))
-    }).catch(() => {})
+    navigator.clipboard
+      .writeText(document.title)
+      .then(() => {
+        window.$message.success(
+          window.$t('keyboardCommand.toast.copyPageTitle'),
+        )
+      })
+      .catch(() => {})
   },
 }
 
@@ -139,7 +152,7 @@ const newtabCommandExecutors: Record<string, () => void> = {
  */
 const setupPortCommandListener = () => {
   const port = getSharedPort()
-  port.onMessage.addListener((msg: { type: string, command: string }) => {
+  port.onMessage.addListener((msg: { type: string; command: string }) => {
     if (msg.type === MSG_EXECUTE_COMMAND) {
       const executor = newtabCommandExecutors[msg.command]
       if (executor) {

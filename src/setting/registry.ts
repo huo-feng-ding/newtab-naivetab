@@ -84,7 +84,9 @@ export const SETTING_GROUPS: SettingGroup[] = [
   },
 ]
 
-const SETTING_ORDER: settingPanes[] = SETTING_GROUPS.flatMap((g) => g.items.map((i) => i.code))
+const SETTING_ORDER: settingPanes[] = SETTING_GROUPS.flatMap((g) =>
+  g.items.map((i) => i.code),
+)
 
 /**
  * 面板 code 与目录名的映射（当目录名与 code 不一致时使用）
@@ -126,4 +128,6 @@ for (const group of SETTING_GROUPS) {
   }
 }
 
-export const settingsList = SETTING_ORDER.map((code) => registry[code]).filter(Boolean)
+export const settingsList = SETTING_ORDER.map((code) => registry[code]).filter(
+  Boolean,
+)
