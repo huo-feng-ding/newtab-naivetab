@@ -7,8 +7,7 @@ export const URL_FIREFOX_STORE = 'https://addons.mozilla.org/zh-CN/firefox/addon
 export const URL_GITHUB_HOME = 'https://github.com/GXFG/newtab-naivetab'
 export const URL_GITHUB_ISSUSE = 'https://github.com/GXFG/newtab-naivetab/issues'
 
-export const URL_NAIVETAB_DOC_HOME = 'https://gxfg.github.io/naivetab-doc/'
-export const URL_NAIVETAB_DOC_STARTED = 'https://gxfg.github.io/naivetab-doc/guide/getting-started.html'
+export const URL_NAIVETAB_DOC_HOME = 'https://gxfg.github.io/newtab-naivetab/'
 
 export const URL_DAYJS_FORMAT = 'https://day.js.org/docs/zh-CN/display/format'
 export const URL_QWEATHER_HOME = 'https://www.qweather.com/'

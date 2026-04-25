@@ -54,7 +54,7 @@ export const WIDGET_CONFIG = {
       url: 'github.com',
     },
     Enter: {
-      url: 'gxfg.github.io/naivetab-doc',
+      url: 'gxfg.github.io/newtab-naivetab/',
       name: 'NaiveTab',
     },
     KeyZ: {
