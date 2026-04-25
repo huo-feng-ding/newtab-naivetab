@@ -12,7 +12,7 @@
  * - newtab 本地命令（execEnv: 'newtab'）在 postMessage 前直接本地执行，不走 SW
  * - SW 命令 / CS 命令走现有 Port 逻辑
  * - SW 未就绪时弹出 toast 提示，与书签快捷键行为一致
- * - 详见 docs/messaging.md
+ * - 详见 docs/architecture/messaging.md
  */
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { matchShortcut, isSwReady } from '@/logic/globalShortcut/shortcut-utils'

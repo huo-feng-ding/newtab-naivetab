@@ -225,7 +225,7 @@ const getGroupLabel = (code: settingPanes): string => {
   }
 
   .n-tab-pane {
-    padding: 0 16px 16px 16px !important;
+    padding: 0;
     height: var(--nt-setting-content-height);
     overflow: auto;
     user-select: none;

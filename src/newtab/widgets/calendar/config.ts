@@ -18,7 +18,7 @@ export const WIDGET_CONFIG = {
   fontSize: 13,
   fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
   dayFontFamily: 'system',
-  dayFontSize: 17,
+  dayFontSize: 16,
   dayFontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
   descFontFamily: 'system',
   descFontSize: 10,

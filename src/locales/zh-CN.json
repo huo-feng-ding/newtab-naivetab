@@ -41,11 +41,12 @@
     "network": "网络",
     "loadMore": "加载更多",
     "loaded": "已加载全部",
-    "uhd": "UHD分辨率",
+    "uhd": "更高分辨率",
     "bing": "Bing",
     "pexels": "Pexels",
     "favorite": "收藏",
     "margin": "边距",
+    "maxItems": "最大条目数",
     "padding": "内边距",
     "paddingVertical": "垂直内边距",
     "paddingHorizontal": "水平内边距",
@@ -168,7 +169,6 @@
     "loadPageAnimation": "载入动画",
     "fadeIn": "淡入",
     "zoomIn": "缩放",
-    "primaryColorTips": "修改后需刷新页面生效",
     "newTabOpen": "在新标签页打开",
     "settingDividerSetting": "设置",
     "syncStorageSize": "存储用量",
@@ -289,11 +289,15 @@
     "itemBorderRadius": "书签项圆角"
   },
   "search": {
+    "searchBar": "搜索栏",
+    "suggestion": "建议列表",
     "searchEngine": "搜索引擎",
     "customEngine": "自定义引擎",
     "placeholder": "占位文本",
     "icon": "搜索按钮",
-    "suggestion": "搜索建议"
+    "searchEngineIcon": "搜索引擎图标",
+    "searchEngineIconUrl": "自定义图标",
+    "searchEngineIconUrlPlaceholder": "留空则自动获取引擎默认 favicon"
   },
   "calendar": {
     "weekBeginsOn": "一周开始于",
@@ -424,11 +428,14 @@
     "toggleSettingDrawer": "打开/关闭设置面板"
   },
   "commandCategory": {
-    "tabAction": "标签页操作",
-    "pageAction": "页面操作",
-    "pageScroll": "页面滚动",
+    "naiveTabControl": "NaiveTab 控制",
+    "tabNavigation": "标签页导航",
+    "tabManagement": "标签页管理",
+    "windowAction": "窗口操作",
+    "batchClose": "批量关闭",
     "tabGroup": "标签组",
-    "naiveTabControl": "NaiveTab 控制"
+    "pageAction": "页面操作",
+    "pageScroll": "页面滚动"
   },
   "about": {
     "tagline": "可视化键盘展示书签和浏览器指令，肌肉记忆一键直达",

@@ -1,22 +1,29 @@
 // NaiveTab global shortcut Content Script
 //
-// Port 长连接架构：
-// - CS 采集按键 -> 修饰键匹配 -> Port.postMessage 发送到 SW
-// - SW 查 keymap -> chrome.tabs.create 打开 URL
-// - Port 连接保持 SW 活跃，消除快捷键冷启动延迟
+// Port 长连接架构 + sendMessage 兜底：
+// - 优先使用 Port：CS 采集按键 -> 修饰键匹配 -> Port.postMessage 发送到 SW（最低延迟）
+// - Port 不可用时降级 sendMessage：chrome.runtime.sendMessage 唤醒休眠的 SW（~50-200ms）
+// - 书签快捷键额外有本地 keymap fallback：零延迟直接打开 URL
+// - SW 查 keymap -> chrome.tabs.create 打开 URL / 路由到 CS 执行 DOM 命令
 //
-// 注入范围：*://*/*（仅 HTTP/HTTPS 页面，不注入 chrome-extension:// 等新标签页）
+// 注入范围：<all_urls>（静态 manifest content_scripts 声明，浏览器自动注入）
 // 注入时机：document_start（DOM 构建前即可拦截按键）
-// 注册方式：background/main.ts 动态注册（chrome.scripting.registerContentScripts）
 //
 // 配置同步：
 // - chrome.storage.onChanged 监听配置变化，更新本地修饰键和启用状态
 // - 首次加载直接从 chrome.storage.sync 读取初始配置（~5-20ms）
+// - Port 不可用时降级为 chrome.runtime.sendMessage（唤醒休眠的 SW）
 //
 // 模块拆分：
 // - index.ts：初始化入口、配置加载/监听、Port 连接、按键分发、命令执行器
 // - scroll.ts：滚动容器查找、缓存失效、平滑滚动
 // - toast.ts：轻量提示组件
+//
+// 为什么 index.ts 不进一步拆分？
+// Content Script 的唯一职责是"在网页中响应键盘快捷键"。所有逻辑围绕单一闭包：
+// keymap、port、swReady 等变量被多个函数共享，拆分会引入不必要的接口层和状态传递。
+// 同类扩展的 CS 入口都是单文件：Vimium C frontend.ts ~2000+ 行，
+// uBlock Origin contentscript.js 同样不拆分。
 //
 // 生命周期：
 // - 无 onUnmounted 清理，页面导航/关闭时整个 JS 环境自动销毁
@@ -40,10 +47,9 @@ const debug = (...args: any[]) => {
 
 // -- 初始化入口 --
 const initMain = () => {
-  // 防止重复注入（Service Worker 回收重建、extension reload 等边界场景）
-  // Content Script 通过 chrome.scripting.registerContentScripts 动态注册，
-  // runAt: 'document_start' 确保在 DOM 构建前注入。
-  // 在极少数情况下（如 SW 休眠后唤醒、扩展热重载），同一页面可能被注入多次，
+  // 防止重复初始化（Service Worker 回收重建、扩展重载等边界场景）
+  // Content Script 通过 manifest 静态声明，浏览器在页面加载时自动注入。
+  // 在极少数情况下（如扩展热重载），同一页面可能被注入多次，
   // 此 guard 确保只执行一次初始化逻辑。
   if (window.__naivetabGlobalShortcutInit) {
     debug('Already initialized, skipping')
@@ -158,6 +164,9 @@ const initMain = () => {
    * Content Script 直接监听 storage 变化，解析后更新本地 keymap 缓存。
    * parseStoredData 自动处理 gzip 压缩数据（>4000 字节时压缩）。
    * 监听器无需清理：页面导航/关闭时 JS 环境销毁，自动回收。
+   *
+   * CS 各自独立解析 gzip 配置是有意为之的设计：
+   * gzip 解压极快（~1-3ms），且独立解析是 CS 本地 fallback 的前提。
    */
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'sync') return
@@ -356,6 +365,7 @@ const initMain = () => {
   const handleKeydown = (e: KeyboardEvent) => {
     if (e.repeat) return
 
+    // about:blank 页面 hostname 为空字符串 ""，不会命中 urlBlacklist，快捷键正常工作
     const hostname = location.hostname
 
     // 使用 matchShortcut 复用匹配逻辑（内置输入元素 + urlBlacklist 检查）
@@ -370,19 +380,19 @@ const initMain = () => {
     const cmdMask = toModifierMask(commandModifiers)
     const hasModifierConflict = bookmarkCode && commandCode && bmMask === cmdMask
 
-    // 通过 Port 发送按键事件到 SW
+    // 通过 Port 发送按键事件到 SW，Port 不可用时降级为 sendMessage 兜底。
     //
     // sent 变量的关键作用：只有在至少一条消息成功发出时才拦截按键（preventDefault + stopPropagation）。
-    // 避免 Port 断开窗口期内用户按键被吞却无任何响应——此时 Port 异常走 catch，sent 保持 false，
+    // 避免 Port 断开窗口期内用户按键被吞却无任何响应——Port 断开时 sent 保持 false，
     // 事件继续传递给浏览器默认行为，用户不会感到"按键丢失"。
     //
-    // SW 未就绪时的本地 fallback 不会导致重复执行：
-    //   - 书签快捷键：swReady && port 为 false 时，直接使用本地 keymap 打开 URL，sent = true
-    //   - 此时 port?.postMessage 仍会调用（因为 sent 判断在 postMessage 之前），
-    //     但 SW 冷启动队列机制保证：配置加载前消息暂存，加载完成后才执行
-    //     而 CS 端本地 fallback 已经执行过了，SW 队列处理时会再次执行
-    //     实际上 swReady 为 false 时 port 可能仍不存在（Port 未连接），postMessage 会抛异常进 catch
-    //     此时 sent 不会被设为 true，所以不会拦截按键，本地 fallback 是唯一执行路径
+    // 三层 fallback 机制（按优先级）：
+    //   1. Port 正常连接 → port.postMessage（最低延迟）
+    //   2. Port 不可用（SW 休眠/断连） → chrome.runtime.sendMessage（唤醒 SW，~50-200ms 延迟）
+    //   3. 书签快捷键专属 fallback → 使用本地 keymap 直接打开 URL（零延迟，不依赖 SW）
+    //
+    // Chrome MV3 的 SW 在 30s 空闲后会被终止，Port 连接也随之断开。
+    // sendMessage 能确保即使 SW 正在休眠也能被唤醒处理命令。
     let sent = false
     try {
       if (bookmarkCode) {
@@ -394,23 +404,47 @@ const initMain = () => {
           })
           sent = true
         } else {
-          // SW 未就绪，使用本地配置直接处理（仅书签快捷键）
+          // Port 不可用：先用 sendMessage 唤醒 SW，再用本地 keymap 兜底
+          try {
+            chrome.runtime.sendMessage({
+              type: MSG_KEYDOWN,
+              key: e.code,
+              source: 'bookmark',
+            })
+          } catch {
+            // sendMessage 也可能失败（SW 被卸载等极端场景）
+          }
+          sent = true
+          // 同时用本地 keymap 直接处理，零延迟响应用户
           const entry = keymap[e.code]
           if (entry?.url) {
             e.preventDefault()
             e.stopPropagation()
             chrome.tabs.create({ url: padUrlHttps(entry.url) })
-            sent = true
           }
         }
       }
       if (commandCode && !hasModifierConflict) {
-        port?.postMessage({
-          type: MSG_KEYDOWN,
-          key: e.code,
-          source: 'command',
-        })
-        sent = true
+        if (swReady && port) {
+          port.postMessage({
+            type: MSG_KEYDOWN,
+            key: e.code,
+            source: 'command',
+          })
+          sent = true
+        } else {
+          // Port 不可用：sendMessage 唤醒 SW，命令快捷键依赖 SW 执行
+          try {
+            chrome.runtime.sendMessage({
+              type: MSG_KEYDOWN,
+              key: e.code,
+              source: 'command',
+            })
+            sent = true
+          } catch {
+            // SW 被卸载等极端场景，无法唤醒，不拦截按键
+          }
+        }
       }
       // 只有在至少一条消息成功发出时才拦截按键，
       // 避免 Port 断开窗口期内用户按键被吞却无任何响应
@@ -430,6 +464,14 @@ const initMain = () => {
 
   // 使用 capture phase 捕获事件，快捷键优先于页面逻辑响应
   document.addEventListener('keydown', handleKeydown, true)
+
+  // BFCache 恢复后重建 Port 连接（导航返回时不重新加载 JS，Port 已断开）
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted && !port) {
+      debug('BFCache restore, reconnecting port')
+      connectPort()
+    }
+  })
 }
 
 initMain()

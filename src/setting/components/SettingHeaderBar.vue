@@ -111,7 +111,7 @@ const openInNewTab = () => {
 
 <style scoped>
 .base_setting__title {
-  padding: 10px 0 10px 0;
+  padding: var(--space-3) var(--space-4);
   z-index: 2000;
   position: sticky;
   top: 0;
@@ -119,7 +119,6 @@ const openInNewTab = () => {
   /* 毛玻璃粘性标题 */
   background-color: var(--n-color);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--n-tab-border-color);
   display: flex;
   align-items: center;

@@ -2,13 +2,13 @@
 
 ## 概述
 
-键盘系统负责在 NaiveTab 新标签页中渲染可定制的虚拟键盘，支持 16 种布局、3 种键帽视觉风格、80+ 预设配色方案。键盘与书签 Widget（`keyboardBookmark`）和全局命令快捷键（`keyboardCommand`）共享视觉渲染逻辑。
+键盘系统负责在 NaiveTab 新标签页中渲染可定制的虚拟键盘，支持 16 种布局、3 种键帽视觉风格、80+ 预设配色方案。键盘与书签 Widget（`keyboardBookmark`）和全局命令快捷键共享视觉渲染逻辑。
+
+**业务范围：** 本文档描述通用键盘引擎（布局、渲染、主题、拖拽）。Widget 专属内容（书签绑定、keymap、事件处理）详见 [keyboard-bookmark-widget.md](../widgets/keyboard-bookmark-widget.md)。
 
 ---
 
 ## 配置命名空间
-
-系统横跨两个独立的配置命名空间：
 
 | 命名空间 | 配置文件 | 用途 |
 |----------|----------|------|
@@ -34,7 +34,6 @@
 
 ### 布局数据结构
 
-每种布局定义：
 ```ts
 {
   list: string[][]                        // 二维数组，每行 key codes
@@ -270,42 +269,6 @@ const moveState = reactive({
 
 ---
 
-## 事件处理
-
-### 键盘 Widget keydown（新标签页）
-
-通过 `addKeydownTask(WIDGET_CODE, keyboardTask)` 注册：
-- `isDragMode` 时提前返回
-- 屏蔽修饰键组合
-- 过滤不在当前布局中的按键
-- folder/back 类型：调用 `handleSpecialKeycapExec` 导航书签树
-- 其他：通过 `openPage()` 打开 URL，设置 `currSelectKeyCode` 做视觉反馈
-
-### 鼠标交互（KeyboardKeycapWidget）
-
-- `mousedown`：阻止默认、停止冒泡
-- Shift+点击 = 后台标签页，Alt+点击 = 新标签页，中键点击 = 后台标签页
-- 视觉反馈：`keyboardState.currSelectKeyCode` 设置 200ms 后重置
-
----
-
-## keyboardBookmark 双模式
-
-### source = 1（系统书签）
-- 读取浏览器 `chrome.bookmarks` API
-- 键位按索引映射到书签树节点
-- 首键始终为"返回"按钮
-- 支持文件夹导航栈
-
-### source = 2（自定义 keymap）
-- 使用 `localConfig.keyboardBookmark.keymap`
-- 每个 key code 映射到 `{url, name?}`
-- 数据持久化在 localStorage + chrome.storage.sync
-
-书签系统详情参见 [bookmark.md](bookmark.md)。
-
----
-
 ## 重要设计模式与避坑
 
 1. **计算属性深拷贝**：`currKeyboardConfig` 使用 `structuredClone(target)` 避免修改冻结的默认配置。直接修改返回值无效。
@@ -324,8 +287,4 @@ const moveState = reactive({
 
 8. **KeyboardKeycapDisplay 是纯组件**：所有样式通过 CSS 变量和内联样式传入。不包含业务逻辑（URL 获取、事件分发）。
 
-9. **isDragMode 屏蔽键盘**：拖拽模式激活时，键盘 Widget 的 keydown handler 提前返回，防止重排 Widget 时误触书签打开。
-
-10. **键帽尺寸单位约定**：配置值以 px 等效整数存储（如 `keycapSize: 58`）。`toUnit()` 转换：`58 * 0.1 = 5.8vmin`。1000px 视口下 5.8vmin = 58px。修改 `keycapSize` 会等比缩放所有派生维度（padding、border-width、font-size 等）。
-
-11. **延迟创建 keymap 条目**：`BookmarkManager` 的 `ensureKeymapEntry` 仅在用户实际修改时创建条目，防止空条目污染配置。
+9. **键帽尺寸单位约定**：配置值以 px 等效整数存储（如 `keycapSize: 58`）。`toUnit()` 转换：`58 * 0.1 = 5.8vmin`。1000px 视口下 5.8vmin = 58px。修改 `keycapSize` 会等比缩放所有派生维度（padding、border-width、font-size 等）。

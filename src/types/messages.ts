@@ -10,7 +10,7 @@
  * - SW (background/) 是中枢：接收 keydown → 查 keymap → 分发执行
  * - 所有连接使用 Port 长连接（name='naivetab-shortcut'），支持冷启动消息队列 + 指数退避重连
  *
- * 详见 docs/messaging.md
+ * 详见 docs/architecture/messaging.md
  */
 
 // ── 消息类型常量 ─────────────────────────────────────────────────────────

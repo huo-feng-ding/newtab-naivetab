@@ -31,6 +31,7 @@ watch(
 
   <NCollapse
     v-model:expanded-names="expandedNames"
+    class="setting__pane__content"
     display-directive="show"
     style="margin-top: 18px"
   >

@@ -35,7 +35,7 @@ export const WIDGET_CONFIG = {
   isShadowEnabled: true,
   shadowColor: ['rgba(0, 0, 0, 0.35)', 'rgba(0, 0, 0, 0.35)'],
   // 功能
-  defaultDuration: 1800,
+  defaultDuration: 300,
   showHours: false,
 }
 

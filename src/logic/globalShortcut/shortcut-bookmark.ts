@@ -15,7 +15,7 @@
  *   newtab 端依赖修饰键天然不同（书签 alt, 命令 shift+alt），
  *   如果用户手动改成相同修饰键，newtab 端会发送两条 keydown 到 SW
  * - SW 冷启动 fallback：Port 异常时弹出 toast 提示用户稍后重试（不拦截按键）
- * - 详见 docs/messaging.md
+ * - 详见 docs/architecture/messaging.md
  */
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { matchShortcut, isSwReady } from '@/logic/globalShortcut/shortcut-utils'

@@ -11,6 +11,7 @@
  * 因此使用 COMMAND_SHORTCUT_CODE 而非 WIDGET_CODE。
  */
 
+import { COMMAND_ICONS } from '@/logic/icons'
 import type { TShortcutModifier } from './shortcut-utils'
 
 /**
@@ -36,6 +37,7 @@ export interface TCommandEntry {
 export interface TCategoryCommand {
   command: TCommandName
   execEnv?: TCommandExecEnv
+  iconName: string
 }
 
 /**
@@ -44,51 +46,85 @@ export interface TCategoryCommand {
  */
 export const COMMAND_CATEGORIES = [
   {
-    categoryKey: 'commandCategory.naiveTabControl',
+    categoryKey: 'commandCategory.tabNavigation',
     commands: [
-      { command: 'toggleFocusMode', execEnv: 'newtab' },
-      { command: 'toggleDragMode', execEnv: 'newtab' },
-      { command: 'toggleSettingDrawer', execEnv: 'newtab' },
-    ] as const,
+      { command: 'prevTab', iconName: COMMAND_ICONS.prevTab },
+      { command: 'nextTab', iconName: COMMAND_ICONS.nextTab },
+      { command: 'firstTab', iconName: COMMAND_ICONS.firstTab },
+      { command: 'lastTab', iconName: COMMAND_ICONS.lastTab },
+      { command: 'goBack', iconName: COMMAND_ICONS.goBack },
+      { command: 'goForward', iconName: COMMAND_ICONS.goForward },
+    ],
   },
   {
-    categoryKey: 'commandCategory.tabAction',
+    categoryKey: 'commandCategory.tabManagement',
     commands: [
-      'toggleTabPinned', 'duplicateTab', 'closeTab', 'toggleTabMute',
-      'reloadAllTabs', 'reloadAllTabsAllWindows', 'newTab', 'closeWindow',
-      'nextTab', 'prevTab', 'firstTab', 'lastTab',
-      'moveTabLeft', 'moveTabRight', 'moveToNewWindow',
-      'newWindow', 'newIncognito', 'newTabAfter',
-      'goBack', 'goForward',
-      'closeOtherTabs', 'closeLeftTabs', 'closeRightTabs',
-      'closeDuplicateTabs', 'mergeAllWindows',
-      'moveTabToNextWindow',
-      'reopenClosedTab',
-    ] as const,
+      { command: 'moveTabLeft', iconName: COMMAND_ICONS.moveTabLeft },
+      { command: 'moveTabRight', iconName: COMMAND_ICONS.moveTabRight },
+      { command: 'newTab', iconName: COMMAND_ICONS.newTab },
+      { command: 'newTabAfter', iconName: COMMAND_ICONS.newTabAfter },
+      { command: 'closeTab', iconName: COMMAND_ICONS.closeTab },
+      { command: 'reopenClosedTab', iconName: COMMAND_ICONS.reopenClosedTab },
+      { command: 'toggleTabPinned', iconName: COMMAND_ICONS.toggleTabPinned },
+      { command: 'toggleTabMute', iconName: COMMAND_ICONS.toggleTabMute },
+      { command: 'duplicateTab', iconName: COMMAND_ICONS.duplicateTab },
+    ],
+  },
+  {
+    categoryKey: 'commandCategory.windowAction',
+    commands: [
+      { command: 'newWindow', iconName: COMMAND_ICONS.newWindow },
+      { command: 'newIncognito', iconName: COMMAND_ICONS.newIncognito },
+      { command: 'moveTabToNextWindow', iconName: COMMAND_ICONS.moveTabToNextWindow },
+      { command: 'moveToNewWindow', iconName: COMMAND_ICONS.moveToNewWindow },
+      { command: 'closeWindow', iconName: COMMAND_ICONS.closeWindow },
+    ],
+  },
+  {
+    categoryKey: 'commandCategory.batchClose',
+    commands: [
+      { command: 'closeLeftTabs', iconName: COMMAND_ICONS.closeLeftTabs },
+      { command: 'closeRightTabs', iconName: COMMAND_ICONS.closeRightTabs },
+      { command: 'closeDuplicateTabs', iconName: COMMAND_ICONS.closeDuplicateTabs },
+      { command: 'closeOtherTabs', iconName: COMMAND_ICONS.closeOtherTabs },
+      { command: 'mergeAllWindows', iconName: COMMAND_ICONS.mergeAllWindows },
+    ],
   },
   {
     categoryKey: 'commandCategory.tabGroup',
     commands: [
-      'groupCurrentTab', 'ungroupCurrentTab',
-      'toggleGroupCollapse', 'closeGroupTabs',
-    ] as const,
+      { command: 'groupCurrentTab', iconName: COMMAND_ICONS.groupCurrentTab },
+      { command: 'ungroupCurrentTab', iconName: COMMAND_ICONS.ungroupCurrentTab },
+      { command: 'toggleGroupCollapse', iconName: COMMAND_ICONS.toggleGroupCollapse },
+      { command: 'closeGroupTabs', iconName: COMMAND_ICONS.closeGroupTabs },
+    ],
   },
   {
     categoryKey: 'commandCategory.pageAction',
     commands: [
-      { command: 'reloadPage', execEnv: 'cs' },
-      { command: 'copyPageUrl', execEnv: 'cs' },
-      { command: 'copyPageTitle', execEnv: 'cs' },
-    ] as const,
+      { command: 'copyPageUrl', execEnv: 'cs' as const, iconName: COMMAND_ICONS.copyPageUrl },
+      { command: 'copyPageTitle', execEnv: 'cs' as const, iconName: COMMAND_ICONS.copyPageTitle },
+      { command: 'reloadPage', execEnv: 'cs' as const, iconName: COMMAND_ICONS.reloadPage },
+      { command: 'reloadAllTabs', iconName: COMMAND_ICONS.reloadAllTabs },
+      { command: 'reloadAllTabsAllWindows', iconName: COMMAND_ICONS.reloadAllTabsAllWindows },
+    ],
   },
   {
     categoryKey: 'commandCategory.pageScroll',
     commands: [
-      { command: 'scrollUp', execEnv: 'cs' },
-      { command: 'scrollDown', execEnv: 'cs' },
-      { command: 'scrollToTop', execEnv: 'cs' },
-      { command: 'scrollToBottom', execEnv: 'cs' },
-    ] as const,
+      { command: 'scrollUp', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollUp },
+      { command: 'scrollDown', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollDown },
+      { command: 'scrollToTop', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollToTop },
+      { command: 'scrollToBottom', execEnv: 'cs' as const, iconName: COMMAND_ICONS.scrollToBottom },
+    ],
+  },
+  {
+    categoryKey: 'commandCategory.naiveTabControl',
+    commands: [
+      { command: 'toggleFocusMode', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleFocusMode },
+      { command: 'toggleDragMode', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleDragMode },
+      { command: 'toggleSettingDrawer', execEnv: 'newtab' as const, iconName: COMMAND_ICONS.toggleSettingDrawer },
+    ],
   },
 ] as const
 
@@ -96,13 +132,7 @@ export const COMMAND_CATEGORIES = [
  * 从 COMMAND_CATEGORIES 派生的命令名称联合类型。
  * 覆盖所有字符串命令和对象命令的 command 字段。
  */
-export type TCommandName = (typeof COMMAND_CATEGORIES)[number]['commands'][number] extends infer Cmd
-  ? Cmd extends string
-    ? Cmd
-    : Cmd extends { command: string }
-      ? Cmd['command']
-      : never
-  : never
+export type TCommandName = (typeof COMMAND_CATEGORIES)[number]['commands'][number]['command']
 
 /**
  * CS 命令名称（与 COMMAND_CATEGORIES 中 execEnv: 'cs' 的条目一致）
@@ -129,8 +159,8 @@ export type TSwCommandName = Exclude<TCommandName, TCsCommandName | TNewtabComma
  */
 export const CS_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
   c.commands
-    .filter((cmd) => typeof cmd === 'object' && 'execEnv' in cmd && cmd.execEnv === 'cs')
-    .map((cmd) => (cmd as { command: string }).command),
+    .filter((cmd) => 'execEnv' in cmd && cmd.execEnv === 'cs')
+    .map((cmd) => cmd.command),
 ) as unknown as readonly TCommandName[]
 
 /**
@@ -138,8 +168,8 @@ export const CS_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
  */
 export const NEWTAB_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
   c.commands
-    .filter((cmd) => typeof cmd === 'object' && 'execEnv' in cmd && cmd.execEnv === 'newtab')
-    .map((cmd) => (cmd as { command: string }).command),
+    .filter((cmd) => 'execEnv' in cmd && cmd.execEnv === 'newtab')
+    .map((cmd) => cmd.command),
 ) as unknown as readonly TNewtabCommandName[]
 
 /**
@@ -148,18 +178,17 @@ export const NEWTAB_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
 export const SW_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
   c.commands
     .filter((cmd) => {
-      if (typeof cmd === 'string') return true
       if (!('execEnv' in cmd)) return true
       return cmd.execEnv !== 'cs' && cmd.execEnv !== 'newtab'
     })
-    .map((cmd) => (typeof cmd === 'string' ? cmd : cmd.command)),
+    .map((cmd) => cmd.command),
 ) as readonly TSwCommandName[]
 
 /**
  * 从单一数据源派生所有命令名称（用于运行时校验）
  */
 const ALL_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
-  c.commands.map((cmd) => (typeof cmd === 'string' ? cmd : cmd.command)),
+  c.commands.map((cmd) => cmd.command),
 )
 
 /**
@@ -201,11 +230,8 @@ const ALL_COMMANDS = COMMAND_CATEGORIES.flatMap((c) =>
 export function getCommandExecEnv(command: TCommandName): TCommandExecEnv {
   for (const category of COMMAND_CATEGORIES) {
     for (const cmd of category.commands) {
-      if (typeof cmd === 'object' && 'command' in cmd && cmd.command === command) {
+      if (cmd.command === command) {
         return ('execEnv' in cmd ? cmd.execEnv : null) ?? 'sw'
-      }
-      if (typeof cmd === 'string' && cmd === command) {
-        return 'sw'
       }
     }
   }

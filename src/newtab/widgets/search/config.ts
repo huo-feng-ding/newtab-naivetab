@@ -5,8 +5,10 @@ export const PRESERVE_FIELDS = ['placeholder', 'urlName', 'urlValue']
 export const WIDGET_CONFIG = {
   enabled: true,
   isNewTabOpen: false,
-  iconEnabled: true,
   suggestionEnabled: true,
+  iconEnabled: true,
+  isSearchEngineIconVisible: false,
+  searchEngineIconUrl: '',
   placeholder: '',
   urlName: 'Bing',
   urlValue: 'https://cn.bing.com/search?q={query}',
@@ -19,7 +21,7 @@ export const WIDGET_CONFIG = {
     yTranslateValue: 0,
   },
   padding: 25,
-  width: 400,
+  width: 450,
   height: 45,
   borderRadius: 50,
   fontFamily: 'system',
@@ -32,6 +34,12 @@ export const WIDGET_CONFIG = {
   backgroundBlur: 5,
   isShadowEnabled: true,
   shadowColor: ['rgba(31, 31, 31, 0.5)', 'rgba(31, 31, 31, 0.5)'],
+  dropdownBorderRadius: 12,
+  dropdownBackgroundColor: ['rgba(30, 30, 30, 0.72)', 'rgba(50, 50, 50, 0.72)'],
+  dropdownMaxItems: 6,
+  dropdownFontFamily: 'system',
+  dropdownFontSize: 14,
+  dropdownFontColor: ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 1)'],
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

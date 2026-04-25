@@ -69,6 +69,9 @@ export const gaProxy = async (type: TGaProxyType, names: string[], payload = {})
 
   fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
+  }).catch((e) => {
+    // console.log('GA event failed', e)
   })
 }

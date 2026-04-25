@@ -23,7 +23,7 @@ export const getLocalVersion = () => {
  * 更新成功通知
  */
 const updateSuccess = () => {
-  window.$notification.success({
+  window.$notification?.success({
     duration: 5000,
     title: `${window.$t('common.update')}${window.$t('common.success')}`,
     content: `${window.$t('common.version')} ${window.appVersion}`,

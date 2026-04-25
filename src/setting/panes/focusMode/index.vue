@@ -35,6 +35,7 @@ const cssVars = computed(() => ({
     <SettingHeaderBar :title="$t('setting.focusMode')" />
 
     <NForm
+      class="setting__pane__content"
       label-placement="left"
       :label-width="120"
       :show-feedback="false"

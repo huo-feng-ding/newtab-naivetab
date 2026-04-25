@@ -41,11 +41,12 @@
     "network": "Network",
     "loadMore": "Load More",
     "loaded": "All Loaded",
-    "uhd": "UHD source",
+    "uhd": "Higher resolution",
     "bing": "Bing",
     "pexels": "Pexels",
     "favorite": "Favorite",
     "margin": "Margin",
+    "maxItems": "Max items",
     "padding": "Padding",
     "paddingVertical": "Vertical Padding",
     "paddingHorizontal": "Horizontal Padding",
@@ -168,7 +169,6 @@
     "loadPageAnimation": "Load animation",
     "fadeIn": "Fade in",
     "zoomIn": "Zoom in",
-    "primaryColorTips": "Takes effect after refresh page",
     "newTabOpen": "Open in newtab",
     "settingDividerSetting": "Setting",
     "syncStorageSize": "Storage usage",
@@ -289,11 +289,15 @@
     "itemBorderRadius": "Item radius"
   },
   "search": {
+    "searchBar": "Search Bar",
+    "suggestion": "Suggestions",
     "searchEngine": "Search engine",
     "customEngine": "Custom engine",
     "placeholder": "Placeholder",
     "icon": "Icon",
-    "suggestion": "Search Suggestions"
+    "searchEngineIcon": "Search engine icon",
+    "searchEngineIconUrl": "Custom icon",
+    "searchEngineIconUrlPlaceholder": "Leave blank to auto-fetch default favicon"
   },
   "calendar": {
     "weekBeginsOn": "Week Begins",
@@ -424,11 +428,14 @@
     "toggleSettingDrawer": "Toggle settings panel"
   },
   "commandCategory": {
-    "tabAction": "Tab actions",
-    "pageAction": "Page actions",
-    "pageScroll": "Page scroll",
-    "tabGroup": "Tab groups",
-    "naiveTabControl": "NaiveTab Control"
+    "naiveTabControl": "NaiveTab Control",
+    "tabNavigation": "Tab Navigation",
+    "tabManagement": "Tab Management",
+    "windowAction": "Window Actions",
+    "batchClose": "Batch Close",
+    "tabGroup": "Tab Groups",
+    "pageAction": "Page Actions",
+    "pageScroll": "Page Scroll"
   },
   "about": {
     "tagline": "Visual keyboard shortcuts for bookmarks and commands, one-tap access with muscle memory",

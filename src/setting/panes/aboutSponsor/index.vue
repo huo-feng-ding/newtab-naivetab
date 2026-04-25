@@ -30,67 +30,69 @@ const removeToast = (id: string) => {
 <template>
   <SettingHeaderBar :title="$t('sponsor.title')" />
 
-  <!-- 文案卡片 -->
-  <div class="sponsor__intro">
-    <div class="intro__lines">
-      <p class="intro__line">{{ $t('sponsor.content1') }}</p>
-      <p class="intro__line">{{ $t('sponsor.content2') }}</p>
-      <p class="intro__line">{{ $t('sponsor.content3') }}</p>
-      <p class="intro__line">{{ $t('sponsor.content4') }}</p>
-      <p class="intro__line">{{ $t('sponsor.content5') }}</p>
+  <div class="setting__pane__content">
+    <!-- 文案卡片 -->
+    <div class="sponsor__intro">
+      <div class="intro__lines">
+        <p class="intro__line">{{ $t('sponsor.content1') }}</p>
+        <p class="intro__line">{{ $t('sponsor.content2') }}</p>
+        <p class="intro__line">{{ $t('sponsor.content3') }}</p>
+        <p class="intro__line">{{ $t('sponsor.content4') }}</p>
+        <p class="intro__line">{{ $t('sponsor.content5') }}</p>
+      </div>
+      <p class="intro__highlight">{{ $t('sponsor.content6') }}</p>
     </div>
-    <p class="intro__highlight">{{ $t('sponsor.content6') }}</p>
-  </div>
 
-  <!-- 二维码区域 -->
-  <div class="sponsor__qr-row">
-    <div
-      v-for="payment in paymentList"
-      :key="payment"
-      class="qr__card"
-      :class="`qr__card--${payment}`"
-    >
-      <div class="qr__img-wrap">
-        <img
-          class="qr__img"
-          :src="`/assets/img/sponsor/${payment}.jpg`"
-          alt=""
-        />
-        <div class="qr__shine" />
-      </div>
-      <div class="qr__label">
-        <span class="label__dot" />
-        {{ $t(`sponsor.${payment}`) }}
-      </div>
-    </div>
-  </div>
-
-  <!-- 底部按钮 -->
-  <div class="sponsor__footer">
-    <div class="footer__toast-area">
-      <div class="toast__stack">
-        <SponsorToastItem
-          v-for="toast in toasts"
-          :key="toast.id"
-          :message="toast.message"
-          @remove="removeToast(toast.id)"
-        />
-      </div>
-
-      <NButton
-        class="footer__skip-btn action-btn action-btn--primary"
-        type="primary"
-        size="small"
-        secondary
-        @click="onNextTime"
+    <!-- 二维码区域 -->
+    <div class="sponsor__qr-row">
+      <div
+        v-for="payment in paymentList"
+        :key="payment"
+        class="qr__card"
+        :class="`qr__card--${payment}`"
       >
-        <template #icon>
-          <div class="icon__wrap">
-            <fa6-regular:face-sad-cry />
-          </div>
-        </template>
-        {{ $t('sponsor.confirm') }}
-      </NButton>
+        <div class="qr__img-wrap">
+          <img
+            class="qr__img"
+            :src="`/assets/img/sponsor/${payment}.jpg`"
+            alt=""
+          />
+          <div class="qr__shine" />
+        </div>
+        <div class="qr__label">
+          <span class="label__dot" />
+          {{ $t(`sponsor.${payment}`) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="sponsor__footer">
+      <div class="footer__toast-area">
+        <div class="toast__stack">
+          <SponsorToastItem
+            v-for="toast in toasts"
+            :key="toast.id"
+            :message="toast.message"
+            @remove="removeToast(toast.id)"
+          />
+        </div>
+
+        <NButton
+          class="footer__skip-btn action-btn action-btn--primary"
+          type="primary"
+          size="small"
+          secondary
+          @click="onNextTime"
+        >
+          <template #icon>
+            <div class="icon__wrap">
+              <fa6-regular:face-sad-cry />
+            </div>
+          </template>
+          {{ $t('sponsor.confirm') }}
+        </NButton>
+      </div>
     </div>
   </div>
 </template>
@@ -179,12 +181,16 @@ const removeToast = (id: string) => {
 
   &.qr__card--wechat:hover {
     border-color: rgba(9, 187, 7, 0.35);
-    box-shadow: var(--shadow-md), 0 0 0 3px rgba(9, 187, 7, 0.06);
+    box-shadow:
+      var(--shadow-md),
+      0 0 0 3px rgba(9, 187, 7, 0.06);
   }
 
   &.qr__card--alipay:hover {
     border-color: rgba(22, 119, 255, 0.35);
-    box-shadow: var(--shadow-md), 0 0 0 3px rgba(22, 119, 255, 0.06);
+    box-shadow:
+      var(--shadow-md),
+      0 0 0 3px rgba(22, 119, 255, 0.06);
   }
 }
 
