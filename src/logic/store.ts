@@ -250,14 +250,33 @@ export const colorMixWithAlpha = (color: string, alpha: number): string =>
 
 export const customPrimaryColor = getStyleField('general', 'primaryColor')
 
-export const themeOverrides: GlobalThemeOverrides = {
+export const themeOverrides = shallowRef<GlobalThemeOverrides>({
   common: {
     primaryColor: customPrimaryColor.value,
     primaryColorSuppl: customPrimaryColor.value,
-    primaryColorHover: '#7f8c8d',
-    primaryColorPressed: '#57606f',
+    primaryColorHover: '',
+    primaryColorPressed: '',
   },
-}
+})
+
+/**
+ * 基于 primaryColor 派生 hover / pressed 颜色，跟随主题切换实时更新。
+ * 必须替换整个对象引用，NConfigProvider 只对 theme-overrides 做浅层监听。
+ */
+watch(
+  customPrimaryColor,
+  (color) => {
+    themeOverrides.value = {
+      common: {
+        primaryColor: color,
+        primaryColorSuppl: color,
+        primaryColorHover: `color-mix(in srgb, ${color}, white 20%)`,
+        primaryColorPressed: `color-mix(in srgb, ${color}, black 20%)`,
+      },
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => localConfig.general.pageTitle,

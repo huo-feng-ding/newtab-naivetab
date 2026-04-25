@@ -295,7 +295,6 @@ const handlerDeleteMouseUp = () => {
     align-items: stretch;
     height: 100%;
     backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
 
@@ -311,7 +310,6 @@ const handlerDeleteMouseUp = () => {
       height: 26px;
       background-color: var(--nt-bg-moveable-tool-drawer);
       backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
       box-shadow:

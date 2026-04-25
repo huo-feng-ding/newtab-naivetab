@@ -35,7 +35,6 @@ const handleAnimationEnd = () => {
   opacity: 0;
   background: rgba(20, 20, 20, 0.72);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   color: #fff;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.1);

@@ -16,7 +16,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  sections: {
+    type: Array as () => Array<{ slot: string, label: string }>,
+    default: () => [],
+  },
 })
+
+const customSections = computed(() =>
+  props.sections.filter((s) => !!s.slot && !!s.label),
+)
 
 // ——— 重置逻辑 ———
 const hasWidgetCode = computed(() => !!props.widgetCode && props.widgetCode in defaultConfig)
@@ -121,6 +129,7 @@ const handleResetSelect = (key: string) => {
 
 <template>
   <NForm
+    class="setting__pane__content"
     label-placement="left"
     :label-width="120"
     :show-feedback="false"
@@ -130,6 +139,19 @@ const handleResetSelect = (key: string) => {
         {{ $t('common.behavior') }}
       </NDivider>
       <slot name="behavior" />
+    </template>
+
+    <!-- 自定义分组：behavior 之后、size 之前 -->
+    <template
+      v-for="section in customSections"
+      :key="section.slot"
+    >
+      <template v-if="$slots[section.slot]">
+        <NDivider title-placement="left">
+          {{ section.label }}
+        </NDivider>
+        <slot :name="section.slot" />
+      </template>
     </template>
 
     <template v-if="$slots.size">

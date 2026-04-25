@@ -64,6 +64,13 @@ const beginsList = computed(() => [
     <!-- 文字排版 -->
     <template #typography>
       <FontField
+        v-model:font-family="localConfig.calendar.fontFamily"
+        v-model:font-color="localConfig.calendar.fontColor"
+        v-model:font-size="localConfig.calendar.fontSize"
+        :label="`${$t('common.font')}`"
+      />
+
+      <FontField
         v-model:font-family="localConfig.calendar.dayFontFamily"
         v-model:font-color="localConfig.calendar.dayFontColor"
         v-model:font-size="localConfig.calendar.dayFontSize"

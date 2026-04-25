@@ -31,6 +31,9 @@ const props = withDefaults(
     bookmarkType?: KeycapBookmarkType // mark（网页）/ folder（文件夹）/ back（返回）
     iconSrc?: string // favicon URL（mark 类型）
 
+    // 命令图标（优先级高于书签图标，用于 keyboardCommand 设置面板）
+    commandIcon?: string // iconify 图标名称
+
     // 内联样式（由 useKeyboardStyle helpers 生成）
     stageStyle?: string // stage 顶面的尺寸偏移（gmk/dsa 立体效果）
     textStyle?: string // label / name 的文字对齐 + padding
@@ -52,6 +55,7 @@ const props = withDefaults(
   {
     bookmarkType: 'mark',
     iconSrc: '',
+    commandIcon: '',
     stageStyle: '',
     textStyle: '',
     iconStyle: '',
@@ -117,14 +121,20 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
         {{ label || '&nbsp;' }}
       </p>
 
-      <!-- 书签图标区：mark 类型显示 favicon，folder/back 显示对应矢量图标 -->
-      <!-- mark 类型只在真的拿到 iconSrc 时才渲染，避免空书签生成占位图 -->
+      <!-- 命令图标区：commandIcon 优先级最高，其次才是书签 favicon/矢量图标 -->
       <div
         class="keycap__img"
         :style="iconStyle"
       >
+        <!-- command：命令图标 -->
+        <Icon
+          v-if="commandIcon"
+          :icon="commandIcon"
+          class="img__command"
+        />
+        <!-- mark / folder / back：书签图标 -->
         <div
-          v-if="showFavicon && (bookmarkType !== 'mark' || iconSrc)"
+          v-else-if="showFavicon && (bookmarkType !== 'mark' || iconSrc)"
           class="img__wrap"
         >
           <!-- mark：外链 favicon -->
@@ -216,7 +226,6 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 
     /* 玻璃模糊 + 饱和度增强 */
     backdrop-filter: blur(2px) saturate(1.3);
-    -webkit-backdrop-filter: blur(2px) saturate(1.3);
 
     /* 顶部高光线（与键帽顶面高光呼应） */
     &::before {
@@ -311,6 +320,10 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
         .img__main {
           height: 100%;
         }
+      }
+
+      .img__command {
+        transform: scale(var(--nt-kb-favicon-size));
       }
     }
 

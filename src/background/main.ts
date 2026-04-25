@@ -5,9 +5,10 @@
  * 所有依赖通过构建打包后的 dist 文件以 CommonJS 方式引入。
  *
  * 模块职责：
- * - main.ts：Port 连接管理、消息队列、命令分发（execSwCommand 40+ 命令）
+ * - main.ts：Port 连接管理、消息队列、sendMessage 兜底
  * - config-cache.ts：配置缓存加载与 onChanged 自动更新
  * - init-guard.ts：启动编排，等待双配置加载完成后放行快捷键处理
+ * - command-registry.ts：SW 命令注册表（30+ 命令的实现 + 分发）
  * - commands.ts：40+ tab 操作命令的具体实现
  */
 import { type TCommandEntry, type TSwCommandName, getCommandExecEnv } from '@/logic/globalShortcut/shortcut-command'
@@ -26,110 +27,96 @@ import {
   type CsToSwMessage,
   type SwToCsMessage,
 } from '@/types/messages'
-import {
-  switchTab,
-  switchToEdgeTab,
-  closeTabsAround,
-  closeDuplicateTabs,
-  reloadAllTabs,
-  reloadAllTabsAllWindows,
-  moveTab,
-  moveToNewWindow,
-  moveTabToNextWindow,
-  mergeAllWindows,
-  groupCurrentTab,
-  ungroupCurrentTab,
-  toggleGroupCollapse,
-  closeGroupTabs,
-} from './commands'
+import { execSwCommand } from './command-registry'
 
 // ── 调试日志 ──────────────────────────────────────────────────────────────
 const debug = (...args: any[]) => {
   console.log('[NaiveTab-sw]', ...args)
 }
 
-// ── 动态注册全局快捷键 Content Script ─────────────────────────────────────
-
-/**
- * 向已打开的页面注入 Content Script。
- * 面向现在：
- * - registerContentScripts 是事件监听式注册，只对注册后加载的页面生效，
- * - 对扩展启动前已存在的标签页无效，需要此函数手动补齐。
- */
-const injectToExistingTabs = async () => {
-  try {
-    const tabs = await chrome.tabs.query({ url: ['*://*/*'] })
-    let successCount = 0
-    let skipCount = 0
-    const injectPromises = tabs
-      .filter((tab) => !!tab.id)
-      .map(async (tab) => {
-        try {
-          // 前置检查：已初始化的 tab 跳过注入，避免重复加载脚本
-          const alreadyInit = await chrome.scripting.executeScript({
-            target: { tabId: tab.id! },
-            func: () => (window as any).__naivetabGlobalShortcutInit === true,
-          })
-          if (alreadyInit[0]?.result === true) {
-            skipCount++
-            return
-          }
-
-          await chrome.scripting.executeScript({
-            target: { tabId: tab.id! },
-            files: ['dist/contentScripts/index.global.js'],
-          })
-          successCount++
-        } catch (e) {
-          debug(`Inject failed for tab ${tab.id}:`, e)
-        }
-      })
-    await Promise.allSettled(injectPromises)
-    const targetCount = tabs.length - skipCount
-    debug(`Injected to ${successCount}/${targetCount} new tabs (${skipCount} already initialized)`)
-  } catch (e) {
-    debug('Failed to inject to existing tabs', e)
-  }
-}
-
-const registerGlobalShortcutContentScript = async () => {
-  try {
-    // 检查是否已注册，避免重复注册抛出 "already exists" 错误
-    const registered = await chrome.scripting.getRegisteredContentScripts()
-    if (registered.some((s) => s.id === 'naivetab-global-shortcut')) {
-      debug('content script already registered')
-      return
-    }
-
-    /**
-     * 注册 Content Script 规则
-     * 面向未来：以后遇到符合规则的页面，自动注入脚本
-     */
-    await chrome.scripting.registerContentScripts([{
-      id: 'naivetab-global-shortcut',
-      js: ['dist/contentScripts/index.global.js'],
-      matches: ['*://*/*'],
-      // document_start 确保在 DOM 构建前注入，在页面脚本之前拦截按键
-      runAt: 'document_start',
-      // Content Script 规则在浏览器重启后仍然有效，Chrome 会自动恢复它。
-      persistAcrossSessions: true,
-    }])
-    debug('Global shortcut content script registered')
-
-    // 注册成功后主动向扩展启动前已打开的页面注入，补齐 registerContentScripts 的遗漏
-    await injectToExistingTabs()
-  } catch (e) {
-    log('Register content script error', e)
-  }
-}
-
-registerGlobalShortcutContentScript()
+// ── Content Script 注册 ─────────────────────────────────────────────────
+// Content Script 采用静态 manifest 声明（manifest.ts content_scripts 字段），
+// 浏览器在页面加载时自动注入，不依赖 SW 启动时机。
+// 相比动态注册的优势：
+// - 注入时机更早：不依赖 SW 启动，浏览器直接注入
+// - 覆盖更全：<all_urls> 包含 about:blank、file:// 等
+// - 代码更简单：无需 registerContentScripts
+//
+// CS 内部有 window.__naivetabGlobalShortcutInit 守卫，防重复初始化。
+// 快捷键启用/禁用由 CS 内部 isEnabled 状态控制，不需要注销 CS。
 
 // ── Service Worker 启动时初始化缓存 ────────────────────────────────────────
 // 使用 waitInitialized 确保两个配置都加载完成，后续 onConnect 可据此守卫
 waitInitialized()
 
+/**
+ * 向已打开的标签页重新注入 Content Script。
+ *
+ * 静态 manifest content_scripts 仅在页面加载时注入，以下场景中已有页面的
+ * CS 环境会被 Chrome 移除且不会自动恢复：
+ * - 扩展重载 / 更新：旧页面的 isolated world 被强制销毁
+ * - 首次安装：安装前已打开的页面无 CS
+ * - 浏览器重启：session restore 恢复的页面不是新加载
+ * - 扩展禁用后重新启用：等价于扩展重载
+ *
+ * 注入策略：
+ * 1. chrome.tabs.query({}) 获取所有 tab（不限 URL 协议）
+ * 2. 过滤无 URL 的 tab（少数 tab 如 PDF 预览可能无 URL）
+ * 3. 串行调用 chrome.scripting.executeScript() 逐个注入
+ * 4. 注入失败（受限页面 chrome:// 等、tab 已关闭）静默忽略
+ *
+ * CS 内部的 window.__naivetabGlobalShortcutInit 守卫确保不会重复执行初始化：
+ * - 静态注入已生效的页面：守卫拦截，跳过
+ * - 已被移除的页面：守卫为空，正常注入
+ * - 新加载的页面：由 manifest 静态注入处理，不受此函数影响
+ *
+ * 为什么 reinjectContentScripts 没有 await waitInitialized()？
+ *
+ * SW 启动时所有 listener（onConnect、onMessage）在同步模块加载阶段就已注册完成，
+ * 远快于任何 CS 连接请求。即使 reinject 注入的 CS 在 waitInitialized() 完成前
+ * 建立了 Port 连接，也会走 pendingMessages 路径被正确处理（见 Port 连接管理部分）。
+ *
+ * 执行时序：
+ *   t=0ms    waitInitialized() → 启动 async 任务（不阻塞后续代码）
+ *   t=0ms    reinjectContentScripts() → 启动 async 任务（不阻塞）
+ *   t<1ms    onConnect / onMessage listener 注册完成 ✓
+ *   t=50ms   waitInitialized() resolve → isInitialized = true
+ *   t=100ms  reinjectContentScripts 完成注入
+ *
+ * 如果改为 await waitInitialized().then(() => reinjectContentScripts())，
+ * 只是让注入延后 ~50ms，但 SW 模块加载阶段已经可以响应 Port 连接了，
+ * 所以并发执行语义更清晰：SW 启动后"同时"完成两件事。
+ */
+const reinjectContentScripts = async () => {
+  const tabs = await chrome.tabs.query({})
+  for (const tab of tabs) {
+    if (!tab.id) continue
+    if (!tab.url) continue
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['dist/contentScripts/index.global.js'],
+      })
+    } catch {
+      // 受限页面（chrome://settings、chrome://downloads 等）不可注入，静默忽略
+    }
+  }
+  debug('Reinject completed, tabs scanned:', tabs.length)
+}
+
+// 配置加载完成后，重新注入 CS 到已打开的标签页
+reinjectContentScripts()
+
 // ── Port 长连接：CS/newtab → SW 统一处理快捷键 ────────────────────────────
+//
+// 消息接收双路径：
+// 1. Port 路径（主力）：CS 通过 connect('naivetab-shortcut') 建立长连接，按键通过 port.postMessage 发送
+// 2. sendMessage 路径（兜底）：Port 不可用时 CS 降级为 chrome.runtime.sendMessage，会唤醒休眠的 SW
+//
+// 为什么需要双路径？
+// Chrome MV3 的 SW 在 30s 空闲后会被终止，Port 也随之断开。
+// Port 断连到重连之间有 100-1000ms 窗口期（指数退避），
+// 此期间按键通过 sendMessage 兜底，避免用户感到"按键丢失"。
 
 /**
  * tabId → Port 映射。每个 tabId 只保留一个 Port 引用。
@@ -217,137 +204,6 @@ const handleCommandShortcutKeydown = (key: string, tabId: number) => {
       }
     }
   }
-}
-
-/**
- * SW 端直接执行的命令分发器
- */
-const execSwCommand = (command: TSwCommandName, tabId: number) => {
-  switch (command) {
-    case 'toggleTabPinned':
-      chrome.tabs.get(tabId).then((tab) => {
-        chrome.tabs.update(tabId, { pinned: !tab.pinned }).catch(logLastError)
-      }).catch(logLastError)
-      break
-    case 'toggleTabMute':
-      chrome.tabs.get(tabId).then((tab) => {
-        chrome.tabs.update(tabId, { muted: !tab.mutedInfo?.muted }).catch(logLastError)
-      }).catch(logLastError)
-      break
-    case 'duplicateTab':
-      chrome.tabs.duplicate(tabId).catch(logLastError)
-      break
-    case 'closeTab':
-      chrome.tabs.remove(tabId).catch(logLastError)
-      break
-    case 'closeOtherTabs':
-      closeTabsAround(tabId, 'others')
-      break
-    case 'closeLeftTabs':
-      closeTabsAround(tabId, 'left')
-      break
-    case 'closeRightTabs':
-      closeTabsAround(tabId, 'right')
-      break
-    case 'nextTab':
-      switchTab(tabId, 1)
-      break
-    case 'prevTab':
-      switchTab(tabId, -1)
-      break
-    case 'firstTab':
-      switchToEdgeTab(tabId, 'first')
-      break
-    case 'lastTab':
-      switchToEdgeTab(tabId, 'last')
-      break
-    case 'reloadAllTabs':
-      reloadAllTabs(tabId)
-      break
-    case 'reloadAllTabsAllWindows':
-      reloadAllTabsAllWindows(tabId)
-      break
-    case 'newTab':
-      chrome.tabs.create({ index: undefined }).catch(logLastError)
-      break
-    case 'newTabAfter':
-      chrome.tabs.get(tabId).then((tab) => {
-        chrome.tabs.create({ index: (tab.index ?? 0) + 1, active: true }).catch(logLastError)
-      }).catch(logLastError)
-      break
-    case 'goBack':
-      chrome.tabs.goBack(tabId).catch(logLastError)
-      break
-    case 'goForward':
-      chrome.tabs.goForward(tabId).catch(logLastError)
-      break
-    case 'closeWindow':
-      (async () => {
-        const tab = await chrome.tabs.get(tabId).catch(logLastError)
-        if (!tab?.windowId) return
-        const windows = await chrome.windows.getAll().catch(logLastError)
-        if (!windows) return
-        const sameTypeWindows = windows.filter((w) => w.type === 'normal' && w.incognito === tab.incognito)
-        if (sameTypeWindows.length <= 1) return
-        await chrome.windows.remove(tab.windowId).catch(logLastError)
-      })()
-      break
-    case 'moveTabLeft':
-      moveTab(tabId, -1)
-      break
-    case 'moveTabRight':
-      moveTab(tabId, 1)
-      break
-    case 'moveToNewWindow':
-      moveToNewWindow(tabId)
-      break
-    case 'moveTabToNextWindow':
-      moveTabToNextWindow(tabId)
-      break
-    case 'newWindow':
-      chrome.windows.create().catch(logLastError)
-      break
-    case 'newIncognito':
-      chrome.windows.create({ incognito: true }).catch(logLastError)
-      break
-    case 'reopenClosedTab':
-      chrome.sessions.getRecentlyClosed({ maxResults: 1 }).then((sessions) => {
-        if (sessions.length > 0) {
-          // @ts-expect-error sessionId exists in Chrome runtime but not in @types/chrome
-          const sessionId = sessions[0].sessionId as string | undefined
-          if (sessionId) {
-            chrome.sessions.restore(sessionId).catch(logLastError)
-          }
-        }
-      }).catch(logLastError)
-      break
-    case 'closeDuplicateTabs':
-      closeDuplicateTabs(tabId)
-      break
-    case 'mergeAllWindows':
-      mergeAllWindows(tabId)
-      break
-    // 标签组
-    case 'groupCurrentTab':
-      groupCurrentTab(tabId)
-      break
-    case 'ungroupCurrentTab':
-      ungroupCurrentTab(tabId)
-      break
-    case 'toggleGroupCollapse':
-      toggleGroupCollapse(tabId)
-      break
-    case 'closeGroupTabs':
-      closeGroupTabs(tabId)
-      break
-    default:
-      command satisfies never
-      log('Unknown SW command:', command)
-  }
-}
-
-const logLastError = (e: Error) => {
-  log('Chrome API error:', e)
 }
 
 // ── Port 连接管理 ──────────────────────────────────────────────────────────
@@ -442,6 +298,25 @@ chrome.runtime.onConnect.addListener((port) => {
     debug('Port disconnected for tab', tabId, 'remaining:', portMap.size)
   })
 })
+
+// ── sendMessage 兜底：处理 CS 在 Port 不可用时发来的按键消息 ──────────────
+//
+// Chrome MV3 的 SW 在 30s 空闲后会被终止，Port 连接也随之断开。
+// CS 在检测到 Port 不可用时会降级为 chrome.runtime.sendMessage。
+// sendMessage 会唤醒 SW（如果休眠），此 handler 处理兜底消息。
+//
+// 为什么不用 Port 保活？
+// Chrome 116+ 后开放 Port 不再阻止 SW 休眠（见 docs/architecture/messaging.md），
+// 刻意保活会增加内存占用且不被 Chrome 推荐。
+// 接受 SW 休眠的事实，优化"休眠 → 唤醒"路径才是正确策略。
+
+chrome.runtime.onMessage.addListener((msg: CsToSwMessage, sender) => {
+  if (msg.type === MSG_KEYDOWN && sender.tab?.id) {
+    processKeydown(msg.key, msg.source, sender.tab.id)
+  }
+})
+
+// ── 未捕获异常上报 ────────────────────────────────────────────────────────
 
 addEventListener('unhandledrejection', async (event) => {
   gaProxy('error', ['unhandledrejection'], {

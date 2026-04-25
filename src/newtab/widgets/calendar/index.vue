@@ -88,10 +88,6 @@ const calendarStyle = computed(() => ({
   '--nt-cal-customDestivalCountdownItemHeight': customDestivalCountdownItemHeight.value,
   '--nt-cal-customDestivalCountdownFontSize': customDestivalCountdownFontSize.value,
   '--nt-cal-customRestLabelFontSize': customDestivalCountdownRestFontSize.value,
-  '--nt-cal-customDayFontSize_festival': customDayFontSize.value,
-  '--nt-cal-customDescFontSize_festival': customDescFontSize.value,
-  '--nt-cal-customDayFontFamily_festival': customDayFontFamily.value,
-  '--nt-cal-customDescFontFamily_festival': customDescFontFamily.value,
 }))
 
 const todayDayjs = dayjs()
@@ -715,6 +711,7 @@ const onToggleDetailPopover = (date?: string) => {
           height: 2.4vmin;
           line-height: 2.4vmin;
           text-align: center;
+          color: var(--nt-cal-customFontColor);
           font-size: var(--nt-cal-customFontSize);
           letter-spacing: 0.02em;
         }
@@ -946,8 +943,11 @@ const onToggleDetailPopover = (date?: string) => {
       gap: 3px;
       .left__date {
         flex: 0 0 auto;
-        opacity: 0.65;
+        opacity: 0.85;
         letter-spacing: 0.01em;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
       }
       .left__rest {
         padding: 0 3px;
@@ -962,6 +962,9 @@ const onToggleDetailPopover = (date?: string) => {
       .left__desc {
         flex: 1;
         width: 100%;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
         text-align: start;
         overflow: hidden;
         white-space: nowrap;
@@ -976,14 +979,16 @@ const onToggleDetailPopover = (date?: string) => {
       width: 30%;
       gap: 2px;
       .right__count {
-        font-size: var(--nt-cal-customDayFontSize_festival);
-        font-family: var(--nt-cal-customDayFontFamily_festival);
+        color: var(--nt-cal-customDayFontColor);
+        font-size: var(--nt-cal-customDayFontSize);
+        font-family: var(--nt-cal-customDayFontFamily);
         font-weight: 500;
       }
       .right__unit {
-        font-size: var(--nt-cal-customDescFontSize_festival);
-        font-family: var(--nt-cal-customDescFontFamily_festival);
-        opacity: 0.65;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
+        opacity: 0.8;
       }
     }
   }

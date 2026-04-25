@@ -14,18 +14,66 @@ export const WIDGET_CONFIG = {
   isNewTabOpen: false,
   defaultExpandFolder: null as null | string,
   keymap: {
-    KeyQ: {
+    Digit1: {
       url: 'www.baidu.com',
     },
-    KeyW: {
+    Digit2: {
       url: 'www.google.com',
     },
-    KeyE: {
+    Digit3: {
       url: 'www.bing.com',
     },
+    KeyR: {
+      url: 'www.reddit.com',
+    },
+    KeyT: {
+      url: 'tieba.baidu.com',
+    },
+    KeyY: {
+      url: 'www.youtube.com',
+    },
+    KeyI: {
+      url: 'mail.google.com',
+    },
+    KeyO: {
+      url: 'outlook.live.com',
+    },
     KeyA: {
-      url: 'https://gxfg.github.io/naivetab-doc/',
-      name: 'welcome',
+      url: 'www.apple.com.cn',
+    },
+    KeyS: {
+      url: 'sspai.com',
+    },
+    KeyD: {
+      url: 'douban.com',
+    },
+    KeyF: {
+      url: 'www.figma.com',
+    },
+    KeyG: {
+      url: 'github.com',
+    },
+    Enter: {
+      url: 'gxfg.github.io/naivetab-doc',
+      name: 'NaiveTab',
+    },
+    KeyZ: {
+      url: 'www.zhihu.com/hot',
+    },
+    KeyX: {
+      url: 'x.com',
+    },
+    KeyC: {
+      url: 'xiaohongshu.com',
+    },
+    KeyV: {
+      url: 'www.douyin.com',
+    },
+    KeyB: {
+      url: 'www.bilibili.com',
+    },
+    MetaLeft: {
+      url: 'gemini.google.com',
     },
   } as Record<string, TBookmarkEntry>,
   layout: {

@@ -21,14 +21,16 @@
 
 | 文档 | 主题 |
 |------|------|
-| [config.md](docs/config.md) | 三层配置架构、配置迁移、主题系统、mergeState 合并 |
-| [storage.md](docs/storage.md) | 存储与同步：useStorageLocal、防抖写入、Gzip 压缩、版本感知同步、配额管理 |
-| [widget-dev.md](docs/widget-dev.md) | Widget 生命周期、WidgetWrap 解析、拖拽系统、定时任务、快速上手 |
-| [background-image.md](docs/background-image.md) | 背景图系统架构、文件索引、核心流程 |
-| [bookmark.md](docs/bookmark.md) | 书签系统架构、双模式运行、同步机制、权限处理 |
-| [global-shortcut.md](docs/global-shortcut.md) | 全局命令快捷键设计与实现 |
-| [keyboard.md](docs/keyboard.md) | 键盘布局系统、键帽渲染、拖拽定位、主题预设 |
-| [messaging.md](docs/messaging.md) | 背景脚本消息传递架构 |
+| [config.md](docs/architecture/config.md) | 三层配置架构、配置迁移、主题系统、mergeState 合并 |
+| [storage.md](docs/architecture/storage.md) | 存储与同步：useStorageLocal、防抖写入、Gzip 压缩、版本感知同步、配额管理 |
+| [messaging.md](docs/architecture/messaging.md) | 背景脚本消息传递架构 |
+| [background-image.md](docs/features/background-image.md) | 背景图系统架构、文件索引、核心流程 |
+| [global-shortcut.md](docs/features/global-shortcut.md) | 全局命令快捷键设计与实现 |
+| [bookmark.md](docs/features/bookmark.md) | 书签系统架构、双模式运行、同步机制、权限处理 |
+| [keyboard.md](docs/features/keyboard.md) | 键盘布局系统、键帽渲染、拖拽定位、主题预设 |
+| [widget-dev.md](docs/widgets/widget-dev.md) | Widget 生命周期、WidgetWrap 解析、拖拽系统、定时任务、快速上手 |
+| [keyboard-bookmark-widget.md](docs/widgets/keyboard-bookmark-widget.md) | KeyboardBookmark Widget：书签绑定、双模式、事件处理 |
+| [search-widget.md](docs/widgets/search-widget.md) | Search Widget 架构、设计决策、错误处理、踩坑点 |
 
 ---
 
@@ -61,7 +63,6 @@
 - 嵌套层级不超过 4 层，过深时拆分为独立类
 - `v-bind()` 用于绑定响应式配置，返回值来自 `getStyleField()`
 - `widget__wrap` div 的 style 被 `v-bind` 用于存放 CSS 变量，不可再对其进行 `:style` 绑定
-- 使用 `backdrop-filter` 时必须同时加 `-webkit-backdrop-filter` 前缀
 
 ## Vue 组件
 
@@ -256,7 +257,7 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 # Widget 开发
 
-详细架构见 [widget-dev.md](docs/widget-dev.md)，新增 Widget 使用 `/add-widget` 技能。
+详细架构见 [widget-dev.md](docs/widgets/widget-dev.md)，新增 Widget 使用 `/add-widget` 技能。
 
 ## 必须遵守的硬规则
 
@@ -271,7 +272,7 @@ window.$message.warning(window.$t('general.syncRateWarning').replace('{count}', 
 
 # 配置 & 数据持久化
 
-详细架构见 [config.md](docs/config.md)（三层架构、迁移、主题系统）和 [storage.md](docs/storage.md)（存储、同步、压缩、配额）。
+详细架构见 [config.md](docs/architecture/config.md)（三层架构、迁移、主题系统）和 [storage.md](docs/architecture/storage.md)（存储、同步、压缩、配额）。
 
 ## 全局状态速查
 

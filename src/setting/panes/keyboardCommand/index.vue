@@ -3,7 +3,7 @@ import { Icon } from '@iconify/vue'
 import { computed, ref } from 'vue'
 import { localConfig, getSettingKeyboardSize } from '@/logic/store'
 import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
-import { formatModifierKeys, toModifierMask } from '@/logic/globalShortcut/shortcut-utils'
+import { ALLOWED_SET, formatModifierKeys, toModifierMask } from '@/logic/globalShortcut/shortcut-utils'
 import { COMMAND_CATEGORIES, type TCommandName } from '@/logic/globalShortcut/shortcut-command'
 import { ICONS } from '@/logic/icons'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
@@ -37,17 +37,11 @@ const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
 const commandCategories = computed(() => {
   return COMMAND_CATEGORIES.map((cat) => ({
     categoryKey: cat.categoryKey,
-    commands: [
-      // 不需要无命令选项，用户可以通过删除取消绑定
-      // { label: window.$t('common.none'), value: '' },
-      ...cat.commands.map((cmd) => {
-        const commandName = (typeof cmd === 'string' ? cmd : cmd.command) as TCommandName
-        return {
-          label: window.$t(`command.${commandName}`),
-          value: commandName,
-        }
-      }),
-    ],
+    commands: cat.commands.map((cmd) => ({
+      label: window.$t(`command.${cmd.command}`),
+      value: cmd.command,
+      icon: cmd.iconName,
+    })),
   }))
 })
 
@@ -84,6 +78,17 @@ const getBoundLabel = (code: string): string => {
 }
 
 /**
+ * 获取按键已绑定命令的图标
+ */
+const getBoundCommandIcon = (code: string): string => {
+  const cmd = getBoundCommand(code)
+  if (!cmd) return ''
+  const cat = commandCategories.value.find((c) => c.commands.some((c2) => c2.value === cmd))
+  if (!cat) return ''
+  return cat.commands.find((c2) => c2.value === cmd)?.icon || ''
+}
+
+/**
  * 当前选中的按键（用于弹出命令选择）
  */
 const selectedKeyCode = ref<string | null>(null)
@@ -94,8 +99,7 @@ const selectedKeyCode = ref<string | null>(null)
 const modifierConflictWarning = computed(() => {
   const cmdModifiers = localConfig.keyboardCommand.modifiers
   const bookmarkModifiers = localConfig.keyboardBookmark.globalShortcutModifiers
-  if (cmdModifiers.length > 0 && bookmarkModifiers.length > 0
-    && toModifierMask(cmdModifiers) === toModifierMask(bookmarkModifiers)) {
+  if (cmdModifiers.length > 0 && bookmarkModifiers.length > 0 && toModifierMask(cmdModifiers) === toModifierMask(bookmarkModifiers)) {
     return window.$t('keyboardCommand.modifierConflict')
   }
   return ''
@@ -105,6 +109,7 @@ const modifierConflictWarning = computed(() => {
  * 选中/取消选中按键
  */
 const toggleSelectKey = (code: string) => {
+  if (!ALLOWED_SET.has(code)) return
   selectedKeyCode.value = selectedKeyCode.value === code ? null : code
 }
 
@@ -187,6 +192,7 @@ const handleCommandSelect = (cmd: TCommandName) => {
                   :key-code="code"
                   :label="getCustomLabel(code)"
                   :name="getBoundLabel(code)"
+                  :command-icon="getBoundCommandIcon(code)"
                   :visual-type="keycapVisualType"
                   :stage-style="getKeycapStageStyle(code)"
                   :text-style="getKeycapTextStyle(code)"
@@ -253,9 +259,16 @@ const handleCommandSelect = (cmd: TCommandName) => {
                     v-for="cmd in cat.commands"
                     :key="cmd.value"
                     :value="cmd.value"
-                    :label="cmd.label"
                     size="small"
-                  />
+                  >
+                    <p class="cmd-label-wrap">
+                      <Icon
+                        :icon="cmd.icon"
+                        class="cmd__icon"
+                      />
+                      <span>{{ cmd.label }}</span>
+                    </p>
+                  </NRadio>
                 </NRadioGroup>
               </div>
             </div>
@@ -336,15 +349,26 @@ const handleCommandSelect = (cmd: TCommandName) => {
 }
 
 /* 覆盖 setting/index.vue 全局的 .n-radio { width: 20% } 规则，
-   命令选择器使用 3 列网格，radio 撑满每个格子 */
+   命令选择器使用 2 列网格，radio 撑满每个格子 */
 :deep(.category-group__options .n-radio) {
   width: auto !important;
 }
 
 .category-group__options {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 6px;
+
+  .cmd-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .cmd__icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+  }
 }
 
 /* 增强选中命令的视觉反馈 */

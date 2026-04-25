@@ -123,14 +123,6 @@ const onImportFileChange = (e: Event) => {
   }
 }
 
-const onExportSetting = () => {
-  exportSetting()
-}
-
-const onResetSetting = () => {
-  resetSetting()
-}
-
 // configSizeMap 的 field 映射到 i18n label，兜底展示原始 field 名
 const getFieldLabel = (field: string) => window.$t(`setting.${field}`) || field
 
@@ -271,7 +263,6 @@ const cssVars = computed(() => ({
         <ColorField
           v-model="localConfig.general.primaryColor"
           :label="$t('common.primaryColor')"
-          :tips="$t('generalSetting.primaryColorTips')"
         />
 
         <ColorField
@@ -480,7 +471,7 @@ const cssVars = computed(() => ({
             type="primary"
             size="small"
             secondary
-            @click="onExportSetting()"
+            @click="exportSetting"
           >
             <template #icon><Icon :icon="ICONS.exportFile" /></template>
             {{ $t('generalSetting.exportSettingValue') }}
@@ -504,7 +495,7 @@ const cssVars = computed(() => ({
         </NFormItem>
 
         <NFormItem :label="$t('generalSetting.resetSettingLabel')">
-          <NPopconfirm @positive-click="onResetSetting()">
+          <NPopconfirm @positive-click="resetSetting">
             <template #trigger>
               <NButton
                 class="action-btn action-btn--error"

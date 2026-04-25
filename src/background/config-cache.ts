@@ -4,6 +4,11 @@
  * Service Worker 无法使用 Vue 响应式状态，采用缓存模式：
  * 启动时读取一次配置到内存，后续通过 chrome.storage.onChanged 自动更新缓存。
  * 按键事件直读缓存（~0ms 响应），无需每次读取 storage + 解压。
+ *
+ * 架构说明：SW 和 CS 各自独立解析 gzip 配置，不通过 SW 广播分发。
+ * 原因：gzip 解压极快（1~3ms），postMessage IPC 开销在同一量级，
+ * 集中到 SW 反而增加耦合、丧失 CS 本地 fallback 能力。
+ * 详见 docs/architecture/messaging.md「配置变更：CS 各自解析 vs SW 广播」。
  */
 import { WIDGET_CONFIG } from '@/newtab/widgets/keyboardBookmark/config'
 import { KEYBOARD_COMMAND_CONFIG } from '@/logic/globalShortcut/shortcut-command'

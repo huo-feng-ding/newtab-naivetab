@@ -398,8 +398,6 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
 
 <style>
 #countdown {
-  font-family: var(--nt-cd-clock-font-family);
-  color: var(--nt-cd-clock-font-color);
   user-select: none;
 
   .countdown__container {
@@ -407,6 +405,8 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
     position: absolute;
     width: var(--nt-cd-size);
     height: var(--nt-cd-size);
+    font-family: var(--nt-cd-clock-font-family);
+    color: var(--nt-cd-clock-font-color);
 
     /* 玻璃背景圆 */
     .countdown__bg {
@@ -415,7 +415,6 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
       border-radius: 50%;
       background: var(--nt-cd-custom-background-color);
       backdrop-filter: blur(var(--nt-cd-custom-background-blur));
-      -webkit-backdrop-filter: blur(var(--nt-cd-custom-background-blur));
       border: var(--nt-cd-custom-border-width) solid var(--nt-cd-custom-border-color);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
@@ -581,7 +580,6 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
           opacity: 0.85;
           transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
           backdrop-filter: blur(4px);
-          -webkit-backdrop-filter: blur(4px);
 
           &:hover {
             background: rgba(255, 255, 255, 0.28);

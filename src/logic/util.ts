@@ -90,8 +90,8 @@ export const urlToFile = (url: string, fileName: string): Promise<File> => {
       const targetFile = new File([fileContent], fileName, { type: 'image/jpeg' })
       resolve(targetFile)
     }
-    xhr.onerror = (e) => {
-      reject(e)
+    xhr.onerror = () => {
+      reject(new Error(`Image download failed: ${url} (status: ${xhr.status})`))
     }
     xhr.send()
   })
@@ -105,7 +105,7 @@ export const urlToImage = (url: string): Promise<HTMLImageElement> => {
       resolve(imageEle)
     }
     imageEle.onerror = () => {
-      reject(imageEle)
+      reject(new Error(`Image load failed: ${url}`))
     }
     imageEle.src = url
   })

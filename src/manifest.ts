@@ -27,25 +27,28 @@ export async function getManifest() {
     chrome_url_overrides: {
       newtab: '/dist/newtab/index.html',
     },
-    background: {
-      service_worker: '/dist/background/index.mjs',
-    },
     options_ui: {
       page: '/dist/options/index.html',
       open_in_tab: true,
     },
+    background: {
+      service_worker: '/dist/background/index.mjs',
+    },
+    content_scripts: [
+      {
+        matches: ['<all_urls>'],
+        match_about_blank: true,
+        js: ['dist/contentScripts/index.global.js'],
+        run_at: 'document_start',
+        // all_frames 默认为 false，仅注入顶层 frame。
+        // 快捷键（标签切换、页面刷新、书签打开）都是顶层页面操作，
+        // iframe（广告、支付、第三方嵌入）中不需要响应快捷键。
+        // allFrames: true 会导致每个 iframe 都注入 CS + 建立 Port + 解析配置，
+        // 多倍资源消耗却无实际用户收益，且可能引发按键重复执行。
+      },
+    ],
     // 一个扩展可以有很多命令，但只能指定 4 个建议的键。
     // commands: {},
-    // content_scripts: [
-    //   {
-    //     matches: [
-    //       '<all_urls>',
-    //     ],
-    //     js: [
-    //       'dist/contentScripts/index.global.js',
-    //     ],
-    //   },
-    // ],
     // web_accessible_resources: [
     //   {
     //     resources: ['dist/contentScripts/style.css'],

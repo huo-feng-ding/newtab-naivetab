@@ -355,7 +355,6 @@ onUnmounted(() => {
   border: 1px solid var(--nt-cm-border);
   background: var(--nt-cm-bg);
   backdrop-filter: blur(40px) saturate(2);
-  -webkit-backdrop-filter: blur(40px) saturate(2);
   box-shadow:
     0 16px 48px var(--nt-cm-shadow),
     0 6px 16px rgba(0, 0, 0, 0.06),

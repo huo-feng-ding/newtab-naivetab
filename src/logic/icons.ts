@@ -112,6 +112,58 @@ export const ICONS = {
   close: 'mdi:close',
 }
 
+export const COMMAND_ICONS = {
+  // 标签页导航
+  nextTab: 'mdi:skip-next',
+  prevTab: 'mdi:skip-previous',
+  firstTab: 'mdi:page-first',
+  lastTab: 'mdi:page-last',
+  goBack: 'material-symbols:arrow-back-rounded',
+  goForward: 'material-symbols:arrow-forward-rounded',
+  // 标签页管理
+  moveTabLeft: 'mdi:arrow-left-bold',
+  moveTabRight: 'mdi:arrow-right-bold',
+  newTab: 'mdi:plus-box-outline',
+  newTabAfter: 'radix-icons:open-in-new-window',
+  closeTab: 'mdi:close',
+  reopenClosedTab: 'mdi:restore',
+  toggleTabPinned: 'mdi:pin',
+  toggleTabMute: 'mdi:volume-mute',
+  duplicateTab: 'mdi:content-duplicate',
+  // 窗口操作
+  newWindow: 'lucide:app-window',
+  newIncognito: 'mdi:incognito',
+  moveTabToNextWindow: 'mdi:arrow-bottom-right-bold-box-outline',
+  moveToNewWindow: 'clarity:pop-out-line',
+  closeWindow: 'mdi:window-close',
+  // 批量关闭
+  closeLeftTabs: 'mdi:arrow-left-bold-box-outline',
+  closeRightTabs: 'mdi:arrow-right-bold-box-outline',
+  closeDuplicateTabs: 'mdi:tab-minus',
+  closeOtherTabs: 'mdi:tab-remove',
+  mergeAllWindows: 'lucide:combine',
+  // 标签组
+  groupCurrentTab: 'mdi:view-grid-plus-outline',
+  ungroupCurrentTab: 'mdi:ungroup',
+  toggleGroupCollapse: 'mdi:unfold-more-horizontal',
+  closeGroupTabs: 'mdi:grid-off',
+  // 页面操作
+  copyPageUrl: 'mdi:link-variant-plus',
+  copyPageTitle: 'mdi:format-text-variant',
+  reloadPage: 'mdi:refresh',
+  reloadAllTabs: 'mdi:reload',
+  reloadAllTabsAllWindows: 'mdi:autorenew',
+  // 页面滚动
+  scrollUp: 'mdi:arrow-up-bold',
+  scrollDown: 'mdi:arrow-down-bold',
+  scrollToTop: 'mdi:format-vertical-align-top',
+  scrollToBottom: 'mdi:format-vertical-align-bottom',
+  // NaiveTab 页面控制
+  toggleFocusMode: 'ri:focus-2-line',
+  toggleDragMode: 'tabler:drag-drop',
+  toggleSettingDrawer: 'ion:settings-outline',
+}
+
 export type WidgetIconMeta = {
   iconName: string
   widgetSize: number

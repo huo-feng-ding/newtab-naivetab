@@ -35,21 +35,27 @@ svg[aria-hidden="true"] {
 /* ============================================================
    Setting Panel — Global Form Styles
    ============================================================ */
+
+/* 表单项默认间距 */
 .n-form-item {
   margin: 10px 0;
 }
+/* 颜色类表单项：压缩上下间距 */
 .n-form-item--color {
   margin: 1px 0 !important;
 }
+/* 半宽表单项：占 50% 宽度 */
 .n-form-item--half {
   margin: 0 !important;
   width: 50%;
 }
+
+/* 下拉选项内容撑满 */
 .n-base-select-option__content {
   width: 100% !important;
 }
 
-/* NFormItem label consistent weight */
+/* NFormItem 标签加粗 */
 .n-form-item-label {
   font-weight: 500;
   letter-spacing: 0.15px;
@@ -59,6 +65,13 @@ svg[aria-hidden="true"] {
   display: flex;
   flex-wrap: wrap;
 }
+
+.setting__pane__content {
+  padding: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+/* Setting 面板分组标题行（图标 + 文字） */
 .setting__label {
   margin-top: 3px;
   display: flex;
@@ -74,6 +87,8 @@ svg[aria-hidden="true"] {
     font-size: var(--text-lg);
   }
 }
+
+/* 表单项容器：flex: 1 占满左侧 label 外的空间，内部 flex 布局用于同行放置多个元素 */
 .setting__item_wrap {
   flex: 1;
   display: flex;
@@ -88,26 +103,41 @@ svg[aria-hidden="true"] {
   }
 }
 
+/* Slider 右侧追加元素容器（与输入框同行） */
 .setting__slider-wrap {
   flex: 1;
   display: flex;
   align-items: center;
 }
 
+/* 表单项内追加的元素：不参与 flex 拉伸，保持自身尺寸 */
 .setting__item-ele {
   flex: 0 0 auto;
 }
+
+/* 表单项内追加的元素：加左间距 */
 .setting__item-ml {
   margin-left: var(--space-2);
 }
+
+/* 同行内联布局：用于开关 + 输入框并列 */
+.setting__inline-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* 固定宽度的数字输入框 */
 .setting__input-number {
   width: 103px;
 }
+/* 带单位的数字输入框 */
 .setting__input-number--unit {
   width: 150px;
 }
 
-/* Switch expand child options - scale transition */
+/* 开关展开子选项 — scaleX 缩放动画（适合同行内联元素，如开关旁边的输入框） */
 .setting-expand-enter-active,
 .setting-expand-leave-active {
   transition: opacity var(--transition-base), transform var(--transition-base);
@@ -124,7 +154,7 @@ svg[aria-hidden="true"] {
   transform: scaleX(1);
 }
 
-/* Switch expand block content - height slide transition */
+/* 开关展开块内容 — max-height 滑动动画（适合整块 NFormItem 垂直展开） */
 .setting-slide-enter-active,
 .setting-slide-leave-active {
   transition: opacity var(--transition-base), max-height var(--transition-base);

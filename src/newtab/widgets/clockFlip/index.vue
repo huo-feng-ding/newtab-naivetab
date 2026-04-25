@@ -85,19 +85,19 @@ const flipCard = (cards: FlipCardData[], index: number, newValue: string) => {
   card.previous = card.current
   card.isFlipping = true
 
-  // flipTop 动画: 0~300ms，flipBottom 动画: delay 300ms + duration 300ms = 600ms
-  // 在 300ms 时更新 current（flipTop 结束时静态上半牌已显示新值）
+  // flipTop 动画: 0~350ms，flipBottom 动画: delay 400ms + duration 370ms = 770ms
+  // 在 350ms 时更新 current（flipTop 结束时静态上半牌已显示新值）
   flipTimers.push(setTimeout(() => {
     card.current = newValue
-  }, 300))
+  }, 350))
 
-  // 620ms 后全部动画结束，移除动画状态
+  // 770ms 后全部动画结束，移除动画状态
   // 同时将 previous 同步为 current，以防止 flip--top 因 forwards 失效
   // 瞬间跳回 rotateX(0deg) 时显示旧值导致上半部分闪烁
   flipTimers.push(setTimeout(() => {
     card.previous = card.current
     card.isFlipping = false
-  }, 620))
+  }, 770))
 }
 
 const initTime = () => {
@@ -342,7 +342,14 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
     background: var(--nt-cf-customCardColor);
     border-radius: var(--nt-cf-customBorderRadius);
 
-    /* 中间分割缝隙 */
+    /* 卡片边缘厚度：模拟纸板侧边 */
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.15),
+      0 -1px 0 rgba(0, 0, 0, 0.1),
+      1px 0 0 rgba(0, 0, 0, 0.05),
+      -1px 0 0 rgba(0, 0, 0, 0.05);
+
+    /* 中间分割缝隙：加深折痕阴影 */
     &::before {
       content: '';
       position: absolute;
@@ -351,6 +358,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       right: 0;
       height: 2px;
       background: var(--nt-cf-customCardDividerColor);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       z-index: 20;
     }
 
@@ -362,7 +370,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
       border-radius: var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius) 0 0;
       z-index: 20;
     }
@@ -397,6 +405,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -430,6 +439,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -450,6 +460,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -479,7 +490,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   .flip-card__flip--bottom {
     top: 50%;
     transform-origin: top center;
-    transform: perspective(600px) rotateX(90deg);
+    transform: perspective(400px) rotateX(90deg);
     border-radius: 0 0 var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius);
 
     /* 下半翻牌的渐变阴影遮罩 */
@@ -498,27 +509,27 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   }
 
   .flip-card__flip--animate.flip-card__flip--top {
-    animation: flipTop 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+    animation: flipTop 0.35s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
     will-change: transform;
 
     &::after {
-      animation: flipTopShadow 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+      animation: flipTopShadow 0.35s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
       will-change: opacity;
     }
   }
 
   .flip-card__flip--animate.flip-card__flip--bottom {
-    animation: flipBottom 0.32s cubic-bezier(0, 0, 0.3, 1) 0.28s forwards;
+    animation: flipBottom 0.37s cubic-bezier(0.1, 0.8, 0.3, 1.0) 0.40s forwards;
     will-change: transform;
   }
 }
 
 @keyframes flipTop {
   0% {
-    transform: perspective(600px) rotateX(0deg);
+    transform: perspective(400px) rotateX(0deg);
   }
   100% {
-    transform: perspective(600px) rotateX(-90deg);
+    transform: perspective(400px) rotateX(-90deg);
   }
 }
 
@@ -535,10 +546,16 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
 
 @keyframes flipBottom {
   0% {
-    transform: perspective(600px) rotateX(90deg);
+    transform: perspective(400px) rotateX(90deg);
+  }
+  60% {
+    transform: perspective(400px) rotateX(-2deg);
+  }
+  80% {
+    transform: perspective(400px) rotateX(1deg);
   }
   100% {
-    transform: perspective(600px) rotateX(0deg);
+    transform: perspective(400px) rotateX(0deg);
   }
 }
 

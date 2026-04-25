@@ -34,7 +34,7 @@ const generalConfig = {
   isBackgroundImageEnabled: true,
   backgroundImageSource: BACKGROUND_IMAGE_SOURCE.NETWORK as (typeof BACKGROUND_IMAGE_SOURCE)[keyof typeof BACKGROUND_IMAGE_SOURCE],
   backgroundNetworkSourceType: IMAGE_NETWORK_SOURCE.BING as (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE],
-  backgroundImageHighQuality: false,
+  backgroundImageHighQuality: true,
   backgroundImageNames: ['DarwinsArch_ZH-CN9740478501', 'DolomitesMW_ZH-CN3307894335'],
   isBackgroundImageCustomUrlEnabled: false,
   backgroundImageCustomUrls: ['https://cn.bing.com/th?id=OHR.DarwinsArch_ZH-CN9740478501_1920x1080.jpg', 'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg'],
@@ -42,14 +42,8 @@ const generalConfig = {
     { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DarwinsArch_ZH-CN9740478501' },
     { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'ChukchiSea_ZH-CN7218471261' },
     { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DolomitesMW_ZH-CN3307894335' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'YosemiteNightSky_ZH-CN5864740024' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'LavaTube_ZH-CN5458469336' },
     { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'YurisNight_ZH-CN5738817931' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'PrathameshJaju_ZH-CN2207606082' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'AthensAcropolis_ZH-CN9942357439' },
     { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'Balsamroot_ZH-CN9456182640' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'ChurchillBears_ZH-CN1430090934' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'WinterHalo_ZH-CN0666553211' },
     { networkSourceType: IMAGE_NETWORK_SOURCE.PEXELS, name: '19161535' },
   ] as {
     networkSourceType: (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE]
@@ -66,7 +60,7 @@ const generalConfig = {
   fontFamily: 'system',
   fontSize: 14,
   fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
-  primaryColor: ['rgba(92, 150, 220, 1)', 'rgba(92, 150, 220, 1)'],
+  primaryColor: ['rgba(58, 115, 195, 1)', 'rgba(100, 160, 230, 1)'],
   backgroundColor: ['rgba(232, 236, 241, 1)', 'rgba(26, 26, 46, 1)'],
   bgOpacity: 1,
   bgBlur: 0,
@@ -76,8 +70,7 @@ const generalConfig = {
     'rgba(255, 255, 255, 1)',
     'rgba(15, 23, 42, 1)',
     'rgba(44, 62, 80, 1)',
-    'rgba(16, 152, 173, 1)',
-    'rgba(92, 150, 220, 1)',
+    'rgba(58, 115, 195, 1)',
   ],
 }
 

@@ -125,7 +125,6 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
   border-radius: var(--nt-kb-shell-radius);
   background-color: var(--nt-kb-shell-color) !important;
   backdrop-filter: blur(var(--nt-kb-shell-blur));
-  -webkit-backdrop-filter: blur(var(--nt-kb-shell-blur));
   /* 模拟玻璃质感的四边高光/阴影 */
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   border-left: 1px solid rgba(255, 255, 255, 0.10);
