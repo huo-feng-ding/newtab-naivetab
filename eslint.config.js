@@ -8,7 +8,7 @@ import stylistic from '@stylistic/eslint-plugin'
 
 export default defineConfig(
   {
-    ignores: ['node_modules', 'extension', 'assets', 'public', 'lib', 'src/auto-imports.d.ts', 'src/components.d.ts'],
+    ignores: ['node_modules', 'extension', 'assets', 'public', 'lib', 'src/auto-imports.d.ts', 'src/components.d.ts', 'site'],
   },
 
   // 推荐配置
