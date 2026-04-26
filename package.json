@@ -7,14 +7,14 @@
   "packageManager": "pnpm@10.13.1",
   "description": "Visual keyboard for bookmarks & browser commands — one-press access. Drag & drop layout, full customization, focus mode, and cloud sync.",
   "scripts": {
+    "site:dev": "vitepress dev site",
+    "site:build": "vitepress build site",
+    "site:preview": "vitepress preview site",
     "dev": "pnpm run clear && cross-env NODE_ENV=development run-p dev:*",
     "dev:prepare": "esno scripts/prepare.ts",
     "dev:background": "pnpm run build:background -- --mode development",
     "dev:web": "vite",
     "dev:js": "pnpm run build:js -- --mode development",
-    "site:dev": "vitepress dev site",
-    "site:build": "vitepress build site",
-    "site:preview": "vitepress preview site",
     "build:prepare": "esno scripts/prepare.ts",
     "build:web": "vite build",
     "build:js": "vite build --config vite.config.content.ts",
@@ -100,7 +100,7 @@
     "webextension-polyfill": "^0.12.0"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
+    "pre-commit": "pnpm lint-staged && pnpm test -- --run"
   },
   "lint-staged": {
     "*.{ts,js,vue}": [

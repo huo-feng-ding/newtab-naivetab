@@ -895,6 +895,12 @@ export const importSetting = async (text: string) => {
       fileContent.general.openPageFocusElement = 'keyboardBookmark'
     }
 
+    // isFocusMode 从 general 迁移到 localState
+    if ((fileContent.general as any)?.isFocusMode !== undefined) {
+      localState.value.isFocusMode = (fileContent.general as any).isFocusMode
+      delete (fileContent.general as any).isFocusMode
+    }
+
     log('FileContentTransform', fileContent)
     fileContent.general.version = window.appVersion // 更新版本号
     await updateSetting(fileContent)

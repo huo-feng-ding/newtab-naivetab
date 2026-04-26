@@ -23,6 +23,7 @@
 |------|------|
 | [config.md](docs/architecture/config.md) | 三层配置架构、配置迁移、主题系统、mergeState 合并 |
 | [storage.md](docs/architecture/storage.md) | 存储与同步：useStorageLocal、防抖写入、Gzip 压缩、版本感知同步、配额管理 |
+| [testing.md](docs/architecture/testing.md) | 测试架构：Vitest 配置、Mock 策略、Pre-commit Hook、新增测试指南 |
 | [messaging.md](docs/architecture/messaging.md) | 背景脚本消息传递架构 |
 | [background-image.md](docs/features/background-image.md) | 背景图系统架构、文件索引、核心流程 |
 | [global-shortcut.md](docs/features/global-shortcut.md) | 全局命令快捷键设计与实现 |
