@@ -1,5 +1,59 @@
 import { isMacOS } from '@/env'
 
+// ── 公共强调键集合 ─────────────────────────
+/** 一级强调键：功能键区 + 修饰键 + 编辑键 */
+export const EMPHASIS_ONE_KEYS = [
+  'F5',
+  'F6',
+  'F7',
+  'F8',
+  'F13',
+  'F14',
+  'F15',
+  'F16',
+  'Backquote',
+  'Backspace',
+  'Tab',
+  'CapsLock',
+  'ShiftLeft',
+  'ShiftRight',
+  'ControlLeft',
+  'MetaLeft',
+  'AltLeft',
+  'AltRight',
+  'MetaRight',
+  'ControlRight',
+  'Fn',
+  'Insert',
+  'Delete',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+  'PrintScreen',
+  'ScrollLock',
+  'Pause',
+  'NumLock',
+  'NumpadDivide',
+  'NumpadMultiply',
+  'NumpadSubtract',
+  'NumpadAdd',
+]
+
+/** 二级强调键：方向键 + 确认键 */
+export const EMPHASIS_TWO_KEYS = [
+  'Escape',
+  'Enter',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'NumpadEnter',
+]
+
+// 按键按压反馈持续时间（ms），控制 keycap 从按下到回弹的完整动画时长
+export const KEYCAP_ACTIVE_DURATION = 80
+
 // keyboard 书签 URL / name 的最大字符数限制
 export const KEYBOARD_URL_MAX_LENGTH = 200
 export const KEYBOARD_NAME_MAX_LENGTH = 10
@@ -19,6 +73,10 @@ export const KEYBOARD_TYPE_OPTION = [
   { label: '81b', value: 'key81b' },
   { label: '84', value: 'key84' },
   { label: '87', value: 'key87' },
+  { label: '96a', value: 'key96a' },
+  { label: '96b', value: 'key96b' },
+  { label: '98', value: 'key98' },
+  { label: '104', value: 'key104' },
   { label: 'HHKB', value: 'hhkb' },
 ]
 
@@ -150,9 +208,9 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
     textAlign: 'left',
     size: 1.25,
   },
-  Space: { label: '', textAlign: 'center', size: 6.25 }, //           space2 -> 3;    space3 -> 2.25
-  SpaceSplit1: { label: '', textAlign: 'center', size: 2.25 }, //  space2 -> 3.25; space3 -> 1.25
-  SpaceSplit2: { label: '', textAlign: 'center', size: 2.75 }, // space2 -> 0;    space3 -> 2.75
+  Space: { label: '', textAlign: 'center', size: 6.25 },
+  SpaceSplit1: { label: '', textAlign: 'center', size: 2.25 },
+  SpaceSplit2: { label: '', textAlign: 'center', size: 2.75 },
   AltRight: {
     label: isMacOS ? '⌥' : 'Alt',
     alias: 'RAlt',
@@ -172,6 +230,7 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
     size: 1.25,
   },
   Fn: { label: isMacOS ? 'fn' : 'Fn', textAlign: 'left', size: 1.25 },
+  Menu: { label: isMacOS ? '⌥' : 'Menu', textAlign: 'left', size: 1.25 },
   // Edit
   Insert: { label: isMacOS ? 'ins' : 'Ins', textAlign: 'center', size: 1 },
   Delete: { label: isMacOS ? 'del' : 'Del', textAlign: 'center', size: 1 },
@@ -221,26 +280,6 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
 }
 
 export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET = [
-  'Escape',
-  // 'F1',
-  // 'F2',
-  // 'F3',
-  // 'F4',
-  // 'F5',
-  // 'F6',
-  // 'F7',
-  // 'F8',
-  // 'F9',
-  // 'F10',
-  // 'F11',
-  // 'F12',
-  // 'F13',
-  // 'F14',
-  // 'F15',
-  // 'Backspace',
-  // 'Tab',
-  // 'CapsLock',
-  // 'Enter',
   'ShiftLeft',
   'ShiftRight',
   'ControlLeft',
@@ -250,12 +289,6 @@ export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET = [
   'AltRight',
   'MetaRight',
   'ControlRight',
-  // 'Insert',
-  // 'Delete',
-  // 'Home',
-  // 'End',
-  // 'PageUp',
-  // 'PageDown',
 ]
 
 export const SPACE_KEYCODE_LIST = ['Space', 'SpaceSplit1', 'SpaceSplit2']

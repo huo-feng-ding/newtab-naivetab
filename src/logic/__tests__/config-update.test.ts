@@ -193,7 +193,7 @@ describe('config-update', () => {
       const result = await updateSetting({
         general: { version: '2.0.0', timeLang: 'zh-CN' },
         search: { isNewTabOpen: true },
-      })
+      } as any)
       expect(result).toBe(true)
     })
 
@@ -201,7 +201,7 @@ describe('config-update', () => {
       const result = await updateSetting({
         general: { version: '2.0.0' },
         nonexistent: { foo: 'bar' } as any,
-      })
+      } as any)
       expect(result).toBe(true)
     })
 

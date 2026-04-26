@@ -16,8 +16,21 @@ import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
 // 固定 24px 基准，纯展示用
 const BASE = 24
 
-const { getCustomLabel, getEmphasisGroup, getEmphasisStyle, keycapCssVars } =
-  useKeyboardStyle('px', BASE)
+const {
+  getCustomLabel,
+  getEmphasisGroup,
+  getEmphasisStyle,
+  keycapCssVars,
+  getKeycapStageStyle,
+  getKeycapTextStyle,
+} = useKeyboardStyle('px', BASE)
+
+// 键帽可见性配置（跟随 keyboardCommon 偏好，与其他设置面板保持一致）
+const keycapVisualType = computed(() => localConfig.keyboardCommon.keycapType)
+const isCapKeyVisible = computed(
+  () => localConfig.keyboardCommon.isCapKeyVisible,
+)
+const isNameVisible = computed(() => localConfig.keyboardCommon.isNameVisible)
 
 // 颜色（跟随外观模式，图例用）
 const mainBgColor = getStyleField('keyboardCommon', 'mainBackgroundColor')
@@ -106,19 +119,21 @@ const hasOverrides = computed(
       <KeyboardLayout
         unit="px"
         :base-size="BASE"
-        :rows="currKeyboardConfig.list"
+        :keys="currKeyboardConfig.keys"
       >
         <template #keycap="{ code }">
           <KeyboardKeycapDisplay
             :key-code="code"
             :label="getCustomLabel(code)"
             name=""
-            visual-type="flat"
-            :show-name="false"
+            :visual-type="keycapVisualType"
+            :stage-style="getKeycapStageStyle(code)"
+            :text-style="getKeycapTextStyle(code)"
+            :show-cap-key="isCapKeyVisible"
+            :show-name="isNameVisible"
             :show-favicon="false"
             :show-tactile-bumps="false"
-            :style="getEmphasisStyle(code)"
-            class="emphasis-keycap"
+            :style="[keycapCssVars, getEmphasisStyle(code)]"
             @click="toggleGroup(code)"
           />
         </template>
@@ -173,19 +188,5 @@ const hasOverrides = computed(
   overflow-x: auto;
   max-width: 100%;
   padding-bottom: 2px;
-}
-
-/* ── 键帽点击交互（不改变颜色，仅透明度反馈） ── */
-.emphasis-keycap {
-  cursor: pointer;
-  transition: opacity 0.12s ease;
-
-  &:hover {
-    opacity: 0.75;
-  }
-
-  &:active {
-    opacity: 0.5;
-  }
 }
 </style>

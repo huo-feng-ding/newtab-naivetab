@@ -7,6 +7,7 @@ export const PRESERVE_FIELDS = [
 export const KEYBOARD_COMMON_CONFIG = {
   keyboardType: 'key67',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
+  keyboardWklMode: false,
   keycapType: 'gmk' as KeycapVisualType,
   keycapPadding: 1.5,
   keycapSize: 58,

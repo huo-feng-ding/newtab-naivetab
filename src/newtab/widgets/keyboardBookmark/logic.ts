@@ -5,6 +5,7 @@ import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
 import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard/keyboard-layout'
 import { localConfig } from '@/logic/store'
+import { KEYCAP_ACTIVE_DURATION } from '@/logic/keyboard/keyboard-constants'
 
 export const state = reactive({
   systemBookmarks: [] as BookmarkNode[],
@@ -175,7 +176,7 @@ const delayResetPressKey = () => {
   clearTimeout(delayResetTimer)
   delayResetTimer = setTimeout(() => {
     state.currSelectKeyCode = ''
-  }, 200)
+  }, KEYCAP_ACTIVE_DURATION)
 }
 
 export const openPage = (
@@ -208,7 +209,7 @@ export const handlePressKeycap = (keyCode: string) => {
   state.currSelectKeyCode = keyCode
   setTimeout(() => {
     state.currSelectKeyCode = ''
-  }, 200)
+  }, KEYCAP_ACTIVE_DURATION)
 }
 
 /**

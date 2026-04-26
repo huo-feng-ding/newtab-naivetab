@@ -41,17 +41,17 @@ describe('keydown task system', () => {
 
   it('registers and removes keydown tasks', () => {
     const fn = vi.fn()
-    addKeydownTask('test-task', fn)
+    addKeydownTask('test-task' as any, fn)
     // Task is registered (no error thrown)
-    removeKeydownTask('test-task')
+    removeKeydownTask('test-task' as any)
     // Task is removed (no error thrown)
   })
 
   it('calls registered tasks when key is pressed', () => {
     const fn1 = vi.fn()
     const fn2 = vi.fn()
-    addKeydownTask('task1', fn1)
-    addKeydownTask('task2', fn2)
+    addKeydownTask('task1' as any, fn1)
+    addKeydownTask('task2' as any, fn2)
     startKeydown()
 
     const event = new KeyboardEvent('keydown', { code: 'KeyA' })
@@ -60,16 +60,16 @@ describe('keydown task system', () => {
     expect(fn1).toHaveBeenCalledWith(event)
     expect(fn2).toHaveBeenCalledWith(event)
 
-    removeKeydownTask('task1')
-    removeKeydownTask('task2')
+    removeKeydownTask('task1' as any)
+    removeKeydownTask('task2' as any)
     stopKeydown()
   })
 
   it('stops further tasks when a task returns true', () => {
     const fn1 = vi.fn().mockReturnValue(true)
     const fn2 = vi.fn()
-    addKeydownTask('task1', fn1)
-    addKeydownTask('task2', fn2)
+    addKeydownTask('task1' as any, fn1)
+    addKeydownTask('task2' as any, fn2)
     startKeydown()
 
     const event = new KeyboardEvent('keydown', { code: 'KeyA' })
@@ -78,8 +78,8 @@ describe('keydown task system', () => {
     expect(fn1).toHaveBeenCalled()
     expect(fn2).not.toHaveBeenCalled()
 
-    removeKeydownTask('task1')
-    removeKeydownTask('task2')
+    removeKeydownTask('task1' as any)
+    removeKeydownTask('task2' as any)
     stopKeydown()
   })
 
@@ -97,7 +97,7 @@ describe('keydown task system', () => {
 
     const task = await import('@/logic/task')
     const fn = vi.fn()
-    task.addKeydownTask('guide-test', fn)
+    task.addKeydownTask('guide-test' as any, fn)
     task.startKeydown()
 
     const event = new KeyboardEvent('keydown', { code: 'KeyA' })
@@ -105,7 +105,7 @@ describe('keydown task system', () => {
 
     expect(fn).not.toHaveBeenCalled()
 
-    task.removeKeydownTask('guide-test')
+    task.removeKeydownTask('guide-test' as any)
     task.stopKeydown()
   })
 
@@ -124,7 +124,7 @@ describe('keydown task system', () => {
 
     const task = await import('@/logic/task')
     const fn = vi.fn()
-    task.addKeydownTask('drawer-test', fn)
+    task.addKeydownTask('drawer-test' as any, fn)
     task.startKeydown()
 
     // Regular key is ignored
@@ -140,7 +140,7 @@ describe('keydown task system', () => {
       expect(switchMock).toHaveBeenCalledWith(false)
     })
 
-    task.removeKeydownTask('drawer-test')
+    task.removeKeydownTask('drawer-test' as any)
     task.stopKeydown()
   })
 })

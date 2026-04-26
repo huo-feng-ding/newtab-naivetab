@@ -13,10 +13,7 @@
  */
 
 import { TEXT_ALIGN_TO_JUSTIFY_CONTENT_MAP } from '@/logic/constants/app'
-import {
-  KEYBOARD_CODE_TO_DEFAULT_CONFIG,
-  SPACE_KEYCODE_LIST,
-} from '@/logic/keyboard/keyboard-constants'
+import { KEYBOARD_CODE_TO_DEFAULT_CONFIG } from '@/logic/keyboard/keyboard-constants'
 import { currKeyboardConfig } from '@/logic/keyboard/keyboard-layout'
 import { localConfig, getStyleField, customPrimaryColor } from '@/logic/store'
 
@@ -46,6 +43,11 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
       ? (baseSizeOverride ?? 40)
       : localConfig.keyboardCommon.keycapSize,
   )
+
+  // ── keys 查找辅助 ────────────────────────────────────────────────────────
+  /** 按 code 查找键位定义，未找到返回 undefined */
+  const findKey = (code: string): TKeyDefinition | undefined =>
+    currKeyboardConfig.value.keys.find((k) => k.code === code)
 
   // ── 颜色 ──────────────────────────────────────────────────────────────────
   // getStyleField 返回 computed ref，自动跟随外观模式（light/dark）切换
@@ -210,21 +212,19 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   // 读取自定义配置时，优先使用用户覆盖值，回退到默认配置
 
   /** 获取键帽显示标签（优先自定义 label） */
-  const getCustomLabel = (code: string): string => {
-    const custom = currKeyboardConfig.value.custom[code]?.label
-    return custom ?? KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].label
-  }
+  const getCustomLabel = (code: string): string =>
+    findKey(code)?.label ?? KEYBOARD_CODE_TO_DEFAULT_CONFIG[code]?.label ?? code
 
   /** 获取键帽文字对齐（优先自定义 textAlign） */
-  const getCustomTextAlign = (code: string): string => {
-    const custom = currKeyboardConfig.value.custom[code]?.textAlign
-    return custom ?? KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].textAlign
-  }
+  const getCustomTextAlign = (code: string): string =>
+    findKey(code)?.textAlign ??
+    KEYBOARD_CODE_TO_DEFAULT_CONFIG[code]?.textAlign ??
+    'center'
 
   /** 获取键帽宽度（原始数值，不含单位；用于算术计算） */
   const getKeycapWidthValue = (code: string, addRatio = 0): number => {
-    const customSize = currKeyboardConfig.value.custom[code]?.size
-    const size = customSize ?? KEYBOARD_CODE_TO_DEFAULT_CONFIG[code].size
+    const key = findKey(code)
+    const size = key?.w ?? KEYBOARD_CODE_TO_DEFAULT_CONFIG[code]?.size ?? 1
     return (size + addRatio) * base.value
   }
 
@@ -232,31 +232,24 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   const getKeycapWidthCss = (code: string, addRatio = 0): string =>
     toUnit(getKeycapWidthValue(code, addRatio), unit)
 
-  /** 获取键帽自定义 margin（数值，不含单位；用于容器宽度计算） */
-  const getKeycapMarginValue = (
-    code: string,
-    type: 'marginLeft' | 'marginRight',
-  ): number => {
-    const value = currKeyboardConfig.value.custom[code]?.[type]
-    return value ? base.value * value : 0
-  }
-
   /**
-   * 计算键盘第一行的总宽度（含 shell 左右 padding）。
+   * 计算键盘第一行的总宽度（含 shell 左右 padding + 2px border 补偿）。
    * - 供 popup 动态计算弹窗容器宽度，避免调用方重复内联换算公式。
-   * - 仅在 unit = 'px' 场景下有意义（返回值单位：px）。
    */
   const getFirstRowWidth = (): number => {
+    const SHELL_BORDER_PX = 2
     let width = 0
     if (localConfig.keyboardCommon.isShellVisible) {
       const s = localConfig.keyboardCommon.keycapSize
       width +=
         (localConfig.keyboardCommon.shellHorizontalPadding / s) * base.value * 2
+      width += SHELL_BORDER_PX
     }
-    for (const code of currKeyboardConfig.value.list[0]) {
-      width += getKeycapWidthValue(code)
-      width += getKeycapMarginValue(code, 'marginLeft')
-      width += getKeycapMarginValue(code, 'marginRight')
+    const firstRowKeys = currKeyboardConfig.value.keys
+      .filter((k) => k.y === 0)
+      .sort((a, b) => a.x - b.x)
+    for (const key of firstRowKeys) {
+      width += (key.w ?? 1) * base.value
     }
     return width
   }
@@ -264,23 +257,12 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   // ── 复合内联样式 helpers ──────────────────────────────────────────────────
   // 以下函数返回内联 style 字符串，供模板直接绑定 :style
 
-  /** keycap-wrap 容器（宽度 + 自定义 margin） */
-  const getKeycapWrapStyle = (code: string): string => {
-    let style = `width: ${getKeycapWidthCss(code)}; `
-    const custom = currKeyboardConfig.value.custom[code]
-    if (custom?.marginLeft)
-      style += `margin-left: ${toUnit(custom.marginLeft * base.value, unit)}; `
-    if (custom?.marginRight)
-      style += `margin-right: ${toUnit(custom.marginRight * base.value, unit)}; `
-    if (custom?.marginBottom)
-      style += `margin-bottom: ${toUnit(custom.marginBottom * base.value, unit)}; `
-    return style
-  }
-
   /** keycap stage 顶面（GMK / DSA 型别的立体偏移） */
   const getKeycapStageStyle = (code: string): string => {
     const keycapType = localConfig.keyboardCommon.keycapType
-    const isSpace = SPACE_KEYCODE_LIST.includes(code)
+    const isSpace = code === 'Space'
+    const keyH = findKey(code)?.h ?? 1
+    const isVerticallyExpanded = keyH > 1
     const spaceGradient =
       'background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 90%); background-color: inherit;'
     let style = ''
@@ -288,12 +270,23 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
       style += `margin-top: -${gmkStageMarginTopCss.value};`
       style += `margin-left: -${gmkStageMarginLeftCss.value};`
       style += `width: ${toUnit(getKeycapWidthValue(code, -(GMK_EDGE * 10)), unit)};`
-      style += `height: ${gmkStageHeightCss.value};`
+      if (isVerticallyExpanded) {
+        // 纵向扩展键：stage 撑满 wrapper 全部高度
+        style += `height: calc(100% + ${gmkStageMarginTopCss.value});`
+      } else {
+        style += `height: ${gmkStageHeightCss.value};`
+      }
       if (isSpace) style += `${spaceGradient} border-radius;`
     } else if (keycapType === 'dsa') {
       style += `margin: -${dsaStageMargCss.value};`
-      style += `width: ${toUnit(getKeycapWidthValue(code, -(DSA_EDGE * 1.7)), unit)};`
-      style += `height: ${dsaStageHeightCss.value};`
+      if (isVerticallyExpanded) {
+        // 纵向扩展键：stage 撑满 wrapper 全部高度
+        style += `width: ${toUnit(getKeycapWidthValue(code, -(DSA_EDGE * 1.7)), unit)};`
+        style += `height: calc(100% + ${dsaStageMargCss.value} * 2);`
+      } else {
+        style += `width: ${toUnit(getKeycapWidthValue(code, -(DSA_EDGE * 1.7)), unit)};`
+        style += `height: ${dsaStageHeightCss.value};`
+      }
       if (isSpace) style += spaceGradient
     }
     return style
@@ -326,8 +319,8 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
   const getEmphasisGroup = (code: string): 0 | 1 | 2 => {
     const override = localConfig.keyboardCommon.emphasisKeyOverrides?.[code]
     if (override !== undefined) return override
-    if (currKeyboardConfig.value.emphasisOneKeys.includes(code)) return 1
-    if (currKeyboardConfig.value.emphasisTwoKeys.includes(code)) return 2
+    if (currKeyboardConfig.value.emphasisOneCodes?.includes(code)) return 1
+    if (currKeyboardConfig.value.emphasisTwoCodes?.includes(code)) return 2
     return 0
   }
 
@@ -339,6 +332,30 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     if (group === 2)
       return `background-color:${emphasisTwoBgColor.value};color:${emphasisTwoFontColor.value};`
     return ''
+  }
+
+  /**
+   * 计算单个键的绝对定位样式。
+   * 返回 { left, top, width, height } 的 CSS 变量字符串，绑定到 :style。
+   *
+   * 键位定位包含 shell padding 偏移（仅外壳可见时），确保开启外壳时键盘整体居中于容器内。
+   */
+  const getLayoutKeyStyle = (keyDef: TKeyDefinition): string => {
+    const w = keyDef.w ?? 1
+    const h = keyDef.h ?? 1
+    const isShellVisible = localConfig.keyboardCommon.isShellVisible
+    const padX = isShellVisible
+      ? localConfig.keyboardCommon.shellHorizontalPadding
+      : 0
+    const padY = isShellVisible
+      ? localConfig.keyboardCommon.shellVerticalPadding
+      : 0
+    const s = localConfig.keyboardCommon.keycapSize
+    const offsetX = (padX / s) * base.value
+    const offsetY = (padY / s) * base.value
+    const left = keyDef.x * base.value + offsetX
+    const top = keyDef.y * base.value + offsetY
+    return `left: ${toUnit(left, unit)}; top: ${toUnit(top, unit)}; width: ${toUnit(w * base.value, unit)}; height: ${toUnit(h * base.value, unit)};`
   }
 
   // ── 按压位移（随 base size 等比缩放，约 4.3% 基准） ─────────────────────
@@ -404,15 +421,18 @@ export const useKeyboardStyle = (unit: Unit, baseSizeOverride?: number) => {
     getCustomTextAlign,
     getKeycapWidthValue,
     getKeycapWidthCss,
-    getKeycapMarginValue,
     getFirstRowWidth,
 
     // 内联样式生成
-    getKeycapWrapStyle,
     getKeycapStageStyle,
     getKeycapTextStyle,
     getKeycapIconStyle,
     getEmphasisGroup,
     getEmphasisStyle,
+    getLayoutKeyStyle,
+
+    // Shell 尺寸（供调用方计算容器尺寸时使用）
+    shellHPaddingCss,
+    shellVPaddingCss,
   }
 }

@@ -76,7 +76,7 @@ const containerClass = computed(() => ({
   <WidgetWrap :widget-code="WIDGET_CODE">
     <KeyboardLayout
       unit="vmin"
-      :rows="currKeyboardConfig.list"
+      :keys="currKeyboardConfig.keys"
       :extra-class="containerClass"
       :style="keyboardStyle"
       class="keyboardBookmark__container"

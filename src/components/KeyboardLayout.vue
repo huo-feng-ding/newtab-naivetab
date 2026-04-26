@@ -2,15 +2,15 @@
 /**
  * KeyboardLayout
  *
- * 键盘行列布局的通用容器组件，供 widget（newtab）和 popup 共用。
- * - 负责渲染 shell / plate / 行列结构，不关心每个键帽的具体内容
+ * 键盘布局容器，使用绝对定位渲染所有键位。
+ * - 负责渲染 shell / plate / 键位结构，不关心每个键帽的具体内容
  * - 每个键帽内容通过具名 slot `keycap` 暴露，调用方自行决定渲染什么
  * - 布局尺寸样式通过 `useKeyboardStyle` composable 统一计算
  *
  * Props：
  *   unit        - 'vmin'（widget）或 'px'（popup），控制尺寸单位
  *   baseSize    - px 模式下的基准尺寸（默认 40），vmin 模式忽略此参数
- *   rows        - 键盘行列数据，二维数组，每项为 keyCode 字符串
+ *   keys        - 键盘所有键的坐标定义数组
  *   extraClass  - 附加到容器的 class（可选）
  *
  * Slot `keycap`：
@@ -20,11 +20,15 @@
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import { localConfig } from '@/logic/store'
 
+/** 将数值按单位转成 CSS 字符串 */
+const toUnit = (value: number, unit: 'vmin' | 'px'): string =>
+  unit === 'vmin' ? `${value * 0.1}vmin` : `${value}px`
+
 const props = withDefaults(
   defineProps<{
     unit: 'vmin' | 'px'
     baseSize?: number
-    rows: string[][]
+    keys: TKeyDefinition[]
     extraClass?: string | string[] | Record<string, boolean>
   }>(),
   {
@@ -34,7 +38,7 @@ const props = withDefaults(
 )
 
 // ── 样式 composable ──────────────────────────────────────────────────────────
-const { getKeycapWrapStyle, layoutCssVars } = useKeyboardStyle(
+const { getLayoutKeyStyle, layoutCssVars, base } = useKeyboardStyle(
   props.unit,
   props.baseSize,
 )
@@ -45,6 +49,27 @@ const isShellShadowEnabled = computed(
   () => localConfig.keyboardCommon.isShellShadowEnabled,
 )
 const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
+
+// ── 容器总宽高（包含 shell padding + border，转成 CSS 字符串注入 :style） ──
+// shell 有 1px 四边 border，box-sizing: border-box 下 border 吃掉 content-box，
+// 需要在容器尺寸中补回 2px，确保键位在 padding-box 内精确居中。
+// 加 2 对应 2 × 1px 边框，在 vmin 模式下 2 即 0.2vmin ≈ 2px（1000px 基准视口）。
+const SHELL_BORDER_PX = 2
+const containerWidthCss = computed(() => {
+  const keyWidth =
+    Math.max(...props.keys.map((k) => k.x + (k.w || 1))) * base.value
+  const s = localConfig.keyboardCommon.keycapSize
+  const pad =
+    (localConfig.keyboardCommon.shellHorizontalPadding / s) * base.value
+  return keyWidth + 2 * pad + SHELL_BORDER_PX
+})
+const containerHeightCss = computed(() => {
+  const keyHeight =
+    Math.max(...props.keys.map((k) => k.y + (k.h || 1))) * base.value
+  const s = localConfig.keyboardCommon.keycapSize
+  const pad = (localConfig.keyboardCommon.shellVerticalPadding / s) * base.value
+  return keyHeight + 2 * pad + SHELL_BORDER_PX
+})
 </script>
 
 <template>
@@ -58,33 +83,32 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
       },
       extraClass,
     ]"
-    :style="layoutCssVars"
+    :style="[
+      layoutCssVars,
+      {
+        width: toUnit(containerWidthCss, props.unit),
+        height: toUnit(containerHeightCss, props.unit),
+      },
+    ]"
   >
-    <!-- 行迭代 -->
+    <!-- 每个键位独立绝对定位 -->
     <div
-      v-for="(rowData, rowIndex) of rows"
-      :key="rowIndex"
-      class="keyboard-layout__row"
+      v-for="key of keys"
+      :key="key.code"
+      class="keyboard-layout__keycap-wrap"
+      :style="getLayoutKeyStyle(key)"
     >
-      <!-- 单键帽 wrap：宽度 / margin 由 getKeycapWrapStyle 计算 -->
+      <!-- 定位板层（shell + plate 均开启时渲染，z-index: -1 置于键帽后方） -->
       <div
-        v-for="code of rowData"
-        :key="code"
-        class="keyboard-layout__keycap-wrap"
-        :style="getKeycapWrapStyle(code)"
-      >
-        <!-- 定位板层（shell + plate 均开启时渲染，z-index: -1 置于键帽后方） -->
-        <div
-          v-if="isShellVisible && isPlateVisible"
-          class="keyboard-layout__keycap-plate"
-        />
-        <!-- 键帽内容由调用方通过 slot 注入 -->
-        <slot
-          name="keycap"
-          :code="code"
-          :row-index="rowIndex"
-        />
-      </div>
+        v-if="isShellVisible && isPlateVisible"
+        class="keyboard-layout__keycap-plate"
+      />
+      <!-- 键帽内容由调用方通过 slot 注入 -->
+      <slot
+        name="keycap"
+        :code="key.code"
+        :row-index="key.y"
+      />
     </div>
   </div>
 </template>
@@ -92,33 +116,28 @@ const isPlateVisible = computed(() => localConfig.keyboardCommon.isPlateVisible)
 <style scoped>
 /* ── 键盘容器基础 ──────────────────────────────────────────────────────────── */
 .keyboard-layout {
+  position: relative;
   font-family: var(--nt-kb-bookmark-font-family);
 
-  /* ── 行 ── */
-  .keyboard-layout__row {
-    display: flex;
+  /* ── 单键帽 wrap ── */
+  .keyboard-layout__keycap-wrap {
+    position: absolute;
+    padding: var(--nt-kb-keycap-padding);
+    height: var(--nt-kb-keycap-height);
 
-    /* ── 单键帽 wrap ── */
-    .keyboard-layout__keycap-wrap {
-      flex: 0 0 auto;
-      position: relative;
-      padding: var(--nt-kb-keycap-padding);
-      height: var(--nt-kb-keycap-height);
-
-      /* ── 定位板（绝对定位，向外扩展 platePadding，置于键帽层之下） ── */
-      .keyboard-layout__keycap-plate {
-        z-index: -1;
-        position: absolute;
-        top: calc(-1 * var(--nt-kb-plate-padding));
-        left: calc(-1 * var(--nt-kb-plate-padding));
-        width: calc(100% + var(--nt-kb-plate-padding) * 2);
-        height: calc(100% + var(--nt-kb-plate-padding) * 2);
-        background: var(--nt-kb-plate-color);
-        border-radius: var(--nt-kb-plate-radius);
-        backdrop-filter: blur(var(--nt-kb-plate-blur));
-        /* 顶部内发光，模拟哑光金属/PCB 定位板的物理质感 */
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      }
+    /* ── 定位板（绝对定位，向外扩展 platePadding，置于键帽层之下） ── */
+    .keyboard-layout__keycap-plate {
+      z-index: -1;
+      position: absolute;
+      top: calc(-1 * var(--nt-kb-plate-padding));
+      left: calc(-1 * var(--nt-kb-plate-padding));
+      width: calc(100% + var(--nt-kb-plate-padding) * 2);
+      height: calc(100% + var(--nt-kb-plate-padding) * 2);
+      background: var(--nt-kb-plate-color);
+      border-radius: var(--nt-kb-plate-radius);
+      backdrop-filter: blur(var(--nt-kb-plate-blur));
+      /* 顶部内发光，模拟哑光金属/PCB 定位板的物理质感 */
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
   }
 }

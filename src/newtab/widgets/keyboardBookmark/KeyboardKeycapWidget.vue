@@ -120,6 +120,7 @@ const keycapStyle = computed(() => getEmphasisStyle(props.keyCode))
     :show-favicon="localConfig.keyboardCommon.isFaviconVisible"
     :show-tactile-bumps="localConfig.keyboardCommon.isTactileBumpsVisible"
     :is-back-icon-visible="keyboardState.selectedFolderTitleStack.length !== 0"
+    :render-mode="'full'"
     :class="rowKeycapClassName"
     :style="[keycapCssVars, keycapStyle]"
     :title="keycapTitle"

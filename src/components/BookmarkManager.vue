@@ -312,7 +312,7 @@ const onHandleInputBlur = () => {
       <KeyboardLayout
         unit="px"
         :base-size="baseSize"
-        :rows="currKeyboardConfig.list"
+        :keys="currKeyboardConfig.keys"
       >
         <template #keycap="{ code }">
           <div

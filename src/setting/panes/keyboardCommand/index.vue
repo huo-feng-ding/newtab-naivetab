@@ -206,7 +206,7 @@ const handleCommandSelect = (cmd: TCommandName) => {
           <KeyboardLayout
             unit="px"
             :base-size="keyboardBaseSize"
-            :rows="currKeyboardConfig.list"
+            :keys="currKeyboardConfig.keys"
           >
             <template #keycap="{ code }">
               <div

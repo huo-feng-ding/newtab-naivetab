@@ -43,6 +43,10 @@ import { localConfig } from '@/logic/store'
       </NRadioGroup>
     </NFormItem>
 
+    <NFormItem :label="$t('keyboardCommon.wklMode')">
+      <NSwitch v-model:value="localConfig.keyboardCommon.keyboardWklMode" />
+    </NFormItem>
+
     <NFormItem :label="$t('keyboardCommon.keyboardType')">
       <NRadioGroup
         v-model:value="localConfig.keyboardCommon.keyboardType"

@@ -241,6 +241,7 @@
     "keyboardType": "Keyboard Type",
     "splitSpace": "Split Space",
     "keycapVisualType": "Keycap Profile",
+    "wklMode": "Winkeyless Mode",
     "tactileBumps": "Tactile Bumps",
     "presetTheme": "Preset Theme",
     "urlLabel": "Url",
