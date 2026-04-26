@@ -1,5 +1,59 @@
 import { isMacOS } from '@/env'
 
+// ── 公共强调键集合 ─────────────────────────
+/** 一级强调键：功能键区 + 修饰键 + 编辑键 */
+export const EMPHASIS_ONE_KEYS = [
+  'F5',
+  'F6',
+  'F7',
+  'F8',
+  'F13',
+  'F14',
+  'F15',
+  'F16',
+  'Backquote',
+  'Backspace',
+  'Tab',
+  'CapsLock',
+  'ShiftLeft',
+  'ShiftRight',
+  'ControlLeft',
+  'MetaLeft',
+  'AltLeft',
+  'AltRight',
+  'MetaRight',
+  'ControlRight',
+  'Fn',
+  'Insert',
+  'Delete',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown',
+  'PrintScreen',
+  'ScrollLock',
+  'Pause',
+  'NumLock',
+  'NumpadDivide',
+  'NumpadMultiply',
+  'NumpadSubtract',
+  'NumpadAdd',
+]
+
+/** 二级强调键：方向键 + 确认键 */
+export const EMPHASIS_TWO_KEYS = [
+  'Escape',
+  'Enter',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'NumpadEnter',
+]
+
+// 按键按压反馈持续时间（ms），控制 keycap 从按下到回弹的完整动画时长
+export const KEYCAP_ACTIVE_DURATION = 80
+
 // keyboard 书签 URL / name 的最大字符数限制
 export const KEYBOARD_URL_MAX_LENGTH = 200
 export const KEYBOARD_NAME_MAX_LENGTH = 10
@@ -19,6 +73,10 @@ export const KEYBOARD_TYPE_OPTION = [
   { label: '81b', value: 'key81b' },
   { label: '84', value: 'key84' },
   { label: '87', value: 'key87' },
+  { label: '96a', value: 'key96a' },
+  { label: '96b', value: 'key96b' },
+  { label: '98', value: 'key98' },
+  { label: '104', value: 'key104' },
   { label: 'HHKB', value: 'hhkb' },
 ]
 
@@ -66,7 +124,11 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   Digit0: { label: '0', textAlign: 'center', size: 1 },
   Minus: { label: '-', textAlign: 'center', size: 1 },
   Equal: { label: '+', textAlign: 'center', size: 1 },
-  Backspace: { label: isMacOS ? 'delete' : 'Backspace', textAlign: 'right', size: 2 },
+  Backspace: {
+    label: isMacOS ? 'delete' : 'Backspace',
+    textAlign: 'right',
+    size: 2,
+  },
   // 2
   Tab: { label: isMacOS ? 'tab' : 'Tab', textAlign: 'left', size: 1.5 },
   KeyQ: { label: 'Q', textAlign: 'center', size: 1 },
@@ -83,7 +145,11 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   BracketRight: { label: '] }', textAlign: 'center', size: 1 },
   Backslash: { label: '| \\', textAlign: 'center', size: 1.5 },
   // 3
-  CapsLock: { label: isMacOS ? 'caps lock' : 'Caps Lock', textAlign: 'left', size: 1.75 },
+  CapsLock: {
+    label: isMacOS ? 'caps lock' : 'Caps Lock',
+    textAlign: 'left',
+    size: 1.75,
+  },
   KeyA: { label: 'A', textAlign: 'center', size: 1 },
   KeyS: { label: 'S', textAlign: 'center', size: 1 },
   KeyD: { label: 'D', textAlign: 'center', size: 1 },
@@ -95,9 +161,18 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   KeyL: { label: 'L', textAlign: 'center', size: 1 },
   Semicolon: { label: ': ;', textAlign: 'center', size: 1 },
   Quote: { label: '" \'', textAlign: 'center', size: 1 },
-  Enter: { label: isMacOS ? 'return' : 'Enter', textAlign: 'right', size: 2.25 },
+  Enter: {
+    label: isMacOS ? 'return' : 'Enter',
+    textAlign: 'right',
+    size: 2.25,
+  },
   // 4
-  ShiftLeft: { label: isMacOS ? 'shift' : 'Shift', alias: 'LShift', textAlign: 'left', size: 2.25 },
+  ShiftLeft: {
+    label: isMacOS ? 'shift' : 'Shift',
+    alias: 'LShift',
+    textAlign: 'left',
+    size: 2.25,
+  },
   KeyZ: { label: 'Z', textAlign: 'center', size: 1 },
   KeyX: { label: 'X', textAlign: 'center', size: 1 },
   KeyC: { label: 'C', textAlign: 'center', size: 1 },
@@ -108,18 +183,54 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   Comma: { label: '< ,', textAlign: 'center', size: 1 },
   Period: { label: '> .', textAlign: 'center', size: 1 },
   Slash: { label: '? /', textAlign: 'center', size: 1 },
-  ShiftRight: { label: isMacOS ? 'shift' : 'Shift', alias: 'RShift', textAlign: 'right', size: 2.75 },
+  ShiftRight: {
+    label: isMacOS ? 'shift' : 'Shift',
+    alias: 'RShift',
+    textAlign: 'right',
+    size: 2.75,
+  },
   // 5
-  ControlLeft: { label: isMacOS ? '⌃' : 'Ctrl', alias: 'LCtrl', textAlign: 'left', size: 1.25 },
-  MetaLeft: { label: isMacOS ? '⌘' : 'Win', alias: 'LMeta', textAlign: 'left', size: 1.25 },
-  AltLeft: { label: isMacOS ? '⌥' : 'Alt', alias: 'LAlt', textAlign: 'left', size: 1.25 },
-  Space: { label: '', textAlign: 'center', size: 6.25 }, //           space2 -> 3;    space3 -> 2.25
-  SpaceSplit1: { label: '', textAlign: 'center', size: 2.25 }, //  space2 -> 3.25; space3 -> 1.25
-  SpaceSplit2: { label: '', textAlign: 'center', size: 2.75 }, // space2 -> 0;    space3 -> 2.75
-  AltRight: { label: isMacOS ? '⌥' : 'Alt', alias: 'RAlt', textAlign: 'left', size: 1.25 },
-  MetaRight: { label: isMacOS ? '⌘' : 'Win', alias: 'RMeta', textAlign: 'left', size: 1.25 },
-  ControlRight: { label: isMacOS ? '⌃' : 'Ctrl', alias: 'RCtrl', textAlign: 'left', size: 1.25 },
+  ControlLeft: {
+    label: isMacOS ? '⌃' : 'Ctrl',
+    alias: 'LCtrl',
+    textAlign: 'left',
+    size: 1.25,
+  },
+  MetaLeft: {
+    label: isMacOS ? '⌘' : 'Win',
+    alias: 'LMeta',
+    textAlign: 'left',
+    size: 1.25,
+  },
+  AltLeft: {
+    label: isMacOS ? '⌥' : 'Alt',
+    alias: 'LAlt',
+    textAlign: 'left',
+    size: 1.25,
+  },
+  Space: { label: '', textAlign: 'center', size: 6.25 },
+  SpaceSplit1: { label: '', textAlign: 'center', size: 2.25 },
+  SpaceSplit2: { label: '', textAlign: 'center', size: 2.75 },
+  AltRight: {
+    label: isMacOS ? '⌥' : 'Alt',
+    alias: 'RAlt',
+    textAlign: 'left',
+    size: 1.25,
+  },
+  MetaRight: {
+    label: isMacOS ? '⌘' : 'Win',
+    alias: 'RMeta',
+    textAlign: 'left',
+    size: 1.25,
+  },
+  ControlRight: {
+    label: isMacOS ? '⌃' : 'Ctrl',
+    alias: 'RCtrl',
+    textAlign: 'left',
+    size: 1.25,
+  },
   Fn: { label: isMacOS ? 'fn' : 'Fn', textAlign: 'left', size: 1.25 },
+  Menu: { label: isMacOS ? '⌥' : 'Menu', textAlign: 'left', size: 1.25 },
   // Edit
   Insert: { label: isMacOS ? 'ins' : 'Ins', textAlign: 'center', size: 1 },
   Delete: { label: isMacOS ? 'del' : 'Del', textAlign: 'center', size: 1 },
@@ -133,8 +244,16 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   ArrowLeft: { label: '←', textAlign: 'center', size: 1 },
   ArrowRight: { label: '→', textAlign: 'center', size: 1 },
   // System
-  PrintScreen: { label: isMacOS ? 'prtsc' : 'PrtSc', textAlign: 'center', size: 1 },
-  ScrollLock: { label: isMacOS ? 'scrlk' : 'ScrLk', textAlign: 'center', size: 1 },
+  PrintScreen: {
+    label: isMacOS ? 'prtsc' : 'PrtSc',
+    textAlign: 'center',
+    size: 1,
+  },
+  ScrollLock: {
+    label: isMacOS ? 'scrlk' : 'ScrLk',
+    textAlign: 'center',
+    size: 1,
+  },
   Pause: { label: isMacOS ? 'pause' : 'Pause', textAlign: 'center', size: 1 },
   // Numpad
   NumLock: { label: 'Num\nLock', textAlign: 'center', size: 1 },
@@ -151,32 +270,16 @@ export const KEYBOARD_CODE_TO_DEFAULT_CONFIG = {
   Numpad1: { label: '1', textAlign: 'center', size: 1 },
   Numpad2: { label: '2', textAlign: 'center', size: 1 },
   Numpad3: { label: '3', textAlign: 'center', size: 1 },
-  NumpadEnter: { label: isMacOS ? 'return' : 'Enter', textAlign: 'center', size: 2 },
+  NumpadEnter: {
+    label: isMacOS ? 'return' : 'Enter',
+    textAlign: 'center',
+    size: 2,
+  },
   Numpad0: { label: '0', textAlign: 'center', size: 2 },
   NumpadDecimal: { label: '.', textAlign: 'center', size: 1 },
 }
 
 export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET = [
-  'Escape',
-  // 'F1',
-  // 'F2',
-  // 'F3',
-  // 'F4',
-  // 'F5',
-  // 'F6',
-  // 'F7',
-  // 'F8',
-  // 'F9',
-  // 'F10',
-  // 'F11',
-  // 'F12',
-  // 'F13',
-  // 'F14',
-  // 'F15',
-  // 'Backspace',
-  // 'Tab',
-  // 'CapsLock',
-  // 'Enter',
   'ShiftLeft',
   'ShiftRight',
   'ControlLeft',
@@ -186,12 +289,6 @@ export const KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET = [
   'AltRight',
   'MetaRight',
   'ControlRight',
-  // 'Insert',
-  // 'Delete',
-  // 'Home',
-  // 'End',
-  // 'PageUp',
-  // 'PageDown',
 ]
 
 export const SPACE_KEYCODE_LIST = ['Space', 'SpaceSplit1', 'SpaceSplit2']

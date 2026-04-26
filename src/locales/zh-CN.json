@@ -241,6 +241,7 @@
     "keyboardType": "键盘配列",
     "splitSpace": "分裂空格",
     "keycapVisualType": "键帽类型",
+    "wklMode": "WKL模式",
     "tactileBumps": "触摸点",
     "presetTheme": "预设主题",
     "urlLabel": "地址",

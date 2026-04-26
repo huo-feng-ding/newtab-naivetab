@@ -2,7 +2,13 @@
 import { localConfig } from '@/logic/store'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, ColorField, FontField, SwitchField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  ColorField,
+  FontField,
+  SwitchField,
+  ToggleColorField,
+} from '@/setting/fields'
 </script>
 
 <template>

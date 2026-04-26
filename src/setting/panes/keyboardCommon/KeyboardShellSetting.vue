@@ -18,7 +18,9 @@ import SliderInput from '@/components/SliderInput.vue'
       />
       <CustomColorPicker
         v-if="localConfig.keyboardCommon.isShellVisible"
-        v-model:value="localConfig.keyboardCommon.shellColor[localState.currAppearanceCode]"
+        v-model:value="
+          localConfig.keyboardCommon.shellColor[localState.currAppearanceCode]
+        "
         class="setting__item-ele setting__item-ml"
       />
     </NFormItem>
@@ -69,7 +71,11 @@ import SliderInput from '@/components/SliderInput.vue'
           size="small"
         />
         <CustomColorPicker
-          v-model:value="localConfig.keyboardCommon.shellShadowColor[localState.currAppearanceCode]"
+          v-model:value="
+            localConfig.keyboardCommon.shellShadowColor[
+              localState.currAppearanceCode
+            ]
+          "
           class="setting__item-ele setting__item-ml"
         />
       </NFormItem>
@@ -87,7 +93,9 @@ import SliderInput from '@/components/SliderInput.vue'
       />
       <CustomColorPicker
         v-if="localConfig.keyboardCommon.isPlateVisible"
-        v-model:value="localConfig.keyboardCommon.plateColor[localState.currAppearanceCode]"
+        v-model:value="
+          localConfig.keyboardCommon.plateColor[localState.currAppearanceCode]
+        "
         class="setting__item-ele setting__item-ml"
       />
     </NFormItem>

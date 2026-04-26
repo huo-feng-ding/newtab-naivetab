@@ -3,8 +3,20 @@ import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { gaProxy } from '@/logic/gtag'
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
-import { isDragMode, toggleIsDragMode, isDraftDrawerVisible, handleToggleIsDraftDrawerVisible, moveState, animateDeleteWidget } from '@/logic/moveable'
-import { customPrimaryColor, localConfig, localState, globalState } from '@/logic/store'
+import {
+  isDragMode,
+  toggleIsDragMode,
+  isDraftDrawerVisible,
+  handleToggleIsDraftDrawerVisible,
+  moveState,
+  animateDeleteWidget,
+} from '@/logic/moveable'
+import {
+  customPrimaryColor,
+  localConfig,
+  localState,
+  globalState,
+} from '@/logic/store'
 import { styleConst } from '@/styles/const'
 import { widgetsRegistry } from '@/newtab/widgets/registry'
 import { WIDGET_GROUPS } from '@/newtab/widgets/codes'
@@ -13,7 +25,8 @@ const draftDrawerStyle = computed(() => {
   const c = styleConst.value
   const ac = localState.value.currAppearanceCode
   return {
-    '--nt-bg-moveable-tool-drawer': c.bgMoveableToolDrawer[ac] || c.bgMoveableToolDrawer[0],
+    '--nt-bg-moveable-tool-drawer':
+      c.bgMoveableToolDrawer[ac] || c.bgMoveableToolDrawer[0],
     '--nt-draft-custom-primary-color': customPrimaryColor.value,
   }
 })
@@ -64,26 +77,34 @@ const handleDraftMouseDown = async (e: MouseEvent) => {
   // 以光标位置为组件的中心开始拖拽
   // ⚠️  必须 await startDrag 完成（它内部需要 nextTick 等 DOM 渲染），
   //     再执行 onDragging，否则 startState 尚未初始化，组件会出现在错误位置
-  const mouseDownTask = moveState.mouseDownTaskMap.get(moveState.currDragTarget.code)
+  const mouseDownTask = moveState.mouseDownTaskMap.get(
+    moveState.currDragTarget.code,
+  )
   if (mouseDownTask) {
     await mouseDownTask(e, true) // startDrag(e: MouseEvent, resite: boolean)
   }
   // 执行一次 onDragging，为消除首次启用组件时会展示上次存储的布局
-  const mouseMoveTask = moveState.mouseMoveTaskMap.get(moveState.currDragTarget.code)
+  const mouseMoveTask = moveState.mouseMoveTaskMap.get(
+    moveState.currDragTarget.code,
+  )
   if (mouseMoveTask) {
     mouseMoveTask(e)
   }
 }
 
 const handleDraftMouseMove = async (e: MouseEvent) => {
-  const mouseMoveTask = moveState.mouseMoveTaskMap.get(moveState.currDragTarget.code)
+  const mouseMoveTask = moveState.mouseMoveTaskMap.get(
+    moveState.currDragTarget.code,
+  )
   if (mouseMoveTask) {
     mouseMoveTask(e)
   }
 }
 
 const handleDraftMouseUp = (e: MouseEvent) => {
-  const mouseUpTask = moveState.mouseUpTaskMap.get(moveState.currDragTarget.code)
+  const mouseUpTask = moveState.mouseUpTaskMap.get(
+    moveState.currDragTarget.code,
+  )
   if (mouseUpTask) {
     mouseUpTask(e)
   }
@@ -152,7 +173,6 @@ const handlerDeleteMouseUp = () => {
   onDeleteComponent()
   moveState.isDeleteHover = false
 }
-
 </script>
 
 <template>
@@ -235,7 +255,9 @@ const handlerDeleteMouseUp = () => {
     <div
       v-if="isDragMode"
       class="tool__delete"
-      :class="{ 'tool__delete--active': isDragMode && moveState.isWidgetStartDrag }"
+      :class="{
+        'tool__delete--active': isDragMode && moveState.isWidgetStartDrag,
+      }"
       @mouseenter="handlerDeleteMouseEnter"
       @mouseleave="handlerDeleteMouseLeave"
       @mouseup="handlerDeleteMouseUp"
@@ -284,7 +306,14 @@ const handlerDeleteMouseUp = () => {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18) 30%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.18) 70%, transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.18) 30%,
+      rgba(255, 255, 255, 0.28) 50%,
+      rgba(255, 255, 255, 0.18) 70%,
+      transparent
+    );
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
   }
@@ -326,7 +355,12 @@ const handlerDeleteMouseUp = () => {
         left: 10%;
         right: 10%;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3) 50%, transparent);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3) 50%,
+          transparent
+        );
         border-radius: 50%;
       }
       .switch__icon {
@@ -354,7 +388,11 @@ const handlerDeleteMouseUp = () => {
       height: 52px;
       width: 100%;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        transparent 100%
+      );
       border-top-left-radius: 16px;
       border-top-right-radius: 16px;
       .header__done {
@@ -460,7 +498,11 @@ const handlerDeleteMouseUp = () => {
           left: 0;
           right: 0;
           height: 40%;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 100%);
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.07) 0%,
+            transparent 100%
+          );
           pointer-events: none;
         }
         .item__icon {
@@ -470,7 +512,9 @@ const handlerDeleteMouseUp = () => {
           width: 100%;
           height: 44px;
           opacity: 0.9;
-          transition: opacity 180ms ease, transform 180ms ease;
+          transition:
+            opacity 180ms ease,
+            transform 180ms ease;
         }
         .item__text {
           flex: 1;
@@ -515,7 +559,11 @@ const handlerDeleteMouseUp = () => {
     width: 200px;
     height: 200px;
     cursor: pointer;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 100, 100, 1), rgba(220, 38, 38, 1));
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 100, 100, 1),
+      rgba(220, 38, 38, 1)
+    );
     box-shadow:
       -4px 4px 20px rgba(220, 38, 38, 0.5),
       0 0 30px rgba(255, 80, 80, 0.15);
@@ -529,7 +577,9 @@ const handlerDeleteMouseUp = () => {
       color: #fff;
       transform: rotate(-45deg);
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-      transition: transform 250ms cubic-bezier(0.34, 1.06, 0.64, 1), filter 250ms ease;
+      transition:
+        transform 250ms cubic-bezier(0.34, 1.06, 0.64, 1),
+        filter 250ms ease;
     }
   }
   .tool__delete--active {

@@ -3,27 +3,27 @@ import globals from 'globals'
 import { defineConfig } from 'eslint/config'
 import eslintPluginVue from 'eslint-plugin-vue'
 import typescriptEslint from 'typescript-eslint'
-import stylistic from '@stylistic/eslint-plugin'
-// import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import prettierRecommended from 'eslint-plugin-prettier/recommended'
+import prettierConfig from 'eslint-config-prettier'
 
 export default defineConfig(
   {
-    ignores: ['node_modules', 'extension', 'assets', 'public', 'lib', 'src/auto-imports.d.ts', 'src/components.d.ts'],
+    ignores: [
+      'node_modules',
+      'extension',
+      'assets',
+      'public',
+      'lib',
+      'src/auto-imports.d.ts',
+      'src/components.d.ts',
+      'site',
+    ],
   },
 
   // 推荐配置
   eslint.configs.recommended,
   ...typescriptEslint.configs.recommended,
   ...eslintPluginVue.configs['flat/recommended'],
-
-  stylistic.configs.customize({
-    indent: 2,
-    quotes: 'single',
-    semi: false,
-    jsx: true,
-    braceStyle: '1tbs',
-    arrowParens: 'always',
-  }),
 
   /**
    * 配置全局变量
@@ -65,7 +65,6 @@ export default defineConfig(
       'vue/multi-word-component-names': 'off',
       'vue/attribute-hyphenation': 'off',
       'vue/no-required-prop-with-default': 'off',
-      '@stylistic/quote-props': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/ban-ts-ignore': 'off',
@@ -103,5 +102,8 @@ export default defineConfig(
    * prettier 配置，会合并根目录下的prettier.config.js 文件
    * @see https://prettier.io/docs/en/options
    */
-  // eslintPluginPrettierRecommended,
+  // eslint-plugin-prettier 将 Prettier 规则作为 ESLint 规则运行
+  // eslint-config-prettier 禁用与 Prettier 冲突的 ESLint 规则
+  prettierConfig,
+  prettierRecommended,
 )

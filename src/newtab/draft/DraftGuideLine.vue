@@ -7,8 +7,10 @@ const lineStyle = computed(() => {
   const c = styleConst.value
   const ac = localState.value.currAppearanceCode
   return {
-    '--nt-auxiliary-line-main': c.auxiliaryLineMain[ac] || c.auxiliaryLineMain[0],
-    '--nt-auxiliary-line-bound': c.auxiliaryLineBound[ac] || c.auxiliaryLineBound[0],
+    '--nt-auxiliary-line-main':
+      c.auxiliaryLineMain[ac] || c.auxiliaryLineMain[0],
+    '--nt-auxiliary-line-bound':
+      c.auxiliaryLineBound[ac] || c.auxiliaryLineBound[0],
   }
 })
 </script>
@@ -21,27 +23,27 @@ const lineStyle = computed(() => {
   >
     <div
       class="axis xaxis__center"
-      :class="{ 'line__show': moveState.isXAxisCenterVisible }"
+      :class="{ line__show: moveState.isXAxisCenterVisible }"
     />
     <div
       class="axis yaxis__center"
-      :class="{ 'line__show': moveState.isYAxisCenterVisible }"
+      :class="{ line__show: moveState.isYAxisCenterVisible }"
     />
     <div
       class="bound bound__top"
-      :class="{ 'line__show': moveState.isTopBoundVisible }"
+      :class="{ line__show: moveState.isTopBoundVisible }"
     />
     <div
       class="bound bound__bottom"
-      :class="{ 'line__show': moveState.isBottomBoundVisible }"
+      :class="{ line__show: moveState.isBottomBoundVisible }"
     />
     <div
       class="bound bound__left"
-      :class="{ 'line__show': moveState.isLeftBoundVisible }"
+      :class="{ line__show: moveState.isLeftBoundVisible }"
     />
     <div
       class="bound bound__right"
-      :class="{ 'line__show': moveState.isRightBoundVisible }"
+      :class="{ line__show: moveState.isRightBoundVisible }"
     />
   </div>
 </template>

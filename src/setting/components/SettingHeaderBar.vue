@@ -28,7 +28,10 @@ const handlerPreviewEnter = () => {
   }
   const mask = document.querySelector('.n-drawer-mask') as HTMLElement
   if (mask) {
-    mask.setAttribute('style', 'transition: all 0.3s ease;background-color: transparent;')
+    mask.setAttribute(
+      'style',
+      'transition: all 0.3s ease;background-color: transparent;',
+    )
   }
 }
 
@@ -56,7 +59,9 @@ const openInNewTab = () => {
   } else {
     params.set('tab', 'general')
   }
-  const url = chrome.runtime.getURL(`dist/options/index.html?${params.toString()}`)
+  const url = chrome.runtime.getURL(
+    `dist/options/index.html?${params.toString()}`,
+  )
   chrome.tabs.create({ url })
 }
 </script>
@@ -147,7 +152,11 @@ const openInNewTab = () => {
     border-radius: var(--radius-md);
     border: 1px solid var(--n-tab-border-color);
     cursor: pointer;
-    transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+    transition:
+      background-color var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base),
+      box-shadow var(--transition-base);
     color: var(--gray-alpha-85);
     user-select: none;
     flex-shrink: 0;

@@ -6,10 +6,13 @@ import SettingPaneContent from './SettingPaneContent.vue'
 // ── drawer 模式：同步侧边栏 nav 高度与内容区一致 ──
 const settingContentHeight = ref(0)
 
-const updateSettingContentHeight = useDebounceFn((entries: ResizeObserverEntry[]) => {
-  if (entries.length === 0) return
-  settingContentHeight.value = entries[0].contentRect.height
-}, 200)
+const updateSettingContentHeight = useDebounceFn(
+  (entries: ResizeObserverEntry[]) => {
+    if (entries.length === 0) return
+    settingContentHeight.value = entries[0].contentRect.height
+  },
+  200,
+)
 
 const settingContentObserver = new ResizeObserver(updateSettingContentHeight)
 
@@ -28,7 +31,9 @@ watch(
      */
     await nextTick()
     await nextTick()
-    const targetEl = document.querySelector('#setting .setting__content .n-drawer-body-content-wrapper') as HTMLElement
+    const targetEl = document.querySelector(
+      '#setting .setting__content .n-drawer-body-content-wrapper',
+    ) as HTMLElement
     if (targetEl) {
       settingContentObserver.observe(targetEl)
     }

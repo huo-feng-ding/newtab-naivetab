@@ -2,8 +2,18 @@
 import { addKeydownTask, removeKeydownTask } from '@/logic/task'
 import { isDragMode } from '@/logic/moveable'
 import { KEYBOARD_NOT_ALLOW_KEYCODE_LIST_FOR_WIDGET } from '@/logic/keyboard/keyboard-constants'
-import { currKeyboardConfig, keyboardCurrentModelAllKeyList } from '@/logic/keyboard/keyboard-layout'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapUrl, handlePressKeycap } from '@/newtab/widgets/keyboardBookmark/logic'
+import {
+  currKeyboardConfig,
+  keyboardCurrentModelAllKeyList,
+} from '@/logic/keyboard/keyboard-layout'
+import {
+  state as keyboardState,
+  openPage,
+  handleSpecialKeycapExec,
+  getKeycapBookmarkType,
+  getKeycapUrl,
+  handlePressKeycap,
+} from '@/newtab/widgets/keyboardBookmark/logic'
 import { getStyleConst, getIsWidgetRender } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
@@ -60,14 +70,13 @@ const containerClass = computed(() => ({
   'keyboardBookmark__container--drag': isDragMode.value,
   'keyboardBookmark__container--hover': !isDragMode.value,
 }))
-
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <KeyboardLayout
       unit="vmin"
-      :rows="currKeyboardConfig.list"
+      :keys="currKeyboardConfig.keys"
       :extra-class="containerClass"
       :style="keyboardStyle"
       class="keyboardBookmark__container"

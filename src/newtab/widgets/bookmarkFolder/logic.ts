@@ -9,7 +9,10 @@ export const state = reactive({
 })
 
 export const refreshSelectedFolderTitles = () => {
-  state.selectedFolderTitles = JSON.parse(JSON.stringify(localConfig.bookmarkFolder.selectedFolderTitles)) || []
+  state.selectedFolderTitles =
+    JSON.parse(
+      JSON.stringify(localConfig.bookmarkFolder.selectedFolderTitles),
+    ) || []
 }
 
 export const initData = async () => {

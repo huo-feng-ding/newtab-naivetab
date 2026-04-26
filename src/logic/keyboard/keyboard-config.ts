@@ -1,8 +1,13 @@
-export const PRESERVE_FIELDS = ['keyboardType', 'keycapType', 'emphasisKeyOverrides']
+export const PRESERVE_FIELDS = [
+  'keyboardType',
+  'keycapType',
+  'emphasisKeyOverrides',
+]
 
 export const KEYBOARD_COMMON_CONFIG = {
   keyboardType: 'key67',
   splitSpace: 'space1' as 'space1' | 'space2' | 'space3',
+  keyboardWklMode: false,
   keycapType: 'gmk' as KeycapVisualType,
   keycapPadding: 1.5,
   keycapSize: 58,
@@ -38,7 +43,10 @@ export const KEYBOARD_COMMON_CONFIG = {
   emphasisOneFontColor: ['rgba(255, 255, 255, 1)', 'rgba(226,232,240,1.0)'],
   emphasisOneBackgroundColor: ['rgba(94,129,172,1.0)', 'rgba(30,41,59,1.0)'],
   emphasisTwoFontColor: ['rgba(255, 255, 255, 1)', 'rgba(30,41,59,1.0)'],
-  emphasisTwoBackgroundColor: ['rgba(136,192,208,1.0)', 'rgba(148,163,184,1.0)'],
+  emphasisTwoBackgroundColor: [
+    'rgba(136,192,208,1.0)',
+    'rgba(148,163,184,1.0)',
+  ],
   emphasisKeyOverrides: {} as Record<string, 0 | 1 | 2>,
 }
 

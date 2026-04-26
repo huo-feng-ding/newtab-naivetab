@@ -1,4 +1,9 @@
-const logStyles = ['padding: 4px 8px', 'color: #fff', 'border-radius: 3px', 'background:'].join(';')
+const logStyles = [
+  'padding: 4px 8px',
+  'color: #fff',
+  'border-radius: 3px',
+  'background:',
+].join(';')
 
 export const log = (msg: string, ...args: unknown[]) => {
   const style = `${logStyles}${msg.includes('error') ? '#ff4757' : '#1475B2'}`
@@ -20,12 +25,16 @@ export const createTab = (url: string, active = true) => {
   chrome.tabs.create({ url, active })
 }
 
-export const padUrlHttps = (url: string) => (url.includes('//') ? url : `https://${url}`)
+export const padUrlHttps = (url: string) =>
+  url.includes('//') ? url : `https://${url}`
 
 /**
  * leftVersion < rightVersion ?
  */
-export const compareLeftVersionLessThanRightVersions = (leftVersion: string, rightVersion: string): boolean => {
+export const compareLeftVersionLessThanRightVersions = (
+  leftVersion: string,
+  rightVersion: string,
+): boolean => {
   const leftVersionList = leftVersion.split('.')
   const rightVersionList = rightVersion.split('.')
   const maxLen = Math.max(leftVersionList.length, rightVersionList.length)
@@ -49,12 +58,20 @@ export const compareLeftVersionLessThanRightVersions = (leftVersion: string, rig
   return false
 }
 
-export const downloadImageByUrl = async (url: string, filename = `${Date.now()}`) => {
+export const downloadImageByUrl = async (
+  url: string,
+  filename = `${Date.now()}`,
+) => {
   const image = await fetch(url)
   const imageBlog = await image.blob()
   // 从 blob MIME 类型推导扩展名，确保下载文件可被系统识别
   if (!filename.includes('.')) {
-    const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' }
+    const extMap: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    }
     const ext = extMap[imageBlog.type] || 'jpg'
     filename = `${filename}.${ext}`
   }
@@ -65,7 +82,10 @@ export const downloadImageByUrl = async (url: string, filename = `${Date.now()}`
   link.click()
 }
 
-export const downloadJsonByTagA = (result: { [propName: string]: unknown }, filename = 'file') => {
+export const downloadJsonByTagA = (
+  result: { [propName: string]: unknown },
+  filename = 'file',
+) => {
   const content = JSON.stringify(result, null, 2)
   const blob = new Blob([content], { type: 'text/json' })
   const url = window.URL.createObjectURL(blob)
@@ -87,7 +107,9 @@ export const urlToFile = (url: string, fileName: string): Promise<File> => {
     }
     xhr.onload = () => {
       const fileContent = xhr.response
-      const targetFile = new File([fileContent], fileName, { type: 'image/jpeg' })
+      const targetFile = new File([fileContent], fileName, {
+        type: 'image/jpeg',
+      })
       resolve(targetFile)
     }
     xhr.onerror = () => {
@@ -123,20 +145,27 @@ export const compressedImageToBlob = async (
 
   try {
     const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
+    const ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+    }) as CanvasRenderingContext2D
     const widthHeightRatio = image.naturalWidth / image.naturalHeight
     canvas.width = width
     canvas.height = Math.ceil(width / widthHeightRatio)
     try {
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
     } catch (error) {
-      throw new Error(`Canvas drawing failed （可能被污染或资源无效）: ${error}`, { cause: error })
+      throw new Error(
+        `Canvas drawing failed （可能被污染或资源无效）: ${error}`,
+        { cause: error },
+      )
     }
     return await new Promise((resolve, reject) => {
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            reject(new Error(`create Blob failed（格式不支持或跨域污染）: ${type}`))
+            reject(
+              new Error(`create Blob failed（格式不支持或跨域污染）: ${type}`),
+            )
             return
           }
           resolve(blob)
@@ -160,7 +189,9 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
   })
 }
 
-export const compressedImageUrlToBase64 = async (imageUrl: string): Promise<string> => {
+export const compressedImageUrlToBase64 = async (
+  imageUrl: string,
+): Promise<string> => {
   const imageEle = await urlToImage(imageUrl)
   const smallBlob = await compressedImageToBlob(imageEle)
   const smallBase64 = await blobToBase64(smallBlob)

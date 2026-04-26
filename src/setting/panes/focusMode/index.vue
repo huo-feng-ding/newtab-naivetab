@@ -2,24 +2,35 @@
 import { Icon } from '@iconify/vue'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import Tips from '@/components/Tips.vue'
-import { localConfig, localState, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  customPrimaryColor,
+  colorMixWithAlpha,
+} from '@/logic/store'
 import { widgetsRegistry } from '@/newtab/widgets/registry'
 import { WIDGET_GROUPS } from '@/newtab/widgets/codes'
 
 const widgetGroups = computed(() =>
   WIDGET_GROUPS.map((group) => ({
     label: window.$t(group.labelKey),
-    items: group.codes
-      .map((code) => widgetsRegistry[code])
-      .filter(Boolean),
+    items: group.codes.map((code) => widgetsRegistry[code]).filter(Boolean),
   })),
 )
 
 // 将主题色替换 alpha 通道，生成半透明版本
-const primaryBg = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.08))
-const primaryBgHover = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.14))
-const primaryBorder = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.28))
-const primaryIconBg = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.14))
+const primaryBg = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.08),
+)
+const primaryBgHover = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.14),
+)
+const primaryBorder = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.28),
+)
+const primaryIconBg = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.14),
+)
 
 const cssVars = computed(() => ({
   '--nt-focus-primary-bg': primaryBg.value,
@@ -66,8 +77,14 @@ const cssVars = computed(() => ({
               v-for="meta in group.items"
               :key="meta.code"
               class="focus__item"
-              :class="{ 'focus__item--active': localConfig.general.focusVisibleWidgetMap[meta.code] }"
-              @click="localConfig.general.focusVisibleWidgetMap[meta.code] = !localConfig.general.focusVisibleWidgetMap[meta.code]"
+              :class="{
+                'focus__item--active':
+                  localConfig.general.focusVisibleWidgetMap[meta.code],
+              }"
+              @click="
+                localConfig.general.focusVisibleWidgetMap[meta.code] =
+                  !localConfig.general.focusVisibleWidgetMap[meta.code]
+              "
             >
               <div class="focus__icon-wrap">
                 <Icon
@@ -79,7 +96,9 @@ const cssVars = computed(() => ({
               <span class="focus__label">{{ $t(meta.widgetLabel) }}</span>
               <div class="focus__switch-wrap">
                 <NSwitch
-                  v-model:value="localConfig.general.focusVisibleWidgetMap[meta.code]"
+                  v-model:value="
+                    localConfig.general.focusVisibleWidgetMap[meta.code]
+                  "
                   size="small"
                   @click.stop
                 />
@@ -194,7 +213,9 @@ const cssVars = computed(() => ({
   font-size: var(--text-sm);
   line-height: 1.4;
   opacity: var(--opacity-secondary);
-  transition: opacity var(--transition-base), font-weight var(--transition-base);
+  transition:
+    opacity var(--transition-base),
+    font-weight var(--transition-base);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

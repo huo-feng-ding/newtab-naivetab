@@ -9,6 +9,8 @@ import KeyboardShellSetting from './KeyboardShellSetting.vue'
 const state = reactive({
   isPresetThemeDrawerVisible: false,
 })
+
+const expandedNames = ref<string[]>(['keyboardStyle'])
 </script>
 
 <template>
@@ -34,7 +36,10 @@ const state = reactive({
         </NButton>
       </NFormItem>
 
-      <NCollapse display-directive="show">
+      <NCollapse
+        v-model:expanded-names="expandedNames"
+        display-directive="show"
+      >
         <NCollapseItem name="keyboardStyle">
           <template #header>
             <span class="setting__label setting__label--collapse">
@@ -56,7 +61,9 @@ const state = reactive({
         <NCollapseItem name="shellSetting">
           <template #header>
             <span class="setting__label setting__label--collapse">
-              {{ `${$t('keyboardCommon.shell')} / ${$t('keyboardCommon.plate')}${$t('common.config')}` }}
+              {{
+                `${$t('keyboardCommon.shell')} / ${$t('keyboardCommon.plate')}${$t('common.config')}`
+              }}
             </span>
           </template>
           <KeyboardShellSetting />

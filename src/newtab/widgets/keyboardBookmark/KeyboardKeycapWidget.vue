@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { getFaviconFromUrl } from '@/logic/bookmark'
-import { state as keyboardState, openPage, handleSpecialKeycapExec, getKeycapBookmarkType, getKeycapName, getKeycapUrl } from '@/newtab/widgets/keyboardBookmark/logic'
+import {
+  state as keyboardState,
+  openPage,
+  handleSpecialKeycapExec,
+  getKeycapBookmarkType,
+  getKeycapName,
+  getKeycapUrl,
+} from '@/newtab/widgets/keyboardBookmark/logic'
 import { localConfig } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
@@ -103,13 +110,17 @@ const keycapStyle = computed(() => getEmphasisStyle(props.keyCode))
     :text-style="keycapTextStyle"
     :icon-style="keycapIconStyle"
     :img-draggable="false"
-    :is-loading="keyboardState.isLoadPageLoading && keyboardState.currSelectKeyCode === keyCode"
+    :is-loading="
+      keyboardState.isLoadPageLoading &&
+      keyboardState.currSelectKeyCode === keyCode
+    "
     :is-border-enabled="localConfig.keyboardCommon.isKeycapBorderEnabled"
     :show-cap-key="localConfig.keyboardCommon.isCapKeyVisible"
     :show-name="localConfig.keyboardCommon.isNameVisible"
     :show-favicon="localConfig.keyboardCommon.isFaviconVisible"
     :show-tactile-bumps="localConfig.keyboardCommon.isTactileBumpsVisible"
     :is-back-icon-visible="keyboardState.selectedFolderTitleStack.length !== 0"
+    :render-mode="'full'"
     :class="rowKeycapClassName"
     :style="[keycapCssVars, keycapStyle]"
     :title="keycapTitle"

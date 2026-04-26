@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { localConfig } from '@/logic/store'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, SwitchField, FontField, ToggleColorField, ColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  FontField,
+  ToggleColorField,
+  ColorField,
+} from '@/setting/fields'
 </script>
 
 <template>

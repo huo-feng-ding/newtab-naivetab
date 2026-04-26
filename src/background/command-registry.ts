@@ -42,15 +42,23 @@ const logLastError = (e: Error) => {
 // ─── Tab 操作 ────────────────────────────────────────────────────────────
 
 const toggleTabPinned = (tabId: number) => {
-  chrome.tabs.get(tabId).then((tab) => {
-    chrome.tabs.update(tabId, { pinned: !tab.pinned }).catch(logLastError)
-  }).catch(logLastError)
+  chrome.tabs
+    .get(tabId)
+    .then((tab) => {
+      chrome.tabs.update(tabId, { pinned: !tab.pinned }).catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 const toggleTabMute = (tabId: number) => {
-  chrome.tabs.get(tabId).then((tab) => {
-    chrome.tabs.update(tabId, { muted: !tab.mutedInfo?.muted }).catch(logLastError)
-  }).catch(logLastError)
+  chrome.tabs
+    .get(tabId)
+    .then((tab) => {
+      chrome.tabs
+        .update(tabId, { muted: !tab.mutedInfo?.muted })
+        .catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 const duplicateTab = (tabId: number) => {
@@ -102,9 +110,14 @@ const newTab = (_tabId: number) => {
 }
 
 const newTabAfter = (tabId: number) => {
-  chrome.tabs.get(tabId).then((tab) => {
-    chrome.tabs.create({ index: (tab.index ?? 0) + 1, active: true }).catch(logLastError)
-  }).catch(logLastError)
+  chrome.tabs
+    .get(tabId)
+    .then((tab) => {
+      chrome.tabs
+        .create({ index: (tab.index ?? 0) + 1, active: true })
+        .catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 const goBack = (tabId: number) => {
@@ -122,7 +135,9 @@ const closeWindow = async (tabId: number) => {
   if (!tab?.windowId) return
   const windows = await chrome.windows.getAll().catch(logLastError)
   if (!windows) return
-  const sameTypeWindows = windows.filter((w) => w.type === 'normal' && w.incognito === tab.incognito)
+  const sameTypeWindows = windows.filter(
+    (w) => w.type === 'normal' && w.incognito === tab.incognito,
+  )
   if (sameTypeWindows.length <= 1) return
   await chrome.windows.remove(tab.windowId).catch(logLastError)
 }
@@ -154,14 +169,17 @@ const newIncognito = (_tabId: number) => {
 // ─── 会话与去重 ──────────────────────────────────────────────────────────
 
 const reopenClosedTab = (_tabId: number) => {
-  chrome.sessions.getRecentlyClosed({ maxResults: 1 }).then((sessions) => {
-    if (sessions.length > 0) {
-      const sessionId = (sessions[0] as any).sessionId as string | undefined
-      if (sessionId) {
-        chrome.sessions.restore(sessionId).catch(logLastError)
+  chrome.sessions
+    .getRecentlyClosed({ maxResults: 1 })
+    .then((sessions) => {
+      if (sessions.length > 0) {
+        const sessionId = (sessions[0] as any).sessionId as string | undefined
+        if (sessionId) {
+          chrome.sessions.restore(sessionId).catch(logLastError)
+        }
       }
-    }
-  }).catch(logLastError)
+    })
+    .catch(logLastError)
 }
 
 const closeDuplicateTabsCmd = (tabId: number) => {

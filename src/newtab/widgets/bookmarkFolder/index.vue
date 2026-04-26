@@ -24,7 +24,11 @@ const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 const customItemGap = getStyleField(WIDGET_CODE, 'itemGap', 'px')
-const customItemBorderRadius = getStyleField(WIDGET_CODE, 'itemBorderRadius', 'vmin')
+const customItemBorderRadius = getStyleField(
+  WIDGET_CODE,
+  'itemBorderRadius',
+  'vmin',
+)
 const customItemHeight = getStyleField(WIDGET_CODE, 'itemHeight', 'px')
 const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'px')
 
@@ -56,12 +60,16 @@ const requestBookmarkAccess = async () => {
   }
 }
 
-const findTargetFolder = (folder: BookmarkNode[], stack: string[]): BookmarkNode[] => {
+const findTargetFolder = (
+  folder: BookmarkNode[],
+  stack: string[],
+): BookmarkNode[] => {
   try {
     if (stack.length === 0) {
       return folder
     }
-    const target = folder.find((i) => i.title === stack[0])?.children as BookmarkNode[]
+    const target = folder.find((i) => i.title === stack[0])
+      ?.children as BookmarkNode[]
     return findTargetFolder(target || [], stack.slice(1))
   } catch {
     return []
@@ -75,7 +83,9 @@ const currFolderBookmarks = computed(() => {
   if (state.selectedFolderTitles.length === 0) {
     return state.systemBookmarks
   }
-  return findTargetFolder(state.systemBookmarks, state.selectedFolderTitles) || []
+  return (
+    findTargetFolder(state.systemBookmarks, state.selectedFolderTitles) || []
+  )
 })
 
 const openBookmark = (url: string) => {
@@ -126,7 +136,6 @@ watch(
   },
   { immediate: true },
 )
-
 </script>
 
 <template>
@@ -135,8 +144,10 @@ watch(
       class="bookmarkFolder__container"
       :style="bookmarkFolderStyle"
       :class="{
-        'bookmarkFolder__container--border': localConfig.bookmarkFolder.isBorderEnabled,
-        'bookmarkFolder__container--shadow': localConfig.bookmarkFolder.isShadowEnabled,
+        'bookmarkFolder__container--border':
+          localConfig.bookmarkFolder.isBorderEnabled,
+        'bookmarkFolder__container--shadow':
+          localConfig.bookmarkFolder.isShadowEnabled,
       }"
     >
       <!-- loading -->
@@ -154,7 +165,9 @@ watch(
         v-else-if="state.isNoPermission"
         class="folder__permission"
       >
-        <div class="folder__permission-text">{{ $t('browserPermission.bookmark') }}</div>
+        <div class="folder__permission-text">
+          {{ $t('browserPermission.bookmark') }}
+        </div>
         <button
           class="folder__permission-btn"
           @click="requestBookmarkAccess"
@@ -166,7 +179,9 @@ watch(
       <div
         v-else
         class="folder__grid"
-        :style="{ gridTemplateColumns: `repeat(${localConfig.bookmarkFolder.gridColumns}, 1fr)` }"
+        :style="{
+          gridTemplateColumns: `repeat(${localConfig.bookmarkFolder.gridColumns}, 1fr)`,
+        }"
       >
         <!-- back -->
         <div
@@ -181,7 +196,11 @@ watch(
           <div class="folder__icon">
             <Icon :icon="ICONS.arrowBackRounded" />
           </div>
-          <div class="folder__label">{{ state.selectedFolderTitles[state.selectedFolderTitles.length - 1] }}</div>
+          <div class="folder__label">
+            {{
+              state.selectedFolderTitles[state.selectedFolderTitles.length - 1]
+            }}
+          </div>
         </div>
 
         <div
@@ -222,8 +241,12 @@ watch(
 
 <style>
 @keyframes folder-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 #bookmarkFolder {
@@ -433,7 +456,10 @@ watch(
     cursor: pointer;
     font-size: 0.85em;
     letter-spacing: 0.3px;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.12s ease;
     &:hover {
       background: rgba(255, 255, 255, 0.18);
       border-color: rgba(255, 255, 255, 0.4);

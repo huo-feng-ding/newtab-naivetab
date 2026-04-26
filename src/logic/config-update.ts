@@ -1,6 +1,10 @@
 import { h } from 'vue'
 import { NButton } from 'naive-ui'
-import { defaultConfig, defaultLocalState, defaultFocusVisibleWidgetMap } from '@/logic/config'
+import {
+  defaultConfig,
+  defaultLocalState,
+  defaultFocusVisibleWidgetMap,
+} from '@/logic/config'
 import { log, compareLeftVersionLessThanRightVersions } from '@/logic/util'
 import { type WidgetCodes } from '@/newtab/widgets/codes'
 
@@ -52,8 +56,15 @@ const updateSuccess = () => {
  */
 export const handleStateResetAndUpdate = () => {
   // 遍历默认状态，增量添加缺失的字段
-  for (const [field, defaultStatus] of Object.entries(defaultLocalState.isUploadConfigStatusMap)) {
-    if (!Object.prototype.hasOwnProperty.call(localState.value.isUploadConfigStatusMap, field)) {
+  for (const [field, defaultStatus] of Object.entries(
+    defaultLocalState.isUploadConfigStatusMap,
+  )) {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        localState.value.isUploadConfigStatusMap,
+        field,
+      )
+    ) {
       localState.value.isUploadConfigStatusMap[field] = { ...defaultStatus }
       log(`isUploadConfigStatusMap add field: ${field}`)
     }
@@ -64,7 +75,9 @@ export const handleStateResetAndUpdate = () => {
  * 处理新增配置，并删除无用旧配置。默认 acceptState 不传递时为刷新配置数据结构
  * 以 defaultConfig 为模板与 acceptState 进行去重合并
  */
-export const updateSetting = (acceptRawState = localConfig): Promise<boolean> => {
+export const updateSetting = (
+  acceptRawState = localConfig,
+): Promise<boolean> => {
   const acceptState = acceptRawState
   return new Promise((resolve) => {
     try {
@@ -119,9 +132,10 @@ export const handleAppUpdate = () => {
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.23.1')) {
     localConfig.clockDigital.width = localConfig.clockDigital.fontSize / 2 + 8
-    const clockDigitalConfig = localConfig.clockDigital as typeof localConfig.clockDigital & {
-      letterSpacing?: number
-    }
+    const clockDigitalConfig =
+      localConfig.clockDigital as typeof localConfig.clockDigital & {
+        letterSpacing?: number
+      }
     delete clockDigitalConfig.letterSpacing
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.24.0')) {
@@ -129,7 +143,9 @@ export const handleAppUpdate = () => {
     localConfig.yearProgress = defaultConfig.yearProgress
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.24.3')) {
-    localConfig.general.backgroundColor = structuredClone(defaultConfig.general.backgroundColor)
+    localConfig.general.backgroundColor = structuredClone(
+      defaultConfig.general.backgroundColor,
+    )
   }
   if (compareLeftVersionLessThanRightVersions(version, '1.25.9')) {
     localConfig.calendar.festivalCountdown = true
@@ -137,26 +153,38 @@ export const handleAppUpdate = () => {
   if (compareLeftVersionLessThanRightVersions(version, '1.27.0')) {
     localState.value.isFocusMode = false
     localConfig.general.focusVisibleWidgetMap = defaultFocusVisibleWidgetMap
-    if ((localConfig.general.openPageFocusElement as any) === 'bookmarkKeyboard') {
+    if (
+      (localConfig.general.openPageFocusElement as any) === 'bookmarkKeyboard'
+    ) {
       localConfig.general.openPageFocusElement = 'keyboardBookmark'
     }
     localConfig.calendar.backgroundBlur = defaultConfig.calendar.backgroundBlur
     localConfig.memo.backgroundBlur = defaultConfig.memo.backgroundBlur
     localConfig.news.backgroundBlur = defaultConfig.news.backgroundBlur
     localConfig.search.backgroundBlur = defaultConfig.search.backgroundBlur
-    localConfig.yearProgress.backgroundBlur = defaultConfig.yearProgress.backgroundBlur
+    localConfig.yearProgress.backgroundBlur =
+      defaultConfig.yearProgress.backgroundBlur
     localConfig.bookmarkFolder.enabled = false
   }
   if (compareLeftVersionLessThanRightVersions(version, '2.0.0')) {
     localConfig.clockFlip.enabled = false
   }
   if (compareLeftVersionLessThanRightVersions(version, '2.2.0')) {
-    localConfig.keyboardBookmark.isGlobalShortcutEnabled = (localConfig.keyboardBookmark as any).isListenBackgroundKeystrokes ?? true
+    localConfig.keyboardBookmark.isGlobalShortcutEnabled =
+      (localConfig.keyboardBookmark as any).isListenBackgroundKeystrokes ?? true
     // 全局快捷键架构变更（浏览器原生 → 扩展内部控制），老用户需重新配置修饰键
     // 修饰键从字符串改为数组的迁移在 handleStateResetAndUpdate 中处理
     localConfig.general.showBreakingChangeNotice = true
     // 通用 widget 字体改为系统字体栈
-    const configList = ['general', 'memo', 'yearProgress', 'calendar', 'bookmarkFolder', 'search', 'news'] as WidgetCodes[]
+    const configList = [
+      'general',
+      'memo',
+      'yearProgress',
+      'calendar',
+      'bookmarkFolder',
+      'search',
+      'news',
+    ] as WidgetCodes[]
     for (const code of configList) {
       const config = localConfig[code] as any
       if (config.fontFamily === 'Arial') {

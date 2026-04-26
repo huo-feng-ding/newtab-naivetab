@@ -11,11 +11,15 @@ import BookmarkManager from '@/components/BookmarkManager.vue'
 // ── 键盘宽度计算 ────────────────────────────────────────────────────────
 const CARD_CONTENT_H_PADDING = 28
 const { getFirstRowWidth } = useKeyboardStyle('px', 40)
-const popupWidth = computed(() => `${getFirstRowWidth() + CARD_CONTENT_H_PADDING}px`)
+const popupWidth = computed(
+  () => `${getFirstRowWidth() + CARD_CONTENT_H_PADDING}px`,
+)
 
 const popupStyle = computed(() => ({
   '--nt-popup-width': popupWidth.value,
-  '--nt-popup-keyboard-border': styleConst.value.popupKeyboardBorder[localState.value.currAppearanceCode] || styleConst.value.popupKeyboardBorder[0],
+  '--nt-popup-keyboard-border':
+    styleConst.value.popupKeyboardBorder[localState.value.currAppearanceCode] ||
+    styleConst.value.popupKeyboardBorder[0],
   '--nt-popup-custom-primary-color': customPrimaryColor.value,
 }))
 
@@ -27,7 +31,9 @@ onMounted(() => {
 
 // ── 同步状态 ────────────────────────────────────────────────────────────
 const bookmarkManagerRef = ref<InstanceType<typeof BookmarkManager>>()
-const hasPendingSync = computed(() => bookmarkManagerRef.value?.hasPendingSync ?? false)
+const hasPendingSync = computed(
+  () => bookmarkManagerRef.value?.hasPendingSync ?? false,
+)
 </script>
 
 <template>
@@ -37,7 +43,9 @@ const hasPendingSync = computed(() => bookmarkManagerRef.value?.hasPendingSync ?
   >
     <template #header>
       <div class="popup__header">
-        <span class="header__title">{{ `${$t('common.config')}${$t('setting.bookmark')}` }}</span>
+        <span class="header__title">{{
+          `${$t('common.config')}${$t('setting.bookmark')}`
+        }}</span>
         <span
           v-show="hasPendingSync"
           class="header__syncing"
@@ -68,7 +76,11 @@ const hasPendingSync = computed(() => bookmarkManagerRef.value?.hasPendingSync ?
   .n-card-header {
     padding: 0 !important;
     border-bottom: 1px solid var(--nt-popup-keyboard-border);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      transparent 100%
+    );
 
     .popup__header {
       display: flex;

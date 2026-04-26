@@ -1,12 +1,24 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { WEATHER_TEMPERATURE_UNIT_MAP, WEATHER_SPEED_UNIT_MAP } from '@/logic/constants/weather'
+import {
+  WEATHER_TEMPERATURE_UNIT_MAP,
+  WEATHER_SPEED_UNIT_MAP,
+} from '@/logic/constants/weather'
 import { URL_QWEATHER_HOME } from '@/logic/constants/urls'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
-import { localConfig, localState, getStyleField, globalState } from '@/logic/store'
-import { weatherState, weatherIndicesInfo, weatherWarningInfo } from '@/newtab/widgets/weather/logic'
+import {
+  localConfig,
+  localState,
+  getStyleField,
+  globalState,
+} from '@/logic/store'
+import {
+  weatherState,
+  weatherIndicesInfo,
+  weatherWarningInfo,
+} from '@/newtab/widgets/weather/logic'
 import { WIDGET_CODE } from './config'
 
 const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
@@ -39,10 +51,16 @@ onMounted(() => {
   })
 })
 
-const isWeatherWarning = computed(() => weatherState.value.warning.list.length > 0)
+const isWeatherWarning = computed(
+  () => weatherState.value.warning.list.length > 0,
+)
 
 const warningVisible = computed(() => {
-  if (isDragMode.value || localState.value.isFocusMode || globalState.isSettingDrawerVisible) {
+  if (
+    isDragMode.value ||
+    localState.value.isFocusMode ||
+    globalState.isSettingDrawerVisible
+  ) {
     return false
   }
   return state.isWarningVisible || weatherState.value.state.isWarningVisible
@@ -84,9 +102,12 @@ const onOpenWeather = () => {
   createTab(URL_QWEATHER_HOME)
 }
 
-const temperatureUnit = computed(() => WEATHER_TEMPERATURE_UNIT_MAP[localConfig.weather.temperatureUnit])
-const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.speedUnit])
-
+const temperatureUnit = computed(
+  () => WEATHER_TEMPERATURE_UNIT_MAP[localConfig.weather.temperatureUnit],
+)
+const speedUnit = computed(
+  () => WEATHER_SPEED_UNIT_MAP[localConfig.weather.speedUnit],
+)
 </script>
 
 <template>
@@ -180,8 +201,12 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
 
           <!-- 体感温度 -->
           <div class="temp__secondary">
-            <span class="temp__secondary-label">{{ $t('weather.feelsLike') }}</span>
-            <span class="temp__secondary-value">{{ weatherState.now.feelsLike }}</span>
+            <span class="temp__secondary-label">{{
+              $t('weather.feelsLike')
+            }}</span>
+            <span class="temp__secondary-value">{{
+              weatherState.now.feelsLike
+            }}</span>
             <span class="temp__secondary-unit">{{ temperatureUnit }}</span>
           </div>
 
@@ -190,7 +215,10 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
           <!-- 今日温度范围 -->
           <div class="temp__range">
             <span class="temp__range-value">
-              {{ weatherState.forecast.list[0] && `${weatherState.forecast.list[0].tempMax}° / ${weatherState.forecast.list[0].tempMin}°` }}
+              {{
+                weatherState.forecast.list[0] &&
+                `${weatherState.forecast.list[0].tempMax}° / ${weatherState.forecast.list[0].tempMin}°`
+              }}
             </span>
           </div>
 
@@ -202,7 +230,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
               class="detail__icon"
               :icon="ICONS.humidity"
             />
-            <span class="temp__secondary-value">{{ weatherState.now.humidity }}</span>
+            <span class="temp__secondary-value">{{
+              weatherState.now.humidity
+            }}</span>
             <span class="temp__secondary-unit">%</span>
           </div>
         </div>
@@ -234,8 +264,14 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
             :icon="ICONS.windyFill"
           />
           <span class="detail__label">{{ weatherState.now.windDir }}</span>
-          <span class="detail__sub">{{ weatherState.now.windScale }}{{ $t('weather.windScaleUnit') }}</span>
-          <span class="detail__sub detail__sub--speed">{{ weatherState.now.windSpeed }}<span class="detail__unit"> {{ speedUnit }}</span></span>
+          <span class="detail__sub"
+            >{{ weatherState.now.windScale
+            }}{{ $t('weather.windScaleUnit') }}</span
+          >
+          <span class="detail__sub detail__sub--speed"
+            >{{ weatherState.now.windSpeed
+            }}<span class="detail__unit"> {{ speedUnit }}</span></span
+          >
         </div>
       </div>
 
@@ -249,7 +285,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
             class="detail__icon"
             :icon="ICONS.uvIndex"
           />
-          <span class="detail__label">UV {{ weatherState.forecast.list[0].uvIndex }}</span>
+          <span class="detail__label"
+            >UV {{ weatherState.forecast.list[0].uvIndex }}</span
+          >
         </div>
         <div class="detail__dot" />
         <div class="detail__item">
@@ -257,7 +295,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
             class="detail__icon detail__icon--sunrise"
             :icon="ICONS.sunrise"
           />
-          <span class="detail__label">{{ weatherState.forecast.list[0].sunrise }}</span>
+          <span class="detail__label">{{
+            weatherState.forecast.list[0].sunrise
+          }}</span>
         </div>
         <div class="detail__dot" />
         <div class="detail__item">
@@ -265,7 +305,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
             class="detail__icon detail__icon--sunset"
             :icon="ICONS.sunset"
           />
-          <span class="detail__label">{{ weatherState.forecast.list[0].sunset }}</span>
+          <span class="detail__label">{{
+            weatherState.forecast.list[0].sunset
+          }}</span>
         </div>
       </div>
     </div>
@@ -281,7 +323,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
     cursor: pointer;
     opacity: 0.7;
     transition: opacity var(--transition-base);
-    &:hover { opacity: 1; }
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 .weather__indices {
@@ -301,7 +345,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform 0.3s cubic-bezier(0.34, 1.06, 0.64, 1), filter 0.25s ease;
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.06, 0.64, 1),
+      filter 0.25s ease;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 
     &:hover {
@@ -315,7 +361,9 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
       align-items: center;
       justify-content: center;
     }
-    .weather-icon__wrap--move { cursor: move !important; }
+    .weather-icon__wrap--move {
+      cursor: move !important;
+    }
   }
 
   /* ── 右侧信息列 ── */
@@ -344,7 +392,10 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         white-space: nowrap;
       }
-      .warning__trigger { display: flex; align-items: center; }
+      .warning__trigger {
+        display: flex;
+        align-items: center;
+      }
       .warning__icon {
         display: flex;
         align-items: center;
@@ -352,13 +403,17 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
         cursor: pointer;
         color: #f5a623;
         filter: drop-shadow(0 0 4px rgba(245, 166, 35, 0.6));
-        transition: transform var(--transition-base), filter var(--transition-base);
+        transition:
+          transform var(--transition-base),
+          filter var(--transition-base);
         &:hover {
           transform: scale(1.2);
           filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.9));
         }
       }
-      .label__info--move { cursor: move !important; }
+      .label__info--move {
+        cursor: move !important;
+      }
     }
 
     /* 当前温度（主） */
@@ -463,8 +518,14 @@ const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.spee
         font-size: var(--nt-wn-font-size);
         flex-shrink: 0;
         opacity: 0.7;
-        &.detail__icon--sunrise { color: #f5c842; opacity: 0.9; }
-        &.detail__icon--sunset  { color: #a78bfa; opacity: 0.9; }
+        &.detail__icon--sunrise {
+          color: #f5c842;
+          opacity: 0.9;
+        }
+        &.detail__icon--sunset {
+          color: #a78bfa;
+          opacity: 0.9;
+        }
       }
       .detail__label {
         font-size: var(--nt-wn-font-size);

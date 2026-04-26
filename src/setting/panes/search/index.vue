@@ -3,7 +3,13 @@ import { SEARCH_ENGINE_LIST } from '@/logic/constants/search'
 import { localConfig } from '@/logic/store'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
-import { SliderField, SwitchField, FontField, ToggleColorField, ColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  FontField,
+  ToggleColorField,
+  ColorField,
+} from '@/setting/fields'
 
 const state = reactive({
   searchEngine: '',
@@ -12,7 +18,10 @@ const state = reactive({
 watch(
   () => localConfig.search.urlName,
   () => {
-    state.searchEngine = localConfig.search.urlName === 'custom' ? 'custom' : localConfig.search.urlValue
+    state.searchEngine =
+      localConfig.search.urlName === 'custom'
+        ? 'custom'
+        : localConfig.search.urlValue
   },
   {
     immediate: true,
@@ -36,10 +45,14 @@ const searchEngineList = computed(() => {
       faviconUrl: '',
     },
     ...SEARCH_ENGINE_LIST,
-  ] as Array<{ label: string, value: string, faviconUrl: string }>
+  ] as Array<{ label: string; value: string; faviconUrl: string }>
 })
 
-const searchSelectRenderLabel = (option: { label: string, value: string, faviconUrl?: string }) => {
+const searchSelectRenderLabel = (option: {
+  label: string
+  value: string
+  faviconUrl?: string
+}) => {
   return [
     h(
       'div',
@@ -52,17 +65,14 @@ const searchSelectRenderLabel = (option: { label: string, value: string, favicon
       },
       [
         option.faviconUrl
-          ? h(
-              'img',
-              {
-                style: {
-                  marginRight: '10px',
-                  width: '15px',
-                  height: '15px',
-                },
-                src: option.faviconUrl,
+          ? h('img', {
+              style: {
+                marginRight: '10px',
+                width: '15px',
+                height: '15px',
               },
-            )
+              src: option.faviconUrl,
+            })
           : h('div', { style: { marginRight: '10px', width: '15px' } }),
         h('span', {}, option.label),
       ],

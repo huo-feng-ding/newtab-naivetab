@@ -20,13 +20,39 @@ interface Window {
 }
 
 type WidgetCodes = import('@/newtab/widgets/codes').WidgetCodes
-type ConfigField = WidgetCodes | 'general' | 'keyboardCommon' | 'keyboardBookmark' | 'keyboardCommand'
+type ConfigField =
+  | WidgetCodes
+  | 'general'
+  | 'keyboardCommon'
+  | 'keyboardBookmark'
+  | 'keyboardCommand'
 type EleTargetCode = WidgetCodes | 'draft-common'
 type EleTargetType = 'widget' | 'draft'
 
-type settingPanes = 'general' | 'focusMode' | 'keyboardCommon' | 'keyboardBookmark' | 'bookmarkFolder' | 'clockDate' | 'calendar' | 'yearProgress' | 'countdown' | 'search' | 'weather' | 'memo' | 'news' | 'aboutIndex' | 'aboutSponsor' | 'keyboardCommand'
+type settingPanes =
+  | 'general'
+  | 'focusMode'
+  | 'keyboardCommon'
+  | 'keyboardBookmark'
+  | 'bookmarkFolder'
+  | 'clockDate'
+  | 'calendar'
+  | 'yearProgress'
+  | 'countdown'
+  | 'search'
+  | 'weather'
+  | 'memo'
+  | 'news'
+  | 'aboutIndex'
+  | 'aboutSponsor'
+  | 'keyboardCommand'
 
-type KeydownTaskKey = 'draft-tool' | 'keyboardBookmark' | 'bookmarkFolder' | 'globalShortcutForBookmark' | 'globalShortcutForCommand'
+type KeydownTaskKey =
+  | 'draft-tool'
+  | 'keyboardBookmark'
+  | 'bookmarkFolder'
+  | 'globalShortcutForBookmark'
+  | 'globalShortcutForCommand'
 
 type DatabaseHandleType = 'add' | 'put' | 'get' | 'delete'
 type DatabaseStore = 'localBackgroundImages' | 'currBackgroundImages'
@@ -39,10 +65,27 @@ type DatabaseLocalBackgroundImages = {
 
 type OptionsPermission = 'bookmarks'
 
-type Placement = 'top-start' | 'top' | 'top-end' | 'right-start' | 'right' | 'right-end' | 'bottom-start' | 'bottom' | 'bottom-end' | 'left-start' | 'left' | 'left-end'
+type Placement =
+  | 'top-start'
+  | 'top'
+  | 'top-end'
+  | 'right-start'
+  | 'right'
+  | 'right-end'
+  | 'bottom-start'
+  | 'bottom'
+  | 'bottom-end'
+  | 'left-start'
+  | 'left'
+  | 'left-end'
 
 type TDrawerPlacement = 'top' | 'bottom' | 'left' | 'right'
-type TPageFocusElement = 'default' | 'root' | 'search' | 'memo' | 'keyboardBookmark'
+type TPageFocusElement =
+  | 'default'
+  | 'root'
+  | 'search'
+  | 'memo'
+  | 'keyboardBookmark'
 
 interface SelectStringItem {
   label: string

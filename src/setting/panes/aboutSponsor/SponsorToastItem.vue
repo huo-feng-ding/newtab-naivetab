@@ -19,7 +19,9 @@ const handleAnimationEnd = () => {
     @animationend="handleAnimationEnd"
   >
     <span class="item__emoji">{{ props.message.split(' ')[0] }}</span>
-    <span class="item__text">{{ props.message.split(' ').slice(1).join(' ') }}</span>
+    <span class="item__text">{{
+      props.message.split(' ').slice(1).join(' ')
+    }}</span>
   </div>
 </template>
 
@@ -38,7 +40,9 @@ const handleAnimationEnd = () => {
   color: #fff;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), var(--shadow-inset);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    var(--shadow-inset);
   white-space: nowrap;
   transform: translateY(14px) scale(0.94);
   animation:
@@ -72,8 +76,15 @@ const handleAnimationEnd = () => {
 }
 
 @keyframes emojiJump {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  40% { transform: translateY(-5px) rotate(-8deg); }
-  70% { transform: translateY(-2px) rotate(4deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-5px) rotate(-8deg);
+  }
+  70% {
+    transform: translateY(-2px) rotate(4deg);
+  }
 }
 </style>

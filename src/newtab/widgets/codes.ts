@@ -15,14 +15,16 @@ export const WIDGET_CODE_LIST = [
   'countdown',
 ] as const
 
-export type WidgetCodes = typeof WIDGET_CODE_LIST[number]
+export type WidgetCodes = (typeof WIDGET_CODE_LIST)[number]
 
 /**
  * 将 widget code 映射到对应的 setting pane code。
  * 未在此映射中的 widget，默认使用自身的 code 作为 pane code。
  * 新增 widget 时，若其设置面板与其他 widget 共用，需在此处补充。
  */
-export const WIDGET_SETTING_PANE_MAP: Partial<Record<WidgetCodes, settingPanes>> = {
+export const WIDGET_SETTING_PANE_MAP: Partial<
+  Record<WidgetCodes, settingPanes>
+> = {
   clockDigital: 'clockDate',
   clockAnalog: 'clockDate',
   clockFlip: 'clockDate',
@@ -44,7 +46,16 @@ export const WIDGET_GROUPS: Array<{
 }> = [
   {
     labelKey: 'widgetGroup.timeAndDate',
-    codes: ['clockDigital', 'clockAnalog', 'clockFlip', 'clockNeon', 'date', 'calendar', 'yearProgress', 'countdown'],
+    codes: [
+      'clockDigital',
+      'clockAnalog',
+      'clockFlip',
+      'clockNeon',
+      'date',
+      'calendar',
+      'yearProgress',
+      'countdown',
+    ],
   },
   {
     labelKey: 'widgetGroup.bookmark',

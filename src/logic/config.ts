@@ -2,14 +2,19 @@ import type { WidgetConfigByCode } from '@/newtab/widgets/registry'
 import { WIDGET_CODE_LIST } from '@/newtab/widgets/codes'
 import pkg from '../../package.json'
 import { KEYBOARD_COMMAND_CONFIG } from '@/logic/globalShortcut/shortcut-command'
-import { IMAGE_NETWORK_SOURCE, BACKGROUND_IMAGE_SOURCE } from '@/logic/constants/image'
+import {
+  IMAGE_NETWORK_SOURCE,
+  BACKGROUND_IMAGE_SOURCE,
+} from '@/logic/constants/image'
 import { KEYBOARD_COMMON_CONFIG } from '@/logic/keyboard/keyboard-config'
 
 const UI_LANGUAGE = chrome.i18n.getUILanguage()
 const CURR_LANG = UI_LANGUAGE || 'en-US'
 
 export const defaultFocusVisibleWidgetMap = {
-  ...Object.fromEntries(WIDGET_CODE_LIST.map((code) => [code, false])) as Record<WidgetCodes, boolean>,
+  ...(Object.fromEntries(
+    WIDGET_CODE_LIST.map((code) => [code, false]),
+  ) as Record<WidgetCodes, boolean>),
   clockDigital: true,
   clockAnalog: true,
   clockFlip: true,
@@ -32,18 +37,41 @@ const generalConfig = {
   loadPageAnimationType: 'fade-in' as 'fade-in' | 'zoom-in',
   focusVisibleWidgetMap: defaultFocusVisibleWidgetMap,
   isBackgroundImageEnabled: true,
-  backgroundImageSource: BACKGROUND_IMAGE_SOURCE.NETWORK as (typeof BACKGROUND_IMAGE_SOURCE)[keyof typeof BACKGROUND_IMAGE_SOURCE],
-  backgroundNetworkSourceType: IMAGE_NETWORK_SOURCE.BING as (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE],
+  backgroundImageSource:
+    BACKGROUND_IMAGE_SOURCE.NETWORK as (typeof BACKGROUND_IMAGE_SOURCE)[keyof typeof BACKGROUND_IMAGE_SOURCE],
+  backgroundNetworkSourceType:
+    IMAGE_NETWORK_SOURCE.BING as (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE],
   backgroundImageHighQuality: true,
-  backgroundImageNames: ['DarwinsArch_ZH-CN9740478501', 'DolomitesMW_ZH-CN3307894335'],
+  backgroundImageNames: [
+    'DarwinsArch_ZH-CN9740478501',
+    'DolomitesMW_ZH-CN3307894335',
+  ],
   isBackgroundImageCustomUrlEnabled: false,
-  backgroundImageCustomUrls: ['https://cn.bing.com/th?id=OHR.DarwinsArch_ZH-CN9740478501_1920x1080.jpg', 'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg'],
+  backgroundImageCustomUrls: [
+    'https://cn.bing.com/th?id=OHR.DarwinsArch_ZH-CN9740478501_1920x1080.jpg',
+    'https://cn.bing.com/th?id=OHR.DolomitesMW_ZH-CN3307894335_1920x1080.jpg',
+  ],
   favoriteImageList: [
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DarwinsArch_ZH-CN9740478501' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'ChukchiSea_ZH-CN7218471261' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'DolomitesMW_ZH-CN3307894335' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'YurisNight_ZH-CN5738817931' },
-    { networkSourceType: IMAGE_NETWORK_SOURCE.BING, name: 'Balsamroot_ZH-CN9456182640' },
+    {
+      networkSourceType: IMAGE_NETWORK_SOURCE.BING,
+      name: 'DarwinsArch_ZH-CN9740478501',
+    },
+    {
+      networkSourceType: IMAGE_NETWORK_SOURCE.BING,
+      name: 'ChukchiSea_ZH-CN7218471261',
+    },
+    {
+      networkSourceType: IMAGE_NETWORK_SOURCE.BING,
+      name: 'DolomitesMW_ZH-CN3307894335',
+    },
+    {
+      networkSourceType: IMAGE_NETWORK_SOURCE.BING,
+      name: 'YurisNight_ZH-CN5738817931',
+    },
+    {
+      networkSourceType: IMAGE_NETWORK_SOURCE.BING,
+      name: 'Balsamroot_ZH-CN9456182640',
+    },
     { networkSourceType: IMAGE_NETWORK_SOURCE.PEXELS, name: '19161535' },
   ] as {
     networkSourceType: (typeof IMAGE_NETWORK_SOURCE)[keyof typeof IMAGE_NETWORK_SOURCE]
@@ -75,7 +103,9 @@ const generalConfig = {
 }
 
 const widgetsDefaultConfig = (() => {
-  const modules = import.meta.glob('../newtab/widgets/**/config.ts', { eager: true }) as Record<string, any>
+  const modules = import.meta.glob('../newtab/widgets/**/config.ts', {
+    eager: true,
+  }) as Record<string, any>
   const map: Record<string, any> = {}
   for (const key in modules) {
     const m = modules[key]

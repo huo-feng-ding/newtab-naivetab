@@ -17,10 +17,21 @@ const widgetStyle = computed(() => ({
   '--nt-y-offset': state.cssVars.yOffset,
   '--nt-x-translate': state.cssVars.xTranslate,
   '--nt-y-translate': state.cssVars.yTranslate,
-  '--nt-auxiliary-line-widget': styleConst.value.auxiliaryLineWidget[localState.value.currAppearanceCode] || styleConst.value.auxiliaryLineWidget[0],
-  '--nt-bg-moveable-widget-main': styleConst.value.bgMoveableWidgetMain[localState.value.currAppearanceCode] || styleConst.value.bgMoveableWidgetMain[0],
-  '--nt-bg-moveable-widget-active': styleConst.value.bgMoveableWidgetActive[localState.value.currAppearanceCode] || styleConst.value.bgMoveableWidgetActive[0],
-  '--nt-moveable-tool-delete-btn-color': styleConst.value.moveableToolDeleteBtnColor[localState.value.currAppearanceCode] || styleConst.value.moveableToolDeleteBtnColor[0],
+  '--nt-auxiliary-line-widget':
+    styleConst.value.auxiliaryLineWidget[localState.value.currAppearanceCode] ||
+    styleConst.value.auxiliaryLineWidget[0],
+  '--nt-bg-moveable-widget-main':
+    styleConst.value.bgMoveableWidgetMain[
+      localState.value.currAppearanceCode
+    ] || styleConst.value.bgMoveableWidgetMain[0],
+  '--nt-bg-moveable-widget-active':
+    styleConst.value.bgMoveableWidgetActive[
+      localState.value.currAppearanceCode
+    ] || styleConst.value.bgMoveableWidgetActive[0],
+  '--nt-moveable-tool-delete-btn-color':
+    styleConst.value.moveableToolDeleteBtnColor[
+      localState.value.currAppearanceCode
+    ] || styleConst.value.moveableToolDeleteBtnColor[0],
 }))
 
 const state = reactive({
@@ -74,13 +85,17 @@ const offsetData = reactive({
   yTranslateValue: null as number | null,
 })
 
-const getPercentageInWidth = (currWidth: number) => +((currWidth / moveState.width) * 100).toFixed(5)
-const getPercentageInHeight = (currHeight: number) => +((currHeight / moveState.height) * 100).toFixed(5)
+const getPercentageInWidth = (currWidth: number) =>
+  +((currWidth / moveState.width) * 100).toFixed(5)
+const getPercentageInHeight = (currHeight: number) =>
+  +((currHeight / moveState.height) * 100).toFixed(5)
 
 const ensureTargetContainer = async (): Promise<HTMLElement | null> => {
   await nextTick()
   if (!state.targetContainerEle) {
-    state.targetContainerEle = document.querySelector(`.${props.widgetCode}__container`)
+    state.targetContainerEle = document.querySelector(
+      `.${props.widgetCode}__container`,
+    )
   }
   return state.targetContainerEle as HTMLElement | null
 }
@@ -90,7 +105,9 @@ const ensureTargetContainer = async (): Promise<HTMLElement | null> => {
  */
 const getTargetContainerSync = (): HTMLElement | null => {
   if (!state.targetContainerEle) {
-    state.targetContainerEle = document.querySelector(`.${props.widgetCode}__container`)
+    state.targetContainerEle = document.querySelector(
+      `.${props.widgetCode}__container`,
+    )
   }
   return state.targetContainerEle as HTMLElement | null
 }
@@ -117,8 +134,10 @@ const startDrag = async (e: MouseEvent, resite = false) => {
     // 默认光标位置为component的中心
     const offsetTop = e.clientY - height / 2
     const offsetLeft = e.clientX - width / 2
-    localConfig[props.widgetCode].layout.xOffsetValue = getPercentageInWidth(offsetLeft)
-    localConfig[props.widgetCode].layout.yOffsetValue = getPercentageInHeight(offsetTop)
+    localConfig[props.widgetCode].layout.xOffsetValue =
+      getPercentageInWidth(offsetLeft)
+    localConfig[props.widgetCode].layout.yOffsetValue =
+      getPercentageInHeight(offsetTop)
     state.startState.top = offsetTop
     state.startState.left = offsetLeft
   }
@@ -143,7 +162,10 @@ const applyContainerLayout = async () => {
     el.style.top = ''
   }
   el.style.setProperty(layout.yOffsetKey, `${layout.yOffsetValue}vh`)
-  el.style.setProperty('transform', `translate(${layout.xTranslateValue}%, ${layout.yTranslateValue}%)`)
+  el.style.setProperty(
+    'transform',
+    `translate(${layout.xTranslateValue}%, ${layout.yTranslateValue}%)`,
+  )
 }
 
 let applyLayoutScheduled = false
@@ -187,10 +209,12 @@ const stopDrag = () => {
     localConfig[props.widgetCode].layout.yOffsetValue = offsetData.yOffsetValue
   }
   if (offsetData.xTranslateValue !== null) {
-    localConfig[props.widgetCode].layout.xTranslateValue = offsetData.xTranslateValue
+    localConfig[props.widgetCode].layout.xTranslateValue =
+      offsetData.xTranslateValue
   }
   if (offsetData.yTranslateValue !== null) {
-    localConfig[props.widgetCode].layout.yTranslateValue = offsetData.yTranslateValue
+    localConfig[props.widgetCode].layout.yTranslateValue =
+      offsetData.yTranslateValue
   }
   state.lastXOffsetKey = ''
   state.lastYOffsetKey = ''
@@ -222,14 +246,18 @@ const onDragging = (e: MouseEvent) => {
     offsetData.xOffsetValue = getPercentageInWidth(offsetData.xOffsetValue)
   } else {
     offsetData.xOffsetKey = 'right'
-    offsetData.xOffsetValue = getPercentageInWidth(moveState.width - state.startState.width - offsetData.xOffsetValue)
+    offsetData.xOffsetValue = getPercentageInWidth(
+      moveState.width - state.startState.width - offsetData.xOffsetValue,
+    )
   }
   if (offsetData.yOffsetValue <= yCenterLine) {
     offsetData.yOffsetKey = 'top'
     offsetData.yOffsetValue = getPercentageInHeight(offsetData.yOffsetValue)
   } else {
     offsetData.yOffsetKey = 'bottom'
-    offsetData.yOffsetValue = getPercentageInHeight(moveState.height - state.startState.height - offsetData.yOffsetValue)
+    offsetData.yOffsetValue = getPercentageInHeight(
+      moveState.height - state.startState.height - offsetData.yOffsetValue,
+    )
   }
 
   // 水平/垂直居中 & 对应辅助线
@@ -292,7 +320,12 @@ const onDragging = (e: MouseEvent) => {
   // 第二层（低频）：仅当方向 key 发生切换（left ↔ right / top ↔ bottom）时，
   // 才直接操作 container 的 el.style，将 left/right 指向对应的 CSS 变量。
   // 停止拖动后由 scheduleApplyContainerLayout 将最终位置写入 localConfig。
-  if (!state.lastXOffsetKey || !state.lastYOffsetKey || state.lastXOffsetKey !== offsetData.xOffsetKey || state.lastYOffsetKey !== offsetData.yOffsetKey) {
+  if (
+    !state.lastXOffsetKey ||
+    !state.lastYOffsetKey ||
+    state.lastXOffsetKey !== offsetData.xOffsetKey ||
+    state.lastYOffsetKey !== offsetData.yOffsetKey
+  ) {
     // 只在 xOffsetKey 或 yOffsetKey 值变化时才触发更新dragStyle
     if (offsetData.xOffsetKey === 'left') {
       el.style.left = 'var(--nt-x-offset)'
@@ -308,7 +341,8 @@ const onDragging = (e: MouseEvent) => {
       el.style.bottom = 'var(--nt-y-offset)'
       el.style.top = ''
     }
-    el.style.transform = 'translate(var(--nt-x-translate), var(--nt-y-translate))'
+    el.style.transform =
+      'translate(var(--nt-x-translate), var(--nt-y-translate))'
     // 更新缓存的值
     state.lastXOffsetKey = offsetData.xOffsetKey
     state.lastYOffsetKey = offsetData.yOffsetKey
@@ -330,7 +364,9 @@ onUnmounted(() => {
 
 const isEnabled = computed(() => localConfig[props.widgetCode].enabled)
 
-const isCurrentActive = computed(() => props.widgetCode === moveState.currDragTarget.code)
+const isCurrentActive = computed(
+  () => props.widgetCode === moveState.currDragTarget.code,
+)
 
 const isFocusVisible = computed(() => {
   if (!localState.value.isFocusMode) {
@@ -364,7 +400,14 @@ watch(isDragMode, (value) => {
   if (value) {
     modifyMoveableWrapClass(true, 'widget-auxiliary-line', 'widget-bg-hover')
   } else {
-    modifyMoveableWrapClass(false, 'widget-auxiliary-line', 'widget-bg-hover', 'widget-active', 'widget-delete', 'widget-dragging')
+    modifyMoveableWrapClass(
+      false,
+      'widget-auxiliary-line',
+      'widget-bg-hover',
+      'widget-active',
+      'widget-delete',
+      'widget-dragging',
+    )
   }
 })
 
@@ -382,7 +425,12 @@ watch(
     // 启用组件，先应用布局样式再加视觉类
     applyContainerLayout()
     if (isDragMode.value) {
-      modifyMoveableWrapClass(true, 'widget-auxiliary-line', 'widget-bg-hover', 'widget-active')
+      modifyMoveableWrapClass(
+        true,
+        'widget-auxiliary-line',
+        'widget-bg-hover',
+        'widget-active',
+      )
     }
   },
 )
@@ -424,7 +472,7 @@ watch(
     class="widget__wrap"
     :class="{
       'widget__wrap--hidden': !isFocusVisible,
-      'widget__wrap--cursor-move': isDragMode
+      'widget__wrap--cursor-move': isDragMode,
     }"
     :style="widgetStyle"
   >
@@ -502,7 +550,8 @@ watch(
 }
 
 @keyframes widget-delete-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 4px 24px rgba(255, 80, 80, 0.55) !important;
     opacity: 1 !important;

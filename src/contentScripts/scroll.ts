@@ -28,8 +28,10 @@ const findScrollContainer = (): Element => {
       const style = window.getComputedStyle(cur)
       const overflowY = style.overflowY
       if (
-        (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay')
-        && cur.scrollHeight > cur.clientHeight + 1
+        (overflowY === 'auto' ||
+          overflowY === 'scroll' ||
+          overflowY === 'overlay') &&
+        cur.scrollHeight > cur.clientHeight + 1
       ) {
         return cur
       }
@@ -45,8 +47,10 @@ const findScrollContainer = (): Element => {
       const style = window.getComputedStyle(el)
       const overflowY = style.overflowY
       if (
-        (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay')
-        && el.scrollHeight > el.clientHeight + 1
+        (overflowY === 'auto' ||
+          overflowY === 'scroll' ||
+          overflowY === 'overlay') &&
+        el.scrollHeight > el.clientHeight + 1
       ) {
         const rect = el.getBoundingClientRect()
         const area = rect.width * rect.height
@@ -55,7 +59,9 @@ const findScrollContainer = (): Element => {
           best = el
         }
       }
-    } catch { /* cross-origin 等异常情况 */ }
+    } catch {
+      /* cross-origin 等异常情况 */
+    }
     for (const child of el.children) {
       walk(child)
     }
@@ -76,7 +82,9 @@ let cachedScrollContainer: Element | null = null
  * 获取当前滚动容器（优先返回缓存，失效时重新查找）
  */
 export const getScrollContainer = (): Element => {
-  return cachedScrollContainer ?? (cachedScrollContainer = findScrollContainer())
+  return (
+    cachedScrollContainer ?? (cachedScrollContainer = findScrollContainer())
+  )
 }
 
 /**
@@ -88,26 +96,47 @@ export const invalidateScrollCache = () => {
 
 // 滚动结束后自动失效缓存，下次滚动时重新查找容器
 // scrollend 事件：Chrome 77+ / Firefox 115+ / Safari 16+
-document.addEventListener('scrollend', invalidateScrollCache, { capture: true, passive: true })
+document.addEventListener('scrollend', invalidateScrollCache, {
+  capture: true,
+  passive: true,
+})
 
 // 监听 DOM 变化：当页面结构变化（SPA 导航、动态加载）时使缓存失效
 // 只关注 body 的子树增减和 class/style 属性变化
 const scrollCacheObserver = new MutationObserver((mutations) => {
   for (const m of mutations) {
-    if (m.type === 'childList' || m.attributeName === 'class' || m.attributeName === 'style') {
+    if (
+      m.type === 'childList' ||
+      m.attributeName === 'class' ||
+      m.attributeName === 'style'
+    ) {
       invalidateScrollCache()
       break
     }
   }
 })
 if (document.body) {
-  scrollCacheObserver.observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['class', 'style'] })
+  scrollCacheObserver.observe(document.body, {
+    childList: true,
+    subtree: false,
+    attributes: true,
+    attributeFilter: ['class', 'style'],
+  })
 }
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.body) {
-    scrollCacheObserver.observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['class', 'style'] })
-  }
-}, { once: true })
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+    if (document.body) {
+      scrollCacheObserver.observe(document.body, {
+        childList: true,
+        subtree: false,
+        attributes: true,
+        attributeFilter: ['class', 'style'],
+      })
+    }
+  },
+  { once: true },
+)
 
 /**
  * 快速平滑滚动辅助函数（200ms，ease-out）。

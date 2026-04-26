@@ -48,10 +48,15 @@ export const updatePoetry = async () => {
   const currTS = dayjs().valueOf()
   // 最小刷新间隔为4小时
   const intervalTime = 3600000 * 4
-  if (currTS - poetryState.value.syncTime >= intervalTime || poetryState.value.content.length === 0) {
+  if (
+    currTS - poetryState.value.syncTime >= intervalTime ||
+    poetryState.value.content.length === 0
+  ) {
     await getPoetryToken()
     await getTodayPoetry()
   }
-  log(`${poetryState.value.content} - ${poetryState.value.origin.author}・${poetryState.value.origin.dynasty}`)
+  log(
+    `${poetryState.value.content} - ${poetryState.value.origin.author}・${poetryState.value.origin.dynasty}`,
+  )
   log(`${poetryState.value.matchTags}`)
 }

@@ -28,7 +28,9 @@ export const sharedConfig: UserConfig = {
   },
   css: {
     postcss: {
-      plugins: [postcssPresetEnv({ stage: 3, features: { 'nesting-rules': true } })],
+      plugins: [
+        postcssPresetEnv({ stage: 3, features: { 'nesting-rules': true } }),
+      ],
     },
   },
   plugins: [
@@ -40,7 +42,11 @@ export const sharedConfig: UserConfig = {
     }),
     Markdown({}),
     AutoImport({
-      imports: ['vue', { 'webextension-polyfill': [['*', 'browser']] }, { dayjs: [['default', 'dayjs']] }],
+      imports: [
+        'vue',
+        { 'webextension-polyfill': [['*', 'browser']] },
+        { dayjs: [['default', 'dayjs']] },
+      ],
       dts: r('src/auto-imports.d.ts'),
     }),
     // https://github.com/antfu/unplugin-vue-components
@@ -67,7 +73,10 @@ export const sharedConfig: UserConfig = {
       name: 'firefox-favicon-inject',
       transformIndexHtml(html) {
         if (process.env.BROWSER === 'firefox') {
-          return html.replace('</head>', '  <link rel="icon" href="/assets/img/icon/icon.svg" />\n</head>')
+          return html.replace(
+            '</head>',
+            '  <link rel="icon" href="/assets/img/icon/icon.svg" />\n</head>',
+          )
         }
         return html
       },
@@ -76,7 +85,13 @@ export const sharedConfig: UserConfig = {
     // visualizer(), // 打包分析工具，需要时启用
   ],
   optimizeDeps: {
-    include: ['vue', '@vueuse/core', 'webextension-polyfill', 'naive-ui', 'vue-i18n'],
+    include: [
+      'vue',
+      '@vueuse/core',
+      'webextension-polyfill',
+      'naive-ui',
+      'vue-i18n',
+    ],
     exclude: ['vue-demi'],
   },
 }
@@ -124,7 +139,11 @@ export default defineConfig(({ command }) => ({
           }
 
           // 业务代码统一归入 main chunk，避免碎片化
-          if (['src/components', 'src/logic', 'src/lib', '~icon'].some((pkg) => id.includes(pkg))) {
+          if (
+            ['src/components', 'src/logic', 'src/lib', '~icon'].some((pkg) =>
+              id.includes(pkg),
+            )
+          ) {
             return 'main'
           }
         },
@@ -134,5 +153,6 @@ export default defineConfig(({ command }) => ({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['../test/setup.ts'],
   },
 }))

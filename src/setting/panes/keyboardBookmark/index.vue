@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { requestPermission } from '@/logic/storage'
-import { state as keyboardState, getSystemBookmarkForKeyboard } from '@/newtab/widgets/keyboardBookmark/logic'
+import {
+  state as keyboardState,
+  getSystemBookmarkForKeyboard,
+} from '@/newtab/widgets/keyboardBookmark/logic'
 import { localConfig, getSettingKeyboardSize } from '@/logic/store'
 import { toModifierMask } from '@/logic/globalShortcut/shortcut-utils'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
@@ -48,8 +51,11 @@ const keyboardBaseSize = computed(() => getSettingKeyboardSize())
 const modifierConflictWarning = computed(() => {
   const bookmarkModifiers = localConfig.keyboardBookmark.globalShortcutModifiers
   const cmdModifiers = localConfig.keyboardCommand.modifiers
-  if (bookmarkModifiers.length > 0 && cmdModifiers.length > 0
-    && toModifierMask(bookmarkModifiers) === toModifierMask(cmdModifiers)) {
+  if (
+    bookmarkModifiers.length > 0 &&
+    cmdModifiers.length > 0 &&
+    toModifierMask(bookmarkModifiers) === toModifierMask(cmdModifiers)
+  ) {
     return window.$t('keyboardBookmark.modifierConflict')
   }
   return ''
@@ -106,7 +112,9 @@ const modifierConflictWarning = computed(() => {
         <div class="setting__item_wrap">
           <div class="item__box">
             <NSwitch
-              v-model:value="localConfig.keyboardBookmark.isGlobalShortcutEnabled"
+              v-model:value="
+                localConfig.keyboardBookmark.isGlobalShortcutEnabled
+              "
               size="small"
             />
             <Tips :content="`${$t('keyboardBookmark.shortcutNote')}`" />
@@ -120,29 +128,39 @@ const modifierConflictWarning = computed(() => {
           <div class="setting__item_wrap">
             <div class="item__box">
               <NSwitch
-                v-model:value="localConfig.keyboardBookmark.shortcutInInputElement"
+                v-model:value="
+                  localConfig.keyboardBookmark.shortcutInInputElement
+                "
                 size="small"
               />
-              <Tips :content="`${$t('keyboardBookmark.shortcutInInputElementNote')}`" />
+              <Tips
+                :content="`${$t('keyboardBookmark.shortcutInInputElementNote')}`"
+              />
             </div>
           </div>
         </NFormItem>
 
         <!-- 域名黑名单 -->
         <NFormItem :label="$t('keyboardBookmark.urlBlacklist')">
-          <UrlBlacklistInput v-model="localConfig.keyboardBookmark.urlBlacklist" />
+          <UrlBlacklistInput
+            v-model="localConfig.keyboardBookmark.urlBlacklist"
+          />
         </NFormItem>
 
         <!-- 全局快捷键修饰键 -->
         <NFormItem :label="$t('keyboardBookmark.globalModifier')">
-          <GlobalShortcutRecorder v-model="localConfig.keyboardBookmark.globalShortcutModifiers" />
+          <GlobalShortcutRecorder
+            v-model="localConfig.keyboardBookmark.globalShortcutModifiers"
+          />
         </NFormItem>
 
         <NFormItem
           v-if="modifierConflictWarning"
           :show-label="false"
         >
-          <span class="modifier-conflict-warning">⚠️ {{ modifierConflictWarning }}</span>
+          <span class="modifier-conflict-warning"
+            >⚠️ {{ modifierConflictWarning }}</span
+          >
         </NFormItem>
       </template>
 

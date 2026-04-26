@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { currDayjsLang, localConfig, getIsWidgetRender, getStyleField, getStyleConst } from '@/logic/store'
+import {
+  currDayjsLang,
+  localConfig,
+  getIsWidgetRender,
+  getStyleField,
+  getStyleConst,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
@@ -85,11 +91,15 @@ const totalTS = endYearTS - startYearTS
 const calculateProgress = () => {
   const currTS = dayjs().valueOf()
   const passTS = currTS - startYearTS
-  state.percent = (passTS / totalTS * 100).toFixed(localConfig.yearProgress.percentageDecimal)
+  state.percent = ((passTS / totalTS) * 100).toFixed(
+    localConfig.yearProgress.percentageDecimal,
+  )
 }
 
 const updateDate = () => {
-  state.date = dayjs().locale(currDayjsLang.value).format(localConfig.yearProgress.format)
+  state.date = dayjs()
+    .locale(currDayjsLang.value)
+    .format(localConfig.yearProgress.format)
 }
 
 const onRender = () => {
@@ -99,10 +109,7 @@ const onRender = () => {
 }
 
 watch(
-  [
-    isRender,
-    () => localConfig.yearProgress.isRealtime,
-  ],
+  [isRender, () => localConfig.yearProgress.isRealtime],
   () => {
     if (isRender && localConfig.yearProgress.isRealtime) {
       addTimerTask(WIDGET_CODE, onRender)
@@ -120,15 +127,9 @@ watch(
   },
 )
 
-watch(
-  [
-    () => localConfig.yearProgress.format,
-    currDayjsLang,
-  ],
-  () => {
-    updateDate()
-  },
-)
+watch([() => localConfig.yearProgress.format, currDayjsLang], () => {
+  updateDate()
+})
 
 onMounted(() => {
   onRender()
@@ -142,14 +143,18 @@ onMounted(() => {
       :style="ypStyle"
       :class="{
         'yearProgress__container--drag': isDragMode,
-        'yearProgress__container--shadow': localConfig.yearProgress.isShadowEnabled,
-        'yearProgress__container--border': localConfig.yearProgress.isBorderEnabled,
+        'yearProgress__container--shadow':
+          localConfig.yearProgress.isShadowEnabled,
+        'yearProgress__container--border':
+          localConfig.yearProgress.isBorderEnabled,
       }"
     >
       <div class="progress__text">
         <div class="text__day-wrap">
           <span class="text__active text__day-num">{{ state.passDay }}</span>
-          <span class="text__blur text__day-total"> / {{ state.totalDay }}</span>
+          <span class="text__blur text__day-total">
+            / {{ state.totalDay }}</span
+          >
         </div>
         <p
           v-if="localConfig.yearProgress.isPercentageEnabled"
@@ -270,7 +275,9 @@ onMounted(() => {
         height: var(--nt-yp-block-size);
         border-radius: var(--nt-yp-block-radius);
         background-color: var(--nt-yp-block-default-color);
-        transition: opacity 0.15s ease, transform 0.15s ease;
+        transition:
+          opacity 0.15s ease,
+          transform 0.15s ease;
 
         &:hover {
           transform: scale(1.2);

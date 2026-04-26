@@ -3,7 +3,13 @@ import { localConfig } from '@/logic/store'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
 import SettingIconGroup from '@/setting/components/SettingIconGroup.vue'
-import { SliderField, SwitchField, ColorField, FontField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  SwitchField,
+  ColorField,
+  FontField,
+  ToggleColorField,
+} from '@/setting/fields'
 import { ICONS } from '@/logic/icons'
 
 const beginsList = computed(() => [

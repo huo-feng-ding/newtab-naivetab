@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { getIsWidgetRender, getStyleField } from '@/logic/store'
-import { updateWeather, refreshWeather, handleWatchWeatherConfigChange } from '@/newtab/widgets/weather/logic'
+import {
+  updateWeather,
+  refreshWeather,
+  handleWatchWeatherConfigChange,
+} from '@/newtab/widgets/weather/logic'
 import WidgetWrap from '../WidgetWrap.vue'
 import NowWeather from './NowWeather.vue'
 import ForecastWeather from './ForecastWeather.vue'
@@ -18,7 +22,9 @@ const weatherStyle = computed(() => ({
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
-let weatherConfigChangeHandle: ReturnType<typeof handleWatchWeatherConfigChange> | null = null
+let weatherConfigChangeHandle: ReturnType<
+  typeof handleWatchWeatherConfigChange
+> | null = null
 
 onMounted(() => {
   updateWeather()
@@ -38,7 +44,6 @@ watch(isRender, (value) => {
   }
   refreshWeather()
 })
-
 </script>
 
 <template>

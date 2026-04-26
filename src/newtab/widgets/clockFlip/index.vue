@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
@@ -79,25 +84,28 @@ const clearFlipTimers = () => {
 
 const flipCard = (cards: FlipCardData[], index: number, newValue: string) => {
   const card = cards[index]
-  if (card.current === newValue)
-    return
+  if (card.current === newValue) return
 
   card.previous = card.current
   card.isFlipping = true
 
   // flipTop 动画: 0~350ms，flipBottom 动画: delay 400ms + duration 370ms = 770ms
   // 在 350ms 时更新 current（flipTop 结束时静态上半牌已显示新值）
-  flipTimers.push(setTimeout(() => {
-    card.current = newValue
-  }, 350))
+  flipTimers.push(
+    setTimeout(() => {
+      card.current = newValue
+    }, 350),
+  )
 
   // 770ms 后全部动画结束，移除动画状态
   // 同时将 previous 同步为 current，以防止 flip--top 因 forwards 失效
   // 瞬间跳回 rotateX(0deg) 时显示旧值导致上半部分闪烁
-  flipTimers.push(setTimeout(() => {
-    card.previous = card.current
-    card.isFlipping = false
-  }, 770))
+  flipTimers.push(
+    setTimeout(() => {
+      card.previous = card.current
+      card.isFlipping = false
+    }, 770),
+  )
 }
 
 const initTime = () => {
@@ -176,7 +184,9 @@ onUnmounted(() => {
 const isShadowEnabled = computed(() => localConfig.clockFlip.isShadowEnabled)
 const showSeconds = computed(() => localConfig.clockFlip.showSeconds)
 const showColon = computed(() => localConfig.clockFlip.showColon)
-const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled)
+const colonBlinkEnabled = computed(
+  () => localConfig.clockFlip.colonBlinkEnabled,
+)
 </script>
 
 <template>
@@ -218,8 +228,11 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
         <span
           v-if="showColon"
           class="cards__divider"
-          :class="{ 'cards__divider--dim': colonBlinkEnabled && !state.colonVisible }"
-        >:</span>
+          :class="{
+            'cards__divider--dim': colonBlinkEnabled && !state.colonVisible,
+          }"
+          >:</span
+        >
 
         <!-- Minutes -->
         <div class="cards__group">
@@ -253,8 +266,11 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
           <span
             v-if="showColon"
             class="cards__divider"
-            :class="{ 'cards__divider--dim': colonBlinkEnabled && !state.colonVisible }"
-          >:</span>
+            :class="{
+              'cards__divider--dim': colonBlinkEnabled && !state.colonVisible,
+            }"
+            >:</span
+          >
 
           <!-- Seconds -->
           <div class="cards__group">
@@ -370,8 +386,14 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-      border-radius: var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius) 0 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent
+      );
+      border-radius: var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius) 0 0;
       z-index: 20;
     }
   }
@@ -388,7 +410,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   /* 静态上半牌：显示数字上半段 */
   .flip-card__top {
     top: 0;
-    border-radius: var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius) 0 0;
+    border-radius: var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius) 0 0;
     background: var(--nt-cf-customCardColor);
     z-index: 1;
 
@@ -412,7 +435,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   /* 静态下半牌：显示数字下半段，略暗增加立体感 */
   .flip-card__bottom {
     bottom: 0;
-    border-radius: 0 0 var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius);
+    border-radius: 0 0 var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius);
     background: var(--nt-cf-customCardColor);
     z-index: 1;
 
@@ -421,8 +445,13 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.06));
-      border-radius: 0 0 var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.14),
+        rgba(0, 0, 0, 0.06)
+      );
+      border-radius: 0 0 var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius);
       pointer-events: none;
     }
 
@@ -468,7 +497,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   .flip-card__flip--top {
     top: 0;
     transform-origin: bottom center;
-    border-radius: var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius) 0 0;
+    border-radius: var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius) 0 0;
 
     /* 翻转时的阴影遮罩（随翻转角度渐深） */
     &::after {
@@ -476,7 +506,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       position: absolute;
       inset: 0;
       background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0));
-      border-radius: var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius) 0 0;
+      border-radius: var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius) 0 0;
       pointer-events: none;
       opacity: 0;
     }
@@ -491,15 +522,21 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
     top: 50%;
     transform-origin: top center;
     transform: perspective(400px) rotateX(90deg);
-    border-radius: 0 0 var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius);
+    border-radius: 0 0 var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius);
 
     /* 下半翻牌的渐变阴影遮罩 */
     &::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.06));
-      border-radius: 0 0 var(--nt-cf-customBorderRadius) var(--nt-cf-customBorderRadius);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.22),
+        rgba(0, 0, 0, 0.06)
+      );
+      border-radius: 0 0 var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius);
       pointer-events: none;
     }
 
@@ -509,17 +546,17 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   }
 
   .flip-card__flip--animate.flip-card__flip--top {
-    animation: flipTop 0.35s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    animation: flipTop 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     will-change: transform;
 
     &::after {
-      animation: flipTopShadow 0.35s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      animation: flipTopShadow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       will-change: opacity;
     }
   }
 
   .flip-card__flip--animate.flip-card__flip--bottom {
-    animation: flipBottom 0.37s cubic-bezier(0.1, 0.8, 0.3, 1.0) 0.40s forwards;
+    animation: flipBottom 0.37s cubic-bezier(0.1, 0.8, 0.3, 1) 0.4s forwards;
     will-change: transform;
   }
 }
@@ -558,5 +595,4 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
     transform: perspective(400px) rotateX(0deg);
   }
 }
-
 </style>

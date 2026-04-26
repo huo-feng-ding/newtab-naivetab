@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { FAVORITE_IMAGE_MAX_COUNT } from '@/logic/constants/app'
 import { createTab, downloadImageByUrl } from '@/logic/util'
-import { customPrimaryColor, localConfig, localState, colorMixWithAlpha } from '@/logic/store'
+import {
+  customPrimaryColor,
+  localConfig,
+  localState,
+  colorMixWithAlpha,
+} from '@/logic/store'
 import { isImageLoading, getImageUrlFromName } from '@/logic/image'
 import { IMAGE_NETWORK_SOURCE } from '@/logic/constants/image'
 import { Icon } from '@iconify/vue'
@@ -31,9 +36,15 @@ const props = defineProps({
   },
 })
 
-const hasImage = computed(() => (props.data.url && props.data.url.length !== 0) || (props.data.name && props.data.name.length !== 0))
+const hasImage = computed(
+  () =>
+    (props.data.url && props.data.url.length !== 0) ||
+    (props.data.name && props.data.name.length !== 0),
+)
 
-const isToolbarVisible = computed(() => props.data.name && props.data.name.length !== 0)
+const isToolbarVisible = computed(
+  () => props.data.name && props.data.name.length !== 0,
+)
 
 const currImageUrl = computed(() => {
   if (props.data.url?.length) return props.data.url
@@ -57,7 +68,12 @@ const isCurrSelectedImage = computed(() => {
   if (!props.select) {
     return false
   }
-  return props.data.name === localConfig.general.backgroundImageNames[localState.value.currAppearanceCode]
+  return (
+    props.data.name ===
+    localConfig.general.backgroundImageNames[
+      localState.value.currAppearanceCode
+    ]
+  )
 })
 
 const onSelectImage = () => {
@@ -69,15 +85,22 @@ const onSelectImage = () => {
     return
   }
   if (props.data.networkSourceType) {
-    localConfig.general.backgroundNetworkSourceType = props.data.networkSourceType
+    localConfig.general.backgroundNetworkSourceType =
+      props.data.networkSourceType
   }
-  localConfig.general.backgroundImageNames[localState.value.currAppearanceCode] = props.data.name || ''
+  localConfig.general.backgroundImageNames[
+    localState.value.currAppearanceCode
+  ] = props.data.name || ''
 }
 
 const getOriginalImageUrl = () => {
   if (props.data.url?.length) return props.data.url
   if (props.data.networkSourceType && props.data.name) {
-    return getImageUrlFromName(props.data.networkSourceType, props.data.name, 'high')
+    return getImageUrlFromName(
+      props.data.networkSourceType,
+      props.data.name,
+      'high',
+    )
   }
   return ''
 }
@@ -93,14 +116,18 @@ const onSaveImage = () => {
   downloadImageByUrl(url, props.data.name)
 }
 
-const favoriteImageNameSet = computed(() => new Set(localConfig.general.favoriteImageList.map((item) => item.name)))
+const favoriteImageNameSet = computed(
+  () => new Set(localConfig.general.favoriteImageList.map((item) => item.name)),
+)
 
 const isFavoriteIconVisible = computed(() => {
   return !favoriteImageNameSet.value.has(props.data.name || '')
 })
 
 const onFavoriteImage = () => {
-  if (localConfig.general.favoriteImageList.length >= FAVORITE_IMAGE_MAX_COUNT) {
+  if (
+    localConfig.general.favoriteImageList.length >= FAVORITE_IMAGE_MAX_COUNT
+  ) {
     window.$message.error(window.$t('prompts.favoriteLimit'))
     return
   }
@@ -112,16 +139,22 @@ const onFavoriteImage = () => {
     networkSourceType: props.data.networkSourceType,
     name: props.data.name || '',
   })
-  window.$message.success(`${window.$t('common.favorite')}${window.$t('common.success')}`)
+  window.$message.success(
+    `${window.$t('common.favorite')}${window.$t('common.success')}`,
+  )
 }
 
 const onUnFavoriteImage = () => {
-  const index = localConfig.general.favoriteImageList.findIndex((item) => item.name === props.data.name)
+  const index = localConfig.general.favoriteImageList.findIndex(
+    (item) => item.name === props.data.name,
+  )
   if (index === -1) return
   localConfig.general.favoriteImageList.splice(index, 1)
 }
 
-const ntBgDrawerOutlineMix = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.22))
+const ntBgDrawerOutlineMix = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.22),
+)
 
 const cssVars = computed(() => ({
   '--nt-bg-drawer-color': customPrimaryColor.value,
@@ -141,7 +174,11 @@ const cssVars = computed(() => ({
         class="image__empty"
       >
         <Icon :icon="ICONS.imageSquare" />
-        <span class="image__empty-text">{{ isImageError ? $t('prompts.imageLoadFailed') : $t('prompts.noImageAvailable') }}</span>
+        <span class="image__empty-text">{{
+          isImageError
+            ? $t('prompts.imageLoadFailed')
+            : $t('prompts.noImageAvailable')
+        }}</span>
       </div>
 
       <!-- 懒加载的img不支持reactive变量 -->
@@ -294,7 +331,11 @@ const cssVars = computed(() => ({
     align-items: center;
     width: 100%;
     height: 28px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.0) 100%);
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.68) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
     padding: 0 4px;
     opacity: 0;
     transform: translateY(6px);
@@ -338,7 +379,11 @@ const cssVars = computed(() => ({
     align-items: center;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.38) 100%);
+    background: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.38) 100%
+    );
 
     .check__icon {
       display: flex;

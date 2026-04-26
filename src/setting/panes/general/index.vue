@@ -1,13 +1,33 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import i18n from '@/lib/i18n'
-import { exportSetting, isUploadConfigLoading, importSetting, refreshSetting, resetSetting, configSizeMap, SYNC_QUOTA_BYTES_PER_ITEM } from '@/logic/storage'
-import { localConfig, localState, globalState, customPrimaryColor, colorMixWithAlpha } from '@/logic/store'
+import {
+  exportSetting,
+  isUploadConfigLoading,
+  importSetting,
+  refreshSetting,
+  resetSetting,
+  configSizeMap,
+  SYNC_QUOTA_BYTES_PER_ITEM,
+} from '@/logic/storage'
+import {
+  localConfig,
+  localState,
+  globalState,
+  customPrimaryColor,
+  colorMixWithAlpha,
+} from '@/logic/store'
 import { ICONS } from '@/logic/icons'
 import SettingHeaderBar from '@/setting/components/SettingHeaderBar.vue'
 import SettingFormWrap from '@/setting/components/SettingFormWrap.vue'
 import Tips from '@/components/Tips.vue'
-import { SliderField, ColorField, FontField, SwitchField, ToggleColorField } from '@/setting/fields'
+import {
+  SliderField,
+  ColorField,
+  FontField,
+  SwitchField,
+  ToggleColorField,
+} from '@/setting/fields'
 import BackgroundDrawer from './BackgroundDrawer.vue'
 
 const instance = getCurrentInstance()
@@ -32,11 +52,23 @@ const themeList = computed(() => [
 ])
 
 const drawerPlacementList = [
-  { value: 'left', icon: ICONS.dockLeft, style: { transform: 'rotate(180deg)' } },
-  { value: 'top', icon: ICONS.dockBottom, style: { transform: 'rotate(180deg)' } },
+  {
+    value: 'left',
+    icon: ICONS.dockLeft,
+    style: { transform: 'rotate(180deg)' },
+  },
+  {
+    value: 'top',
+    icon: ICONS.dockBottom,
+    style: { transform: 'rotate(180deg)' },
+  },
   { value: 'bottom', icon: ICONS.dockBottom, style: {} },
   { value: 'right', icon: ICONS.dockLeft, style: {} },
-] as { value: TDrawerPlacement | 'right', icon: string, style: Record<string, string> }[]
+] as {
+  value: TDrawerPlacement | 'right'
+  icon: string
+  style: Record<string, string>
+}[]
 
 const focusElementList = computed(() => [
   { label: window.$t('generalSetting.focusBrowserDefault'), value: 'default' },
@@ -84,7 +116,12 @@ watch(
 )
 
 const syncTime = computed(() => {
-  if (!Object.prototype.hasOwnProperty.call(localState.value, 'isUploadConfigStatusMap')) {
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      localState.value,
+      'isUploadConfigStatusMap',
+    )
+  ) {
     return '0'
   }
   const syncTimeList = [] as number[]
@@ -128,8 +165,7 @@ const getFieldLabel = (field: string) => window.$t(`setting.${field}`) || field
 
 // 计算总用量和 Top 占用大户
 const sortedEntries = computed(() => {
-  return Object.entries(configSizeMap)
-    .sort((a, b) => b[1] - a[1])
+  return Object.entries(configSizeMap).sort((a, b) => b[1] - a[1])
 })
 
 const totalBytes = computed(() => {
@@ -144,8 +180,12 @@ const topLargeItems = computed(() => {
   return sortedEntries.value.slice(0, 3)
 })
 
-const ntGeneralActiveColor = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.12))
-const ntGeneralActiveBorderColor = computed(() => colorMixWithAlpha(customPrimaryColor.value, 0.30))
+const ntGeneralActiveColor = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.12),
+)
+const ntGeneralActiveBorderColor = computed(() =>
+  colorMixWithAlpha(customPrimaryColor.value, 0.3),
+)
 
 const cssVars = computed(() => ({
   '--nt-general-color': customPrimaryColor.value,
@@ -198,7 +238,10 @@ const cssVars = computed(() => ({
               v-for="(item, index) in drawerPlacementList"
               :key="index"
               class="site__item"
-              :class="{ 'site__item--active': localConfig.general.drawerPlacement === item.value }"
+              :class="{
+                'site__item--active':
+                  localConfig.general.drawerPlacement === item.value,
+              }"
               :style="item.style"
               @click="localConfig.general.drawerPlacement = item.value"
             >
@@ -380,7 +423,9 @@ const cssVars = computed(() => ({
               <template #header>
                 <div class="storage-header">
                   <div class="storage-header__title">
-                    <span class="storage-header__field">{{ $t('generalSetting.total') }}</span>
+                    <span class="storage-header__field">{{
+                      $t('generalSetting.total')
+                    }}</span>
                     <span class="storage-header__total">
                       {{ (totalBytes / 1024).toFixed(1) }}KB / ~100KB
                     </span>
@@ -402,21 +447,27 @@ const cssVars = computed(() => ({
                         'storage-header__item--danger': bytes > 8000,
                       }"
                     >
-                      <span class="storage-header__field">{{ getFieldLabel(field) }}</span>
+                      <span class="storage-header__field">{{
+                        getFieldLabel(field)
+                      }}</span>
                       <div class="storage-header__bar-wrap">
                         <div
                           class="storage-header__bar"
-                          :style="{ width: `${Math.min((bytes / SYNC_QUOTA_BYTES_PER_ITEM) * 100, 100)}%` }"
+                          :style="{
+                            width: `${Math.min((bytes / SYNC_QUOTA_BYTES_PER_ITEM) * 100, 100)}%`,
+                          }"
                         />
                       </div>
-                      <span class="storage-header__bytes">{{ (bytes / 1024).toFixed(1) }}KB</span>
+                      <span class="storage-header__bytes"
+                        >{{ (bytes / 1024).toFixed(1) }}KB</span
+                      >
                     </div>
                   </div>
                 </div>
               </template>
               <div class="storage-size__list">
                 <NTooltip
-                  v-for="([field, bytes]) in sortedEntries"
+                  v-for="[field, bytes] in sortedEntries"
                   :key="field"
                   trigger="hover"
                   placement="top"
@@ -429,17 +480,25 @@ const cssVars = computed(() => ({
                         'storage-size__item--danger': bytes > 8000,
                       }"
                     >
-                      <span class="item__field">{{ getFieldLabel(field) }}</span>
+                      <span class="item__field">{{
+                        getFieldLabel(field)
+                      }}</span>
                       <div class="item__bar-wrap">
                         <div
                           class="item__bar"
-                          :style="{ width: `${Math.min((bytes / SYNC_QUOTA_BYTES_PER_ITEM) * 100, 100)}%` }"
+                          :style="{
+                            width: `${Math.min((bytes / SYNC_QUOTA_BYTES_PER_ITEM) * 100, 100)}%`,
+                          }"
                         />
                       </div>
-                      <span class="item__bytes">{{ (bytes / 1024).toFixed(1) }}KB</span>
+                      <span class="item__bytes"
+                        >{{ (bytes / 1024).toFixed(1) }}KB</span
+                      >
                     </div>
                   </template>
-                  {{ `${getFieldLabel(field)}: ${bytes} / ${SYNC_QUOTA_BYTES_PER_ITEM} bytes` }}
+                  {{
+                    `${getFieldLabel(field)}: ${bytes} / ${SYNC_QUOTA_BYTES_PER_ITEM} bytes`
+                  }}
                 </NTooltip>
               </div>
             </NCollapseItem>
@@ -507,7 +566,9 @@ const cssVars = computed(() => ({
                 {{ $t('generalSetting.resetAllSettingValue') }}
               </NButton>
             </template>
-            {{ `${$t('common.confirm')} ${$t('generalSetting.resetAllSettingValue')}` }}?
+            {{
+              `${$t('common.confirm')} ${$t('generalSetting.resetAllSettingValue')}`
+            }}?
           </NPopconfirm>
           <Tips :content="$t('generalSetting.resetSettingTips')" />
         </NFormItem>

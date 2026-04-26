@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { localConfig, localState, availableFontOptions, fontSelectRenderLabel } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  availableFontOptions,
+  fontSelectRenderLabel,
+} from '@/logic/store'
 import CustomColorPicker from '@/components/CustomColorPicker.vue'
 import SliderInput from '@/components/SliderInput.vue'
 import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
@@ -57,7 +62,11 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
         size="small"
       />
       <CustomColorPicker
-        v-model:value="localConfig.keyboardCommon.keycapBorderColor[localState.currAppearanceCode]"
+        v-model:value="
+          localConfig.keyboardCommon.keycapBorderColor[
+            localState.currAppearanceCode
+          ]
+        "
         class="setting__item-ele setting__item-ml"
       />
       <NInputNumber
@@ -157,13 +166,25 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.mainFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.mainFontColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.mainBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.mainBackgroundColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
     </NFormItem>
 
@@ -172,13 +193,25 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisOneFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.emphasisOneFontColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisOneBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.emphasisOneBackgroundColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
     </NFormItem>
 
@@ -187,13 +220,25 @@ import KeyboardEmphasisKeySetting from './KeyboardEmphasisKeySetting.vue'
         :label="`${$t('common.fontColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisTwoFontColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.emphasisTwoFontColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
       <NFormItem
         :label="`${$t('common.backgroundColor')}`"
         class="n-form-item--color"
       >
-        <CustomColorPicker v-model:value="localConfig.keyboardCommon.emphasisTwoBackgroundColor[localState.currAppearanceCode]" />
+        <CustomColorPicker
+          v-model:value="
+            localConfig.keyboardCommon.emphasisTwoBackgroundColor[
+              localState.currAppearanceCode
+            ]
+          "
+        />
       </NFormItem>
     </NFormItem>
 

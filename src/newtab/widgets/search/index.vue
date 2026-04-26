@@ -7,7 +7,12 @@ import { createTab, sleep, log } from '@/logic/util'
 import { getSearchSuggestion } from '@/api'
 import { SEARCH_ENGINE_LIST } from '@/logic/constants/search'
 import { isDragMode } from '@/logic/moveable'
-import { localConfig, globalState, getStyleField, customPrimaryColor } from '@/logic/store'
+import {
+  localConfig,
+  globalState,
+  getStyleField,
+  customPrimaryColor,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
@@ -23,11 +28,25 @@ const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
 const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
 const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-const customDropdownBorderRadius = getStyleField(WIDGET_CODE, 'dropdownBorderRadius', 'vmin')
-const customDropdownBackgroundColor = getStyleField(WIDGET_CODE, 'dropdownBackgroundColor')
-const customDropdownFontFamily = getStyleField(WIDGET_CODE, 'dropdownFontFamily')
+const customDropdownBorderRadius = getStyleField(
+  WIDGET_CODE,
+  'dropdownBorderRadius',
+  'vmin',
+)
+const customDropdownBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'dropdownBackgroundColor',
+)
+const customDropdownFontFamily = getStyleField(
+  WIDGET_CODE,
+  'dropdownFontFamily',
+)
 const customDropdownFontColor = getStyleField(WIDGET_CODE, 'dropdownFontColor')
-const customDropdownFontSize = getStyleField(WIDGET_CODE, 'dropdownFontSize', 'vmin')
+const customDropdownFontSize = getStyleField(
+  WIDGET_CODE,
+  'dropdownFontSize',
+  'vmin',
+)
 
 /**
  * 获取当前搜索引擎图标
@@ -91,7 +110,7 @@ const state = reactive({
   isSuggestSelecting: false,
   isSearching: false,
   currSuggestIndex: -1,
-  suggestList: [] as { label: string, key: string }[],
+  suggestList: [] as { label: string; key: string }[],
 })
 
 const onSearch = () => {
@@ -164,7 +183,10 @@ const handleSearchKeydown = (e: KeyboardEvent) => {
     if (code === 'ArrowUp') {
       state.currSuggestIndex = Math.max(0, state.currSuggestIndex - 1)
     } else {
-      state.currSuggestIndex = Math.min(state.suggestList.length - 1, state.currSuggestIndex + 1)
+      state.currSuggestIndex = Math.min(
+        state.suggestList.length - 1,
+        state.currSuggestIndex + 1,
+      )
     }
     state.searchValue = state.suggestList[state.currSuggestIndex].label
     // debounce 窗口 300ms，延迟 350ms 清除标志确保 watcher + debounce 都已跳过
@@ -194,9 +216,17 @@ const getSearchSuggest = async () => {
   }
   state.isSuggestLoading = true
   try {
-    const engine = SEARCH_ENGINE_LIST.find((e) => e.label === localConfig.search.urlName)
-    const results = await getSearchSuggestion(engine?.label ?? 'Baidu', engine?.suggestUrl, state.searchValue)
-    state.suggestList = results.map((label) => ({ label, key: label })).slice(0, localConfig.search.dropdownMaxItems)
+    const engine = SEARCH_ENGINE_LIST.find(
+      (e) => e.label === localConfig.search.urlName,
+    )
+    const results = await getSearchSuggestion(
+      engine?.label ?? 'Baidu',
+      engine?.suggestUrl,
+      state.searchValue,
+    )
+    state.suggestList = results
+      .map((label) => ({ label, key: label }))
+      .slice(0, localConfig.search.dropdownMaxItems)
   } catch (error) {
     log('search suggestion error:', error)
     state.suggestList = []
@@ -237,7 +267,8 @@ watch(isDragMode, () => {
       class="search__container"
       :style="searchStyle"
       :class="{
-        'search__container--focus': localConfig.search.isBorderEnabled && globalState.isSearchFocused,
+        'search__container--focus':
+          localConfig.search.isBorderEnabled && globalState.isSearchFocused,
         'search__container--border': localConfig.search.isBorderEnabled,
         'search__container--shadow': localConfig.search.isShadowEnabled,
       }"
@@ -256,7 +287,9 @@ watch(isDragMode, () => {
           size="large"
           class="input__main"
           :class="{ 'input__main--move': isDragMode }"
-          :placeholder="localConfig.search.placeholder || localConfig.search.urlName"
+          :placeholder="
+            localConfig.search.placeholder || localConfig.search.urlName
+          "
           :loading="state.isSuggestLoading"
           clearable
           @focus="handleSearchFocus"
@@ -267,14 +300,21 @@ watch(isDragMode, () => {
       </div>
       <Transition name="search-dropdown">
         <div
-          v-if="localConfig.search.suggestionEnabled && state.isSuggestVisible && state.suggestList.length !== 0"
+          v-if="
+            localConfig.search.suggestionEnabled &&
+            state.isSuggestVisible &&
+            state.suggestList.length !== 0
+          "
           class="search__dropdown"
         >
           <div
             v-for="(item, index) in state.suggestList"
             :key="item.key"
             class="search__dropdown-item"
-            :class="{ 'search__dropdown-item--pending': state.currSuggestIndex === index }"
+            :class="{
+              'search__dropdown-item--pending':
+                state.currSuggestIndex === index,
+            }"
             @mousedown.prevent="handleSelectSuggest(item.key)"
           >
             {{ item.label }}
@@ -329,7 +369,12 @@ watch(isDragMode, () => {
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 70%);
+      background: linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.04) 40%,
+        transparent 70%
+      );
       z-index: 0;
     }
     /* 顶部高光线 — 仅覆盖输入框区域 */
@@ -341,7 +386,12 @@ watch(isDragMode, () => {
       left: 12%;
       right: calc(12% + var(--nt-s-height, 45px));
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.28),
+        transparent
+      );
       z-index: 2;
     }
 
@@ -494,7 +544,8 @@ watch(isDragMode, () => {
       scrollbar-width: none;
       /* 圆角比输入框稍小，视觉上收敛 */
       border-radius: calc(var(--nt-s-dropdown-radius));
-      backdrop-filter: blur(calc(var(--nt-s-background-blur) * 1.2)) saturate(1.4);
+      backdrop-filter: blur(calc(var(--nt-s-background-blur) * 1.2))
+        saturate(1.4);
       background: var(--nt-s-dropdown-bg-color);
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow:
@@ -507,7 +558,11 @@ watch(isDragMode, () => {
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 40%);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.06) 0%,
+          transparent 40%
+        );
         z-index: 0;
       }
       /* 顶部连接线 — 与输入框底部的高光线呼应 */
@@ -519,7 +574,12 @@ watch(isDragMode, () => {
         left: 15%;
         right: 15%;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.15),
+          transparent
+        );
         z-index: 2;
       }
       &::-webkit-scrollbar {
@@ -548,7 +608,12 @@ watch(isDragMode, () => {
           left: var(--nt-s-padding);
           right: var(--nt-s-padding);
           height: 1px;
-          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.06) 50%,
+            transparent 100%
+          );
         }
         &:hover {
           background: rgba(255, 255, 255, 0.08);
@@ -557,7 +622,11 @@ watch(isDragMode, () => {
       /* 键盘导航选中态，必须与 .search__dropdown-item 同级 */
       .search__dropdown-item--pending {
         border-radius: var(--radius-md);
-        background: color-mix(in srgb, var(--nt-s-primary-color) 22%, transparent);
+        background: color-mix(
+          in srgb,
+          var(--nt-s-primary-color) 22%,
+          transparent
+        );
         /* pending 态左侧醒目高亮条 */
         &::after {
           content: '';
@@ -581,20 +650,37 @@ watch(isDragMode, () => {
           0 8px 32px rgba(0, 0, 0, 0.4),
           0 2px 8px rgba(0, 0, 0, 0.15);
         &::before {
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 40%);
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 40%
+          );
         }
         .search__dropdown-item {
           & + .search__dropdown-item::before {
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 50%, transparent 100%);
+            background: linear-gradient(
+              90deg,
+              transparent 0%,
+              rgba(255, 255, 255, 0.04) 50%,
+              transparent 100%
+            );
           }
           &:hover {
             background: rgba(255, 255, 255, 0.1);
           }
         }
         .search__dropdown-item--pending {
-          background: color-mix(in srgb, var(--nt-s-primary-color) 30%, transparent);
+          background: color-mix(
+            in srgb,
+            var(--nt-s-primary-color) 30%,
+            transparent
+          );
           &::after {
-            background: color-mix(in srgb, var(--nt-s-primary-color) 80%, white);
+            background: color-mix(
+              in srgb,
+              var(--nt-s-primary-color) 80%,
+              white
+            );
           }
         }
       }
@@ -622,7 +708,11 @@ watch(isDragMode, () => {
       border-color: var(--nt-s-font-color);
     }
     /* 聚焦时背景微微提亮 */
-    background-color: color-mix(in srgb, var(--nt-s-background-color) 85%, rgba(255, 255, 255, 0.08) 15%);
+    background-color: color-mix(
+      in srgb,
+      var(--nt-s-background-color) 85%,
+      rgba(255, 255, 255, 0.08) 15%
+    );
   }
 }
 

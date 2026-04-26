@@ -4,7 +4,10 @@ import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 import { localConfig } from '@/logic/store'
 import { defaultConfig } from '@/logic/config'
-import { PRESERVE_FIELDS as COMMAND_PRESERVE_FIELDS, COMMAND_SHORTCUT_CODE } from '@/logic/globalShortcut/shortcut-command'
+import {
+  PRESERVE_FIELDS as COMMAND_PRESERVE_FIELDS,
+  COMMAND_SHORTCUT_CODE,
+} from '@/logic/globalShortcut/shortcut-command'
 import { PRESERVE_FIELDS as KEYBOARD_COMMON_PRESERVE_FIELDS } from '@/logic/keyboard/keyboard-config'
 
 const props = defineProps({
@@ -17,7 +20,7 @@ const props = defineProps({
     default: false,
   },
   sections: {
-    type: Array as () => Array<{ slot: string, label: string }>,
+    type: Array as () => Array<{ slot: string; label: string }>,
     default: () => [],
   },
 })
@@ -27,15 +30,24 @@ const customSections = computed(() =>
 )
 
 // ——— 重置逻辑 ———
-const hasWidgetCode = computed(() => !!props.widgetCode && props.widgetCode in defaultConfig)
+const hasWidgetCode = computed(
+  () => !!props.widgetCode && props.widgetCode in defaultConfig,
+)
 
 // 从各 widget config.ts 中获取需要保留的字段（自动扫描）
 const preserveFieldsMap = (() => {
-  const modules = import.meta.glob('../../newtab/widgets/**/config.ts', { eager: true }) as Record<string, any>
+  const modules = import.meta.glob('../../newtab/widgets/**/config.ts', {
+    eager: true,
+  }) as Record<string, any>
   const map: Record<string, string[]> = {}
   for (const key in modules) {
     const m = modules[key]
-    if (m && m.WIDGET_CODE && Array.isArray(m.PRESERVE_FIELDS) && m.PRESERVE_FIELDS.length > 0) {
+    if (
+      m &&
+      m.WIDGET_CODE &&
+      Array.isArray(m.PRESERVE_FIELDS) &&
+      m.PRESERVE_FIELDS.length > 0
+    ) {
       map[m.WIDGET_CODE] = m.PRESERVE_FIELDS
     }
   }
@@ -64,7 +76,8 @@ const handleQuickReset = () => {
   // 总是保留 enabled 和 layout
   const preserved: Record<string, any> = {}
   if (current.enabled !== undefined) preserved.enabled = current.enabled
-  if (current.layout !== undefined) preserved.layout = JSON.parse(JSON.stringify(current.layout))
+  if (current.layout !== undefined)
+    preserved.layout = JSON.parse(JSON.stringify(current.layout))
 
   // 额外保留 widget 特定的用户数据字段
   const preserveFields = preserveFieldsMap[props.widgetCode]
@@ -77,7 +90,9 @@ const handleQuickReset = () => {
   }
 
   Object.assign(localConfig[code], defaultValue, preserved)
-  window.$message?.success(`${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
+  window.$message?.success(
+    `${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`,
+  )
 }
 
 // 完全重置：只保留 enabled 和 layout（原有逻辑）
@@ -89,31 +104,87 @@ const handleFullReset = () => {
   // 保留 enabled（开启状态）和 layout（位置信息），避免重置后意外关闭或移位
   const preserved: Record<string, any> = {}
   if (current.enabled !== undefined) preserved.enabled = current.enabled
-  if (current.layout !== undefined) preserved.layout = JSON.parse(JSON.stringify(current.layout))
+  if (current.layout !== undefined)
+    preserved.layout = JSON.parse(JSON.stringify(current.layout))
   Object.assign(localConfig[code], defaultValue, preserved)
-  window.$message?.success(`${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`)
+  window.$message?.success(
+    `${window.$t('generalSetting.resetSettingValue')} "${window.$t('setting.' + props.widgetCode)}" ${window.$t('common.success')}`,
+  )
 }
 
 // 渲染图标函数，和项目右键菜单保持一致用法
-const renderIcon = (iconName: string) => () => h(Icon, { icon: iconName, size: 16 })
+const renderIcon = (iconName: string) => () =>
+  h(Icon, { icon: iconName, size: 16 })
 
 // 下拉菜单选项 - 使用 computed 保证 i18n 响应式更新
 const resetOptions = computed(() => [
   {
     key: 'quick',
     icon: renderIcon(ICONS.save),
-    label: () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px', padding: '2px 0' } }, [
-      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('generalSetting.quickReset')),
-      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('generalSetting.quickResetDesc')),
-    ]),
+    label: () =>
+      h(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            padding: '2px 0',
+          },
+        },
+        [
+          h(
+            'div',
+            { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } },
+            window.$t('generalSetting.quickReset'),
+          ),
+          h(
+            'div',
+            {
+              style: {
+                fontSize: '12px',
+                color: 'var(--n-text-color-3)',
+                lineHeight: '1.2',
+              },
+            },
+            window.$t('generalSetting.quickResetDesc'),
+          ),
+        ],
+      ),
   },
   {
     key: 'full',
     icon: renderIcon(ICONS.clearOutlined),
-    label: () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: '2px', padding: '2px 0' } }, [
-      h('div', { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } }, window.$t('generalSetting.fullReset')),
-      h('div', { style: { fontSize: '12px', color: 'var(--n-text-color-3)', lineHeight: '1.2' } }, window.$t('generalSetting.fullResetDesc')),
-    ]),
+    label: () =>
+      h(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            padding: '2px 0',
+          },
+        },
+        [
+          h(
+            'div',
+            { style: { fontSize: '14px', fontWeight: 500, lineHeight: '1.2' } },
+            window.$t('generalSetting.fullReset'),
+          ),
+          h(
+            'div',
+            {
+              style: {
+                fontSize: '12px',
+                color: 'var(--n-text-color-3)',
+                lineHeight: '1.2',
+              },
+            },
+            window.$t('generalSetting.fullResetDesc'),
+          ),
+        ],
+      ),
   },
 ])
 
@@ -196,7 +267,11 @@ const handleResetSelect = (key: string) => {
             :icon="ICONS.restoreTwotone"
             class="reset-btn__icon"
           />
-          <span class="reset-btn__label">{{ $t('generalSetting.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
+          <span class="reset-btn__label"
+            >{{ $t('generalSetting.resetSettingValue') }} "{{
+              $t('setting.' + props.widgetCode)
+            }}"</span
+          >
         </div>
       </NDropdown>
       <!-- 没有需要保留的字段：只显示单个重置按钮，点击直接执行完全重置 -->
@@ -205,14 +280,16 @@ const handleResetSelect = (key: string) => {
         @positive-click="handleFullReset"
       >
         <template #trigger>
-          <div
-            class="setting-pane-wrap__reset-btn"
-          >
+          <div class="setting-pane-wrap__reset-btn">
             <Icon
               :icon="ICONS.restoreTwotone"
               class="reset-btn__icon"
             />
-            <span class="reset-btn__label">{{ $t('generalSetting.resetSettingValue') }} "{{ $t('setting.' + props.widgetCode) }}"</span>
+            <span class="reset-btn__label"
+              >{{ $t('generalSetting.resetSettingValue') }} "{{
+                $t('setting.' + props.widgetCode)
+              }}"</span
+            >
           </div>
         </template>
         <span>{{ `${$t('generalSetting.confirmReset')}` }}</span>
@@ -237,7 +314,11 @@ const handleResetSelect = (key: string) => {
   border-radius: var(--radius-md);
   border: 1px dashed rgba(208, 48, 80, 0.28);
   cursor: pointer;
-  transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
   color: rgba(208, 48, 80, 0.55);
   user-select: none;
 

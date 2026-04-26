@@ -57,7 +57,6 @@ watch(
     }
   },
 )
-
 </script>
 
 <template>
@@ -98,7 +97,10 @@ watch(
     border-radius: var(--nt-memo-border-radius);
     background-color: var(--nt-memo-background-color);
     backdrop-filter: blur(var(--nt-memo-background-blur)) saturate(1.4);
-    transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+    transition:
+      box-shadow 0.25s ease,
+      border-color 0.25s ease,
+      background-color 0.25s ease;
     will-change: transform;
 
     /* 内高光：左上角玻璃反射光晕 */

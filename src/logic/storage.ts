@@ -65,22 +65,49 @@
  */
 import md5 from 'crypto-js/md5'
 import { useDebounceFn } from '@vueuse/core'
-import { MERGE_CONFIG_DELAY, MERGE_CONFIG_MAX_DELAY } from '@/logic/constants/app'
-import { KEYBOARD_URL_MAX_LENGTH, KEYBOARD_NAME_MAX_LENGTH } from '@/logic/keyboard/keyboard-constants'
+import {
+  MERGE_CONFIG_DELAY,
+  MERGE_CONFIG_MAX_DELAY,
+} from '@/logic/constants/app'
+import {
+  KEYBOARD_URL_MAX_LENGTH,
+  KEYBOARD_NAME_MAX_LENGTH,
+} from '@/logic/keyboard/keyboard-constants'
 import { defaultConfig, defaultUploadStatusItem } from '@/logic/config'
 import { KEYBOARD_COMMON_CONFIG } from '@/logic/keyboard/keyboard-config'
-import { compareLeftVersionLessThanRightVersions, log, downloadJsonByTagA, sleep } from '@/logic/util'
-import { localConfig, localState, globalState, switchSettingDrawerVisible } from '@/logic/store'
+import {
+  compareLeftVersionLessThanRightVersions,
+  log,
+  downloadJsonByTagA,
+  sleep,
+} from '@/logic/util'
+import {
+  localConfig,
+  localState,
+  globalState,
+  switchSettingDrawerVisible,
+} from '@/logic/store'
 import { mergeState } from '@/logic/config-merge'
 import { handleStateResetAndUpdate, updateSetting } from '@/logic/config-update'
 import { clearDatabase } from '@/logic/database'
-import { COMPRESS_PREFIX, compressString, decompressString, shouldCompress, parseStoredData } from '@/logic/compress'
+import {
+  COMPRESS_PREFIX,
+  compressString,
+  decompressString,
+  shouldCompress,
+  parseStoredData,
+} from '@/logic/compress'
 
 // ── 压缩配置 ─────────────────────────
 // 压缩相关函数已移至 @/logic/compress.ts，此处仅引用
 
 export const isUploadConfigLoading = computed(() => {
-  if (!Object.prototype.hasOwnProperty.call(localState.value, 'isUploadConfigStatusMap')) {
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      localState.value,
+      'isUploadConfigStatusMap',
+    )
+  ) {
     return false
   }
   let isLoading = false
@@ -119,7 +146,9 @@ const writeHistory: WriteRecord[] = []
 /**
  * 检测写入频率，返回是否接近限制
  */
-const checkWriteRate = (field: ConfigField): { isNearLimit: boolean, count: number } => {
+const checkWriteRate = (
+  field: ConfigField,
+): { isNearLimit: boolean; count: number } => {
   const now = Date.now()
   // 清理过期记录
   const cutoff = now - WRITE_RATE_WINDOW
@@ -129,7 +158,8 @@ const checkWriteRate = (field: ConfigField): { isNearLimit: boolean, count: numb
   // 添加当前记录
   writeHistory.push({ timestamp: now, field })
   const count = writeHistory.length
-  const isNearLimit = count >= MAX_WRITE_PER_MINUTE * (WRITE_RATE_WARN_THRESHOLD / 100)
+  const isNearLimit =
+    count >= MAX_WRITE_PER_MINUTE * (WRITE_RATE_WARN_THRESHOLD / 100)
   return { isNearLimit, count }
 }
 
@@ -139,9 +169,9 @@ const getUploadConfigData = (field: ConfigField) => {
   //   2. 兜底截断超长 url / name（防止极端情况写爆 8KB 限制）
   if (field === 'keyboardBookmark') {
     const src = localConfig.keyboardBookmark
-    const newKeymap: Record<string, { url: string, name?: string }> = {}
+    const newKeymap: Record<string, { url: string; name?: string }> = {}
     for (const code of Object.keys(src.keymap)) {
-      const item = src.keymap[code] as { url?: string, name?: string }
+      const item = src.keymap[code] as { url?: string; name?: string }
       if (!item) continue
       let url = (item.url || '').replaceAll(' ', '')
       if (url.length === 0) continue
@@ -153,7 +183,7 @@ const getUploadConfigData = (field: ConfigField) => {
       if (name.length > KEYBOARD_NAME_MAX_LENGTH) {
         name = name.slice(0, KEYBOARD_NAME_MAX_LENGTH)
       }
-      const next: { url: string, name?: string } = { url }
+      const next: { url: string; name?: string } = { url }
       if (name.length > 0) next.name = name
       newKeymap[code] = next
     }
@@ -194,16 +224,22 @@ const uploadConfigFn = async (field: ConfigField) => {
     // 检测写入频率
     const { isNearLimit, count } = checkWriteRate(field)
     if (isNearLimit) {
-      log(`Upload config-${field} write rate warning`, `${count}/${MAX_WRITE_PER_MINUTE} per minute`)
+      log(
+        `Upload config-${field} write rate warning`,
+        `${count}/${MAX_WRITE_PER_MINUTE} per minute`,
+      )
       window.$message.warning(
-        window.$t('generalSetting.syncRateWarning')
+        window
+          .$t('generalSetting.syncRateWarning')
           .replace('__count__', String(count))
           .replace('__max__', String(MAX_WRITE_PER_MINUTE)),
       )
     }
 
     if (!localState.value.isUploadConfigStatusMap[field]) {
-      localState.value.isUploadConfigStatusMap[field] = { ...defaultUploadStatusItem }
+      localState.value.isUploadConfigStatusMap[field] = {
+        ...defaultUploadStatusItem,
+      }
     }
     localState.value.isUploadConfigStatusMap[field].loading = true
     log(`Upload config-${field} start`)
@@ -243,7 +279,10 @@ const uploadConfigFn = async (field: ConfigField) => {
           const compressed = await compressString(payloadStr)
           finalPayload = COMPRESS_PREFIX + compressed
           isCompressed = true
-          log(`Upload config-${field} compressed`, `${payloadBytes} -> ${finalPayload.length} bytes`)
+          log(
+            `Upload config-${field} compressed`,
+            `${payloadBytes} -> ${finalPayload.length} bytes`,
+          )
         } catch (e) {
           log(`Upload config-${field} compress failed, use raw`, e)
         }
@@ -252,15 +291,31 @@ const uploadConfigFn = async (field: ConfigField) => {
       // 检查压缩后大小（或原始大小）
       const finalBytes = new TextEncoder().encode(finalPayload).length
       if (finalBytes > SYNC_SIZE_LIMIT) {
-        log(`Upload config-${field} size exceeded`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.error(window.$t('generalSetting.syncSizeExceeded').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
+        log(
+          `Upload config-${field} size exceeded`,
+          `${finalBytes} bytes (compressed: ${isCompressed})`,
+        )
+        window.$message.error(
+          window
+            .$t('generalSetting.syncSizeExceeded')
+            .replace('__field__', field)
+            .replace('__size__', `${(finalBytes / 1024).toFixed(1)}`),
+        )
         localState.value.isUploadConfigStatusMap[field].loading = false
         resolve(false)
         return
       }
       if (finalBytes > SYNC_SIZE_WARN) {
-        log(`Upload config-${field} size warning`, `${finalBytes} bytes (compressed: ${isCompressed})`)
-        window.$message.warning(window.$t('generalSetting.syncSizeWarning').replace('__field__', field).replace('__size__', `${(finalBytes / 1024).toFixed(1)}`))
+        log(
+          `Upload config-${field} size warning`,
+          `${finalBytes} bytes (compressed: ${isCompressed})`,
+        )
+        window.$message.warning(
+          window
+            .$t('generalSetting.syncSizeWarning')
+            .replace('__field__', field)
+            .replace('__size__', `${(finalBytes / 1024).toFixed(1)}`),
+        )
       }
 
       const payload = { [`naive-tab-${field}`]: finalPayload }
@@ -269,7 +324,9 @@ const uploadConfigFn = async (field: ConfigField) => {
         if (error) {
           // 上传失败：保留 loading 和 dirty 状态，页面刷新后重试
           log(`Upload config-${field} error`, error)
-          window.$message.error(`${window.$t('common.upload')}${window.$t('common.setting')}${window.$t('common.fail')}`)
+          window.$message.error(
+            `${window.$t('common.upload')}${window.$t('common.setting')}${window.$t('common.fail')}`,
+          )
         } else {
           // 上传成功：更新同步状态，清除 dirty 标记
           log(`Upload config-${field} complete (compressed: ${isCompressed})`)
@@ -316,7 +373,8 @@ const genWathUploadConfigFn = (field: ConfigField) => {
   return () => {
     // 标记本地有修改
     localState.value.isUploadConfigStatusMap[field].dirty = true
-    localState.value.isUploadConfigStatusMap[field].localModifiedTime = Date.now()
+    localState.value.isUploadConfigStatusMap[field].localModifiedTime =
+      Date.now()
     localState.value.isUploadConfigStatusMap[field].loading = true
     log(`Upload config-${field} ready`)
     debounceFn()
@@ -349,12 +407,15 @@ export const handleWatchLocalConfigChange = () => {
 export const flushConfigSync = async (field: ConfigField): Promise<boolean> => {
   // 安全兜底：确保 isUploadConfigStatusMap[field] 存在（popup 不会调用 handleStateResetAndUpdate）
   if (!localState.value.isUploadConfigStatusMap[field]) {
-    localState.value.isUploadConfigStatusMap[field] = { ...defaultUploadStatusItem }
+    localState.value.isUploadConfigStatusMap[field] = {
+      ...defaultUploadStatusItem,
+    }
   }
   // 标记本地有修改（如果尚未标记）
   if (!localState.value.isUploadConfigStatusMap[field].dirty) {
     localState.value.isUploadConfigStatusMap[field].dirty = true
-    localState.value.isUploadConfigStatusMap[field].localModifiedTime = Date.now()
+    localState.value.isUploadConfigStatusMap[field].localModifiedTime =
+      Date.now()
   }
   localState.value.isUploadConfigStatusMap[field].loading = true
   log(`Flush config-${field} sync`)
@@ -395,7 +456,8 @@ export const setupKeyboardSyncListener = () => {
     return parseStoredData(raw)
       .then((parsed: SyncPayload) => {
         const newSyncId = parsed.syncId
-        const currSyncId = localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
+        const currSyncId =
+          localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
 
         // syncId 相同说明内容未变化，跳过更新（防循环）
         if (newSyncId === currSyncId) {
@@ -405,8 +467,10 @@ export const setupKeyboardSyncListener = () => {
 
         // 先更新同步状态，防止后续替换对象时触发防抖上传
         // uploadConfigFn 中的 MD5 去重会检测到 syncId 相同而跳过上传
-        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncId = newSyncId
-        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime = parsed.syncTime
+        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncId =
+          newSyncId
+        localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime =
+          parsed.syncTime
         localState.value.isUploadConfigStatusMap.keyboardBookmark.dirty = false
 
         // 整体替换 keyboardBookmark 配置对象
@@ -430,7 +494,9 @@ export const setupKeyboardSyncListener = () => {
  * 在 loadRemoteConfig 之后执行，确保先同步云端最新数据，再处理本地未完成的上传
  */
 export const handleMissedUploadConfig = async () => {
-  for (const field of Object.keys(localState.value.isUploadConfigStatusMap) as ConfigField[]) {
+  for (const field of Object.keys(
+    localState.value.isUploadConfigStatusMap,
+  ) as ConfigField[]) {
     if (localState.value.isUploadConfigStatusMap[field].loading) {
       log('Handle missed upload config', field)
       await uploadConfigFn(field)
@@ -513,7 +579,10 @@ const mergeConfigWithVersionAwareness = (
   }
 
   // 比较版本，以较新版本为模板进行合并
-  const isLocalNewer = compareLeftVersionLessThanRightVersions(remoteVersion, localVersion)
+  const isLocalNewer = compareLeftVersionLessThanRightVersions(
+    remoteVersion,
+    localVersion,
+  )
 
   if (isLocalNewer) {
     // 本地版本较新：以本地为模板，保留本地新字段
@@ -577,7 +646,9 @@ export const loadRemoteConfig = () => {
       const error = chrome.runtime.lastError
       if (error) {
         log('Load config error', error)
-        window.$message.error(`${window.$t('common.sync')}${window.$t('common.setting')}${window.$t('common.fail')}`)
+        window.$message.error(
+          `${window.$t('common.sync')}${window.$t('common.setting')}${window.$t('common.fail')}`,
+        )
         resolve(false)
         console.timeEnd('loadRemoteConfig')
         return
@@ -586,7 +657,9 @@ export const loadRemoteConfig = () => {
         const pendingConfig = {} as typeof defaultConfig
         const uploadPromises: Promise<unknown>[] = []
         for (const field of Object.keys(defaultConfig) as ConfigField[]) {
-          if (!Object.prototype.hasOwnProperty.call(data, `naive-tab-${field}`)) {
+          if (
+            !Object.prototype.hasOwnProperty.call(data, `naive-tab-${field}`)
+          ) {
             // 云端无该字段，上传本地配置进行初始化
             log(`Config-${field} initialize`)
             uploadPromises.push(uploadConfigFn(field))
@@ -614,10 +687,13 @@ export const loadRemoteConfig = () => {
             const targetSyncId = target.syncId
             // 兼容旧数据：缺失 appVersion 时默认 '0.0.0'，按最旧版本处理
             const targetAppVersion = target.appVersion || '0.0.0'
-            const localSyncId = localState.value.isUploadConfigStatusMap[field].syncId
-            chrome.storage.sync.getBytesInUse(`naive-tab-${field}`).then((bytesInUse) => {
-              configSizeMap[field] = bytesInUse
-            })
+            const localSyncId =
+              localState.value.isUploadConfigStatusMap[field].syncId
+            chrome.storage.sync
+              .getBytesInUse(`naive-tab-${field}`)
+              .then((bytesInUse) => {
+                configSizeMap[field] = bytesInUse
+              })
 
             // syncId(md5)一致时无需更新
             if (targetSyncId === localSyncId) {
@@ -631,13 +707,17 @@ export const loadRemoteConfig = () => {
             // 2. 本地无修改 (dirty=false) → 使用版本感知合并策略
             // 3. 本地有修改，且本地修改时间 > 云端同步时间 → 上传本地
             // 4. 本地有修改，但云端更新 → 使用版本感知合并策略
-            const localDirty = localState.value.isUploadConfigStatusMap[field].dirty
-            const localModifiedTime = localState.value.isUploadConfigStatusMap[field].localModifiedTime
+            const localDirty =
+              localState.value.isUploadConfigStatusMap[field].dirty
+            const localModifiedTime =
+              localState.value.isUploadConfigStatusMap[field].localModifiedTime
 
             if (!localDirty) {
               // 场景2：本地无修改，使用版本感知合并策略
               // 说明：本地未修改，信任云端数据，但仍需考虑版本差异
-              log(`Config-${field} merge (local clean): local v${window.appVersion} vs remote v${targetAppVersion}`)
+              log(
+                `Config-${field} merge (local clean): local v${window.appVersion} vs remote v${targetAppVersion}`,
+              )
               const mergedConfig = mergeConfigWithVersionAwareness(
                 localConfig[field] as Record<string, any>,
                 targetConfig as Record<string, any>,
@@ -645,17 +725,23 @@ export const loadRemoteConfig = () => {
                 targetAppVersion,
               )
               pendingConfig[field] = mergedConfig as any
-              localState.value.isUploadConfigStatusMap[field].syncTime = targetSyncTime
-              localState.value.isUploadConfigStatusMap[field].syncId = targetSyncId
+              localState.value.isUploadConfigStatusMap[field].syncTime =
+                targetSyncTime
+              localState.value.isUploadConfigStatusMap[field].syncId =
+                targetSyncId
             } else if (localModifiedTime > targetSyncTime) {
               // 场景3：本地修改更新，上传本地配置
               // 说明：本地最后修改时间晚于云端同步时间，本地优先
-              log(`Config-${field} upload local (local newer: ${localModifiedTime} > ${targetSyncTime})`)
+              log(
+                `Config-${field} upload local (local newer: ${localModifiedTime} > ${targetSyncTime})`,
+              )
               uploadPromises.push(uploadConfigFn(field))
             } else {
               // 场景4：云端修改更新，使用版本感知合并策略
               // 说明：云端更新，但需考虑版本差异，以较新版本为模板合并
-              log(`Config-${field} merge (remote newer: ${targetSyncTime} >= ${localModifiedTime}): local v${window.appVersion} vs remote v${targetAppVersion}`)
+              log(
+                `Config-${field} merge (remote newer: ${targetSyncTime} >= ${localModifiedTime}): local v${window.appVersion} vs remote v${targetAppVersion}`,
+              )
               const mergedConfig = mergeConfigWithVersionAwareness(
                 localConfig[field] as Record<string, any>,
                 targetConfig as Record<string, any>,
@@ -665,8 +751,10 @@ export const loadRemoteConfig = () => {
               pendingConfig[field] = mergedConfig as any
               // 合并后清除 dirty 标记，因为已与云端同步
               localState.value.isUploadConfigStatusMap[field].dirty = false
-              localState.value.isUploadConfigStatusMap[field].syncTime = targetSyncTime
-              localState.value.isUploadConfigStatusMap[field].syncId = targetSyncId
+              localState.value.isUploadConfigStatusMap[field].syncTime =
+                targetSyncTime
+              localState.value.isUploadConfigStatusMap[field].syncId =
+                targetSyncId
             }
           }
         }
@@ -684,7 +772,9 @@ export const loadRemoteConfig = () => {
         resolve(true)
       } catch (e) {
         log('Process remote config error', e)
-        window.$message.error(`${window.$t('common.process')}${window.$t('common.setting')}${window.$t('common.fail')}`)
+        window.$message.error(
+          `${window.$t('common.process')}${window.$t('common.setting')}${window.$t('common.fail')}`,
+        )
         console.timeEnd('loadRemoteConfig')
         resolve(false)
       }
@@ -734,11 +824,17 @@ export const importSetting = async (text: string) => {
     fileContent = JSON.parse(text)
   } catch (e) {
     log('Parse error', e)
-    window.$message.error(`${window.$t('common.import')}${window.$t('common.fail')}`)
+    window.$message.error(
+      `${window.$t('common.import')}${window.$t('common.fail')}`,
+    )
     globalState.isImportSettingLoading = false
     return
   }
-  if (!fileContent || Object.keys(fileContent).length === 0 || !fileContent?.general?.version) {
+  if (
+    !fileContent ||
+    Object.keys(fileContent).length === 0 ||
+    !fileContent?.general?.version
+  ) {
     globalState.isImportSettingLoading = false
     return
   }
@@ -752,12 +848,16 @@ export const importSetting = async (text: string) => {
     }
     // keyboard → keyboardBookmark（code 重命名）
     if ((fileContent as any).keyboard && !fileContent.keyboardBookmark) {
-      fileContent.keyboardBookmark = structuredClone((fileContent as any).keyboard)
+      fileContent.keyboardBookmark = structuredClone(
+        (fileContent as any).keyboard,
+      )
       delete (fileContent as any).keyboard
     }
     // commandShortcut → keyboardCommand（code 重命名）
     if ((fileContent as any).commandShortcut && !fileContent.keyboardCommand) {
-      fileContent.keyboardCommand = structuredClone((fileContent as any).commandShortcut)
+      fileContent.keyboardCommand = structuredClone(
+        (fileContent as any).commandShortcut,
+      )
       delete (fileContent as any).commandShortcut
     }
     // keyboardBookmark 外观字段拆分到 keyboardCommon
@@ -766,7 +866,9 @@ export const importSetting = async (text: string) => {
       const appearanceFields = Object.keys(KEYBOARD_COMMON_CONFIG)
       for (const field of appearanceFields) {
         if ((fileContent.keyboardBookmark as any)[field] !== undefined) {
-          (fileContent.keyboardCommon as any)[field] = (fileContent.keyboardBookmark as any)[field]
+          ;(fileContent.keyboardCommon as any)[field] = (
+            fileContent.keyboardBookmark as any
+          )[field]
         }
       }
       for (const field of appearanceFields) {
@@ -780,7 +882,10 @@ export const importSetting = async (text: string) => {
         fvm.keyboardBookmark = fvm.keyboard
         delete fvm.keyboard
       }
-      if (fvm.commandShortcut !== undefined && fvm.keyboardCommand === undefined) {
+      if (
+        fvm.commandShortcut !== undefined &&
+        fvm.keyboardCommand === undefined
+      ) {
         fvm.keyboardCommand = fvm.commandShortcut
         delete fvm.commandShortcut
       }
@@ -790,15 +895,25 @@ export const importSetting = async (text: string) => {
       fileContent.general.openPageFocusElement = 'keyboardBookmark'
     }
 
+    // isFocusMode 从 general 迁移到 localState
+    if ((fileContent.general as any)?.isFocusMode !== undefined) {
+      localState.value.isFocusMode = (fileContent.general as any).isFocusMode
+      delete (fileContent.general as any).isFocusMode
+    }
+
     log('FileContentTransform', fileContent)
     fileContent.general.version = window.appVersion // 更新版本号
     await updateSetting(fileContent)
-    window.$message.success(`${window.$t('common.import')}${window.$t('common.success')}`)
+    window.$message.success(
+      `${window.$t('common.import')}${window.$t('common.success')}`,
+    )
     globalState.isImportSettingLoading = false
     switchSettingDrawerVisible(false)
   } catch (e) {
     log('Import error', e)
-    window.$message.error(`${window.$t('common.import')}${window.$t('common.fail')} ${e}`)
+    window.$message.error(
+      `${window.$t('common.import')}${window.$t('common.fail')} ${e}`,
+    )
     globalState.isImportSettingLoading = false
   }
 }
@@ -806,7 +921,9 @@ export const importSetting = async (text: string) => {
 export const exportSetting = () => {
   const filename = `naivetab-v${window.appVersion}-${dayjs().format('YYYYMMDD-HHmmss')}.json`
   downloadJsonByTagA(localConfig, filename)
-  window.$message.success(`${window.$t('common.export')}${window.$t('common.success')}`)
+  window.$message.success(
+    `${window.$t('common.export')}${window.$t('common.success')}`,
+  )
 }
 
 /**
@@ -831,7 +948,8 @@ export const loadRemoteKeyboardConfig = async () => {
 
     const parsed = await parseStoredData(raw)
     const newSyncId = parsed.syncId
-    const currSyncId = localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
+    const currSyncId =
+      localState.value.isUploadConfigStatusMap.keyboardBookmark?.syncId
 
     // syncId 相同说明本地已是最新，跳过
     if (newSyncId === currSyncId) {
@@ -841,10 +959,13 @@ export const loadRemoteKeyboardConfig = async () => {
 
     // 更新同步状态并替换配置
     if (!localState.value.isUploadConfigStatusMap.keyboardBookmark) {
-      localState.value.isUploadConfigStatusMap.keyboardBookmark = { ...defaultUploadStatusItem }
+      localState.value.isUploadConfigStatusMap.keyboardBookmark = {
+        ...defaultUploadStatusItem,
+      }
     }
     localState.value.isUploadConfigStatusMap.keyboardBookmark.syncId = newSyncId
-    localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime = parsed.syncTime
+    localState.value.isUploadConfigStatusMap.keyboardBookmark.syncTime =
+      parsed.syncTime
     localState.value.isUploadConfigStatusMap.keyboardBookmark.dirty = false
     localConfig.keyboardBookmark = parsed.data
 

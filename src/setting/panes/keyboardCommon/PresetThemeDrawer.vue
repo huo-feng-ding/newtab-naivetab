@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { SECOND_MODAL_WIDTH } from '@/logic/constants/app'
-import { KEYCAP_PREINSTALL_GROUPS, KEYCAP_PREINSTALL_MAP, type KeycapThemeKey } from '@/logic/keyboard/keycap-themes'
+import {
+  KEYCAP_PREINSTALL_GROUPS,
+  KEYCAP_PREINSTALL_MAP,
+  type KeycapThemeKey,
+} from '@/logic/keyboard/keycap-themes'
 import { localConfig, localState } from '@/logic/store'
 
 const props = defineProps({
@@ -17,13 +21,26 @@ const onCloseModal = () => {
 }
 
 const onSelectPresetTheme = (themeKey: KeycapThemeKey) => {
-  localConfig.keyboardCommon.shellColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].shellColor
-  localConfig.keyboardCommon.mainFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainFontColor
-  localConfig.keyboardCommon.mainBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].mainBackgroundColor
-  localConfig.keyboardCommon.emphasisOneFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneFontColor
-  localConfig.keyboardCommon.emphasisOneBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneBackgroundColor
-  localConfig.keyboardCommon.emphasisTwoFontColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoFontColor
-  localConfig.keyboardCommon.emphasisTwoBackgroundColor[localState.value.currAppearanceCode] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoBackgroundColor
+  localConfig.keyboardCommon.shellColor[localState.value.currAppearanceCode] =
+    KEYCAP_PREINSTALL_MAP[themeKey].shellColor
+  localConfig.keyboardCommon.mainFontColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].mainFontColor
+  localConfig.keyboardCommon.mainBackgroundColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].mainBackgroundColor
+  localConfig.keyboardCommon.emphasisOneFontColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneFontColor
+  localConfig.keyboardCommon.emphasisOneBackgroundColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisOneBackgroundColor
+  localConfig.keyboardCommon.emphasisTwoFontColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoFontColor
+  localConfig.keyboardCommon.emphasisTwoBackgroundColor[
+    localState.value.currAppearanceCode
+  ] = KEYCAP_PREINSTALL_MAP[themeKey].emphasisTwoBackgroundColor
 }
 
 const presetThemeGroups = KEYCAP_PREINSTALL_GROUPS
@@ -71,8 +88,10 @@ const KB_ROWS = [
 
 const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
   const theme = KEYCAP_PREINSTALL_MAP[themeKey]
-  if (type === 'e1') return `color:${theme.emphasisOneFontColor};background-color:${theme.emphasisOneBackgroundColor}`
-  if (type === 'e2') return `color:${theme.emphasisTwoFontColor};background-color:${theme.emphasisTwoBackgroundColor}`
+  if (type === 'e1')
+    return `color:${theme.emphasisOneFontColor};background-color:${theme.emphasisOneBackgroundColor}`
+  if (type === 'e2')
+    return `color:${theme.emphasisTwoFontColor};background-color:${theme.emphasisTwoBackgroundColor}`
   return `color:${theme.mainFontColor};background-color:${theme.mainBackgroundColor}`
 }
 </script>
@@ -99,12 +118,12 @@ const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
         >
           <div class="section__header">
             <span class="section__label">{{ $t(group.labelKey) }}</span>
-            <span class="section__count">{{ Object.keys(group.themes).length }}</span>
+            <span class="section__count">{{
+              Object.keys(group.themes).length
+            }}</span>
           </div>
 
-          <div
-            class="theme__container"
-          >
+          <div class="theme__container">
             <div
               v-for="[themeKey, theme] in Object.entries(group.themes)"
               :key="themeKey"
@@ -115,7 +134,8 @@ const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
               <span
                 class="theme__title"
                 :style="getKeycapStyle(themeKey, 'main')"
-              >{{ theme.label }}</span>
+                >{{ theme.label }}</span
+              >
 
               <div
                 v-for="(row, ri) in KB_ROWS"
@@ -127,7 +147,8 @@ const getKeycapStyle = (themeKey: string, type: 'main' | 'e1' | 'e2') => {
                   :key="ki"
                   class="keycap"
                   :style="`${getKeycapStyle(themeKey, key.t)};grid-column:span ${key.span}`"
-                >{{ key.k }}</span>
+                  >{{ key.k }}</span
+                >
               </div>
             </div>
           </div>

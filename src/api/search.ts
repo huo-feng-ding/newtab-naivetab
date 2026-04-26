@@ -44,11 +44,15 @@ export const getSearchSuggestion = async (
 
   // Bing / Google / Sogou: ["query", ["词1", "词2", ...], ...]
   if (
-    engineLabel === 'Bing'
-    || engineLabel === 'Google'
-    || engineLabel === 'Sogou'
+    engineLabel === 'Bing' ||
+    engineLabel === 'Google' ||
+    engineLabel === 'Sogou'
   ) {
-    const data = await request({ url }) as unknown as [string, string[], ...unknown[]]
+    const data = (await request({ url })) as unknown as [
+      string,
+      string[],
+      ...unknown[],
+    ]
     if (Array.isArray(data) && Array.isArray(data[1])) {
       return data[1]
     }
@@ -57,7 +61,9 @@ export const getSearchSuggestion = async (
 
   // DuckDuckGo: [{phrase: "..."}, ...]
   if (engineLabel === 'Duckduckgo') {
-    const data = await request({ url }) as unknown as Array<{ phrase: string }>
+    const data = (await request({ url })) as unknown as Array<{
+      phrase: string
+    }>
     if (Array.isArray(data)) {
       return data.map((item) => item.phrase).filter(Boolean)
     }
@@ -66,7 +72,11 @@ export const getSearchSuggestion = async (
 
   // Yandex: ["query", ["词1", "词2", ...]]
   if (engineLabel === 'Yandex') {
-    const data = await request({ url }) as unknown as [string, string[], ...unknown[]]
+    const data = (await request({ url })) as unknown as [
+      string,
+      string[],
+      ...unknown[],
+    ]
     if (Array.isArray(data) && Array.isArray(data[1])) {
       return data[1]
     }
@@ -75,7 +85,9 @@ export const getSearchSuggestion = async (
 
   // 360: {"result": [{"word": "..."}, ...]}
   if (engineLabel === '360') {
-    const data = await request({ url }) as unknown as { result?: Array<{ word: string }> }
+    const data = (await request({ url })) as unknown as {
+      result?: Array<{ word: string }>
+    }
     if (data?.result?.length) {
       return data.result.map((item) => item.word)
     }
@@ -83,7 +95,9 @@ export const getSearchSuggestion = async (
   }
 
   // 百度: {"g": [{q: "..."}, ...]}
-  const data = await request({ url }) as unknown as { g?: Array<{ q: string }> }
+  const data = (await request({ url })) as unknown as {
+    g?: Array<{ q: string }>
+  }
   if (data?.g?.length) {
     return data.g.map((item) => item.q)
   }

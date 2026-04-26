@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, globalState, getIsWidgetRender, getStyleField } from '@/logic/store'
-import { sendNotification, requestNotificationsPermission } from '@/logic/permission'
+import {
+  localConfig,
+  globalState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
+import {
+  sendNotification,
+  requestNotificationsPermission,
+} from '@/logic/permission'
 import { useStorageLocal } from '@/composables/useStorageLocal'
 import { ICONS } from '@/logic/icons'
 import WidgetWrap from '../WidgetWrap.vue'
@@ -51,15 +59,28 @@ const countdownState = useStorageLocal('l-countdown-state', {
 })
 
 // ─── 时间分量计算 ───
-const totalSeconds = computed(() => Math.max(0, Math.floor(countdownState.value.remainingSeconds)))
+const totalSeconds = computed(() =>
+  Math.max(0, Math.floor(countdownState.value.remainingSeconds)),
+)
 
-const hh = computed(() => String(Math.floor(totalSeconds.value / 3600)).padStart(2, '0'))
-const mm = computed(() => String(Math.floor((totalSeconds.value % 3600) / 60)).padStart(2, '0'))
+const hh = computed(() =>
+  String(Math.floor(totalSeconds.value / 3600)).padStart(2, '0'),
+)
+const mm = computed(() =>
+  String(Math.floor((totalSeconds.value % 3600) / 60)).padStart(2, '0'),
+)
 const ss = computed(() => String(totalSeconds.value % 60).padStart(2, '0'))
 
-const isFinished = computed(() => countdownState.value.remainingSeconds <= 0 && !countdownState.value.isRunning)
+const isFinished = computed(
+  () =>
+    countdownState.value.remainingSeconds <= 0 &&
+    !countdownState.value.isRunning,
+)
 const isInitialState = computed(
-  () => Math.floor(countdownState.value.remainingSeconds) === localConfig[WIDGET_CODE].defaultDuration && !countdownState.value.isRunning,
+  () =>
+    Math.floor(countdownState.value.remainingSeconds) ===
+      localConfig[WIDGET_CODE].defaultDuration &&
+    !countdownState.value.isRunning,
 )
 
 // ─── 内联编辑状态 ───
@@ -88,7 +109,10 @@ const cancelEdit = () => {
 }
 
 const onDocumentMousedown = (e: MouseEvent) => {
-  if (editContainerRef.value && !editContainerRef.value.contains(e.target as Node)) {
+  if (
+    editContainerRef.value &&
+    !editContainerRef.value.contains(e.target as Node)
+  ) {
     commitEdit()
   }
 }
@@ -102,7 +126,9 @@ const startEdit = () => {
   globalState.isInputFocused = true
   document.addEventListener('mousedown', onDocumentMousedown)
   nextTick(() => {
-    const input = document.querySelector('.countdown__edit-h') as HTMLInputElement
+    const input = document.querySelector(
+      '.countdown__edit-h',
+    ) as HTMLInputElement
     input?.select()
   })
 }
@@ -132,7 +158,10 @@ const tick = () => {
     sendFinishNotification()
     // 闪烁 2 秒后自动重置
     setTimeout(() => {
-      if (!countdownState.value.isRunning && countdownState.value.remainingSeconds <= 0) {
+      if (
+        !countdownState.value.isRunning &&
+        countdownState.value.remainingSeconds <= 0
+      ) {
         handleReset()
       }
     }, 2000)
@@ -158,8 +187,10 @@ const handlePause = () => {
 
 const handleReset = () => {
   countdownState.value.isRunning = false
-  countdownState.value.remainingSeconds = localConfig[WIDGET_CODE].defaultDuration
-  countdownState.value.initialRemaining = localConfig[WIDGET_CODE].defaultDuration
+  countdownState.value.remainingSeconds =
+    localConfig[WIDGET_CODE].defaultDuration
+  countdownState.value.initialRemaining =
+    localConfig[WIDGET_CODE].defaultDuration
   countdownState.value.startedAt = 0
 }
 
@@ -184,7 +215,8 @@ watch(
     }
     if (countdownState.value.isRunning) {
       countdownState.value.startedAt = Date.now()
-      countdownState.value.initialRemaining = countdownState.value.remainingSeconds
+      countdownState.value.initialRemaining =
+        countdownState.value.remainingSeconds
     }
     tick()
     addTimerTask(WIDGET_CODE, tick)
@@ -198,12 +230,18 @@ const onVisibilityChange = () => {
     tick()
   }
 }
-onMounted(() => document.addEventListener('visibilitychange', onVisibilityChange))
-onUnmounted(() => document.removeEventListener('visibilitychange', onVisibilityChange))
+onMounted(() =>
+  document.addEventListener('visibilitychange', onVisibilityChange),
+)
+onUnmounted(() =>
+  document.removeEventListener('visibilitychange', onVisibilityChange),
+)
 
 // ─── 进度环计算 ───
 // SVG viewBox 100×100，圆心(50,50)，半径动态基于 strokeWidth
-const svgRadius = computed(() => 50 - localConfig[WIDGET_CODE].strokeWidth / 2 - 1)
+const svgRadius = computed(
+  () => 50 - localConfig[WIDGET_CODE].strokeWidth / 2 - 1,
+)
 const circumference = computed(() => 2 * Math.PI * svgRadius.value)
 
 const progressRatio = computed(() => {
@@ -212,8 +250,9 @@ const progressRatio = computed(() => {
   return Math.max(0, Math.min(1, countdownState.value.remainingSeconds / total))
 })
 
-const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio.value))
-
+const strokeDashoffset = computed(
+  () => circumference.value * (1 - progressRatio.value),
+)
 </script>
 
 <template>
@@ -307,7 +346,7 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
                 max="99"
                 @keydown.enter="commitEdit"
                 @keydown.escape="cancelEdit"
-              >
+              />
               <button
                 class="edit__spin"
                 tabindex="-1"
@@ -334,7 +373,7 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
               max="59"
               @keydown.enter="commitEdit"
               @keydown.escape="cancelEdit"
-            >
+            />
             <button
               class="edit__spin"
               tabindex="-1"
@@ -360,7 +399,7 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
               max="59"
               @keydown.enter="commitEdit"
               @keydown.escape="cancelEdit"
-            >
+            />
             <button
               class="edit__spin"
               tabindex="-1"
@@ -380,11 +419,22 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
             :disabled="countdownState.remainingSeconds <= 0"
             @click="countdownState.isRunning ? handlePause() : handleStart()"
           >
-            <Icon :icon="countdownState.isRunning ? ICONS.countdownPause : ICONS.countdownPlay" />
+            <Icon
+              :icon="
+                countdownState.isRunning
+                  ? ICONS.countdownPause
+                  : ICONS.countdownPlay
+              "
+            />
           </button>
           <!-- 重置按钮：仅暂停时显示，小号，紧靠主按钮 -->
           <button
-            v-if="!countdownState.isRunning && !isInitialState && !isEditing && !isFinished"
+            v-if="
+              !countdownState.isRunning &&
+              !isInitialState &&
+              !isEditing &&
+              !isFinished
+            "
             class="control__btn control__btn--reset"
             @click="handleReset"
           >
@@ -415,7 +465,8 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
       border-radius: 50%;
       background: var(--nt-cd-custom-background-color);
       backdrop-filter: blur(var(--nt-cd-custom-background-blur));
-      border: var(--nt-cd-custom-border-width) solid var(--nt-cd-custom-border-color);
+      border: var(--nt-cd-custom-border-width) solid
+        var(--nt-cd-custom-border-color);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
@@ -522,7 +573,11 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
           padding: 0.1vmin 0;
           cursor: pointer;
           opacity: 0.5;
-          transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+          transition:
+            background 0.15s ease,
+            opacity 0.15s ease,
+            transform 0.1s ease,
+            border-color 0.15s ease;
 
           &:hover {
             transform: scale(1.3);
@@ -557,7 +612,6 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
           font-size: var(--nt-cd-clock-font-size);
           line-height: 1;
         }
-
       }
 
       /* 按钮区域：固定在底部 */
@@ -578,7 +632,11 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
           color: inherit;
           cursor: pointer;
           opacity: 0.85;
-          transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+          transition:
+            background 0.15s ease,
+            opacity 0.15s ease,
+            transform 0.1s ease,
+            border-color 0.15s ease;
           backdrop-filter: blur(4px);
 
           &:hover {
@@ -617,14 +675,18 @@ const strokeDashoffset = computed(() => circumference.value * (1 - progressRatio
         }
       }
     }
-
   }
 }
 
 /* 结束闪烁 */
 @keyframes countdown-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }
 
 #countdown {

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { currDayjsLang, localConfig, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  currDayjsLang,
+  localConfig,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
@@ -25,7 +30,9 @@ const state = reactive({
 })
 
 const updateDate = () => {
-  state.date = dayjs().locale(currDayjsLang.value).format(localConfig.date.format)
+  state.date = dayjs()
+    .locale(currDayjsLang.value)
+    .format(localConfig.date.format)
 }
 
 watch(
@@ -39,7 +46,6 @@ watch(
   },
   { immediate: true },
 )
-
 </script>
 
 <template>

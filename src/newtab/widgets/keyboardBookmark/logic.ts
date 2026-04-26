@@ -5,6 +5,7 @@ import { addVisibilityTask, addPageFocusTask } from '@/logic/task'
 import { getBrowserBookmark } from '@/logic/bookmark'
 import { keyboardCurrentModelAllKeyList } from '@/logic/keyboard/keyboard-layout'
 import { localConfig } from '@/logic/store'
+import { KEYCAP_ACTIVE_DURATION } from '@/logic/keyboard/keyboard-constants'
 
 export const state = reactive({
   systemBookmarks: [] as BookmarkNode[],
@@ -44,7 +45,10 @@ export const getSystemBookmarkForKeyboard = async () => {
 
 export const initKeyboardData = () => {
   getSystemBookmarkForKeyboard()
-  state.selectedFolderTitleStack = localConfig.keyboardBookmark.defaultExpandFolder ? [localConfig.keyboardBookmark.defaultExpandFolder] : []
+  state.selectedFolderTitleStack = localConfig.keyboardBookmark
+    .defaultExpandFolder
+    ? [localConfig.keyboardBookmark.defaultExpandFolder]
+    : []
 }
 
 export const getDefaultBookmarkNameFromUrl = (url: string) => {
@@ -57,10 +61,15 @@ export const getDefaultBookmarkNameFromUrl = (url: string) => {
   return tempSplitList.includes('www') ? tempSplitList[1] : tempSplitList[0]
 }
 
-const findTargetFolderBookmark = (folderBookmark: BookmarkNode[], folderTitleStack: string[]) => {
+const findTargetFolderBookmark = (
+  folderBookmark: BookmarkNode[],
+  folderTitleStack: string[],
+) => {
   try {
     if (folderTitleStack.length === 0) return folderBookmark
-    const targetFolder = folderBookmark.find((item) => item.title === folderTitleStack[0])?.children as BookmarkNode[]
+    const targetFolder = folderBookmark.find(
+      (item) => item.title === folderTitleStack[0],
+    )?.children as BookmarkNode[]
     return findTargetFolderBookmark(targetFolder, folderTitleStack.slice(1))
   } catch (e) {
     console.error(e)
@@ -71,10 +80,18 @@ const findTargetFolderBookmark = (folderBookmark: BookmarkNode[], folderTitleSta
 export const currFolderBookmarks = computed(() => {
   if (state.systemBookmarks.length === 0) return []
   if (state.selectedFolderTitleStack.length === 0) return state.systemBookmarks
-  return findTargetFolderBookmark(state.systemBookmarks, state.selectedFolderTitleStack) || []
+  return (
+    findTargetFolderBookmark(
+      state.systemBookmarks,
+      state.selectedFolderTitleStack,
+    ) || []
+  )
 })
 
-export const handleSpecialKeycapExec = (keyCode: string, keycapBookmarkType: KeycapBookmarkType) => {
+export const handleSpecialKeycapExec = (
+  keyCode: string,
+  keycapBookmarkType: KeycapBookmarkType,
+) => {
   if (keycapBookmarkType === 'folder') {
     const targetKeyIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
     const bookmarkItem = currFolderBookmarks.value[targetKeyIndex - 1] || {}
@@ -92,7 +109,12 @@ export const getBookmarkConfigName = (keyCode: string) => {
   if (!localConfig.keyboardBookmark.keymap[keyCode]) {
     return ''
   }
-  return (localConfig.keyboardBookmark.keymap[keyCode].name as string) || getDefaultBookmarkNameFromUrl(localConfig.keyboardBookmark.keymap[keyCode].url)
+  return (
+    (localConfig.keyboardBookmark.keymap[keyCode].name as string) ||
+    getDefaultBookmarkNameFromUrl(
+      localConfig.keyboardBookmark.keymap[keyCode].url,
+    )
+  )
 }
 
 export const getBookmarkConfigUrl = (keyCode: string) => {
@@ -115,7 +137,10 @@ export const getKeycapBookmarkType = (keyCode: string): KeycapBookmarkType => {
   const targetIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
   if (targetIndex === 0) return 'back'
   const bookmarkItem = currFolderBookmarks.value[targetIndex - 1] || {}
-  const isFolder = Object.prototype.hasOwnProperty.call(bookmarkItem, 'children')
+  const isFolder = Object.prototype.hasOwnProperty.call(
+    bookmarkItem,
+    'children',
+  )
   if (isFolder) return 'folder'
   if ((bookmarkItem as any)?.url) return 'mark'
   return 'none'
@@ -137,7 +162,10 @@ export const getKeycapUrl = (keyCode: string) => {
   if (localConfig.keyboardBookmark.source === 1) {
     const targetIndex = keyboardCurrentModelAllKeyList.value.indexOf(keyCode)
     const bookmarkItem = currFolderBookmarks.value[targetIndex - 1] || {}
-    const isFolder = Object.prototype.hasOwnProperty.call(bookmarkItem, 'children')
+    const isFolder = Object.prototype.hasOwnProperty.call(
+      bookmarkItem,
+      'children',
+    )
     return isFolder ? '' : (bookmarkItem as any)?.url || ''
   }
   return getBookmarkConfigUrl(keyCode)
@@ -148,10 +176,14 @@ const delayResetPressKey = () => {
   clearTimeout(delayResetTimer)
   delayResetTimer = setTimeout(() => {
     state.currSelectKeyCode = ''
-  }, 200)
+  }, KEYCAP_ACTIVE_DURATION)
 }
 
-export const openPage = (url: string, isBgOpen = false, isNewTabOpen = false) => {
+export const openPage = (
+  url: string,
+  isBgOpen = false,
+  isNewTabOpen = false,
+) => {
   if (url.length === 0) return
   gaProxy('click', ['keyboardBookmark', 'openPage'])
   if (isBgOpen) {
@@ -159,7 +191,11 @@ export const openPage = (url: string, isBgOpen = false, isNewTabOpen = false) =>
     delayResetPressKey()
     return
   }
-  if (isNewTabOpen || localConfig.keyboardBookmark.isNewTabOpen || !/http/.test(url)) {
+  if (
+    isNewTabOpen ||
+    localConfig.keyboardBookmark.isNewTabOpen ||
+    !/http/.test(url)
+  ) {
     createTab(url)
     delayResetPressKey()
     return
@@ -173,7 +209,7 @@ export const handlePressKeycap = (keyCode: string) => {
   state.currSelectKeyCode = keyCode
   setTimeout(() => {
     state.currSelectKeyCode = ''
-  }, 200)
+  }, KEYCAP_ACTIVE_DURATION)
 }
 
 /**

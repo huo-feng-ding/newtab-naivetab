@@ -34,7 +34,9 @@ const handleUpdatePopoverShow = async (value: boolean) => {
   isPickerVisible.value = value
 }
 
-const isFavorite = computed(() => localConfig.general.swatcheColors.includes(props.value))
+const isFavorite = computed(() =>
+  localConfig.general.swatcheColors.includes(props.value),
+)
 
 const addFavoriteColor = () => {
   if (isFavorite.value) {
