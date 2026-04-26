@@ -48,7 +48,10 @@ export default defineConfig({
             items: [
               { text: '介绍', link: '/guide/introduce.md' },
               { text: '快速上手', link: '/guide/getting-started.md' },
-              { text: '基础配置', link: '/guide/general.md' },
+              { text: '基础功能', link: '/guide/general.md' },
+              { text: '编辑布局', link: '/guide/edit-layout.md' },
+              { text: '自定义背景', link: '/guide/background.md' },
+              { text: '同步与备份', link: '/guide/sync-backup.md' },
             ]
           },
           {
@@ -57,6 +60,7 @@ export default defineConfig({
               { text: '键盘书签', link: '/guide/keyboard-bookmark.md' },
               { text: '指令键盘', link: '/guide/command-shortcut.md' },
               { text: '书签文件夹', link: '/guide/bookmark-folder.md' },
+              { text: '专注模式', link: '/guide/focus-mode.md' },
             ]
           },
           {
@@ -72,7 +76,6 @@ export default defineConfig({
           {
             text: '效率工具',
             items: [
-              { text: '专注模式', link: '/guide/focus-mode.md' },
               { text: '搜索栏', link: '/guide/search.md' },
               { text: '备忘录', link: '/guide/memo.md' },
               { text: '天气', link: '/guide/weather.md' },
@@ -83,7 +86,7 @@ export default defineConfig({
             text: '其他',
             items: [
               { text: 'FAQ', link: '/guide/faq.md' },
-              { text: '帮助翻译', link: '/guide/help-translation.md' },
+              { text: '贡献指南', link: '/guide/help-translation.md' },
             ]
           },
         ]
@@ -91,8 +94,7 @@ export default defineConfig({
       {
         text: '安装教程',
         items: [
-          { text: '官方商店安装（推荐）', link: '/install/webstore.md' },
-          { text: '手动安装', link: '/install/manual.md' },
+          { text: '官方商店安装', link: '/install/webstore.md' },
         ]
       },
     ],
