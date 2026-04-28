@@ -16,7 +16,10 @@ export const handleCloseCurrentTab = (): void => {
  * @param e 键盘事件或鼠标事件
  * @param keyboardState 键盘状态
  */
-export const handleSearchFocus = (e: KeyboardEvent | MouseEvent, keyboardState: { currSelectKeyCode: string }): void => {
+export const handleSearchFocus = (
+  e: KeyboardEvent | MouseEvent,
+  keyboardState: { currSelectKeyCode: string },
+): void => {
   e.preventDefault() // 禁止输入框中有英文快捷键输入
   keyboardState.currSelectKeyCode = ''
   const searchInput = window.document.querySelector('.n-input__input-el')
@@ -32,7 +35,18 @@ export const handleSearchFocus = (e: KeyboardEvent | MouseEvent, keyboardState: 
  * @param keyboardState 键盘状态
  * @returns 是否处理了该脚本
  */
-export const handleSpecialScript = (url: string, e: KeyboardEvent | MouseEvent, keyboardState: { currSelectKeyCode: string }): boolean => {
+/**
+ * 处理特殊脚本执行
+ * @param url - 要执行的URL
+ * @param e - 键盘事件或鼠标事件
+ * @param keyboardState - 键盘状态对象
+ * @returns 是否处理了该脚本，true表示已处理，false表示不是特殊脚本
+ */
+export const handleSpecialScript = (
+  url: string,
+  e: KeyboardEvent | MouseEvent,
+  keyboardState: { currSelectKeyCode: string },
+): boolean => {
   if (url.startsWith('script://CloseCurrentTab')) {
     handleCloseCurrentTab()
     return true

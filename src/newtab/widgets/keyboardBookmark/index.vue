@@ -19,6 +19,7 @@ import WidgetWrap from '../WidgetWrap.vue'
 import KeyboardLayout from '@/components/KeyboardLayout.vue'
 import KeyboardKeycapWidget from './KeyboardKeycapWidget.vue'
 import { WIDGET_CODE } from './config'
+import { handleSpecialScript } from './scriptHandlers'
 
 const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 
@@ -48,6 +49,10 @@ const keyboardTask = (e: KeyboardEvent) => {
   const url = getKeycapUrl(code)
   if (isHandled || url.length === 0) {
     handlePressKeycap(code)
+    return
+  }
+  // 处理特殊脚本
+  if (handleSpecialScript(url, e, keyboardState)) {
     return
   }
   keyboardState.currSelectKeyCode = code

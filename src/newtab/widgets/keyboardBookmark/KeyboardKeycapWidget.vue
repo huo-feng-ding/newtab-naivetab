@@ -12,6 +12,7 @@ import {
 import { localConfig } from '@/logic/store'
 import { useKeyboardStyle } from '@/composables/useKeyboardStyle'
 import KeyboardKeycapDisplay from '@/components/KeyboardKeycapDisplay.vue'
+import { handleSpecialScript } from './scriptHandlers'
 
 const props = defineProps({
   keyCode: {
@@ -69,6 +70,10 @@ const onMouseDownKey = (event: MouseEvent, keyCode: string) => {
   }
   const url = keycapBookmarkUrl.value
   if (url.length === 0) {
+    return
+  }
+  // 处理特殊脚本
+  if (handleSpecialScript(url, event, keyboardState)) {
     return
   }
   if (button === 0) {
