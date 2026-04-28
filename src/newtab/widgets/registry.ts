@@ -1,6 +1,6 @@
 import type { DefineComponent } from 'vue'
 import { WIDGET_CODE_LIST } from './codes'
-import type { TWidgetConfig as KeyboardConfig } from './keyboard/config'
+import type { TWidgetConfig as KeyboardBookmarkConfig } from './keyboardBookmark/config'
 import type { TWidgetConfig as BookmarkFolderConfig } from './bookmarkFolder/config'
 import type { TWidgetConfig as CalendarConfig } from './calendar/config'
 import type { TWidgetConfig as SearchConfig } from './search/config'
@@ -13,10 +13,11 @@ import type { TWidgetConfig as ClockFlipConfig } from './clockFlip/config'
 import type { TWidgetConfig as ClockNeonConfig } from './clockNeon/config'
 import type { TWidgetConfig as WeatherConfig } from './weather/config'
 import type { TWidgetConfig as YearProgressConfig } from './yearProgress/config'
+import type { TWidgetConfig as CountdownConfig } from './countdown/config'
 
 // @@@@ add widget registry
 export type WidgetConfigByCode = {
-  keyboard: KeyboardConfig
+  keyboardBookmark: KeyboardBookmarkConfig
   bookmarkFolder: BookmarkFolderConfig
   calendar: CalendarConfig
   search: SearchConfig
@@ -29,6 +30,7 @@ export type WidgetConfigByCode = {
   clockNeon: ClockNeonConfig
   weather: WeatherConfig
   yearProgress: YearProgressConfig
+  countdown: CountdownConfig
 }
 
 export type WidgetMeta = {
@@ -40,7 +42,10 @@ export type WidgetMeta = {
   widgetLabel: string // i18n key
 }
 
-const modules = import.meta.glob('./**/index.ts', { eager: true }) as Record<string, { default: WidgetMeta }>
+const modules = import.meta.glob('./**/index.ts', { eager: true }) as Record<
+  string,
+  { default: WidgetMeta }
+>
 
 const registry: Record<WidgetCodes, WidgetMeta> = {} as any
 
@@ -50,4 +55,6 @@ for (const path in modules) {
 }
 
 export const widgetsRegistry = registry
-export const widgetsList = WIDGET_CODE_LIST.map((widgetCode) => registry[widgetCode])
+export const widgetsList = WIDGET_CODE_LIST.map(
+  (widgetCode) => registry[widgetCode],
+)

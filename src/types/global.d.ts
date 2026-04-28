@@ -7,6 +7,11 @@ declare const __NAME__: string //  Extension name, defined in packageJson.name
 
 interface Window {
   appVersion: string
+  __naivetabDebug: boolean
+  /**
+   * Content Script 初始化标志（涵盖书签快捷键 + 命令快捷键两类功能的完整初始化）
+   */
+  __naivetabGlobalShortcutInit: boolean
   $t: (key: string) => string
   $message: MessageApiInjection
   $notification: NotificationApiInjection
@@ -14,15 +19,40 @@ interface Window {
   $loadingBar: LoadingBarApiInjection
 }
 
-// @@@@ add widget type
-type WidgetCodes = 'keyboard' | 'bookmarkFolder' | 'clockDigital' | 'clockAnalog' | 'clockFlip' | 'clockNeon' | 'date' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news'
-type ConfigField = WidgetCodes | 'general'
+type WidgetCodes = import('@/newtab/widgets/codes').WidgetCodes
+type ConfigField =
+  | WidgetCodes
+  | 'general'
+  | 'keyboardCommon'
+  | 'keyboardBookmark'
+  | 'keyboardCommand'
 type EleTargetCode = WidgetCodes | 'draft-common'
 type EleTargetType = 'widget' | 'draft'
 
-type settingPanes = 'general' | 'focusMode' | 'keyboard' | 'bookmarkFolder' | 'clockDate' | 'calendar' | 'yearProgress' | 'search' | 'weather' | 'memo' | 'news' | 'aboutIndex' | 'aboutSponsor'
+type settingPanes =
+  | 'general'
+  | 'focusMode'
+  | 'keyboardCommon'
+  | 'keyboardBookmark'
+  | 'bookmarkFolder'
+  | 'clockDate'
+  | 'calendar'
+  | 'yearProgress'
+  | 'countdown'
+  | 'search'
+  | 'weather'
+  | 'memo'
+  | 'news'
+  | 'aboutIndex'
+  | 'aboutSponsor'
+  | 'keyboardCommand'
 
-type KeydownTaskKey = 'draft-tool' | 'keyboard' | 'bookmarkFolder'
+type KeydownTaskKey =
+  | 'draft-tool'
+  | 'keyboardBookmark'
+  | 'bookmarkFolder'
+  | 'globalShortcutForBookmark'
+  | 'globalShortcutForCommand'
 
 type DatabaseHandleType = 'add' | 'put' | 'get' | 'delete'
 type DatabaseStore = 'localBackgroundImages' | 'currBackgroundImages'
@@ -35,12 +65,40 @@ type DatabaseLocalBackgroundImages = {
 
 type OptionsPermission = 'bookmarks'
 
-type Placement = 'top-start' | 'top' | 'top-end' | 'right-start' | 'right' | 'right-end' | 'bottom-start' | 'bottom' | 'bottom-end' | 'left-start' | 'left' | 'left-end'
+type Placement =
+  | 'top-start'
+  | 'top'
+  | 'top-end'
+  | 'right-start'
+  | 'right'
+  | 'right-end'
+  | 'bottom-start'
+  | 'bottom'
+  | 'bottom-end'
+  | 'left-start'
+  | 'left'
+  | 'left-end'
 
 type TDrawerPlacement = 'top' | 'bottom' | 'left' | 'right'
-type TPageFocusElement = 'default' | 'root' | 'search' | 'memo' | 'keyboard'
+type TPageFocusElement =
+  | 'default'
+  | 'root'
+  | 'search'
+  | 'memo'
+  | 'keyboardBookmark'
 
 interface SelectStringItem {
   label: string
   value: string
+}
+
+/**
+ * 同步数据结构
+ * ⚠️ 重要：appVersion 字段用于版本感知合并策略，确保多设备多版本场景下配置兼容性
+ */
+interface SyncPayload {
+  syncTime: number
+  syncId: string // md5
+  appVersion: string // 生成该数据的客户端版本
+  data: any
 }

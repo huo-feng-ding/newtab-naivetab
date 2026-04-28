@@ -1,0 +1,37 @@
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animation--fade-in {
+  animation: fade-in 400ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes zoom-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animation--zoom-in {
+  animation: zoom-in 500ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* 无障碍：用户偏好减弱动效时跳过动画 */
+@media (prefers-reduced-motion: reduce) {
+  .animation--fade-in,
+  .animation--zoom-in {
+    animation: none;
+    opacity: 1;
+  }
+}

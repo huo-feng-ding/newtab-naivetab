@@ -1,5 +1,5 @@
 import request from '@/lib/request'
-import { PEXELS_API } from '@/logic/constants/index'
+import { PEXELS_API } from '@/logic/constants/app'
 import { localConfig } from '@/logic/store'
 
 // https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=10
@@ -43,7 +43,9 @@ export const getPexelsImagesData = (params?: {
   })
 }
 
-export const getPexelsImageById = (id: string): Promise<TImage.PexelsImageItem> => {
+export const getPexelsImageById = (
+  id: string,
+): Promise<TImage.PexelsImageItem> => {
   return request({
     method: 'get',
     url: `https://api.pexels.com/v1/photos/${id}`,

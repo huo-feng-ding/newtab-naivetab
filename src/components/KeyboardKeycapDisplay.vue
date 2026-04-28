@@ -1,74 +1,124 @@
 <script setup lang="ts">
+/**
+ * KeyboardKeycapDisplay
+ *
+ * 单个键帽的纯展示组件，widget（newtab）和 popup 共用同一套 DOM 结构。
+ * - 仅负责渲染，不包含任何业务逻辑（数据获取、事件派发等由外层处理）
+ * - 尺寸 / 颜色通过父级注入的 CSS 变量（--nt-kb-*）驱动，无需 props 传递
+ * - 外层通过 :style 绑定 keycapCssVars（来自 useKeyboardStyle）注入所有变量
+ *
+ * 视觉层级（从外到内）：
+ *   row__keycap（键帽底座，含边框/阴影）
+ *     └─ keycap__stage（键帽顶面，gmk/dsa/flat 三种型别）
+ *          ├─ keycap__label  （键位标识，如 A / Enter）
+ *          ├─ keycap__img    （书签图标 / 文件夹图标）
+ *          └─ keycap__name   （书签名称）
+ */
+
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
 
-// 通过 props + CSS 变量复用同一套键帽 DOM：
-// - widget 和 popup 共享结构与基础视觉
-// - 外层只需要传入尺寸、颜色、交互状态和显示开关
-// - 这样可以保证两处在后续迭代时不再出现结构漂移
-const props = withDefaults(defineProps<{
-  keyCode: string
-  label: string
-  name: string
-  visualType: KeycapVisualType
-  // 可选参数
-  bookmarkType?: KeycapBookmarkType
-  iconSrc?: string
-  stageStyle?: string
-  textStyle?: string
-  iconStyle?: string
-  imgDraggable?: boolean
-  isSelected?: boolean
-  isLoading?: boolean
-  isBorderEnabled?: boolean
-  showCapKey?: boolean
-  showName?: boolean
-  showFavicon?: boolean
-  showTactileBumps?: boolean
-  isBackIconVisible?: boolean
-}>(), {
-  bookmarkType: 'mark',
-  iconSrc: '',
-  stageStyle: '',
-  textStyle: '',
-  iconStyle: '',
-  imgDraggable: false,
-  isSelected: false,
-  isLoading: false,
-  isBorderEnabled: false,
-  showCapKey: true,
-  showName: true,
-  showFavicon: true,
-  showTactileBumps: false,
-  isBackIconVisible: false,
-})
+// ── Props ────────────────────────────────────────────────────────────────────
+const props = withDefaults(
+  defineProps<{
+    // 必填
+    keyCode: string
+    label: string // 键位标识文本（如 'A'、'Enter'）
+    name: string // 书签名称
+    visualType: KeycapVisualType // 键帽型别：flat / gmk / dsa
 
-// 基础类型类名由组件自身管理，外层只关心 hover / active / move 等附加状态类
+    // 书签相关
+    bookmarkType?: KeycapBookmarkType // mark（网页）/ folder（文件夹）/ back（返回）
+    iconSrc?: string // favicon URL（mark 类型）
+
+    // 命令图标（优先级高于书签图标，用于 keyboardCommand 设置面板）
+    commandIcon?: string // iconify 图标名称
+
+    // 内联样式（由 useKeyboardStyle helpers 生成）
+    stageStyle?: string // stage 顶面的尺寸偏移（gmk/dsa 立体效果）
+    textStyle?: string // label / name 的文字对齐 + padding
+    iconStyle?: string // 图标区的 justify-content + padding
+
+    // 交互 / 状态
+    imgDraggable?: boolean // 图标是否可拖拽（popup 拖拽排序时开启）
+    isSelected?: boolean // 选中高亮（popup 书签选择态）
+    isLoading?: boolean // 加载动画
+    isBorderEnabled?: boolean // 显示自定义边框（--nt-kb-border-*）
+    renderMode?: 'full' | 'preview' // 完整光感 / 预览渲染（设置面板使用，禁用 backdrop-filter 和 hover filter）
+
+    // 内容显示开关
+    showCapKey?: boolean // 显示键位标识
+    showName?: boolean // 显示书签名称
+    showFavicon?: boolean // 显示书签图标
+    showTactileBumps?: boolean // 显示触感凸起（F / J 键）
+    isBackIconVisible?: boolean // back 类型时是否显示返回箭头
+  }>(),
+  {
+    bookmarkType: 'mark',
+    iconSrc: '',
+    commandIcon: '',
+    stageStyle: '',
+    textStyle: '',
+    iconStyle: '',
+    imgDraggable: false,
+    isSelected: false,
+    isLoading: false,
+    isBorderEnabled: false,
+    renderMode: 'preview',
+    showCapKey: true,
+    showName: true,
+    showFavicon: true,
+    showTactileBumps: false,
+    isBackIconVisible: false,
+  },
+)
+
+// ── 派生 class ───────────────────────────────────────────────────────────────
+// 型别 class 由组件自身管理；hover / active / move 等附加状态由外层传入
+
+/** 键帽底座 class：型别 + 可选边框 + 预览模式 */
 const rowClassName = computed(() => [
   `row__keycap-${props.visualType}`,
   props.isBorderEnabled && 'row__keycap--border',
+  props.renderMode === 'preview' && 'row__keycap--preview',
 ])
 
+/** stage 顶面 class：随型别切换 */
 const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
+
+/** 触感凸起显示判断（F / J 键专属，模拟实体键盘盲打定位标记） */
+const shouldShowTactileBumps = computed(
+  () => props.showTactileBumps && ['KeyF', 'KeyJ'].includes(props.keyCode),
+)
+
+/** 空值占位符（避免模板中使用 &nbsp; 或不可见字符被转义） */
+const EMPTY_PLACEHOLDER = ' '
 </script>
 
 <template>
+  <!-- 键帽底座：型别 class 决定边框厚度和阴影风格 -->
   <div
     class="row__keycap"
     :class="rowClassName"
   >
+    <!-- 选中遮罩（选择态） -->
     <div
       v-if="isSelected"
       class="keycap__select"
     >
-      <Icon :icon="ICONS.checkCircle" />
+      <Icon
+        class="select__icon"
+        :icon="ICONS.checkCircle"
+      />
     </div>
 
+    <!-- 键帽顶面（三种型别 flat / gmk / dsa，stageStyle 传入几何偏移） -->
     <div
       class="keycap__stage"
       :class="stageClassName"
       :style="stageStyle"
     >
+      <!-- 加载动画（书签 favicon 加载中） -->
       <div
         v-if="isLoading"
         class="item__loading"
@@ -76,59 +126,61 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
         <Icon :icon="ICONS.loading" />
       </div>
 
+      <!-- 键位标识（如 A / Enter / Shift） -->
       <p
         v-if="showCapKey"
         class="keycap__label"
         :style="textStyle"
       >
-        {{ label || '&nbsp;' }}
+        {{ label || EMPTY_PLACEHOLDER }}
       </p>
 
-      <!-- mark 类型只有在真的拿到 iconSrc 时才渲染 img，避免空书签生成占位图 -->
+      <!-- 命令图标区：commandIcon 优先级最高，其次才是书签 favicon/矢量图标 -->
       <div
         class="keycap__img"
         :style="iconStyle"
       >
-        <div
-          v-if="showFavicon && (bookmarkType !== 'mark' || iconSrc)"
-          class="img__wrap"
-        >
-          <img
-            v-if="bookmarkType === 'mark' && iconSrc"
-            class="img__main"
-            :src="iconSrc"
-            :draggable="imgDraggable"
-          />
-          <div
-            v-else
-            class="img__type"
-          >
-            <template v-if="bookmarkType === 'folder'">
-              <Icon
-                :icon="ICONS.folderOutline"
-                class="type__icon"
-              />
-            </template>
-            <template v-else-if="bookmarkType === 'back' && isBackIconVisible">
-              <Icon
-                :icon="ICONS.arrowBackRounded"
-                class="type__icon"
-              />
-            </template>
-          </div>
-        </div>
+        <!-- 命令图标：优先级最高，用于 keyboardCommand 设置面板 -->
+        <Icon
+          v-if="commandIcon"
+          :icon="commandIcon"
+          class="img__command"
+        />
+        <!-- 书签 favicon（mark 类型） -->
+        <img
+          v-else-if="showFavicon && bookmarkType === 'mark' && iconSrc"
+          class="img__main"
+          :src="iconSrc"
+          :draggable="imgDraggable"
+        />
+        <!-- 文件夹图标（folder 类型） -->
+        <Icon
+          v-else-if="showFavicon && bookmarkType === 'folder'"
+          :icon="ICONS.folderOutline"
+          class="img__type"
+        />
+        <!-- 返回箭头（back 类型） -->
+        <Icon
+          v-else-if="
+            showFavicon && bookmarkType === 'back' && isBackIconVisible
+          "
+          :icon="ICONS.arrowBackRounded"
+          class="img__type"
+        />
       </div>
 
+      <!-- 书签名称 -->
       <p
         v-if="showName"
         class="keycap__name"
         :style="textStyle"
       >
-        {{ name || '&nbsp;' }}
+        {{ name || EMPTY_PLACEHOLDER }}
       </p>
 
+      <!-- 触感凸起（仅 F / J 键，模拟实体键盘触感标记） -->
       <div
-        v-if="showTactileBumps && ['KeyF', 'KeyJ'].includes(keyCode)"
+        v-if="shouldShowTactileBumps"
         class="keycap__tactile-bumps"
       />
     </div>
@@ -136,22 +188,24 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
 </template>
 
 <style scoped>
+/* ── 键帽底座基础样式 ─────────────────────────────────────────────────────── */
 .row__keycap {
   position: relative;
   width: 100%;
   height: 100%;
-  color: var(--keycap-main-font-color);
-  background-color: var(--keycap-main-bg-color);
-  backdrop-filter: blur(var(--keycap-background-blur));
-  border-radius: var(--keycap-border-radius);
+  color: var(--nt-kb-main-font-color);
+  background-color: var(--nt-kb-main-bg-color);
+  backdrop-filter: blur(var(--nt-kb-background-blur));
+  border-radius: var(--nt-kb-border-radius);
   border-style: solid;
   box-sizing: border-box;
   cursor: pointer;
   transition:
-    transform 80ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    box-shadow 80ms ease,
-    filter 80ms ease;
+    transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 100ms ease,
+    filter 100ms ease;
 
+  /* ── 选中遮罩 ── */
   .keycap__select {
     display: flex;
     justify-content: center;
@@ -161,18 +215,63 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
-    background: color-mix(in srgb, var(--custom-primary-color) 20%, transparent);
-    color: var(--custom-primary-color);
-    font-size: 14px;
-    border-radius: calc(var(--keycap-border-radius) - 1px);
+    z-index: 10;
+    border-radius: calc(var(--nt-kb-border-radius) - 1px);
+    overflow: hidden;
+    pointer-events: none;
+    animation: selectFadeIn 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* 底部半透明渐变，保留键帽内容的可见性 */
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--nt-kb-primary-color) 8%, transparent) 0%,
+      color-mix(in srgb, var(--nt-kb-primary-color) 22%, transparent) 100%
+    );
+
+    /* 玻璃模糊 + 饱和度增强 */
+    backdrop-filter: blur(2px) saturate(1.3);
+
+    /* 顶部高光线（与键帽顶面高光呼应） */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--nt-kb-primary-color) 60%, white),
+        transparent
+      );
+      border-radius: 1px;
+    }
+
+    /* 多层边框 + 扩散光晕 */
     box-shadow:
-      inset 0 0 0 1.5px var(--custom-primary-color),
-      0 0 8px color-mix(in srgb, var(--custom-primary-color) 28%, transparent);
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--nt-kb-primary-color) 50%, transparent),
+      inset 0 0 12px
+        color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent),
+      0 0 10px color-mix(in srgb, var(--nt-kb-primary-color) 25%, transparent),
+      0 0 20px color-mix(in srgb, var(--nt-kb-primary-color) 12%, transparent);
+
+    /* 选中图标 */
+    .select__icon {
+      width: 60%;
+      height: 60%;
+      color: var(--nt-kb-primary-color);
+      filter: drop-shadow(
+        0 1px 4px
+          color-mix(in srgb, var(--nt-kb-primary-color) 45%, transparent)
+      );
+      animation: selectPopIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
   }
 
+  /* ── 键帽顶面（纵向三段式：label / img / name） ── */
   .keycap__stage {
-    /* 纵向三段式布局：label / img / name，popup 与 widget 都按这套骨架渲染 */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -183,6 +282,7 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     color: inherit;
     background-color: inherit;
 
+    /* 加载旋转图标，绝对定位居中覆盖 */
     .item__loading {
       z-index: 1;
       position: absolute;
@@ -192,20 +292,22 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       display: flex;
       justify-content: center;
       align-items: center;
-      color: var(--custom-primary-color);
+      color: var(--nt-kb-primary-color);
       font-size: 190%;
     }
 
+    /* 键位标识（左上角小字） */
     .keycap__label {
       flex: 0 0 auto;
       width: 100%;
       line-height: 1;
       padding-top: 1%;
-      font-family: var(--keycap-key-font-family);
-      font-size: var(--keycap-key-font-size);
+      font-family: var(--nt-kb-key-font-family);
+      font-size: var(--nt-kb-key-font-size);
       font-weight: 500;
     }
 
+    /* 图标区（居中弹性伸缩，transform scale 由 --nt-kb-favicon-size 控制大小） */
     .keycap__img {
       flex: 1 1 0;
       min-height: 0;
@@ -216,63 +318,87 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       align-items: center;
       overflow: hidden;
 
-      .img__wrap {
+      .img__main {
         height: 100%;
-        transform: scale(var(--keycap-favicon-size));
+        transform: scale(var(--nt-kb-favicon-size));
+      }
 
-        .img__type {
-          height: 100%;
+      .img__type {
+        height: 100%;
+        width: 100%;
+        transform: scale(var(--nt-kb-favicon-size));
+      }
 
-          .type__icon {
-            width: 100%;
-            height: 100%;
-          }
-        }
-
-        .img__main {
-          height: 100%;
-        }
+      .img__command {
+        transform: scale(var(--nt-kb-favicon-size));
       }
     }
 
+    /* 书签名称（底部单行截断） */
     .keycap__name {
       flex: 0 0 auto;
       width: 100%;
       line-height: 1;
-      font-size: var(--keycap-bookmark-font-size);
+      font-size: var(--nt-kb-bookmark-font-size);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
+    /* 触感凸起（F / J 键底部横杠，模拟实体键盘盲打定位内凹标记） */
     .keycap__tactile-bumps {
       position: absolute;
       left: 50%;
-      bottom: 6%;
+      bottom: 8%;
       transform: translate(-50%, 0);
-      width: 22%;
-      height: 3px;
-      border-radius: 2px;
-      background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0.55) 0%,
-        var(--keycap-main-font-color) 40%,
-        rgba(0, 0, 0, 0.25) 100%
-      );
-      opacity: 0.7;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      /* 宽高随 base size 等比缩放，由 CSS 变量驱动 */
+      width: var(--nt-kb-tactile-width);
+      height: var(--nt-kb-tactile-height);
+      border-radius: 99px;
+      background: var(--nt-kb-main-font-color);
+      opacity: 0.45;
+      box-shadow:
+        inset 0 1px 1px var(--gray-alpha-35),
+        0 1px 0 var(--gray-alpha-15);
     }
   }
 }
 
+/* ── 选中动画关键帧 ── */
+@keyframes selectFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes selectPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── flat 型别（微立体内嵌渐变 + 顶面高光线模拟光泽） ─────────────────────── */
 .row__keycap-flat {
-  box-shadow: none;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
 
   .keycap__stage-flat {
-    padding: var(--keycap-stage-flat-padding);
-    border-radius: var(--keycap-border-radius);
+    padding: var(--nt-kb-stage-flat-padding);
+    border-radius: var(--nt-kb-border-radius);
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08) rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18) rgba(0, 0, 0, 0.08)
+      rgba(0, 0, 0, 0.12) rgba(255, 255, 255, 0.12);
     background: linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.18) 0%,
@@ -280,17 +406,20 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       rgba(0, 0, 0, 0.06) 100%
     );
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.25),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   }
 }
 
+/* ── GMK 型别（仿 Cherry 高度，顶厚底薄三层边框 + 外阴影） ─────────────── */
 .row__keycap-gmk {
-  border-width: var(--keycap-gmk-top-border) var(--keycap-gmk-h-border) var(--keycap-gmk-bot-border);
-  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.30) rgba(0, 0, 0, 0.08);
+  border-width: var(--nt-kb-gmk-top-border) var(--nt-kb-gmk-h-border)
+    var(--nt-kb-gmk-bot-border);
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.12) rgba(0, 0, 0, 0.3)
+    rgba(0, 0, 0, 0.08);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.45),
-    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 1px 2px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
   .keycap__stage-gmk {
@@ -304,9 +433,9 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     background: linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.28) 0%,
-      rgba(255, 255, 255, 0.10) 18%,
+      rgba(255, 255, 255, 0.1) 18%,
       rgba(0, 0, 0, 0.04) 55%,
-      rgba(0, 0, 0, 0.10) 100%
+      rgba(0, 0, 0, 0.1) 100%
     );
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.35),
@@ -317,27 +446,30 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   }
 }
 
+/* ── DSA 型别（球面均等高度，四边等宽 + 辐射渐变顶面） ──────────────────── */
 .row__keycap-dsa {
-  border-width: var(--keycap-dsa-border);
-  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.10) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.06);
+  border-width: var(--nt-kb-dsa-border);
+  border-color: rgba(255, 255, 255, 0.06) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.24)
+    rgba(0, 0, 0, 0.06);
   box-shadow:
-    0 3px 7px rgba(0, 0, 0, 0.40),
+    0 3px 7px rgba(0, 0, 0, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
   .keycap__stage-dsa {
     overflow: hidden;
     border-width: 0px;
-    border-radius: 8px;
+    /* 随用户设置的 border-radius 变量响应，略加 2px 模拟 DSA 圆润球面 */
+    border-radius: calc(var(--nt-kb-border-radius) + 2px);
     background: radial-gradient(
       ellipse at 38% 30%,
-      rgba(255, 255, 255, 0.30) 0%,
-      rgba(255, 255, 255, 0.10) 35%,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.1) 35%,
       rgba(0, 0, 0, 0.06) 65%,
       rgba(0, 0, 0, 0.14) 100%
     );
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
       inset 0 -1px 0 rgba(0, 0, 0, 0.14),
       inset 1px 0 0 rgba(255, 255, 255, 0.12),
       inset -1px 0 0 rgba(0, 0, 0, 0.08),
@@ -347,21 +479,31 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
   }
 }
 
+/* ── 状态修饰符 ──────────────────────────────────────────────────────────── */
+
+/* 拖拽排序中 */
 .row__keycap--move {
   cursor: move !important;
 }
 
+/* 自定义边框高亮（使用 outline 避免影响布局） */
 .row__keycap--border {
-  outline: var(--keycap-border-width) solid var(--keycap-border-color);
+  outline: var(--nt-kb-border-width) solid var(--nt-kb-border-color);
 }
 
+/* 按下态（popup 点击书签 / widget 键盘按下） */
 .row__keycap--active {
-  transform: translate(0px, 3px);
-  filter: brightness(0.94);
+  /* 按压位移随 base size 等比缩放 */
+  transform: translate(0px, var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
+  transition:
+    transform 60ms cubic-bezier(0.3, 0.8, 0.4, 0.6),
+    filter 60ms ease,
+    box-shadow 60ms ease;
 
   &.row__keycap-gmk {
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.40),
+      0 1px 3px rgba(0, 0, 0, 0.4),
       0 0px 1px rgba(0, 0, 0, 0.25),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
@@ -372,19 +514,28 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
       0 0px 1px rgba(0, 0, 0, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
+
+  &.row__keycap-flat {
+    box-shadow:
+      0 0px 1px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
 }
 
+/* 悬停态（--hover 是外层显式加的，gmk/dsa 自身也有 hover 增强） */
 .row__keycap--hover:hover,
 .row__keycap-gmk:hover,
-.row__keycap-dsa:hover {
+.row__keycap-dsa:hover,
+.row__keycap-flat:hover {
   transform: translate(0px, -1px);
-  filter: brightness(1.06);
+  /* 同时提升亮度和对比度，在深色键帽上也能获得明显的 hover 感知 */
+  filter: brightness(1.06) contrast(1.05);
 }
 
 .row__keycap--hover:hover.row__keycap-gmk,
 .row__keycap-gmk:hover {
   box-shadow:
-    0 5px 12px rgba(0, 0, 0, 0.50),
+    0 5px 12px rgba(0, 0, 0, 0.5),
     0 2px 4px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
@@ -397,21 +548,75 @@ const stageClassName = computed(() => `keycap__stage-${props.visualType}`)
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-.row__keycap-gmk:active {
-  transform: translateY(2px);
-  filter: brightness(0.94);
+.row__keycap--hover:hover.row__keycap-flat,
+.row__keycap-flat:hover {
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.40),
+    0 3px 6px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* 预览模式（设置面板使用）：禁用 backdrop-filter，hover 不触发 filter / box-shadow 变化 */
+.row__keycap--preview {
+  backdrop-filter: none;
+}
+
+.row__keycap--preview:hover {
+  transform: translate3d(0px, -1px, 0);
+  filter: none !important;
+  box-shadow: inherit;
+}
+
+/* 覆盖各型别 hover 对 filter / box-shadow 的影响，保持型别自身 shadow */
+.row__keycap--preview.row__keycap-gmk:hover {
+  filter: none !important;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.row__keycap--preview.row__keycap-dsa:hover {
+  filter: none !important;
+  box-shadow:
+    0 3px 7px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.row__keycap--preview.row__keycap-flat:hover {
+  filter: none !important;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* 原生 :active（无需外层控制的默认点击反馈） */
+.row__keycap-gmk:active {
+  transform: translateY(var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.4),
     0 0px 1px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .row__keycap-dsa:active {
-  transform: translateY(2px);
-  filter: brightness(0.94);
+  transform: translateY(var(--nt-kb-active-translate-y));
+  filter: brightness(0.92);
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.36),
     0 0px 1px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.row__keycap-flat:active {
+  transform: translateY(calc(var(--nt-kb-active-translate-y) * 0.6));
+  filter: brightness(0.94);
+  box-shadow:
+    0 0px 1px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 </style>

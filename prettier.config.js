@@ -3,7 +3,7 @@
  * @see https://www.prettier.cn/docs/options.html
  */
 export default {
-  printWidth: 200,
+  printWidth: 80,
   tabWidth: 2,
   semi: false,
   singleQuote: true,

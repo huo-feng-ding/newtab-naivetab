@@ -1,9 +1,61 @@
 <script setup lang="ts">
 import { isDragMode } from '@/logic/moveable'
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { currDayjsLang, localConfig, getIsWidgetRender, getStyleField, getStyleConst } from '@/logic/store'
+import {
+  currDayjsLang,
+  localConfig,
+  getIsWidgetRender,
+  getStyleField,
+  getStyleConst,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
+
+const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customSubFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.9)
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+const customTextActiveColor = getStyleField(WIDGET_CODE, 'textActiveColor')
+const customTextLineHeight = getStyleField(WIDGET_CODE, 'textLineHeight')
+const customBlockMargin = getStyleField(WIDGET_CODE, 'blockMargin', 'vmin')
+const customBlockSize = getStyleField(WIDGET_CODE, 'blockSize', 'vmin')
+const customBlockRadius = getStyleField(WIDGET_CODE, 'blockRadius', 'vmin')
+const customBlockDefaultColor = getStyleField(WIDGET_CODE, 'blockDefaultColor')
+const customBlockActiveColor = getStyleField(WIDGET_CODE, 'blockActiveColor')
+const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
+
+const ypStyle = computed(() => ({
+  '--nt-yp-padding': customPadding.value,
+  '--nt-yp-width': customWidth.value,
+  '--nt-yp-height': customHeight.value,
+  '--nt-yp-font-family': customFontFamily.value,
+  '--nt-yp-font-color': customFontColor.value,
+  '--nt-yp-font-size': customFontSize.value,
+  '--nt-yp-sub-font-size': customSubFontSize.value,
+  '--nt-yp-border-radius': customBorderRadius.value,
+  '--nt-yp-border-width': customBorderWidth.value,
+  '--nt-yp-border-color': customBorderColor.value,
+  '--nt-yp-background-color': customBackgroundColor.value,
+  '--nt-yp-shadow-color': customShadowColor.value,
+  '--nt-yp-background-blur': customBackgroundBlur.value,
+  '--nt-yp-text-active-color': customTextActiveColor.value,
+  '--nt-yp-text-line-height': customTextLineHeight.value,
+  '--nt-yp-block-margin': customBlockMargin.value,
+  '--nt-yp-block-size': customBlockSize.value,
+  '--nt-yp-block-radius': customBlockRadius.value,
+  '--nt-yp-block-default-color': customBlockDefaultColor.value,
+  '--nt-yp-block-active-color': customBlockActiveColor.value,
+  '--nt-yp-bg-moveable-main': bgMoveableWidgetMain.value,
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -39,11 +91,15 @@ const totalTS = endYearTS - startYearTS
 const calculateProgress = () => {
   const currTS = dayjs().valueOf()
   const passTS = currTS - startYearTS
-  state.percent = (passTS / totalTS * 100).toFixed(localConfig.yearProgress.percentageDecimal)
+  state.percent = ((passTS / totalTS) * 100).toFixed(
+    localConfig.yearProgress.percentageDecimal,
+  )
 }
 
 const updateDate = () => {
-  state.date = dayjs().locale(currDayjsLang.value).format(localConfig.yearProgress.format)
+  state.date = dayjs()
+    .locale(currDayjsLang.value)
+    .format(localConfig.yearProgress.format)
 }
 
 const onRender = () => {
@@ -53,10 +109,7 @@ const onRender = () => {
 }
 
 watch(
-  [
-    isRender,
-    () => localConfig.yearProgress.isRealtime,
-  ],
+  [isRender, () => localConfig.yearProgress.isRealtime],
   () => {
     if (isRender && localConfig.yearProgress.isRealtime) {
       addTimerTask(WIDGET_CODE, onRender)
@@ -74,62 +127,34 @@ watch(
   },
 )
 
-watch(
-  [
-    () => localConfig.yearProgress.format,
-    currDayjsLang,
-  ],
-  () => {
-    updateDate()
-  },
-)
+watch([() => localConfig.yearProgress.format, currDayjsLang], () => {
+  updateDate()
+})
 
 onMounted(() => {
   onRender()
 })
-
-const customPadding = getStyleField(WIDGET_CODE, 'padding', 'vmin')
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px')
-const customSubFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'px', 0.9)
-
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-
-const customTextActiveColor = getStyleField(WIDGET_CODE, 'textActiveColor')
-const customTextLineHeight = getStyleField(WIDGET_CODE, 'textLineHeight')
-
-const customBlockMargin = getStyleField(WIDGET_CODE, 'blockMargin', 'vmin')
-const customBlockSize = getStyleField(WIDGET_CODE, 'blockSize', 'vmin')
-const customBlockRadius = getStyleField(WIDGET_CODE, 'blockRadius', 'vmin')
-const customBlockDefaultColor = getStyleField(WIDGET_CODE, 'blockDefaultColor')
-const customBlockActiveColor = getStyleField(WIDGET_CODE, 'blockActiveColor')
-
-const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="yearProgress__container"
+      :style="ypStyle"
       :class="{
         'yearProgress__container--drag': isDragMode,
-        'yearProgress__container--shadow': localConfig.yearProgress.isShadowEnabled,
-        'yearProgress__container--border': localConfig.yearProgress.isBorderEnabled,
+        'yearProgress__container--shadow':
+          localConfig.yearProgress.isShadowEnabled,
+        'yearProgress__container--border':
+          localConfig.yearProgress.isBorderEnabled,
       }"
     >
       <div class="progress__text">
         <div class="text__day-wrap">
           <span class="text__active text__day-num">{{ state.passDay }}</span>
-          <span class="text__blur text__day-total"> / {{ state.totalDay }}</span>
+          <span class="text__blur text__day-total">
+            / {{ state.totalDay }}</span
+          >
         </div>
         <p
           v-if="localConfig.yearProgress.isPercentageEnabled"
@@ -166,9 +191,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 
 <style>
 #yearProgress {
-  font-family: v-bind(customFontFamily);
-  color: v-bind(customFontColor);
-  font-size: v-bind(customFontSize);
+  font-family: var(--nt-yp-font-family);
+  color: var(--nt-yp-font-color);
+  font-size: var(--nt-yp-font-size);
   user-select: none;
   .yearProgress__container {
     z-index: 10;
@@ -176,11 +201,11 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     display: flex;
     justify-content: center;
     align-items: stretch;
-    width: v-bind(customWidth);
-    height: v-bind(customHeight);
-    border-radius: v-bind(customBorderRadius);
-    background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur));
+    width: var(--nt-yp-width);
+    height: var(--nt-yp-height);
+    border-radius: var(--nt-yp-border-radius);
+    background-color: var(--nt-yp-background-color);
+    backdrop-filter: blur(var(--nt-yp-background-blur));
     overflow: hidden;
     will-change: transform;
     transform: translateZ(0);
@@ -194,14 +219,15 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       align-items: flex-end;
       padding-right: 10px;
       gap: 1px;
-      line-height: v-bind(customTextLineHeight);
+      font-size: var(--nt-yp-font-size);
+      line-height: var(--nt-yp-text-line-height);
 
       .text__blur {
         opacity: 0.5;
       }
       .text__active {
         font-weight: 700;
-        color: v-bind(customTextActiveColor);
+        color: var(--nt-yp-text-active-color);
       }
       .text__day-wrap {
         display: flex;
@@ -209,11 +235,10 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         gap: 2px;
       }
       .text__day-num {
-        font-size: 1.35em;
-        letter-spacing: -0.02em;
+        font-size: var(--nt-yp-font-size);
       }
       .text__day-total {
-        font-size: 0.78em;
+        font-size: var(--nt-yp-sub-font-size);
       }
       .text__percent {
         display: flex;
@@ -221,11 +246,10 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         gap: 1px;
       }
       .text__unit {
-        font-size: 0.78em;
+        font-size: var(--nt-yp-sub-font-size);
       }
       .text__date {
-        font-size: v-bind(customSubFontSize);
-        letter-spacing: 0.01em;
+        font-size: var(--nt-yp-sub-font-size);
       }
     }
 
@@ -233,37 +257,39 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       flex: 0 0 1px;
       align-self: stretch;
       margin: 12% 0;
-      background-color: v-bind(customFontColor);
+      background-color: var(--nt-yp-font-color);
       opacity: 0.12;
       border-radius: 1px;
     }
 
     .progress__table {
       flex: 1;
-      padding: v-bind(customPadding);
+      padding: var(--nt-yp-padding);
       display: flex;
       flex-wrap: wrap;
       align-content: center;
 
       .table__block {
-        margin: v-bind(customBlockMargin);
-        width: v-bind(customBlockSize);
-        height: v-bind(customBlockSize);
-        border-radius: v-bind(customBlockRadius);
-        background-color: v-bind(customBlockDefaultColor);
-        transition: opacity 0.15s ease, transform 0.15s ease;
+        margin: var(--nt-yp-block-margin);
+        width: var(--nt-yp-block-size);
+        height: var(--nt-yp-block-size);
+        border-radius: var(--nt-yp-block-radius);
+        background-color: var(--nt-yp-block-default-color);
+        transition:
+          opacity 0.15s ease,
+          transform 0.15s ease;
 
         &:hover {
           transform: scale(1.2);
-          box-shadow: 0 0 0 1.5px v-bind(customBlockActiveColor);
+          box-shadow: 0 0 0 1.5px var(--nt-yp-block-active-color);
           opacity: 0.9;
         }
       }
       .table__block--active {
-        background-color: v-bind(customBlockActiveColor);
+        background-color: var(--nt-yp-block-active-color);
       }
       .table__block--current {
-        box-shadow: 0 0 0 1.5px v-bind(customBlockActiveColor);
+        box-shadow: 0 0 0 1.5px var(--nt-yp-block-active-color);
         opacity: 0.9;
       }
     }
@@ -271,16 +297,16 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
   .yearProgress__container--drag {
     background-color: transparent !important;
     &:hover {
-      background-color: v-bind(bgMoveableWidgetMain) !important;
+      background-color: var(--nt-yp-bg-moveable-main) !important;
     }
   }
   .yearProgress__container--border {
-    border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+    border: var(--nt-yp-border-width) solid var(--nt-yp-border-color);
   }
   .yearProgress__container--shadow {
     box-shadow:
-      v-bind(customShadowColor) 0px 2px 4px 0px,
-      v-bind(customShadowColor) 0px 2px 16px 0px;
+      var(--nt-yp-shadow-color) 0px 2px 4px 0px,
+      var(--nt-yp-shadow-color) 0px 2px 16px 0px;
   }
 }
 </style>

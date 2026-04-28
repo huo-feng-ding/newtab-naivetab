@@ -3,6 +3,14 @@ import { isChrome, isFirefox } from '@/env'
 const getChromeBookmark = (): Promise<chrome.bookmarks.BookmarkTreeNode[]> => {
   return new Promise((resolve, reject) => {
     try {
+      if (!chrome.bookmarks) {
+        reject(
+          new Error(
+            'chrome.bookmarks API not available. Permission not granted.',
+          ),
+        )
+        return
+      }
       chrome.bookmarks.getTree((bookmarks) => resolve(bookmarks))
     } catch (e) {
       reject(e)
@@ -21,7 +29,9 @@ export const getBrowserBookmark = async () => {
 export const getFaviconFromUrl = (url: string, size = 128) => {
   if (!url) return ''
   try {
-    if (isChrome) return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`
+    if (isChrome) {
+      return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`
+    }
     const urlEle = new URL(url)
     return `https://www.google.com/s2/favicons?domain=${urlEle.origin}&sz=${size}`
   } catch (e) {

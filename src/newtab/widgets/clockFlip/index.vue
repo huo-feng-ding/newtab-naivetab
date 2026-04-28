@@ -1,8 +1,37 @@
 <script setup lang="ts">
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
+
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customCardColor = getStyleField(WIDGET_CODE, 'cardColor')
+const customCardDividerColor = getStyleField(WIDGET_CODE, 'cardDividerColor')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'px')
+const customCardGap = getStyleField(WIDGET_CODE, 'cardGap', 'px')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+
+const clockFlipStyle = computed(() => ({
+  '--nt-cf-customWidth': customWidth.value,
+  '--nt-cf-customHeight': customHeight.value,
+  '--nt-cf-customFontFamily': customFontFamily.value,
+  '--nt-cf-customFontSize': customFontSize.value,
+  '--nt-cf-customFontColor': customFontColor.value,
+  '--nt-cf-customCardColor': customCardColor.value,
+  '--nt-cf-customCardDividerColor': customCardDividerColor.value,
+  '--nt-cf-customBorderRadius': customBorderRadius.value,
+  '--nt-cf-customCardGap': customCardGap.value,
+  '--nt-cf-customShadowColor': customShadowColor.value,
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -44,8 +73,6 @@ const state = reactive({
   colonVisible: true,
 })
 
-const currTheme = computed(() => localState.value.currAppearanceCode)
-
 // 统一追踪所有翻牌动画 timer，在 Widget 停用/卸载时一并清除，防止泄漏
 const flipTimers: ReturnType<typeof setTimeout>[] = []
 
@@ -57,25 +84,28 @@ const clearFlipTimers = () => {
 
 const flipCard = (cards: FlipCardData[], index: number, newValue: string) => {
   const card = cards[index]
-  if (card.current === newValue)
-    return
+  if (card.current === newValue) return
 
   card.previous = card.current
   card.isFlipping = true
 
-  // flipTop 动画: 0~300ms，flipBottom 动画: delay 300ms + duration 300ms = 600ms
-  // 在 300ms 时更新 current（flipTop 结束时静态上半牌已显示新值）
-  flipTimers.push(setTimeout(() => {
-    card.current = newValue
-  }, 300))
+  // flipTop 动画: 0~350ms，flipBottom 动画: delay 400ms + duration 370ms = 770ms
+  // 在 350ms 时更新 current（flipTop 结束时静态上半牌已显示新值）
+  flipTimers.push(
+    setTimeout(() => {
+      card.current = newValue
+    }, 350),
+  )
 
-  // 620ms 后全部动画结束，移除动画状态
-  // 同时将 previous 同步为 current，防止 flip--top 因 forwards 失效
+  // 770ms 后全部动画结束，移除动画状态
+  // 同时将 previous 同步为 current，以防止 flip--top 因 forwards 失效
   // 瞬间跳回 rotateX(0deg) 时显示旧值导致上半部分闪烁
-  flipTimers.push(setTimeout(() => {
-    card.previous = card.current
-    card.isFlipping = false
-  }, 620))
+  flipTimers.push(
+    setTimeout(() => {
+      card.previous = card.current
+      card.isFlipping = false
+    }, 770),
+  )
 }
 
 const initTime = () => {
@@ -140,7 +170,7 @@ watch(
       clearFlipTimers()
       return
     }
-    // 直接同步设值，不走 flipCard 动画，避免首次渲染/重新启用时闪动
+    // 直接同步设值，不走 flipCard 动画，以避免首次渲染/重新启用时闪动
     initTime()
     addTimerTask(WIDGET_CODE, updateTime)
   },
@@ -151,20 +181,12 @@ onUnmounted(() => {
   clearFlipTimers()
 })
 
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customCardColor = getStyleField(WIDGET_CODE, 'cardColor')
-const customCardDividerColor = getStyleField(WIDGET_CODE, 'cardDividerColor')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'px')
-const customCardGap = getStyleField(WIDGET_CODE, 'cardGap', 'px')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
 const isShadowEnabled = computed(() => localConfig.clockFlip.isShadowEnabled)
 const showSeconds = computed(() => localConfig.clockFlip.showSeconds)
 const showColon = computed(() => localConfig.clockFlip.showColon)
-const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled)
+const colonBlinkEnabled = computed(
+  () => localConfig.clockFlip.colonBlinkEnabled,
+)
 </script>
 
 <template>
@@ -172,6 +194,7 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
     <div
       class="clockFlip__container"
       :class="{ 'clockFlip__container--shadow': isShadowEnabled }"
+      :style="clockFlipStyle"
     >
       <div class="clock__cards">
         <!-- Hours -->
@@ -205,8 +228,11 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
         <span
           v-if="showColon"
           class="cards__divider"
-          :class="{ 'cards__divider--dim': colonBlinkEnabled && !state.colonVisible }"
-        >:</span>
+          :class="{
+            'cards__divider--dim': colonBlinkEnabled && !state.colonVisible,
+          }"
+          >:</span
+        >
 
         <!-- Minutes -->
         <div class="cards__group">
@@ -240,8 +266,11 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
           <span
             v-if="showColon"
             class="cards__divider"
-            :class="{ 'cards__divider--dim': colonBlinkEnabled && !state.colonVisible }"
-          >:</span>
+            :class="{
+              'cards__divider--dim': colonBlinkEnabled && !state.colonVisible,
+            }"
+            >:</span
+          >
 
           <!-- Seconds -->
           <div class="cards__group">
@@ -278,7 +307,6 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
 
 <style>
 #clockFlip {
-  font-family: v-bind(customFontFamily);
   user-select: none;
 
   .clockFlip__container {
@@ -287,20 +315,21 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: var(--nt-cf-customFontFamily);
 
     .clock__cards {
       display: flex;
       align-items: center;
-      gap: v-bind(customCardGap);
+      gap: var(--nt-cf-customCardGap);
 
       .cards__group {
         display: flex;
-        gap: v-bind(customCardGap);
+        gap: var(--nt-cf-customCardGap);
       }
 
       .cards__divider {
-        font-size: v-bind(customFontSize);
-        color: v-bind(customFontColor);
+        font-size: var(--nt-cf-customFontSize);
+        color: var(--nt-cf-customFontColor);
         line-height: 1;
         font-weight: 700;
         letter-spacing: 0;
@@ -317,19 +346,26 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   .clockFlip__container--shadow {
     .flip-card {
       box-shadow:
-        0 2px 4px v-bind(customShadowColor),
-        0 8px 24px v-bind(customShadowColor);
+        0 2px 4px var(--nt-cf-customShadowColor),
+        0 8px 24px var(--nt-cf-customShadowColor);
     }
   }
 
   .flip-card {
     position: relative;
-    width: v-bind(customWidth);
-    height: v-bind(customHeight);
-    background: v-bind(customCardColor);
-    border-radius: v-bind(customBorderRadius);
+    width: var(--nt-cf-customWidth);
+    height: var(--nt-cf-customHeight);
+    background: var(--nt-cf-customCardColor);
+    border-radius: var(--nt-cf-customBorderRadius);
 
-    /* 中间分割缝隙 */
+    /* 卡片边缘厚度：模拟纸板侧边 */
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.15),
+      0 -1px 0 rgba(0, 0, 0, 0.1),
+      1px 0 0 rgba(0, 0, 0, 0.05),
+      -1px 0 0 rgba(0, 0, 0, 0.05);
+
+    /* 中间分割缝隙：加深折痕阴影 */
     &::before {
       content: '';
       position: absolute;
@@ -337,7 +373,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       left: 0;
       right: 0;
       height: 2px;
-      background: v-bind(customCardDividerColor);
+      background: var(--nt-cf-customCardDividerColor);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       z-index: 20;
     }
 
@@ -349,8 +386,14 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
-      border-radius: v-bind(customBorderRadius) v-bind(customBorderRadius) 0 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent
+      );
+      border-radius: var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius) 0 0;
       z-index: 20;
     }
   }
@@ -367,8 +410,9 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   /* 静态上半牌：显示数字上半段 */
   .flip-card__top {
     top: 0;
-    border-radius: v-bind(customBorderRadius) v-bind(customBorderRadius) 0 0;
-    background: v-bind(customCardColor);
+    border-radius: var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius) 0 0;
+    background: var(--nt-cf-customCardColor);
     z-index: 1;
 
     span {
@@ -380,18 +424,20 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       display: flex;
       align-items: center;
       justify-content: center;
-      color: v-bind(customFontColor);
-      font-size: v-bind(customFontSize);
+      color: var(--nt-cf-customFontColor);
+      font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
   /* 静态下半牌：显示数字下半段，略暗增加立体感 */
   .flip-card__bottom {
     bottom: 0;
-    border-radius: 0 0 v-bind(customBorderRadius) v-bind(customBorderRadius);
-    background: v-bind(customCardColor);
+    border-radius: 0 0 var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius);
+    background: var(--nt-cf-customCardColor);
     z-index: 1;
 
     /* 下半部分渐变暗色遮罩，模拟真实翻页时钟的阴影质感 */
@@ -399,8 +445,13 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.06));
-      border-radius: 0 0 v-bind(customBorderRadius) v-bind(customBorderRadius);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.14),
+        rgba(0, 0, 0, 0.06)
+      );
+      border-radius: 0 0 var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius);
       pointer-events: none;
     }
 
@@ -413,16 +464,17 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       display: flex;
       align-items: center;
       justify-content: center;
-      color: v-bind(customFontColor);
-      font-size: v-bind(customFontSize);
+      color: var(--nt-cf-customFontColor);
+      font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
   /* 翻转牌（覆盖在静态牌上方） */
   .flip-card__flip {
-    background: v-bind(customCardColor);
+    background: var(--nt-cf-customCardColor);
     z-index: 5;
 
     span {
@@ -433,10 +485,11 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       display: flex;
       align-items: center;
       justify-content: center;
-      color: v-bind(customFontColor);
-      font-size: v-bind(customFontSize);
+      color: var(--nt-cf-customFontColor);
+      font-size: var(--nt-cf-customFontSize);
       font-weight: 700;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -444,7 +497,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   .flip-card__flip--top {
     top: 0;
     transform-origin: bottom center;
-    border-radius: v-bind(customBorderRadius) v-bind(customBorderRadius) 0 0;
+    border-radius: var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius) 0 0;
 
     /* 翻转时的阴影遮罩（随翻转角度渐深） */
     &::after {
@@ -452,7 +506,8 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
       position: absolute;
       inset: 0;
       background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0));
-      border-radius: v-bind(customBorderRadius) v-bind(customBorderRadius) 0 0;
+      border-radius: var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius) 0 0;
       pointer-events: none;
       opacity: 0;
     }
@@ -466,16 +521,22 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   .flip-card__flip--bottom {
     top: 50%;
     transform-origin: top center;
-    transform: perspective(600px) rotateX(90deg);
-    border-radius: 0 0 v-bind(customBorderRadius) v-bind(customBorderRadius);
+    transform: perspective(400px) rotateX(90deg);
+    border-radius: 0 0 var(--nt-cf-customBorderRadius)
+      var(--nt-cf-customBorderRadius);
 
     /* 下半翻牌的渐变阴影遮罩 */
     &::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.06));
-      border-radius: 0 0 v-bind(customBorderRadius) v-bind(customBorderRadius);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.22),
+        rgba(0, 0, 0, 0.06)
+      );
+      border-radius: 0 0 var(--nt-cf-customBorderRadius)
+        var(--nt-cf-customBorderRadius);
       pointer-events: none;
     }
 
@@ -485,27 +546,27 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
   }
 
   .flip-card__flip--animate.flip-card__flip--top {
-    animation: flipTop 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+    animation: flipTop 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     will-change: transform;
 
     &::after {
-      animation: flipTopShadow 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+      animation: flipTopShadow 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       will-change: opacity;
     }
   }
 
   .flip-card__flip--animate.flip-card__flip--bottom {
-    animation: flipBottom 0.32s cubic-bezier(0, 0, 0.3, 1) 0.28s forwards;
+    animation: flipBottom 0.37s cubic-bezier(0.1, 0.8, 0.3, 1) 0.4s forwards;
     will-change: transform;
   }
 }
 
 @keyframes flipTop {
   0% {
-    transform: perspective(600px) rotateX(0deg);
+    transform: perspective(400px) rotateX(0deg);
   }
   100% {
-    transform: perspective(600px) rotateX(-90deg);
+    transform: perspective(400px) rotateX(-90deg);
   }
 }
 
@@ -522,11 +583,16 @@ const colonBlinkEnabled = computed(() => localConfig.clockFlip.colonBlinkEnabled
 
 @keyframes flipBottom {
   0% {
-    transform: perspective(600px) rotateX(90deg);
+    transform: perspective(400px) rotateX(90deg);
+  }
+  60% {
+    transform: perspective(400px) rotateX(-2deg);
+  }
+  80% {
+    transform: perspective(400px) rotateX(1deg);
   }
   100% {
-    transform: perspective(600px) rotateX(0deg);
+    transform: perspective(400px) rotateX(0deg);
   }
 }
-
 </style>

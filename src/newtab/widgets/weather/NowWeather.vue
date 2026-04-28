@@ -1,12 +1,39 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { URL_QWEATHER_HOME, WEATHER_TEMPERATURE_UNIT_MAP, WEATHER_SPEED_UNIT_MAP } from '@/logic/constants/index'
+import {
+  WEATHER_TEMPERATURE_UNIT_MAP,
+  WEATHER_SPEED_UNIT_MAP,
+} from '@/logic/constants/weather'
+import { URL_QWEATHER_HOME } from '@/logic/constants/urls'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
-import { localConfig, getStyleField, globalState } from '@/logic/store'
-import { weatherState, weatherIndicesInfo, weatherWarningInfo } from '@/newtab/widgets/weather/logic'
+import {
+  localConfig,
+  localState,
+  getStyleField,
+  globalState,
+} from '@/logic/store'
+import {
+  weatherState,
+  weatherIndicesInfo,
+  weatherWarningInfo,
+} from '@/newtab/widgets/weather/logic'
 import { WIDGET_CODE } from './config'
+
+const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
+const customLabelSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.4)
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.2)
+const customLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.5)
+const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
+
+const nowWeatherStyle = computed(() => ({
+  '--nt-wn-icon-size': customIconSize.value,
+  '--nt-wn-label-size': customLabelSize.value,
+  '--nt-wn-font-size': customFontSize.value,
+  '--nt-wn-large-font-size': customLargeFontSize.value,
+  '--nt-wn-xlarge-font-size': customXLargeFontSize.value,
+}))
 
 const state = reactive({
   isWarningVisible: false,
@@ -24,10 +51,16 @@ onMounted(() => {
   })
 })
 
-const isWeatherWarning = computed(() => weatherState.value.warning.list.length > 0)
+const isWeatherWarning = computed(
+  () => weatherState.value.warning.list.length > 0,
+)
 
 const warningVisible = computed(() => {
-  if (isDragMode.value || localConfig.general.isFocusMode || globalState.isSettingDrawerVisible) {
+  if (
+    isDragMode.value ||
+    localState.value.isFocusMode ||
+    globalState.isSettingDrawerVisible
+  ) {
     return false
   }
   return state.isWarningVisible || weatherState.value.state.isWarningVisible
@@ -69,18 +102,19 @@ const onOpenWeather = () => {
   createTab(URL_QWEATHER_HOME)
 }
 
-const temperatureUnit = computed(() => WEATHER_TEMPERATURE_UNIT_MAP[localConfig.weather.temperatureUnit])
-const speedUnit = computed(() => WEATHER_SPEED_UNIT_MAP[localConfig.weather.speedUnit])
-
-const customIconSize = getStyleField(WIDGET_CODE, 'iconSize', 'vmin')
-const customLabelSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.4)
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.2)
-const customLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 1.5)
-const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
+const temperatureUnit = computed(
+  () => WEATHER_TEMPERATURE_UNIT_MAP[localConfig.weather.temperatureUnit],
+)
+const speedUnit = computed(
+  () => WEATHER_SPEED_UNIT_MAP[localConfig.weather.speedUnit],
+)
 </script>
 
 <template>
-  <div id="now">
+  <div
+    id="now"
+    :style="nowWeatherStyle"
+  >
     <!-- 天气图标区域 -->
     <div
       v-if="localConfig.weather.iconEnabled"
@@ -167,8 +201,12 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
 
           <!-- 体感温度 -->
           <div class="temp__secondary">
-            <span class="temp__secondary-label">{{ $t('weather.feelsLike') }}</span>
-            <span class="temp__secondary-value">{{ weatherState.now.feelsLike }}</span>
+            <span class="temp__secondary-label">{{
+              $t('weather.feelsLike')
+            }}</span>
+            <span class="temp__secondary-value">{{
+              weatherState.now.feelsLike
+            }}</span>
             <span class="temp__secondary-unit">{{ temperatureUnit }}</span>
           </div>
 
@@ -177,7 +215,10 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
           <!-- 今日温度范围 -->
           <div class="temp__range">
             <span class="temp__range-value">
-              {{ weatherState.forecast.list[0] && `${weatherState.forecast.list[0].tempMax}° / ${weatherState.forecast.list[0].tempMin}°` }}
+              {{
+                weatherState.forecast.list[0] &&
+                `${weatherState.forecast.list[0].tempMax}° / ${weatherState.forecast.list[0].tempMin}°`
+              }}
             </span>
           </div>
 
@@ -189,7 +230,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
               class="detail__icon"
               :icon="ICONS.humidity"
             />
-            <span class="temp__secondary-value">{{ weatherState.now.humidity }}</span>
+            <span class="temp__secondary-value">{{
+              weatherState.now.humidity
+            }}</span>
             <span class="temp__secondary-unit">%</span>
           </div>
         </div>
@@ -221,8 +264,14 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
             :icon="ICONS.windyFill"
           />
           <span class="detail__label">{{ weatherState.now.windDir }}</span>
-          <span class="detail__sub">{{ weatherState.now.windScale }}{{ $t('weather.windScaleUnit') }}</span>
-          <span class="detail__sub detail__sub--speed">{{ weatherState.now.windSpeed }}<span class="detail__unit"> {{ speedUnit }}</span></span>
+          <span class="detail__sub"
+            >{{ weatherState.now.windScale
+            }}{{ $t('weather.windScaleUnit') }}</span
+          >
+          <span class="detail__sub detail__sub--speed"
+            >{{ weatherState.now.windSpeed
+            }}<span class="detail__unit"> {{ speedUnit }}</span></span
+          >
         </div>
       </div>
 
@@ -236,7 +285,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
             class="detail__icon"
             :icon="ICONS.uvIndex"
           />
-          <span class="detail__label">UV {{ weatherState.forecast.list[0].uvIndex }}</span>
+          <span class="detail__label"
+            >UV {{ weatherState.forecast.list[0].uvIndex }}</span
+          >
         </div>
         <div class="detail__dot" />
         <div class="detail__item">
@@ -244,7 +295,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
             class="detail__icon detail__icon--sunrise"
             :icon="ICONS.sunrise"
           />
-          <span class="detail__label">{{ weatherState.forecast.list[0].sunrise }}</span>
+          <span class="detail__label">{{
+            weatherState.forecast.list[0].sunrise
+          }}</span>
         </div>
         <div class="detail__dot" />
         <div class="detail__item">
@@ -252,7 +305,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
             class="detail__icon detail__icon--sunset"
             :icon="ICONS.sunset"
           />
-          <span class="detail__label">{{ weatherState.forecast.list[0].sunset }}</span>
+          <span class="detail__label">{{
+            weatherState.forecast.list[0].sunset
+          }}</span>
         </div>
       </div>
     </div>
@@ -268,7 +323,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
     cursor: pointer;
     opacity: 0.7;
     transition: opacity var(--transition-base);
-    &:hover { opacity: 1; }
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 .weather__indices {
@@ -288,7 +345,9 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform 0.3s cubic-bezier(0.34, 1.06, 0.64, 1), filter 0.25s ease;
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.06, 0.64, 1),
+      filter 0.25s ease;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 
     &:hover {
@@ -297,12 +356,14 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
     }
 
     .weather-icon__wrap {
-      font-size: v-bind(customIconSize);
+      font-size: var(--nt-wn-icon-size);
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .weather-icon__wrap--move { cursor: move !important; }
+    .weather-icon__wrap--move {
+      cursor: move !important;
+    }
   }
 
   /* ── 右侧信息列 ── */
@@ -325,27 +386,34 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 5px;
 
       .text__condition {
-        font-size: v-bind(customLargeFontSize);
+        font-size: var(--nt-wn-large-font-size);
         font-weight: 700;
         letter-spacing: 0.03em;
         text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         white-space: nowrap;
       }
-      .warning__trigger { display: flex; align-items: center; }
+      .warning__trigger {
+        display: flex;
+        align-items: center;
+      }
       .warning__icon {
         display: flex;
         align-items: center;
-        font-size: v-bind(customLabelSize);
+        font-size: var(--nt-wn-label-size);
         cursor: pointer;
         color: #f5a623;
         filter: drop-shadow(0 0 4px rgba(245, 166, 35, 0.6));
-        transition: transform var(--transition-base), filter var(--transition-base);
+        transition:
+          transform var(--transition-base),
+          filter var(--transition-base);
         &:hover {
           transform: scale(1.2);
           filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.9));
         }
       }
-      .label__info--move { cursor: move !important; }
+      .label__info--move {
+        cursor: move !important;
+      }
     }
 
     /* 当前温度（主） */
@@ -355,20 +423,20 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 2px;
 
       .temp__icon {
-        font-size: v-bind(customLabelSize);
+        font-size: var(--nt-wn-label-size);
         opacity: 0.75;
         /* svg icon 无法直接参与 baseline，用 translate 微调垂直居中 */
         transform: translateY(15%);
       }
       .temp__value {
-        font-size: v-bind(customXLargeFontSize);
+        font-size: var(--nt-wn-xlarge-font-size);
         font-weight: 800;
         line-height: 1;
         letter-spacing: -1px;
         text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
       .temp__unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 600;
         opacity: 0.8;
       }
@@ -391,18 +459,18 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 2px;
 
       .temp__secondary-label {
-        font-size: calc(v-bind(customFontSize) * 0.9);
+        font-size: calc(var(--nt-wn-font-size) * 0.9);
         opacity: 0.55;
         margin-bottom: 1px;
         letter-spacing: 0.02em;
       }
       .temp__secondary-value {
-        font-size: v-bind(customLargeFontSize);
+        font-size: var(--nt-wn-large-font-size);
         font-weight: 600;
         line-height: 1;
       }
       .temp__secondary-unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
         margin-bottom: 1px;
       }
@@ -414,7 +482,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       align-items: center;
       gap: 2px;
       .detail__icon {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
       }
     }
@@ -425,7 +493,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       align-items: center;
 
       .temp__range-value {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 500;
         opacity: 0.75;
         letter-spacing: 0.02em;
@@ -447,18 +515,24 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
       gap: 3px;
 
       .detail__icon {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         flex-shrink: 0;
         opacity: 0.7;
-        &.detail__icon--sunrise { color: #f5c842; opacity: 0.9; }
-        &.detail__icon--sunset  { color: #a78bfa; opacity: 0.9; }
+        &.detail__icon--sunrise {
+          color: #f5c842;
+          opacity: 0.9;
+        }
+        &.detail__icon--sunset {
+          color: #a78bfa;
+          opacity: 0.9;
+        }
       }
       .detail__label {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         font-weight: 500;
       }
       .detail__sub {
-        font-size: calc(v-bind(customFontSize) * 0.9);
+        font-size: calc(var(--nt-wn-font-size) * 0.9);
         opacity: 0.65;
         &::before {
           content: '·';
@@ -470,7 +544,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
         }
       }
       .detail__badge {
-        font-size: calc(v-bind(customFontSize) * 0.85);
+        font-size: calc(var(--nt-wn-font-size) * 0.85);
         padding: 1px 5px;
         border-radius: 3px;
         background: rgba(255, 255, 255, 0.12);
@@ -481,7 +555,7 @@ const customXLargeFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 2.2)
         backdrop-filter: blur(4px);
       }
       .detail__unit {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-wn-font-size);
         opacity: 0.7;
       }
     }

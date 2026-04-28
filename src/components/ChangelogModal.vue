@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICONS } from '@/logic/icons'
-import { defineAsyncComponent } from 'vue'
-import { globalState } from '@/logic/store'
+import { defineAsyncComponent, computed } from 'vue'
+import { globalState, localConfig } from '@/logic/store'
 
 const modules = import.meta.glob('../../CHANGELOG.md')
-const ChangeLogMd = modules['../../CHANGELOG.md'] ? defineAsyncComponent(modules['../../CHANGELOG.md'] as any) : null
+const ChangeLogMd = modules['../../CHANGELOG.md']
+  ? defineAsyncComponent(modules['../../CHANGELOG.md'] as any)
+  : null
 
-const onCloseModal = () => {
+const showBreakingChangeNotice = computed(() => {
+  return localConfig.general.showBreakingChangeNotice
+})
+
+const onConfirm = () => {
+  if (showBreakingChangeNotice.value) {
+    localConfig.general.showBreakingChangeNotice = false
+  }
   globalState.isChangelogModalVisible = false
 }
 </script>
@@ -21,9 +30,22 @@ const onCloseModal = () => {
       class="card__wrap"
       :title="`🚀 ${$t('about.changelog')}`"
     >
+      <div
+        v-if="showBreakingChangeNotice"
+        class="breaking-notice"
+      >
+        <Icon
+          :icon="ICONS.warning"
+          class="notice__icon"
+        />
+        <div class="notice__content">
+          {{ $t('prompts.breakingChangeNotice') }}
+        </div>
+      </div>
+
       <div class="modal__content changelog__content">
         <ChangeLogMd v-if="ChangeLogMd" />
-        <p v-else> - </p>
+        <p v-else>-</p>
       </div>
 
       <div class="card__footer">
@@ -32,7 +54,7 @@ const onCloseModal = () => {
           type="primary"
           size="small"
           secondary
-          @click="onCloseModal()"
+          @click="onConfirm()"
         >
           <template #icon>
             <div class="icon__wrap">
@@ -59,6 +81,47 @@ const onCloseModal = () => {
       font-weight: bold;
     }
   }
+}
+
+.breaking-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background-color: rgba(250, 173, 20, 0.08);
+  border: 1px solid rgba(250, 173, 20, 0.3);
+  border-radius: 8px;
+}
+
+.notice__icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: #d97706;
+}
+
+:root[data-theme='dark'] .breaking-notice,
+.dark .breaking-notice {
+  background-color: rgba(250, 173, 20, 0.12);
+  border-color: rgba(250, 173, 20, 0.4);
+}
+
+:root[data-theme='dark'] .notice__icon,
+.dark .notice__icon {
+  color: #f59e0b;
+}
+
+.notice__content {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.6;
+}
+
+:root[data-theme='dark'] .notice__content,
+.dark .notice__content {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .card__footer {

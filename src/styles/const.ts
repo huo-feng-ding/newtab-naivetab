@@ -21,18 +21,16 @@ export const styleConst = ref({
   auxiliaryLineWidget: ['#69c0ff', ''],
   bgMoveableWidgetMain: ['rgba(100,181,246, 0.5)', ''],
   bgMoveableWidgetActive: ['rgba(100,181,246, 0.7)', ''],
-  bgMoveableWidgetDelete: ['rgba(250,82,82, 1)', ''],
   moveableToolDeleteBtnColor: ['#ffa39e', ''],
-  borderMoveableToolItem: ['#95a5a6', ''],
-  bgMoveableToolDrawer: ['rgba(32, 32, 32, 0.7)', ''],
+  bgMoveableToolDrawer: ['rgba(32, 32, 32, 0.85)', ''],
 
   // ── Popup Keyboard ──────────────────────────────────────────────────
   popupKeyboardBorder: ['rgb(224, 224, 230)', 'rgba(73, 73, 77, 1)'],
   popupKeyboardHoverBg: ['rgba(209, 213, 219, 1)', 'rgba(73, 73, 77, 1)'],
   popupKeyboardActiveBg: ['rgba(209, 213, 219, 0.85)', 'rgba(73, 73, 77, 0.8)'],
 
-  // ── Dropdown Menu (右键菜单) ────────────────────────────────────────
-  // CSS 变量前缀 --dm-，由 RightClickMenu.vue 的 applyDropdownThemeVars 写入 body
+  // ── Context Menu (右键菜单) ─────────────────────────────────────────
+  // CSS 变量前缀 --cm-，由 RightClickMenu.vue 的 :style 注入到菜单容器
   dropdownBg: ['rgba(252, 252, 253, 0.92)', 'rgba(28, 28, 32, 0.82)'],
   dropdownBorder: ['rgba(0, 0, 0, 0.08)', 'rgba(255, 255, 255, 0.12)'],
   dropdownShadowColor: ['rgba(0, 0, 0, 0.14)', 'rgba(0, 0, 0, 0.36)'],

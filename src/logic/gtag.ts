@@ -11,21 +11,29 @@ const getOrCreateClientId = async () => {
 
 const SESSION_EXPIRATION_IN_MIN = 30
 
+interface SessionData {
+  session_id: string
+  timestamp: string
+}
+
 const getOrCreateSessionId = async () => {
   // Store session in memory storage
-  let { sessionData } = await chrome.storage.session.get('sessionData')
+  let { sessionData } = (await chrome.storage.session.get('sessionData')) as {
+    sessionData: SessionData | null
+  }
   // Check if session exists and is still valid
   const currentTimeInMs = Date.now()
   if (sessionData && sessionData.timestamp) {
     // Calculate how long ago the session was last updated
-    const durationInMin = (currentTimeInMs - sessionData.timestamp) / 60000
+    const durationInMin =
+      (currentTimeInMs - Number(sessionData.timestamp)) / 60000
     // Check if last update lays past the session expiration threshold
     if (durationInMin > SESSION_EXPIRATION_IN_MIN) {
       // Delete old session id to start a new session
       sessionData = null
     } else {
       // Update timestamp to keep session alive
-      sessionData.timestamp = currentTimeInMs
+      sessionData.timestamp = currentTimeInMs.toString()
       await chrome.storage.session.set({ sessionData })
     }
   }
@@ -47,7 +55,11 @@ const DEFAULT_ENGAGEMENT_TIME_IN_MSEC = 100
 
 type TGaProxyType = 'view' | 'click' | 'move' | 'delete' | 'press' | 'error'
 
-export const gaProxy = async (type: TGaProxyType, names: string[], payload = {}) => {
+export const gaProxy = async (
+  type: TGaProxyType,
+  names: string[],
+  payload = {},
+) => {
   const params = {
     client_id: await getOrCreateClientId(),
     events: [
@@ -62,8 +74,14 @@ export const gaProxy = async (type: TGaProxyType, names: string[], payload = {})
     ],
   }
 
-  fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {
-    method: 'POST',
-    body: JSON.stringify(params),
+  fetch(
+    `${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    },
+  ).catch((e) => {
+    // console.log('GA event failed', e)
   })
 }

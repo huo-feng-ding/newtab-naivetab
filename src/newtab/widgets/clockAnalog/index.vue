@@ -1,12 +1,45 @@
 <script setup lang="ts">
 import { addVisibilityTask, addTimerTask, removeTimerTask } from '@/logic/task'
-import { localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
+
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const numberScaleFontFamily = computed(
+  () => localConfig.clockAnalog.numberScaleFontFamily,
+)
+const numberScaleFontSize = computed(
+  () => `${localConfig.clockAnalog.numberScaleFontSize}px`,
+)
+const numberScaleFontColor = computed(() => {
+  const colors = localConfig.clockAnalog.numberScaleFontColor
+  return Array.isArray(colors)
+    ? colors[localState.value.currAppearanceCode]
+    : colors
+})
+const hourDeg = computed(() => `${state.hourDeg}deg`)
+const minuteDeg = computed(() => `${state.minuteDeg}deg`)
+const secondDeg = computed(() => `${state.secondDeg}deg`)
+
+const clockAnalogStyle = computed(() => ({
+  '--nt-ca-custom-width': customWidth.value,
+  '--nt-ca-number-scale-font-family': numberScaleFontFamily.value,
+  '--nt-ca-number-scale-font-size': numberScaleFontSize.value,
+  '--nt-ca-number-scale-font-color': numberScaleFontColor.value,
+  '--nt-ca-hour-deg': hourDeg.value,
+  '--nt-ca-minute-deg': minuteDeg.value,
+  '--nt-ca-second-deg': secondDeg.value,
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 const currTheme = computed(() => localState.value.currAppearanceLabel)
+const showNumberScale = computed(() => localConfig.clockAnalog.showNumberScale)
 
 const state = reactive({
   isAnimationEnable: true,
@@ -32,7 +65,9 @@ const imageLoadComplete = (url: string) => {
   })
 }
 
-const getClockImageUrl = (type: 'background' | 'marker' | 'hour' | 'minute' | 'second') => {
+const getClockImageUrl = (
+  type: 'background' | 'marker' | 'hour' | 'minute' | 'second',
+) => {
   return `/assets/img/clock/${currTheme.value}/${type}.png`
 }
 
@@ -112,6 +147,19 @@ const handleFullRotation = (m: number) => {
   }
 }
 
+const getNumberPosition = (num: number) => {
+  const angle = num * 30 * (Math.PI / 180) // 转弧度
+  const radiusPercent = localConfig.clockAnalog.numberScaleRadius
+  const center = 50 // 圆心在 50%, 50%
+  const r = (radiusPercent / 100) * 50
+  const x = center + r * Math.sin(angle)
+  const y = center - r * Math.cos(angle)
+  return {
+    left: `${x}%`,
+    top: `${y}%`,
+  }
+}
+
 watch(
   isRender,
   (value) => {
@@ -134,17 +182,13 @@ addVisibilityTask(WIDGET_CODE, (hidden) => {
     }, ENABLE_ANIMATION_DELAY_TIME)
   }
 })
-
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const hourDeg = computed(() => `${state.hourDeg}deg`)
-const minuteDeg = computed(() => `${state.minuteDeg}deg`)
-const secondDeg = computed(() => `${state.secondDeg}deg`)
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="clockAnalog__container"
+      :style="clockAnalogStyle"
     >
       <div
         v-show="state.isClockVisible"
@@ -157,19 +201,43 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
         />
         <div
           class="clock__base clock__hour"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isHourAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isHourAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/hour.png);`"
         />
         <div
           class="clock__base clock__minute"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isMinuteAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isMinuteAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/minute.png);`"
         />
         <div
           class="clock__base clock__second"
-          :class="{ 'clock__base--animation': state.isAnimationEnable && state.isSecondAnimationEnable }"
+          :class="{
+            'clock__base--animation':
+              state.isAnimationEnable && state.isSecondAnimationEnable,
+          }"
           :style="`background-image: url(/assets/img/clock/${currTheme}/second.png);`"
         />
+
+        <!-- 数字刻度 -->
+        <div
+          v-if="showNumberScale"
+          class="clock__number-scale"
+        >
+          <div
+            v-for="num in 12"
+            :key="num"
+            class="number-scale__item"
+            :style="getNumberPosition(num)"
+          >
+            <span>{{ num }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </WidgetWrap>
@@ -185,15 +253,15 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
     text-align: center;
     .container__clock {
       position: relative;
-      height: v-bind(customWidth);
-      width: v-bind(customWidth);
+      height: var(--nt-ca-custom-width);
+      width: var(--nt-ca-custom-width);
       background-size: 100%;
       .clock__base {
         position: absolute;
         top: 0;
         left: 0;
-        height: v-bind(customWidth);
-        width: v-bind(customWidth);
+        height: var(--nt-ca-custom-width);
+        width: var(--nt-ca-custom-width);
         border-radius: 50%;
         background-size: 100%;
       }
@@ -201,13 +269,38 @@ const secondDeg = computed(() => `${state.secondDeg}deg`)
         transition: transform 0.3s cubic-bezier(0.4, 2.08, 0.55, 0.44);
       }
       .clock__hour {
-        transform: rotateZ(v-bind(hourDeg));
+        transform: rotateZ(var(--nt-ca-hour-deg));
       }
       .clock__minute {
-        transform: rotateZ(v-bind(minuteDeg));
+        transform: rotateZ(var(--nt-ca-minute-deg));
       }
       .clock__second {
-        transform: rotateZ(v-bind(secondDeg));
+        transform: rotateZ(var(--nt-ca-second-deg));
+      }
+
+      .clock__number-scale {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        font-weight: 500;
+
+        .number-scale__item {
+          position: absolute;
+
+          span {
+            display: block;
+            text-align: center;
+            font-family: var(--nt-ca-number-scale-font-family);
+            font-size: var(--nt-ca-number-scale-font-size);
+            color: var(--nt-ca-number-scale-font-color);
+            font-weight: 600;
+            line-height: 1;
+            min-width: 1.5em;
+            transform: translate(-50%, -50%);
+          }
+        }
       }
     }
   }

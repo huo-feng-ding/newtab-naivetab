@@ -1,6 +1,7 @@
 export const ICONS = {
   // widget icons
-  keyboard: 'ic:outline-keyboard-alt',
+  keyboardCommon: 'ic:outline-keyboard-alt',
+  bookmarkKeyboard: 'ic:twotone-bookmarks',
   bookmarkFolder: 'akar-icons:grid',
   clockDigital: 'fluent-emoji-high-contrast:input-numbers',
   clockAnalog: 'grommet-icons:clock',
@@ -13,8 +14,15 @@ export const ICONS = {
   weather: 'mdi:weather-cloudy',
   memo: 'material-symbols:note-alt-outline',
   news: 'majesticons:newspaper-line',
+  countdown: 'mdi:timer-outline',
+  countdownPlay: 'mdi:play',
+  countdownPause: 'mdi:pause',
+  countdownRestore: 'mdi:restore',
+  countdownSpinUp: 'mdi:chevron-up',
+  countdownSpinDown: 'mdi:chevron-down',
   // setting__label
   calendarHoliday: 'mdi:calendar-star',
+  keyboardCommand: 'ic:twotone-keyboard-command-key',
   calendarToday: 'mdi:calendar-today',
   calendarRest: 'mdi:bed',
   calendarWork: 'mdi:briefcase-outline',
@@ -95,8 +103,65 @@ export const ICONS = {
   keyboardCmdKey: 'ic:twotone-keyboard-command-key',
   openInNew: 'material-symbols:open-in-new',
   bookmarkPlus: 'lucide:bookmark-plus',
+  link: 'mdi:link-variant',
+  text: 'mdi:format-text',
   folderOutline: 'ic:outline-folder',
   arrowBackRounded: 'material-symbols:arrow-back-rounded',
+  record: 'fluent:record-12-regular',
+  stop: 'fluent:record-stop-12-regular',
+  close: 'mdi:close',
+}
+
+export const COMMAND_ICONS = {
+  // 标签页导航
+  nextTab: 'mdi:skip-next',
+  prevTab: 'mdi:skip-previous',
+  firstTab: 'mdi:page-first',
+  lastTab: 'mdi:page-last',
+  goBack: 'material-symbols:arrow-back-rounded',
+  goForward: 'material-symbols:arrow-forward-rounded',
+  // 标签页管理
+  moveTabLeft: 'mdi:arrow-left-bold',
+  moveTabRight: 'mdi:arrow-right-bold',
+  newTab: 'mdi:plus-box-outline',
+  newTabAfter: 'radix-icons:open-in-new-window',
+  closeTab: 'mdi:close',
+  reopenClosedTab: 'mdi:restore',
+  toggleTabPinned: 'mdi:pin',
+  toggleTabMute: 'mdi:volume-mute',
+  duplicateTab: 'mdi:content-duplicate',
+  // 窗口操作
+  newWindow: 'lucide:app-window',
+  newIncognito: 'mdi:incognito',
+  moveTabToNextWindow: 'mdi:arrow-bottom-right-bold-box-outline',
+  moveToNewWindow: 'clarity:pop-out-line',
+  closeWindow: 'mdi:window-close',
+  // 批量关闭
+  closeLeftTabs: 'mdi:arrow-left-bold-box-outline',
+  closeRightTabs: 'mdi:arrow-right-bold-box-outline',
+  closeDuplicateTabs: 'mdi:tab-minus',
+  closeOtherTabs: 'mdi:tab-remove',
+  mergeAllWindows: 'lucide:combine',
+  // 标签组
+  groupCurrentTab: 'mdi:view-grid-plus-outline',
+  ungroupCurrentTab: 'mdi:ungroup',
+  toggleGroupCollapse: 'mdi:unfold-more-horizontal',
+  closeGroupTabs: 'mdi:grid-off',
+  // 页面操作
+  copyPageUrl: 'mdi:link-variant-plus',
+  copyPageTitle: 'mdi:format-text-variant',
+  reloadPage: 'mdi:refresh',
+  reloadAllTabs: 'mdi:reload',
+  reloadAllTabsAllWindows: 'mdi:autorenew',
+  // 页面滚动
+  scrollUp: 'mdi:arrow-up-bold',
+  scrollDown: 'mdi:arrow-down-bold',
+  scrollToTop: 'mdi:format-vertical-align-top',
+  scrollToBottom: 'mdi:format-vertical-align-bottom',
+  // NaiveTab 页面控制
+  toggleFocusMode: 'ri:focus-2-line',
+  toggleDragMode: 'tabler:drag-drop',
+  toggleSettingDrawer: 'ion:settings-outline',
 }
 
 export type WidgetIconMeta = {
@@ -110,7 +175,7 @@ export type SettingIconMeta = {
 }
 
 export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
-  keyboard: { iconName: ICONS.keyboard, widgetSize: 33 },
+  keyboardBookmark: { iconName: ICONS.bookmarkKeyboard, widgetSize: 33 },
   bookmarkFolder: { iconName: ICONS.bookmarkFolder, widgetSize: 30 },
   clockDigital: { iconName: ICONS.clockDigital, widgetSize: 32 },
   clockAnalog: { iconName: ICONS.clockAnalog, widgetSize: 30 },
@@ -123,12 +188,15 @@ export const WIDGET_ICON_META: Record<WidgetCodes, WidgetIconMeta> = {
   weather: { iconName: ICONS.weather, widgetSize: 35 },
   memo: { iconName: ICONS.memo, widgetSize: 35 },
   news: { iconName: ICONS.news, widgetSize: 30 },
+  countdown: { iconName: ICONS.countdown, widgetSize: 32 },
 }
 
 export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   general: { iconName: ICONS.settings, settingSize: 18 },
   focusMode: { iconName: ICONS.focus, settingSize: 18 },
-  keyboard: { iconName: ICONS.keyboard, settingSize: 18 },
+  keyboardCommon: { iconName: ICONS.keyboardCommon, settingSize: 18 },
+  keyboardCommand: { iconName: ICONS.keyboardCommand, settingSize: 18 },
+  keyboardBookmark: { iconName: ICONS.bookmarkKeyboard, settingSize: 18 },
   bookmarkFolder: { iconName: ICONS.bookmarkFolder, settingSize: 18 },
   clockDate: { iconName: ICONS.clockAnalog, settingSize: 17 },
   calendar: { iconName: ICONS.calendar, settingSize: 16 },
@@ -137,6 +205,7 @@ export const SETTING_ICON_META: Record<settingPanes, SettingIconMeta> = {
   weather: { iconName: ICONS.weather, settingSize: 19 },
   memo: { iconName: ICONS.memo, settingSize: 18 },
   news: { iconName: ICONS.news, settingSize: 18 },
+  countdown: { iconName: ICONS.countdown, settingSize: 18 },
   aboutSponsor: { iconName: ICONS.sponsor, settingSize: 19 },
   aboutIndex: { iconName: ICONS.info, settingSize: 19 },
 }

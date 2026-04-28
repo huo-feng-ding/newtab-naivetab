@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import request from '@/lib/request'
 import { useStorageLocal } from '@/composables/useStorageLocal'
-import { NEWS_SOURCE_MAP } from '@/logic/constants/index'
+import { NEWS_SOURCE_MAP } from '@/logic/constants/urls'
 import { createTab, log } from '@/logic/util'
 import { localConfig } from '@/logic/store'
 
@@ -20,10 +20,17 @@ export const newsLocalState = useStorageLocal('data-news', {
 })
 
 export const getToutiaoNews = async () => {
-  const res: { status: 'success', data: { Title: string, ClusterIdStr: string, HotValue: string }[] } = await request.get(NEWS_SOURCE_MAP.toutiao)
+  const res: {
+    status: 'success'
+    data: { Title: string; ClusterIdStr: string; HotValue: string }[]
+  } = await request.get(NEWS_SOURCE_MAP.toutiao)
   try {
     if (!res || !res.status || res.status !== 'success') return
-    newsLocalState.value.toutiao.list = res.data.map((item) => ({ url: `https://www.toutiao.com/trending/${item.ClusterIdStr}`, desc: item.Title, hot: `${Math.floor(+item.HotValue / 10000)}w` }))
+    newsLocalState.value.toutiao.list = res.data.map((item) => ({
+      url: `https://www.toutiao.com/trending/${item.ClusterIdStr}`,
+      desc: item.Title,
+      hot: `${Math.floor(+item.HotValue / 10000)}w`,
+    }))
     newsLocalState.value.toutiao.syncTime = dayjs().valueOf()
     log('News-update toutiao')
   } catch (e) {
@@ -40,7 +47,11 @@ export const getBaiduNews = async () => {
     $('.category-wrap_iQLoo').each((i, ele) => {
       const url = ($(ele).find('.title_dIF3B').attr('href') || '').trim()
       const desc = $(ele).find('.c-single-text-ellipsis').text().trim()
-      let hot = $(ele).children('.trend_2RttY').children('.hot-index_1Bl1a').text().trim()
+      let hot = $(ele)
+        .children('.trend_2RttY')
+        .children('.hot-index_1Bl1a')
+        .text()
+        .trim()
       hot = `${Math.floor(+hot / 10000)}w`
       newsList.push({ url, desc, hot })
     })
@@ -62,7 +73,10 @@ export const getZhihuNews = async () => {
     $('.HotItem-content').each((i, ele) => {
       const url = $(ele).children().eq(0).attr('href') || ''
       const desc = $(ele).children().eq(0).attr('title') || ''
-      let hot = i === 0 ? ($(ele).children('.HotItem-metrics')[0] as any).children[2].data : $(ele).children('.HotItem-metrics').text() || ''
+      let hot =
+        i === 0
+          ? ($(ele).children('.HotItem-metrics')[0] as any).children[2].data
+          : $(ele).children('.HotItem-metrics').text() || ''
       const count = hot.split(' ')[0]
       if (!isNaN(count)) {
         hot = `${count}w`
@@ -83,11 +97,18 @@ export const getWeiboNews = async () => {
     if (!data) return
     const $ = cheerio.load(data)
     let newsList = [] as NewsListItem[]
-    const eleList = $('#pl_top_realtimehot').find('tbody').children().filter('tr')
+    const eleList = $('#pl_top_realtimehot')
+      .find('tbody')
+      .children()
+      .filter('tr')
     eleList.each((i, ele) => {
       const url = `https://s.weibo.com${$(ele).children('.td-02').children('a').attr('href')}`
       const desc = $(ele).children('.td-02').children('a').text().trim()
-      let hot: string | number = $(ele).children('.td-02').children('span').text().trim()
+      let hot: string | number = $(ele)
+        .children('.td-02')
+        .children('span')
+        .text()
+        .trim()
       if (hot) {
         let type = ''
         if (isNaN(parseInt(hot, 10))) {
@@ -137,7 +158,11 @@ export const getBilibiliNews = async () => {
     $('.rank-item').each((i, ele) => {
       const url = `https:${($(ele).find('.info .title').attr('href') || '').trim()}`
       const desc = $(ele).find('.info .title').text().trim()
-      const hot = $(ele).find('.info .detail-state .data-box').eq(0).text().trim()
+      const hot = $(ele)
+        .find('.info .detail-state .data-box')
+        .eq(0)
+        .text()
+        .trim()
       newsList.push({ url, desc, hot })
     })
     newsLocalState.value.bilibili.list = newsList
@@ -200,5 +225,8 @@ export const updateNews = async () => {
 }
 
 export const handleWatchNewsConfigChange = () => {
-  return watch(() => localConfig.news.sourceList, () => updateNews())
+  return watch(
+    () => localConfig.news.sourceList,
+    () => updateNews(),
+  )
 }

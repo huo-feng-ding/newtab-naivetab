@@ -1,54 +1,38 @@
-type KeyLabel
-  = | '1'
-    | '2'
-    | '3'
-    | '4'
-    | '5'
-    | '6'
-    | '7'
-    | '8'
-    | '9'
-    | '0'
-    | '-'
-    | '+'
-    | 'BS'
-    | 'q'
-    | 'w'
-    | 'e'
-    | 'r'
-    | 't'
-    | 'y'
-    | 'u'
-    | 'i'
-    | 'o'
-    | 'p'
-    | '{'
-    | '}'
-    | 'a'
-    | 's'
-    | 'd'
-    | 'f'
-    | 'g'
-    | 'h'
-    | 'j'
-    | 'k'
-    | 'l'
-    | ':'
-    | '"'
-    | 'z'
-    | 'x'
-    | 'c'
-    | 'v'
-    | 'b'
-    | 'n'
-    | 'm'
-    | '<'
-    | '>'
-    | '?'
-
 type KeycapBookmarkType = 'none' | 'mark' | 'folder' | 'back'
 
 type KeycapVisualType = 'gmk' | 'dsa' | 'flat'
+
+/** 单个键位的坐标定义 */
+interface TKeyDefinition {
+  code: string
+  x: number
+  y: number
+  w?: number
+  h?: number
+  label?: string
+  textAlign?: 'left' | 'center' | 'right'
+}
+
+/** Space 键拆分的单个键位定义（仅定义宽度，x 坐标由运行时从 Space 起点累加计算） */
+interface TSpaceVariantKey {
+  code: string
+  w: number
+}
+
+/** 完整的键盘布局定义 */
+interface TKeyboardDefinition {
+  id: string
+  name: string
+  keys: TKeyDefinition[]
+  emphasisOneCodes?: string[]
+  emphasisTwoCodes?: string[]
+  /** Space 键拆分变体：根据 splitSpace 配置选择对应的 Space 区域布局 */
+  spaceVariants?: {
+    space1: TSpaceVariantKey[]
+    space2: TSpaceVariantKey[]
+    space3: TSpaceVariantKey[]
+  }
+}
 
 interface KeyboardConfigItem {
   label?: string
@@ -61,6 +45,11 @@ interface KeyboardConfigItem {
 }
 
 type BookmarkNode = chrome.bookmarks.BookmarkTreeNode
+
+interface TBookmarkEntry {
+  url: string
+  name?: string
+}
 
 interface BookmarkItem {
   key: string

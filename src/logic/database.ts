@@ -18,11 +18,15 @@ const databaseInit = (): Promise<boolean> => {
       DB = (event.target as IDBOpenDBRequest).result
       if (!DB.objectStoreNames.contains('localBackgroundImages')) {
         // 存储本地背景图文件数据，包含浅色、深色外观两张图片
-        DB.createObjectStore('localBackgroundImages', { keyPath: 'appearanceCode' })
+        DB.createObjectStore('localBackgroundImages', {
+          keyPath: 'appearanceCode',
+        })
       }
       if (!DB.objectStoreNames.contains('currBackgroundImages')) {
         // 存储当前背景图数据，包含浅色、深色外观两张图片
-        DB.createObjectStore('currBackgroundImages', { keyPath: 'appearanceCode' })
+        DB.createObjectStore('currBackgroundImages', {
+          keyPath: 'appearanceCode',
+        })
       }
       // 使用索引：索引的意义在于，可以让你搜索任意字段，也就是说从任意字段拿到数据记录。如果不建立索引，默认只能搜索主键（即从主键取值）。
       // dbTable.createIndex('indexName', 'name', { unique: false })
@@ -62,7 +66,11 @@ export const clearDatabase = (): Promise<boolean> => {
   })
 }
 
-export const databaseStore = async (storeName: DatabaseStore, type: DatabaseHandleType, payload: DatabaseLocalBackgroundImages | string | number): Promise<DatabaseLocalBackgroundImages | null> => {
+export const databaseStore = async (
+  storeName: DatabaseStore,
+  type: DatabaseHandleType,
+  payload: DatabaseLocalBackgroundImages | string | number,
+): Promise<DatabaseLocalBackgroundImages | null> => {
   if (!isInitialized) {
     await databaseInit()
   }
@@ -72,12 +80,13 @@ export const databaseStore = async (storeName: DatabaseStore, type: DatabaseHand
       throw new Error('Database is not initialized')
     }
 
-    const store = DB.transaction([storeName], 'readwrite').objectStore(storeName)
+    // get 用 readonly 减少锁竞争，put/add/delete 用 readwrite
+    const mode = type === 'get' ? 'readonly' : 'readwrite'
+    const store = DB.transaction([storeName], mode).objectStore(storeName)
     let request: IDBRequest<any> | null = null
     if (type === 'add') {
       request = store.add(payload)
     } else if (type === 'put') {
-      // 更新，第一次使用add，后续修改使用put
       request = store.put(payload)
     } else if (type === 'get') {
       request = store.get(payload as number | string)

@@ -5,6 +5,31 @@ import WidgetWrap from '../WidgetWrap.vue'
 import { useDebounceFn } from '@vueuse/core'
 import { WIDGET_CODE } from './config'
 
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customUnitMargin = getStyleField(
+  WIDGET_CODE,
+  'unit.fontSize',
+  'vmin',
+  0.2,
+)
+const customUnitFontSize = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin')
+const customDigitTextWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
+
+const cdStyle = computed(() => ({
+  '--nt-cd-font-family': customFontFamily.value,
+  '--nt-cd-font-color': customFontColor.value,
+  '--nt-cd-font-size': customFontSize.value,
+  '--nt-cd-shadow-color': customShadowColor.value,
+  '--nt-cd-unit-margin': customUnitMargin.value,
+  '--nt-cd-unit-font-size': customUnitFontSize.value,
+  '--nt-cd-digit-text-width': customDigitTextWidth.value,
+  '--nt-cd-digit-divide-width': customDigitDivideWidth.value,
+}))
+
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
 const state = reactive({
@@ -46,24 +71,17 @@ watch(
   },
   { immediate: true },
 )
-
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-
-const customUnitMargin = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin', 0.2)
-const customUnitFontSize = getStyleField(WIDGET_CODE, 'unit.fontSize', 'vmin')
-
-const customDigitTextWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="clockDigital__container"
-      :class="{ 'clockDigital__container--shadow': localConfig.clockDigital.isShadowEnabled }"
+      :style="cdStyle"
+      :class="{
+        'clockDigital__container--shadow':
+          localConfig.clockDigital.isShadowEnabled,
+      }"
     >
       <div class="clock__time">
         <p class="time__text">
@@ -75,19 +93,24 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
               v-if="Number.isNaN(+item)"
               class="text__divide"
               :class="{
-                'text__divide--dim': localConfig.clockDigital.colonBlinkEnabled && !state.colonVisible,
+                'text__divide--dim':
+                  localConfig.clockDigital.colonBlinkEnabled &&
+                  !state.colonVisible,
               }"
-            >{{ item }}</span>
+              >{{ item }}</span
+            >
             <span
               v-else
               class="text__digit"
-            >{{ item }}</span>
+              >{{ item }}</span
+            >
           </template>
         </p>
         <span
           v-if="localConfig.clockDigital.unitEnabled"
           class="time__unit"
-        >{{ state.unit }}</span>
+          >{{ state.unit }}</span
+        >
       </div>
     </div>
   </WidgetWrap>
@@ -95,14 +118,14 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
 
 <style>
 #clockDigital {
-  font-family: v-bind(customFontFamily);
-  color: v-bind(customFontColor);
   user-select: none;
 
   .clockDigital__container {
     z-index: 10;
     position: absolute;
     text-align: center;
+    font-family: var(--nt-cd-font-family);
+    color: var(--nt-cd-font-color);
 
     .clock__time {
       display: flex;
@@ -110,17 +133,17 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
       align-items: baseline;
 
       .time__text {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-cd-font-size);
         letter-spacing: 0.01em;
 
         .text__digit {
           display: inline-block;
-          width: v-bind(customDigitTextWidth);
+          width: var(--nt-cd-digit-text-width);
           text-align: center;
         }
         .text__divide {
           display: inline-block;
-          width: v-bind(customDigitDivideWidth);
+          width: var(--nt-cd-digit-divide-width);
           text-align: center;
           opacity: 1;
           transition: opacity 0.15s ease;
@@ -132,8 +155,8 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
       }
 
       .time__unit {
-        margin-left: v-bind(customUnitMargin);
-        font-size: v-bind(customUnitFontSize);
+        margin-left: var(--nt-cd-unit-margin);
+        font-size: var(--nt-cd-unit-font-size);
         opacity: 0.7;
         letter-spacing: 0.05em;
       }
@@ -143,9 +166,9 @@ const customDigitDivideWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 0.5)
   /* 多层文字阴影：近距硬影 + 中距扩散 + 远距光晕 */
   .clockDigital__container--shadow {
     text-shadow:
-      1px 2px 2px v-bind(customShadowColor),
-      2px 6px 10px v-bind(customShadowColor),
-      0 0 30px color-mix(in srgb, v-bind(customShadowColor) 40%, transparent);
+      1px 2px 2px var(--nt-cd-shadow-color),
+      2px 6px 10px var(--nt-cd-shadow-color),
+      0 0 30px color-mix(in srgb, var(--nt-cd-shadow-color) 40%, transparent);
   }
 }
 </style>

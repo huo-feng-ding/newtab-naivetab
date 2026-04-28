@@ -2,6 +2,9 @@ import '../styles/reset.css'
 import { createApp } from 'vue'
 import i18n from '@/lib/i18n'
 import App from './App.vue'
+import pkg from '../../package.json'
+
+window.appVersion = pkg.version
 
 const app = createApp(App)
 

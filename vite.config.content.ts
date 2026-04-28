@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import { sharedConfig } from './vite.config'
-import { isDev, r } from './scripts/utils'
+import { isDev, r, BROWSER_DIR } from './scripts/utils'
 import packageJson from './package.json'
 
 // bundling the content script using Vite
@@ -11,11 +11,13 @@ export default defineConfig({
     __NAME__: JSON.stringify(packageJson.name),
     // https://github.com/vitejs/vite/issues/9320
     // https://github.com/vitejs/vite/issues/9186
-    'process.env.NODE_ENV': JSON.stringify(isDev ? 'development' : 'production'),
+    'process.env.NODE_ENV': JSON.stringify(
+      isDev ? 'development' : 'production',
+    ),
   },
   build: {
     watch: isDev ? {} : undefined,
-    outDir: r('extension/dist/contentScripts'),
+    outDir: r(`${BROWSER_DIR}/dist/contentScripts`),
     cssCodeSplit: false,
     emptyOutDir: false,
     sourcemap: isDev ? 'inline' : false,

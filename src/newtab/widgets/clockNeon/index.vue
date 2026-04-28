@@ -1,8 +1,53 @@
 <script setup lang="ts">
 import { addTimerTask, removeTimerTask } from '@/logic/task'
-import { localConfig, localState, getIsWidgetRender, getStyleField } from '@/logic/store'
+import {
+  localConfig,
+  localState,
+  getIsWidgetRender,
+  getStyleField,
+} from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
+
+const customPaddingVertical = getStyleField(
+  WIDGET_CODE,
+  'paddingVertical',
+  'px',
+)
+const customPaddingHorizontal = getStyleField(
+  WIDGET_CODE,
+  'paddingHorizontal',
+  'px',
+)
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customPrimaryColor = getStyleField(WIDGET_CODE, 'primaryColor')
+const customSecondaryColor = getStyleField(WIDGET_CODE, 'secondaryColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customGlowIntensity = getStyleField(WIDGET_CODE, 'glowIntensity', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'px')
+const customFrameColor = getStyleField(WIDGET_CODE, 'frameColor')
+const customAccentColor = getStyleField(WIDGET_CODE, 'accentColor')
+
+const clockNeonStyle = computed(() => ({
+  '--nt-cn-customPaddingVertical': customPaddingVertical.value,
+  '--nt-cn-customPaddingHorizontal': customPaddingHorizontal.value,
+  '--nt-cn-customFontFamily': customFontFamily.value,
+  '--nt-cn-customFontSize': customFontSize.value,
+  '--nt-cn-customFontColor': customFontColor.value,
+  '--nt-cn-customPrimaryColor': customPrimaryColor.value,
+  '--nt-cn-customSecondaryColor': customSecondaryColor.value,
+  '--nt-cn-customBackgroundColor': customBackgroundColor.value,
+  '--nt-cn-customGlowIntensity': customGlowIntensity.value,
+  '--nt-cn-customBorderColor': customBorderColor.value,
+  '--nt-cn-customBorderWidth': customBorderWidth.value,
+  '--nt-cn-customBorderRadius': customBorderRadius.value,
+  '--nt-cn-customFrameColor': customFrameColor.value,
+  '--nt-cn-customAccentColor': customAccentColor.value,
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -43,20 +88,6 @@ watch(
   { immediate: true },
 )
 
-const customPaddingVertical = getStyleField(WIDGET_CODE, 'paddingVertical', 'px')
-const customPaddingHorizontal = getStyleField(WIDGET_CODE, 'paddingHorizontal', 'px')
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customPrimaryColor = getStyleField(WIDGET_CODE, 'primaryColor')
-const customSecondaryColor = getStyleField(WIDGET_CODE, 'secondaryColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customGlowIntensity = getStyleField(WIDGET_CODE, 'glowIntensity', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'px')
-const customFrameColor = getStyleField(WIDGET_CODE, 'frameColor')
-const customAccentColor = getStyleField(WIDGET_CODE, 'accentColor')
 const showFrame = computed(() => localConfig.clockNeon.showFrame)
 const isBorderEnabled = computed(() => localConfig.clockNeon.isBorderEnabled)
 const showSeconds = computed(() => localConfig.clockNeon.showSeconds)
@@ -72,7 +103,11 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
     <div class="clockNeon__container">
       <div
         class="neon__frame"
-        :class="{ 'neon__frame--border': isBorderEnabled, 'neon__frame--visible': showFrame }"
+        :class="{
+          'neon__frame--border': isBorderEnabled,
+          'neon__frame--visible': showFrame,
+        }"
+        :style="clockNeonStyle"
       >
         <!-- 扫描线遮罩 -->
         <div class="neon__scanlines" />
@@ -90,7 +125,9 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
               :style="{ animationDelay: digitDelays[idx] }"
             >
               <span class="neon__digit-ghost">{{ digit }}</span>
-              <span class="neon__digit-lit neon__digit-lit--primary">{{ digit }}</span>
+              <span class="neon__digit-lit neon__digit-lit--primary">{{
+                digit
+              }}</span>
             </span>
           </div>
 
@@ -113,8 +150,12 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
               class="neon__digit"
               :style="{ animationDelay: digitDelays[idx + 2] }"
             >
-              <span class="neon__digit-ghost neon__digit-ghost--secondary">{{ digit }}</span>
-              <span class="neon__digit-lit neon__digit-lit--secondary">{{ digit }}</span>
+              <span class="neon__digit-ghost neon__digit-ghost--secondary">{{
+                digit
+              }}</span>
+              <span class="neon__digit-lit neon__digit-lit--secondary">{{
+                digit
+              }}</span>
             </span>
           </div>
 
@@ -138,8 +179,12 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
                 class="neon__digit neon__digit--small"
                 :style="{ animationDelay: digitDelays[idx + 4] }"
               >
-                <span class="neon__digit-ghost neon__digit-ghost--accent">{{ digit }}</span>
-                <span class="neon__digit-lit neon__digit-lit--accent">{{ digit }}</span>
+                <span class="neon__digit-ghost neon__digit-ghost--accent">{{
+                  digit
+                }}</span>
+                <span class="neon__digit-lit neon__digit-lit--accent">{{
+                  digit
+                }}</span>
               </span>
             </div>
           </template>
@@ -172,12 +217,15 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
 
     .neon__frame {
       position: relative;
-      padding: v-bind(customPaddingVertical) v-bind(customPaddingHorizontal);
-      background: v-bind(customBackgroundColor);
-      border-radius: v-bind(customBorderRadius);
-      transition: opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      padding: var(--nt-cn-customPaddingVertical)
+        var(--nt-cn-customPaddingHorizontal);
+      background: var(--nt-cn-customBackgroundColor);
+      border-radius: var(--nt-cn-customBorderRadius);
+      transition:
+        opacity 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       overflow: hidden;
 
       /* 玻璃反光 */
@@ -198,12 +246,14 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
       }
 
       &.neon__frame--border {
-        border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+        border: var(--nt-cn-customBorderWidth) solid
+          var(--nt-cn-customBorderColor);
         box-shadow:
-          0 0 6px v-bind(customBorderColor),
-          0 0 14px v-bind(customBorderColor),
-          0 0 v-bind(customGlowIntensity) v-bind(customBorderColor),
-          0 0 calc(v-bind(customGlowIntensity) * 2) v-bind(customBorderColor),
+          0 0 6px var(--nt-cn-customBorderColor),
+          0 0 14px var(--nt-cn-customBorderColor),
+          0 0 var(--nt-cn-customGlowIntensity) var(--nt-cn-customBorderColor),
+          0 0 calc(var(--nt-cn-customGlowIntensity) * 2)
+            var(--nt-cn-customBorderColor),
           inset 0 0 16px rgba(0, 0, 0, 0.6),
           inset 0 1px 0 rgba(255, 255, 255, 0.06);
       }
@@ -220,15 +270,15 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
           pointer-events: none;
           z-index: 1;
           /* 用 outline + clip 做四角发光框 */
-          border-top: 1px solid v-bind(customPrimaryColor);
-          border-bottom: 1px solid v-bind(customSecondaryColor);
-          border-left: 1px solid v-bind(customPrimaryColor);
-          border-right: 1px solid v-bind(customSecondaryColor);
-          border-radius: calc(v-bind(customBorderRadius) - 4px);
+          border-top: 1px solid var(--nt-cn-customPrimaryColor);
+          border-bottom: 1px solid var(--nt-cn-customSecondaryColor);
+          border-left: 1px solid var(--nt-cn-customPrimaryColor);
+          border-right: 1px solid var(--nt-cn-customSecondaryColor);
+          border-radius: calc(var(--nt-cn-customBorderRadius) - 4px);
           box-shadow:
             /* 内框主色发光 */
-            0 0 3px v-bind(customFrameColor),
-            inset 0 0 3px v-bind(customFrameColor);
+            0 0 3px var(--nt-cn-customFrameColor),
+            inset 0 0 3px var(--nt-cn-customFrameColor);
           opacity: 0.7;
         }
       }
@@ -246,7 +296,7 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
         );
         pointer-events: none;
         z-index: 2;
-        border-radius: v-bind(customBorderRadius);
+        border-radius: var(--nt-cn-customBorderRadius);
       }
 
       /* 双色环境光 */
@@ -264,7 +314,7 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
           left: 0;
           background: radial-gradient(
             ellipse at right center,
-            v-bind(customPrimaryColor),
+            var(--nt-cn-customPrimaryColor),
             transparent 70%
           );
         }
@@ -273,7 +323,7 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
           right: 0;
           background: radial-gradient(
             ellipse at left center,
-            v-bind(customSecondaryColor),
+            var(--nt-cn-customSecondaryColor),
             transparent 70%
           );
         }
@@ -284,7 +334,7 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
         display: flex;
         align-items: center;
         gap: 6px;
-        font-family: v-bind(customFontFamily), 'Orbitron', monospace;
+        font-family: var(--nt-cn-customFontFamily), 'Orbitron', monospace;
         z-index: 3;
 
         .neon__digit-group {
@@ -295,13 +345,13 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
         /* 数字容器 */
         .neon__digit {
           position: relative;
-          font-size: v-bind(customFontSize);
+          font-size: var(--nt-cn-customFontSize);
           font-weight: 900;
           width: 0.65em;
           display: inline-block;
           text-align: center;
           animation: neonFlicker 10s infinite;
-          /* 告知浏览器此元素需独立合成层，防止 opacity 动画影响周边 widget 渲染 */
+          /* 告知浏览器此元素需独立合成层，以防止 opacity 动画影响周边 widget 渲染 */
           will-change: opacity;
 
           /* 熄灭轮廓 */
@@ -311,14 +361,14 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
             opacity: 0.07;
             filter: blur(0.5px);
             text-shadow: none;
-            color: v-bind(customFontColor);
+            color: var(--nt-cn-customFontColor);
 
             &.neon__digit-ghost--secondary {
-              color: v-bind(customSecondaryColor);
+              color: var(--nt-cn-customSecondaryColor);
             }
 
             &.neon__digit-ghost--accent {
-              color: v-bind(customAccentColor);
+              color: var(--nt-cn-customAccentColor);
               opacity: 0.1;
             }
           }
@@ -328,48 +378,51 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
             position: relative;
 
             &.neon__digit-lit--primary {
-              color: v-bind(customFontColor);
+              color: var(--nt-cn-customFontColor);
               text-shadow:
                 0 0 2px #fff,
                 0 0 5px #fff,
-                0 0 10px v-bind(customFontColor),
-                0 0 20px v-bind(customPrimaryColor),
-                0 0 35px v-bind(customPrimaryColor),
-                0 0 v-bind(customGlowIntensity) v-bind(customPrimaryColor),
-                /* 赛博朋克特征：互补色边缘光晕（品红渗透） */
-                2px 0 8px v-bind(customSecondaryColor),
-                -1px 0 4px v-bind(customSecondaryColor);
+                0 0 10px var(--nt-cn-customFontColor),
+                0 0 20px var(--nt-cn-customPrimaryColor),
+                0 0 35px var(--nt-cn-customPrimaryColor),
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customPrimaryColor),
+                /* 赛博朋克特征：互补色边缘光晕（品红渗透） */ 2px 0 8px
+                  var(--nt-cn-customSecondaryColor),
+                -1px 0 4px var(--nt-cn-customSecondaryColor);
             }
 
             /* 点亮发光 - 品红色（分钟） */
             &.neon__digit-lit--secondary {
-              color: v-bind(customSecondaryColor);
+              color: var(--nt-cn-customSecondaryColor);
               text-shadow:
                 0 0 2px #fff,
                 0 0 5px #fff,
-                0 0 10px v-bind(customSecondaryColor),
-                0 0 20px v-bind(customSecondaryColor),
-                0 0 35px v-bind(customSecondaryColor),
-                0 0 v-bind(customGlowIntensity) v-bind(customSecondaryColor),
-                /* 互补色边缘光晕（青色渗透） */
-                -2px 0 8px v-bind(customPrimaryColor),
-                1px 0 4px v-bind(customPrimaryColor);
+                0 0 10px var(--nt-cn-customSecondaryColor),
+                0 0 20px var(--nt-cn-customSecondaryColor),
+                0 0 35px var(--nt-cn-customSecondaryColor),
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customSecondaryColor),
+                /* 互补色边缘光晕（青色渗透） */ -2px 0 8px
+                  var(--nt-cn-customPrimaryColor),
+                1px 0 4px var(--nt-cn-customPrimaryColor);
             }
 
             /* 秒数 - 强调色 */
             &.neon__digit-lit--accent {
-              color: v-bind(customAccentColor);
+              color: var(--nt-cn-customAccentColor);
               text-shadow:
                 0 0 2px #fff,
-                0 0 6px v-bind(customAccentColor),
-                0 0 14px v-bind(customAccentColor),
-                0 0 24px v-bind(customAccentColor),
-                0 0 v-bind(customGlowIntensity) v-bind(customAccentColor);
+                0 0 6px var(--nt-cn-customAccentColor),
+                0 0 14px var(--nt-cn-customAccentColor),
+                0 0 24px var(--nt-cn-customAccentColor),
+                0 0 var(--nt-cn-customGlowIntensity)
+                  var(--nt-cn-customAccentColor);
             }
           }
 
           &.neon__digit--small {
-            font-size: calc(v-bind(customFontSize) * 0.58);
+            font-size: calc(var(--nt-cn-customFontSize) * 0.58);
             opacity: 0.9;
           }
         }
@@ -381,12 +434,12 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
           align-items: center;
           justify-content: center;
           gap: 0.2em;
-          height: v-bind(customFontSize);
+          height: var(--nt-cn-customFontSize);
           width: 0.3em;
           z-index: 3;
 
           &.neon__separator--small {
-            height: calc(v-bind(customFontSize) * 0.58);
+            height: calc(var(--nt-cn-customFontSize) * 0.58);
             gap: 0.15em;
           }
 
@@ -396,25 +449,27 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
             min-width: 4px;
             min-height: 4px;
             border-radius: 50%;
-            transition: opacity 0.2s ease, box-shadow 0.2s ease;
+            transition:
+              opacity 0.2s ease,
+              box-shadow 0.2s ease;
             flex-shrink: 0;
 
             &.neon__dot--primary {
-              background-color: v-bind(customFontColor);
+              background-color: var(--nt-cn-customFontColor);
               box-shadow:
                 0 0 2px #fff,
-                0 0 5px v-bind(customFontColor),
-                0 0 10px v-bind(customPrimaryColor),
-                0 0 18px v-bind(customPrimaryColor);
+                0 0 5px var(--nt-cn-customFontColor),
+                0 0 10px var(--nt-cn-customPrimaryColor),
+                0 0 18px var(--nt-cn-customPrimaryColor);
             }
 
             &.neon__dot--secondary {
-              background-color: v-bind(customSecondaryColor);
+              background-color: var(--nt-cn-customSecondaryColor);
               box-shadow:
                 0 0 2px #fff,
-                0 0 5px v-bind(customSecondaryColor),
-                0 0 10px v-bind(customSecondaryColor),
-                0 0 18px v-bind(customSecondaryColor);
+                0 0 5px var(--nt-cn-customSecondaryColor),
+                0 0 10px var(--nt-cn-customSecondaryColor),
+                0 0 18px var(--nt-cn-customSecondaryColor);
             }
 
             &.neon__dot--small {
@@ -443,24 +498,24 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
         z-index: 3;
 
         .neon__label-text {
-          font-family: v-bind(customFontFamily), 'Orbitron', monospace;
-          font-size: calc(v-bind(customFontSize) * 0.18);
+          font-family: var(--nt-cn-customFontFamily), 'Orbitron', monospace;
+          font-size: calc(var(--nt-cn-customFontSize) * 0.18);
           font-weight: 700;
           letter-spacing: 0.15em;
-          color: v-bind(customFrameColor);
+          color: var(--nt-cn-customFrameColor);
           opacity: 0.6;
           text-shadow:
-            0 0 4px v-bind(customFrameColor),
-            0 0 8px v-bind(customFrameColor);
+            0 0 4px var(--nt-cn-customFrameColor),
+            0 0 8px var(--nt-cn-customFrameColor);
         }
 
         .neon__label-dot {
           width: 3px;
           height: 3px;
           border-radius: 50%;
-          background: v-bind(customFrameColor);
+          background: var(--nt-cn-customFrameColor);
           opacity: 0.5;
-          box-shadow: 0 0 4px v-bind(customFrameColor);
+          box-shadow: 0 0 4px var(--nt-cn-customFrameColor);
         }
       }
     }
@@ -468,16 +523,35 @@ const digitDelays = ['0s', '0.4s', '1.2s', '0.8s', '2.1s', '0.6s']
 }
 
 @keyframes neonFlicker {
-  0%, 100% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 1;
+  }
   /* 偶发短闪 */
-  88% { opacity: 1; }
-  88.5% { opacity: 0.88; }
-  89% { opacity: 1; }
+  88% {
+    opacity: 1;
+  }
+  88.5% {
+    opacity: 0.88;
+  }
+  89% {
+    opacity: 1;
+  }
   /* 偶发强闪 */
-  95% { opacity: 1; }
-  95.2% { opacity: 0.55; }
-  95.5% { opacity: 1; }
-  95.7% { opacity: 0.8; }
-  96% { opacity: 1; }
+  95% {
+    opacity: 1;
+  }
+  95.2% {
+    opacity: 0.55;
+  }
+  95.5% {
+    opacity: 1;
+  }
+  95.7% {
+    opacity: 0.8;
+  }
+  96% {
+    opacity: 1;
+  }
 }
 </style>

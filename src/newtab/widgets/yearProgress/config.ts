@@ -14,7 +14,7 @@ export const WIDGET_CONFIG = {
   width: 345,
   height: 110,
   borderRadius: 5.5,
-  fontFamily: 'Arial',
+  fontFamily: 'system',
   fontSize: 16,
   fontColor: ['rgba(44, 62, 80, 1)', 'rgba(255, 255, 255, 1)'],
   isBorderEnabled: false,
@@ -26,7 +26,7 @@ export const WIDGET_CONFIG = {
   shadowColor: ['rgba(14, 30, 37, 0.12)', 'rgba(14, 30, 37, 0.12)'],
   isRealtime: false,
   textLineHeight: 1.5,
-  textActiveColor: ['rgba(16, 152, 173, 1)', 'rgba(16, 152, 173, 1)'],
+  textActiveColor: ['rgba(58, 115, 195, 1)', 'rgba(58, 115, 195, 1)'],
   isPercentageEnabled: true,
   percentageDecimal: 3,
   isDateEnabled: true,
@@ -35,7 +35,7 @@ export const WIDGET_CONFIG = {
   blockSize: 4.5,
   blockRadius: 1,
   blockDefaultColor: ['rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'],
-  blockActiveColor: ['rgba(16, 152, 173, 1)', 'rgba(16, 152, 173, 1)'],
+  blockActiveColor: ['rgba(58, 115, 195, 1)', 'rgba(58, 115, 195, 1)'],
 }
 
 export type TWidgetConfig = typeof WIDGET_CONFIG

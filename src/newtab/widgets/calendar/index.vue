@@ -8,6 +8,139 @@ import { localConfig, getStyleField, getStyleConst } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
 
+const customContainerWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 7.3)
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customDayFontFamily = getStyleField(WIDGET_CODE, 'dayFontFamily')
+const customDayFontSize = getStyleField(WIDGET_CODE, 'dayFontSize', 'vmin')
+const customDayFontColor = getStyleField(WIDGET_CODE, 'dayFontColor')
+const customDescFontFamily = getStyleField(WIDGET_CODE, 'descFontFamily')
+const customDescFontSize = getStyleField(WIDGET_CODE, 'descFontSize', 'vmin')
+const customDescFontColor = getStyleField(WIDGET_CODE, 'descFontColor')
+const customHolidayFontColor = getStyleField(WIDGET_CODE, 'holidayFontColor')
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customItemWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customBodyWrapHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 6)
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customTodayDayFontColor = getStyleField(WIDGET_CODE, 'todayDayFontColor')
+const customTodayDescFontColor = getStyleField(
+  WIDGET_CODE,
+  'todayDescFontColor',
+)
+const customTodayLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'todayLabelBackgroundColor',
+)
+const customTodayLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'todayLabelFontColor',
+)
+const customTodayItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'todayItemBackgroundColor',
+)
+const customRestDayFontColor = getStyleField(WIDGET_CODE, 'restDayFontColor')
+const customRestDescFontColor = getStyleField(WIDGET_CODE, 'restDescFontColor')
+const customRestLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'restLabelBackgroundColor',
+)
+const customRestLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'restLabelFontColor',
+)
+const customRestItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'restItemBackgroundColor',
+)
+const customWorkDayFontColor = getStyleField(WIDGET_CODE, 'workDayFontColor')
+const customWorkDescFontColor = getStyleField(WIDGET_CODE, 'workDescFontColor')
+const customWorkLabelBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'workLabelBackgroundColor',
+)
+const customWorkLabelFontColor = getStyleField(
+  WIDGET_CODE,
+  'workLabelFontColor',
+)
+const customWorkItemBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'workItemBackgroundColor',
+)
+const customDestivalCountdownItemHeight = getStyleField(
+  WIDGET_CODE,
+  'width',
+  'vmin',
+  1.4,
+)
+const customDestivalCountdownFontSize = getStyleField(
+  WIDGET_CODE,
+  'fontSize',
+  'vmin',
+  0.95,
+)
+const customDestivalCountdownRestFontSize = getStyleField(
+  WIDGET_CODE,
+  'fontSize',
+  'vmin',
+  0.65,
+)
+const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
+
+const calendarStyle = computed(() => ({
+  '--nt-cal-customFontColor': customFontColor.value,
+  '--nt-cal-customFontSize': customFontSize.value,
+  '--nt-cal-customFontFamily': customFontFamily.value,
+  '--nt-cal-customContainerWidth': customContainerWidth.value,
+  '--nt-cal-customBorderRadius': customBorderRadius.value,
+  '--nt-cal-customBackgroundColor': customBackgroundColor.value,
+  '--nt-cal-customBackgroundBlur': customBackgroundBlur.value,
+  '--nt-cal-customFontSize_btn': customFontSize.value,
+  '--nt-cal-customFontColor_btn': customFontColor.value,
+  '--nt-cal-customHolidayFontColor': customHolidayFontColor.value,
+  '--nt-cal-customBodyWrapHeight': customBodyWrapHeight.value,
+  '--nt-cal-customItemWidth': customItemWidth.value,
+  '--nt-cal-customDayFontColor': customDayFontColor.value,
+  '--nt-cal-customDayFontSize': customDayFontSize.value,
+  '--nt-cal-customDayFontFamily': customDayFontFamily.value,
+  '--nt-cal-customDescFontColor': customDescFontColor.value,
+  '--nt-cal-customDescFontSize': customDescFontSize.value,
+  '--nt-cal-customDescFontFamily': customDescFontFamily.value,
+  '--nt-cal-customWorkItemBackgroundColor': customWorkItemBackgroundColor.value,
+  '--nt-cal-customWorkLabelFontColor': customWorkLabelFontColor.value,
+  '--nt-cal-customWorkLabelBackgroundColor':
+    customWorkLabelBackgroundColor.value,
+  '--nt-cal-customWorkDayFontColor': customWorkDayFontColor.value,
+  '--nt-cal-customWorkDescFontColor': customWorkDescFontColor.value,
+  '--nt-cal-customRestItemBackgroundColor': customRestItemBackgroundColor.value,
+  '--nt-cal-customRestLabelFontColor': customRestLabelFontColor.value,
+  '--nt-cal-customRestLabelBackgroundColor':
+    customRestLabelBackgroundColor.value,
+  '--nt-cal-customRestDayFontColor': customRestDayFontColor.value,
+  '--nt-cal-customRestDescFontColor': customRestDescFontColor.value,
+  '--nt-cal-customTodayItemBackgroundColor':
+    customTodayItemBackgroundColor.value,
+  '--nt-cal-customTodayLabelFontColor': customTodayLabelFontColor.value,
+  '--nt-cal-customTodayLabelBackgroundColor':
+    customTodayLabelBackgroundColor.value,
+  '--nt-cal-customTodayDayFontColor': customTodayDayFontColor.value,
+  '--nt-cal-customTodayDescFontColor': customTodayDescFontColor.value,
+  '--nt-cal-customBorderWidth': customBorderWidth.value,
+  '--nt-cal-customBorderColor': customBorderColor.value,
+  '--nt-cal-customShadowColor': customShadowColor.value,
+  '--nt-cal-bgMoveableWidgetMain': bgMoveableWidgetMain.value,
+  '--nt-cal-customDestivalCountdownItemHeight':
+    customDestivalCountdownItemHeight.value,
+  '--nt-cal-customDestivalCountdownFontSize':
+    customDestivalCountdownFontSize.value,
+  '--nt-cal-customRestLabelFontSize': customDestivalCountdownRestFontSize.value,
+}))
+
 const todayDayjs = dayjs()
 
 const slideDirection = ref<'left' | 'right'>('left')
@@ -17,7 +150,10 @@ const state = reactive({
   currYear: todayDayjs.get('year'),
   currMonth: todayDayjs.get('month') + 1,
   currDay: todayDayjs.get('date'),
-  yearList: Array.from(Array(101), (v, i) => ({ label: `${2000 + i}`, value: 2000 + i })),
+  yearList: Array.from(Array(101), (v, i) => ({
+    label: `${2000 + i}`,
+    value: 2000 + i,
+  })),
   dateList: [] as {
     date: string // YYYY-MM-DD
     shortDate: string // MM.DD
@@ -49,8 +185,16 @@ const festivalList = (() => {
     const targetDateEle = new Date(formatDate)
     const solarEle = Solar.fromDate(targetDateEle)
     const lunarEle = Lunar.fromDate(targetDateEle)
-    const holidayEle = HolidayUtil.getHoliday(dateEle.get('year'), dateEle.get('month') + 1, dateEle.get('date'))
-    const desc = lunarEle.getFestivals()[0] || solarEle.getFestivals()[0] || lunarEle.getJieQi() || ''
+    const holidayEle = HolidayUtil.getHoliday(
+      dateEle.get('year'),
+      dateEle.get('month') + 1,
+      dateEle.get('date'),
+    )
+    const desc =
+      lunarEle.getFestivals()[0] ||
+      solarEle.getFestivals()[0] ||
+      lunarEle.getJieQi() ||
+      ''
     if (!desc) continue
     let dayType = 0
     if (holidayEle && holidayEle.isWork()) {
@@ -58,36 +202,42 @@ const festivalList = (() => {
     } else if (holidayEle && holidayEle.getName()) {
       dayType = 1
     }
-    list.push({ date: formatDate, shortDate, desc, type: dayType, festivalCountdownDay: i })
+    list.push({
+      date: formatDate,
+      shortDate,
+      desc,
+      type: dayType,
+      festivalCountdownDay: i,
+    })
   }
   return list
 })()
 
 const monthsList = computed(() => [
-  { label: window.$t('calendar.january'), value: 1 },
-  { label: window.$t('calendar.february'), value: 2 },
-  { label: window.$t('calendar.march'), value: 3 },
-  { label: window.$t('calendar.april'), value: 4 },
-  { label: window.$t('calendar.may'), value: 5 },
-  { label: window.$t('calendar.june'), value: 6 },
-  { label: window.$t('calendar.july'), value: 7 },
-  { label: window.$t('calendar.august'), value: 8 },
-  { label: window.$t('calendar.september'), value: 9 },
-  { label: window.$t('calendar.october'), value: 10 },
-  { label: window.$t('calendar.november'), value: 11 },
-  { label: window.$t('calendar.december'), value: 12 },
+  { label: window.$t('calendar.month.january'), value: 1 },
+  { label: window.$t('calendar.month.february'), value: 2 },
+  { label: window.$t('calendar.month.march'), value: 3 },
+  { label: window.$t('calendar.month.april'), value: 4 },
+  { label: window.$t('calendar.month.may'), value: 5 },
+  { label: window.$t('calendar.month.june'), value: 6 },
+  { label: window.$t('calendar.month.july'), value: 7 },
+  { label: window.$t('calendar.month.august'), value: 8 },
+  { label: window.$t('calendar.month.september'), value: 9 },
+  { label: window.$t('calendar.month.october'), value: 10 },
+  { label: window.$t('calendar.month.november'), value: 11 },
+  { label: window.$t('calendar.month.december'), value: 12 },
 ])
 
-const sundayOption = { label: window.$t('calendar.sunday'), value: 7 }
+const sundayOption = { label: window.$t('calendar.weekday.sunday'), value: 7 }
 
 const weekList = computed(() => {
   const list = [
-    { label: window.$t('calendar.monday'), value: 1 },
-    { label: window.$t('calendar.tuesday'), value: 2 },
-    { label: window.$t('calendar.wednesday'), value: 3 },
-    { label: window.$t('calendar.thursday'), value: 4 },
-    { label: window.$t('calendar.friday'), value: 5 },
-    { label: window.$t('calendar.saturday'), value: 6 },
+    { label: window.$t('calendar.weekday.monday'), value: 1 },
+    { label: window.$t('calendar.weekday.tuesday'), value: 2 },
+    { label: window.$t('calendar.weekday.wednesday'), value: 3 },
+    { label: window.$t('calendar.weekday.thursday'), value: 4 },
+    { label: window.$t('calendar.weekday.friday'), value: 5 },
+    { label: window.$t('calendar.weekday.saturday'), value: 6 },
   ]
   if (localConfig.calendar.weekBeginsOn === 7) {
     list.unshift(sundayOption)
@@ -111,15 +261,26 @@ const genDateList = (type: 'start' | 'main' | 'end', dateEle: typeof dayjs) => {
   const targetDateEle = new Date(formatDate)
   const solarEle = Solar.fromDate(targetDateEle)
   const lunarEle = Lunar.fromDate(targetDateEle)
-  const holidayEle = HolidayUtil.getHoliday(dateEle.get('year'), dateEle.get('month') + 1, dateEle.get('date'))
+  const holidayEle = HolidayUtil.getHoliday(
+    dateEle.get('year'),
+    dateEle.get('month') + 1,
+    dateEle.get('date'),
+  )
 
   // desc展示优先级：阴历节日, 阳历节日, 节气, 阴历月份, 阴历日期
-  let desc = lunarEle.getFestivals()[0] || solarEle.getFestivals()[0] || lunarEle.getJieQi() || ''
+  let desc =
+    lunarEle.getFestivals()[0] ||
+    solarEle.getFestivals()[0] ||
+    lunarEle.getJieQi() ||
+    ''
   let isFestival = true
   let festivalCountdownDay = 0
   if (desc.length === 0) {
     isFestival = false
-    desc = lunarEle.getDay() === 1 ? `${lunarEle.getMonthInChinese()}月` : lunarEle.getDayInChinese()
+    desc =
+      lunarEle.getDay() === 1
+        ? `${lunarEle.getMonthInChinese()}月`
+        : lunarEle.getDayInChinese()
   } else {
     festivalCountdownDay = dateEle.diff(todayDayjs, 'day')
   }
@@ -155,7 +316,8 @@ const onRender = () => {
 
   const currMonthFirstDate = `${state.currYear}-${state.currMonth}-01`
   let currMonthFirstDateWeek = dayjs(currMonthFirstDate).day()
-  currMonthFirstDateWeek = currMonthFirstDateWeek === 0 ? 7 : currMonthFirstDateWeek // 1234567
+  currMonthFirstDateWeek =
+    currMonthFirstDateWeek === 0 ? 7 : currMonthFirstDateWeek // 1234567
 
   // padStart
   let padStartCount = currMonthFirstDateWeek - 1
@@ -175,7 +337,8 @@ const onRender = () => {
     .subtract(1, 'day')
     .get('date')
   let currMonthLastDateWeek = dayjs(currMonthLastDate).day()
-  currMonthLastDateWeek = currMonthLastDateWeek === 0 ? 7 : currMonthLastDateWeek
+  currMonthLastDateWeek =
+    currMonthLastDateWeek === 0 ? 7 : currMonthLastDateWeek
   // add main
   for (let index = 0; index < currMonthLastDay; index += 1) {
     const dateEle = dayjs(`${state.currYear}-${state.currMonth}-${index + 1}`)
@@ -235,17 +398,25 @@ const onNextMonth = () => {
 
 const onDateChange = (type: 'year' | 'month', newVal: number) => {
   const oldYearMonth = state.currYear * 12 + state.currMonth
-  const newYearMonth = type === 'year' ? newVal * 12 + state.currMonth : state.currYear * 12 + newVal
+  const newYearMonth =
+    type === 'year'
+      ? newVal * 12 + state.currMonth
+      : state.currYear * 12 + newVal
   slideDirection.value = newYearMonth >= oldYearMonth ? 'left' : 'right'
   gaProxy('click', ['calendar', 'dateChange', type])
   onRender()
 }
 
-const isResetBtnVisible = computed(() => state.currYear !== todayDayjs.get('year') || state.currMonth !== todayDayjs.get('month') + 1)
+const isResetBtnVisible = computed(
+  () =>
+    state.currYear !== todayDayjs.get('year') ||
+    state.currMonth !== todayDayjs.get('month') + 1,
+)
 
 const onReset = () => {
   const currYearMonth = state.currYear * 12 + state.currMonth
-  const todayYearMonth = todayDayjs.get('year') * 12 + todayDayjs.get('month') + 1
+  const todayYearMonth =
+    todayDayjs.get('year') * 12 + todayDayjs.get('month') + 1
   slideDirection.value = currYearMonth > todayYearMonth ? 'right' : 'left'
   state.currYear = todayDayjs.get('year')
   state.currMonth = todayDayjs.get('month') + 1
@@ -291,53 +462,6 @@ const onToggleDetailPopover = (date?: string) => {
   state.currDetailDate = date
   gaProxy('click', ['calendar', 'detail'])
 }
-
-const customContainerWidth = getStyleField(WIDGET_CODE, 'width', 'vmin', 7.3)
-
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customDayFontFamily = getStyleField(WIDGET_CODE, 'dayFontFamily')
-const customDayFontSize = getStyleField(WIDGET_CODE, 'dayFontSize', 'vmin')
-const customDayFontColor = getStyleField(WIDGET_CODE, 'dayFontColor')
-const customDescFontFamily = getStyleField(WIDGET_CODE, 'descFontFamily')
-const customDescFontSize = getStyleField(WIDGET_CODE, 'descFontSize', 'vmin')
-const customDescFontColor = getStyleField(WIDGET_CODE, 'descFontColor')
-
-const customHolidayFontColor = getStyleField(WIDGET_CODE, 'holidayFontColor')
-
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customItemWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customBodyWrapHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 6)
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-
-const customTodayDayFontColor = getStyleField(WIDGET_CODE, 'todayDayFontColor')
-const customTodayDescFontColor = getStyleField(WIDGET_CODE, 'todayDescFontColor')
-const customTodayLabelBackgroundColor = getStyleField(WIDGET_CODE, 'todayLabelBackgroundColor')
-const customTodayLabelFontColor = getStyleField(WIDGET_CODE, 'todayLabelFontColor')
-const customTodayItemBackgroundColor = getStyleField(WIDGET_CODE, 'todayItemBackgroundColor')
-
-const customRestDayFontColor = getStyleField(WIDGET_CODE, 'restDayFontColor')
-const customRestDescFontColor = getStyleField(WIDGET_CODE, 'restDescFontColor')
-const customRestLabelBackgroundColor = getStyleField(WIDGET_CODE, 'restLabelBackgroundColor')
-const customRestLabelFontColor = getStyleField(WIDGET_CODE, 'restLabelFontColor')
-const customRestItemBackgroundColor = getStyleField(WIDGET_CODE, 'restItemBackgroundColor')
-
-const customWorkDayFontColor = getStyleField(WIDGET_CODE, 'workDayFontColor')
-const customWorkDescFontColor = getStyleField(WIDGET_CODE, 'workDescFontColor')
-const customWorkLabelBackgroundColor = getStyleField(WIDGET_CODE, 'workLabelBackgroundColor')
-const customWorkLabelFontColor = getStyleField(WIDGET_CODE, 'workLabelFontColor')
-const customWorkItemBackgroundColor = getStyleField(WIDGET_CODE, 'workItemBackgroundColor')
-
-const customDestivalCountdownItemHeight = getStyleField(WIDGET_CODE, 'width', 'vmin', 1.4)
-const customDestivalCountdownFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.95)
-const customDestivalCountdownRestFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin', 0.65)
-
-const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 </script>
 
 <template>
@@ -349,6 +473,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         'calendar__container--shadow': localConfig.calendar.isShadowEnabled,
         'calendar__container--border': localConfig.calendar.isBorderEnabled,
       }"
+      :style="calendarStyle"
     >
       <div class="calendar__options">
         <div class="options__item">
@@ -364,9 +489,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         <div class="options__item">
           <NButton
             class="item__btn"
+            :class="{ 'item__btn--move': isDragMode }"
             text
             :disabled="isDragMode"
-            :style="isDragMode ? 'cursor: move;' : ''"
             @click="onPrevMonth()"
           >
             <Icon
@@ -386,7 +511,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
             class="item__btn"
             text
             :disabled="isDragMode"
-            :style="isDragMode ? 'cursor: move;' : ''"
+            :class="{ 'item__btn--move': isDragMode }"
             @click="onNextMonth()"
           >
             <Icon
@@ -401,7 +526,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
             class="item__btn"
             text
             :disabled="isDragMode"
-            :style="isDragMode ? 'cursor: move;' : ''"
+            :class="{ 'item__btn--move': isDragMode }"
             @click="onReset()"
           >
             <Icon
@@ -462,11 +587,13 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
                     <span
                       v-if="item.type"
                       class="item__label"
-                    >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span>
+                      >{{ holidayTypeToDesc[item.type as 1 | 2] }}</span
+                    >
                     <span
                       v-if="item.isToday"
                       class="item__label item__label--today"
-                    >{{ $t('calendar.today') }}</span>
+                      >{{ $t('calendar.today') }}</span
+                    >
                     <!-- 日期 -->
                     <span class="item__day">{{ item.day }}</span>
                     <!-- 描述 -->
@@ -475,7 +602,8 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
                       :class="{
                         'item__desc--highlight': item.isFestival,
                       }"
-                    >{{ item.desc }}</span>
+                      >{{ item.desc }}</span
+                    >
                   </div>
                 </template>
 
@@ -489,7 +617,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
                     {{ detailInfo.lunar }}
                   </p>
                   <p class="detail__festival">
-                    {{ `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}` }}
+                    {{
+                      `${detailInfo.lunarFestivals} ${detailInfo.solarFestivals}`
+                    }}
                   </p>
                   <div class="detail__row">
                     <p class="row__tag row__tag--yi">易</p>
@@ -592,20 +722,20 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 
 <style>
 #calendar {
-  color: v-bind(customFontColor);
-  font-size: v-bind(customFontSize);
-  font-family: v-bind(customFontFamily);
+  color: var(--nt-cal-customFontColor);
+  font-size: var(--nt-cal-customFontSize);
+  font-family: var(--nt-cal-customFontFamily);
   .calendar__container {
     z-index: 10;
     position: absolute;
-    width: v-bind(customContainerWidth);
+    width: var(--nt-cal-customContainerWidth);
     text-align: center;
-    border-radius: v-bind(customBorderRadius);
-    background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur));
+    border-radius: var(--nt-cal-customBorderRadius);
+    background-color: var(--nt-cal-customBackgroundColor);
+    backdrop-filter: blur(var(--nt-cal-customBackgroundBlur));
     user-select: none;
     overflow: hidden;
-    /* 提升为独立 GPU 合成层，防止其他 widget 的持续动画（neonFlicker 等）影响 box-shadow 渲染 */
+    /* 提升为独立 GPU 合成层，以防止其他 widget 的持续动画（neonFlicker 等）影响 box-shadow 渲染 */
     will-change: transform;
     transform: translateZ(0);
     .calendar__options {
@@ -630,16 +760,22 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
           cursor: pointer;
           transition: background-color 150ms ease-in-out;
           &:hover {
-            background-color: rgba(128, 128, 128, 0.15);
+            background-color: var(--gray-alpha-15);
+          }
+          &.item__btn--move {
+            cursor: move !important;
+            &:hover {
+              background-color: transparent;
+            }
           }
           .btn__icon {
-            font-size: v-bind(customFontSize);
-            color: v-bind(customFontColor);
+            font-size: var(--nt-cal-customFontSize_btn);
+            color: var(--nt-cal-customFontColor_btn);
           }
         }
         .n-base-selection-input__content {
-          color: v-bind(customFontColor) !important;
-          font-size: v-bind(customFontSize) !important;
+          color: var(--nt-cal-customFontColor) !important;
+          font-size: var(--nt-cal-customFontSize) !important;
         }
         .item__select_year {
           width: 84px;
@@ -664,21 +800,22 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       opacity: 0.65;
       padding-bottom: 0.3vmin;
       .header__item {
-          flex: 1;
-          height: 2.4vmin;
-          line-height: 2.4vmin;
-          text-align: center;
-          font-size: v-bind(customFontSize);
-          letter-spacing: 0.02em;
-        }
+        flex: 1;
+        height: 2.4vmin;
+        line-height: 2.4vmin;
+        text-align: center;
+        color: var(--nt-cal-customFontColor);
+        font-size: var(--nt-cal-customFontSize);
+        letter-spacing: 0.02em;
+      }
       .header__item--weekend {
-        color: v-bind(customHolidayFontColor);
+        color: var(--nt-cal-customHolidayFontColor);
       }
     }
     .calendar__body__wrap {
       position: relative;
       overflow: hidden;
-      height: v-bind(customBodyWrapHeight);
+      height: var(--nt-cal-customBodyWrapHeight);
     }
     .calendar__body {
       display: flex;
@@ -694,24 +831,26 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         justify-content: center;
         align-items: center;
         box-sizing: border-box;
-        width: v-bind(customItemWidth);
-        height: v-bind(customItemWidth);
+        width: var(--nt-cal-customItemWidth);
+        height: var(--nt-cal-customItemWidth);
         text-align: center;
         border-radius: 6px;
         overflow: hidden;
-        transition: background-color 150ms ease-in-out, opacity 150ms ease-in-out;
+        transition:
+          background-color 150ms ease-in-out,
+          opacity 150ms ease-in-out;
         .item__day {
-          color: v-bind(customDayFontColor);
-          font-size: v-bind(customDayFontSize);
-          font-family: v-bind(customDayFontFamily);
+          color: var(--nt-cal-customDayFontColor);
+          font-size: var(--nt-cal-customDayFontSize);
+          font-family: var(--nt-cal-customDayFontFamily);
           font-weight: 500;
           line-height: 1.2;
         }
         .item__desc {
           margin-top: 0.15vmin;
-          color: v-bind(customDescFontColor);
-          font-size: v-bind(customDescFontSize);
-          font-family: v-bind(customDescFontFamily);
+          color: var(--nt-cal-customDescFontColor);
+          font-size: var(--nt-cal-customDescFontSize);
+          font-family: var(--nt-cal-customDescFontFamily);
           white-space: nowrap;
           line-height: 1.2;
           max-width: 92%;
@@ -719,7 +858,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
           text-align: left;
         }
         .item__desc--highlight {
-          color: v-bind(customHolidayFontColor) !important;
+          color: var(--nt-cal-customHolidayFontColor) !important;
         }
         .item__label {
           position: absolute;
@@ -736,35 +875,35 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
         }
       }
       .body__item--hover:hover {
-        background-color: rgba(128, 128, 128, 0.15);
+        background-color: var(--gray-alpha-15);
       }
       .body__item--work {
-        background-color: v-bind(customWorkItemBackgroundColor);
+        background-color: var(--nt-cal-customWorkItemBackgroundColor);
         .item__label {
-          color: v-bind(customWorkLabelFontColor);
-          background-color: v-bind(customWorkLabelBackgroundColor);
+          color: var(--nt-cal-customWorkLabelFontColor);
+          background-color: var(--nt-cal-customWorkLabelBackgroundColor);
         }
         .item__day {
-          color: v-bind(customWorkDayFontColor);
+          color: var(--nt-cal-customWorkDayFontColor);
         }
         .item__desc {
-          color: v-bind(customWorkDescFontColor);
+          color: var(--nt-cal-customWorkDescFontColor);
         }
         &.body__item--hover:hover {
           filter: brightness(0.92);
         }
       }
       .body__item--rest {
-        background-color: v-bind(customRestItemBackgroundColor);
+        background-color: var(--nt-cal-customRestItemBackgroundColor);
         .item__label {
-          color: v-bind(customRestLabelFontColor);
-          background-color: v-bind(customRestLabelBackgroundColor);
+          color: var(--nt-cal-customRestLabelFontColor);
+          background-color: var(--nt-cal-customRestLabelBackgroundColor);
         }
         .item__day {
-          color: v-bind(customRestDayFontColor);
+          color: var(--nt-cal-customRestDayFontColor);
         }
         .item__desc {
-          color: v-bind(customRestDescFontColor);
+          color: var(--nt-cal-customRestDescFontColor);
         }
         &.body__item--hover:hover {
           filter: brightness(0.92);
@@ -772,26 +911,26 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       }
       .body__item--weekend {
         .item__day {
-          color: v-bind(customHolidayFontColor);
+          color: var(--nt-cal-customHolidayFontColor);
         }
       }
       .body__item--today {
-        background-color: v-bind(customTodayItemBackgroundColor);
+        background-color: var(--nt-cal-customTodayItemBackgroundColor);
         .item__label--today {
           left: auto !important;
           right: 2px !important;
-          color: v-bind(customTodayLabelFontColor);
-          background-color: v-bind(customTodayLabelBackgroundColor);
+          color: var(--nt-cal-customTodayLabelFontColor);
+          background-color: var(--nt-cal-customTodayLabelBackgroundColor);
         }
         .item__day {
-          color: v-bind(customTodayDayFontColor);
+          color: var(--nt-cal-customTodayDayFontColor);
         }
         .item__desc {
-          color: v-bind(customTodayDescFontColor);
+          color: var(--nt-cal-customTodayDescFontColor);
         }
         &.body__item--hover:hover {
           filter: brightness(0.9);
-          background-color: v-bind(customTodayItemBackgroundColor);
+          background-color: var(--nt-cal-customTodayItemBackgroundColor);
         }
       }
       .body__item--blur {
@@ -803,17 +942,18 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     }
   }
   .calendar__container--border {
-    outline: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+    outline: var(--nt-cal-customBorderWidth) solid
+      var(--nt-cal-customBorderColor);
   }
   .calendar__container--shadow {
     box-shadow:
-      v-bind(customShadowColor) 0px 2px 8px 0px,
-      v-bind(customShadowColor) 0px 4px 20px 0px;
+      var(--nt-cal-customShadowColor) 0px 2px 8px 0px,
+      var(--nt-cal-customShadowColor) 0px 4px 20px 0px;
   }
   .calendar__container--drag {
     background-color: transparent !important;
     &:hover {
-      background-color: v-bind(bgMoveableWidgetMain) !important;
+      background-color: var(--nt-cal-bgMoveableWidgetMain) !important;
     }
   }
 }
@@ -878,9 +1018,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  max-height: v-bind(customDestivalCountdownItemHeight);
+  max-height: var(--nt-cal-customDestivalCountdownItemHeight);
   overflow-y: auto;
-  border-top: 1px solid rgba(128, 128, 128, 0.12);
+  border-top: 1px solid var(--gray-alpha-12);
   -ms-overflow-style: none;
   scrollbar-width: none;
   .festival__item {
@@ -889,7 +1029,7 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
     justify-content: space-between;
     align-items: center;
     width: 50%;
-    font-size: v-bind(customDestivalCountdownFontSize);
+    font-size: var(--nt-cal-customDestivalCountdownFontSize);
     box-sizing: border-box;
     .item__left {
       display: flex;
@@ -899,15 +1039,18 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       gap: 3px;
       .left__date {
         flex: 0 0 auto;
-        opacity: 0.65;
+        opacity: 0.85;
         letter-spacing: 0.01em;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
       }
       .left__rest {
         padding: 0 3px;
         flex: 0 0 auto;
-        color: v-bind(customRestLabelFontColor);
-        background-color: v-bind(customRestLabelBackgroundColor);
-        font-size: v-bind(customDestivalCountdownRestFontSize);
+        color: var(--nt-cal-customRestLabelFontColor);
+        background-color: var(--nt-cal-customRestLabelBackgroundColor);
+        font-size: var(--nt-cal-customRestLabelFontSize);
         border-radius: 3px;
         box-sizing: border-box;
         line-height: 1.5;
@@ -915,6 +1058,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       .left__desc {
         flex: 1;
         width: 100%;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
         text-align: start;
         overflow: hidden;
         white-space: nowrap;
@@ -929,14 +1075,16 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
       width: 30%;
       gap: 2px;
       .right__count {
-        font-size: v-bind(customDayFontSize);
-        font-family: v-bind(customDayFontFamily);
+        color: var(--nt-cal-customDayFontColor);
+        font-size: var(--nt-cal-customDayFontSize);
+        font-family: var(--nt-cal-customDayFontFamily);
         font-weight: 500;
       }
       .right__unit {
-        font-size: v-bind(customDescFontSize);
-        font-family: v-bind(customDescFontFamily);
-        opacity: 0.65;
+        color: var(--nt-cal-customDescFontColor);
+        font-size: var(--nt-cal-customDescFontSize);
+        font-family: var(--nt-cal-customDescFontFamily);
+        opacity: 0.8;
       }
     }
   }
@@ -946,7 +1094,9 @@ const bgMoveableWidgetMain = getStyleConst('bgMoveableWidgetMain')
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   top: 0;
   left: 0;

@@ -2,10 +2,57 @@
 import { gaProxy } from '@/logic/gtag'
 import { createTab } from '@/logic/util'
 import { isDragMode } from '@/logic/moveable'
-import { state, newsLocalState, updateNews, onRetryNews, handleWatchNewsConfigChange } from '@/newtab/widgets/news/logic'
+import {
+  state,
+  newsLocalState,
+  updateNews,
+  onRetryNews,
+  handleWatchNewsConfigChange,
+} from '@/newtab/widgets/news/logic'
 import { localConfig, getIsWidgetRender, getStyleField } from '@/logic/store'
 import WidgetWrap from '../WidgetWrap.vue'
 import { WIDGET_CODE } from './config'
+
+const customMargin = getStyleField(WIDGET_CODE, 'margin', 'vmin')
+const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
+const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
+const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
+const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
+const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
+const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
+const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
+const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
+const customUrlActiveColor = getStyleField(WIDGET_CODE, 'urlActiveColor')
+const customTabActiveBackgroundColor = getStyleField(
+  WIDGET_CODE,
+  'tabActiveBackgroundColor',
+)
+const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
+const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
+const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
+
+const newsStyle = computed(() => ({
+  '--nt-n-margin': customMargin.value,
+  '--nt-n-width': customWidth.value,
+  '--nt-n-height': customHeight.value,
+  '--nt-n-font-family': customFontFamily.value,
+  '--nt-n-font-color': customFontColor.value,
+  '--nt-n-font-size': customFontSize.value,
+  '--nt-n-border-radius': customBorderRadius.value,
+  '--nt-n-border-width': customBorderWidth.value,
+  '--nt-n-border-color': customBorderColor.value,
+  '--nt-n-url-active-color': customUrlActiveColor.value,
+  '--nt-n-tab-active-background-color': customTabActiveBackgroundColor.value,
+  '--nt-n-background-color': customBackgroundColor.value,
+  '--nt-n-shadow-color': customShadowColor.value,
+  '--nt-n-background-blur': customBackgroundBlur.value,
+}))
+
+// NPopover 是 teleport 组件，不继承父级 CSS 变量，需显式传宽度
+const newsPopoverStyle = computed(() => ({
+  width: customWidth.value,
+  lineHeight: '1.5',
+}))
 
 const isRender = getIsWidgetRender(WIDGET_CODE)
 
@@ -44,7 +91,9 @@ const onMouseDownKey = (event: MouseEvent, url: string) => {
   createTab(url, false)
 }
 
-let newsConfigChangeHandle: ReturnType<typeof handleWatchNewsConfigChange> | null = null
+let newsConfigChangeHandle: ReturnType<
+  typeof handleWatchNewsConfigChange
+> | null = null
 
 onMounted(() => {
   updateNews()
@@ -64,28 +113,13 @@ watch(isRender, (value) => {
   }
   updateNews()
 })
-
-const customMargin = getStyleField(WIDGET_CODE, 'margin', 'vmin')
-const customWidth = getStyleField(WIDGET_CODE, 'width', 'vmin')
-const customHeight = getStyleField(WIDGET_CODE, 'height', 'vmin')
-const customFontFamily = getStyleField(WIDGET_CODE, 'fontFamily')
-const customFontColor = getStyleField(WIDGET_CODE, 'fontColor')
-const customFontSize = getStyleField(WIDGET_CODE, 'fontSize', 'vmin')
-const customBorderRadius = getStyleField(WIDGET_CODE, 'borderRadius', 'vmin')
-const customBorderWidth = getStyleField(WIDGET_CODE, 'borderWidth', 'px')
-const customBorderColor = getStyleField(WIDGET_CODE, 'borderColor')
-const customUrlActiveColor = getStyleField(WIDGET_CODE, 'urlActiveColor')
-const customTabActiveBackgroundColor = getStyleField(WIDGET_CODE, 'tabActiveBackgroundColor')
-const customBackgroundColor = getStyleField(WIDGET_CODE, 'backgroundColor')
-const customShadowColor = getStyleField(WIDGET_CODE, 'shadowColor')
-const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
-
 </script>
 
 <template>
   <WidgetWrap :widget-code="WIDGET_CODE">
     <div
       class="news__container"
+      :style="newsStyle"
       :class="{
         'news__container--border': localConfig.news.isBorderEnabled,
         'news__container--shadow': localConfig.news.isShadowEnabled,
@@ -112,9 +146,15 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
                 'news__content--hover': !isDragMode,
               }"
             >
-              <template v-if="newsLocalState[source.value] && newsLocalState[source.value].list.length !== 0">
+              <template
+                v-if="
+                  newsLocalState[source.value] &&
+                  newsLocalState[source.value].list.length !== 0
+                "
+              >
                 <div
-                  v-for="(item, index) in newsLocalState[source.value] && newsLocalState[source.value].list"
+                  v-for="(item, index) in newsLocalState[source.value] &&
+                  newsLocalState[source.value].list"
                   :key="item.desc"
                   class="content__item"
                   :class="{
@@ -136,7 +176,7 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
                     :delay="500"
                     trigger="hover"
                     :disabled="isDragMode"
-                    :style="`width: ${customWidth}; line-height: 1.5;`"
+                    :style="newsPopoverStyle"
                   >
                     <template #trigger>
                       <div
@@ -177,20 +217,20 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
 
 <style>
 #news {
-  font-family: v-bind(customFontFamily);
+  font-family: var(--nt-n-font-family);
   user-select: none;
   .news__container {
     z-index: 10;
     position: absolute;
-    border-radius: v-bind(customBorderRadius);
-    background-color: v-bind(customBackgroundColor);
-    backdrop-filter: blur(v-bind(customBackgroundBlur));
+    border-radius: var(--nt-n-border-radius);
+    background-color: var(--nt-n-background-color);
+    backdrop-filter: blur(var(--nt-n-background-blur));
     overflow: hidden;
     will-change: transform;
     /* 显式触发合成层，配合 overflow:hidden + border-radius 消除边缘竖向闪烁 */
     transform: translateZ(0);
     .news__wrap {
-      width: v-bind(customWidth);
+      width: var(--nt-n-width);
       .n-tabs .n-tab-pane {
         padding: 0 !important;
       }
@@ -201,7 +241,9 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           background-color: transparent !important;
           border-radius: 8px !important;
           .n-tabs-capsule {
-            background-color: v-bind(customTabActiveBackgroundColor) !important;
+            background-color: var(
+              --nt-n-tab-active-background-color
+            ) !important;
             border-radius: 6px !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
             /* 提前升为独立合成层，消除 translateX 动画在父合成层边缘产生的竖向闪烁 */
@@ -216,16 +258,16 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
       }
       /* line bottom border */
       .n-tabs .n-tabs-nav.n-tabs-nav--line-type .n-tabs-nav-scroll-content {
-        border-bottom: v-bind(customBorderWidth) solid v-bind(customBorderColor) !important;
+        border-bottom: var(--nt-n-border-width) solid var(--nt-n-border-color) !important;
       }
       .n-tabs-tab__label {
-        font-size: v-bind(customFontSize);
+        font-size: var(--nt-n-font-size);
         font-weight: 500;
       }
       .news__content {
-        height: v-bind(customHeight);
-        color: v-bind(customFontColor);
-        font-size: v-bind(customFontSize);
+        height: var(--nt-n-height);
+        color: var(--nt-n-font-color);
+        font-size: var(--nt-n-font-size);
         overflow-y: scroll;
         padding: 2px 8px 6px;
         box-sizing: border-box;
@@ -235,10 +277,12 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
         .content__item {
           display: flex;
           align-items: center;
-          padding: v-bind(customMargin) 4px;
+          padding: var(--nt-n-margin) 4px;
           width: 100%;
           border-radius: 6px;
-          transition: background-color 0.15s ease, color 0.15s ease;
+          transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
           box-sizing: border-box;
           .row__index {
             width: 28px;
@@ -281,15 +325,15 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
           }
         }
         .content__item--hover:hover {
-          color: v-bind(customUrlActiveColor);
-          background-color: v-bind(customTabActiveBackgroundColor);
+          color: var(--nt-n-url-active-color);
+          background-color: var(--nt-n-tab-active-background-color);
           cursor: pointer;
         }
         .content__empty {
           display: flex;
           justify-content: center;
           align-items: center;
-          height: v-bind(customHeight);
+          height: var(--nt-n-height);
         }
       }
       .news__content--hover:hover {
@@ -298,12 +342,12 @@ const customBackgroundBlur = getStyleField(WIDGET_CODE, 'backgroundBlur', 'px')
     }
   }
   .news__container--border {
-    border: v-bind(customBorderWidth) solid v-bind(customBorderColor);
+    border: var(--nt-n-border-width) solid var(--nt-n-border-color);
   }
   .news__container--shadow {
     box-shadow:
-      v-bind(customShadowColor) 0px 2px 4px 0px,
-      v-bind(customShadowColor) 0px 2px 16px 0px;
+      var(--nt-n-shadow-color) 0px 2px 4px 0px,
+      var(--nt-n-shadow-color) 0px 2px 16px 0px;
   }
 }
 </style>
