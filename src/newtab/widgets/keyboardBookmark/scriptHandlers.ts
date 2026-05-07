@@ -1,3 +1,7 @@
+export const handleReloadPage = (): void => {
+  location.reload()
+}
+
 /**
  * 处理关闭当前标签页的脚本
  */
@@ -30,13 +34,6 @@ export const handleSearchFocus = (
 
 /**
  * 处理特殊脚本执行
- * @param url 要执行的URL
- * @param e 键盘事件或鼠标事件
- * @param keyboardState 键盘状态
- * @returns 是否处理了该脚本
- */
-/**
- * 处理特殊脚本执行
  * @param url - 要执行的URL
  * @param e - 键盘事件或鼠标事件
  * @param keyboardState - 键盘状态对象
@@ -47,6 +44,11 @@ export const handleSpecialScript = (
   e: KeyboardEvent | MouseEvent,
   keyboardState: { currSelectKeyCode: string },
 ): boolean => {
+  if (url.startsWith('script://ReloadPage')) {
+    handleReloadPage()
+    return true
+  }
+
   if (url.startsWith('script://CloseCurrentTab')) {
     handleCloseCurrentTab()
     return true
